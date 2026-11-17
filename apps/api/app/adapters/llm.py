@@ -10,6 +10,7 @@ from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
 from typing import TypeVar
 
+import httpx
 from openai import APIConnectionError, APIStatusError, APITimeoutError, AsyncOpenAI, RateLimitError
 from pydantic import BaseModel, ValidationError
 from tenacity import AsyncRetrying, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -21,7 +22,10 @@ from app.schemas.common import Usage
 
 log = logging.getLogger("app.llm")
 T = TypeVar("T", bound=BaseModel)
-_RETRYABLE = (APIConnectionError, APITimeoutError, RateLimitError)
+_TRANSIENT = (APIConnectionError, APITimeoutError)
+_STREAM_ERRORS = (APIConnectionError, APITimeoutError, APIStatusError, httpx.HTTPError)
+_COOLDOWN_RATE_LIMIT_S = 60.0
+_COOLDOWN_BAD_REQUEST_S = 600.0
 
 
 @dataclass
@@ -62,6 +66,7 @@ class LLMClient:
         self.s = settings
         self.mock = not settings.llm_enabled
         self.mock_fn = mock_fn
+        self._cooldown_until: dict[str, float] = {}
         self._client = (
             None
             if self.mock
@@ -80,25 +85,54 @@ class LLMClient:
             price_out=self.s.llm_price_out_per_mtok,
         )
 
-    async def _create(self, **kwargs):  # noqa: ANN202
-        assert self._client is not None
+    def _candidates(self) -> list[str]:
+        """Configured models in order, skipping ones in cooldown (unless all are cooling down)."""
         models = [self.s.llm_model] + ([self.s.llm_fallback_model] if self.s.llm_fallback_model else [])
+        now = time.monotonic()
+        ready = [m for m in models if self._cooldown_until.get(m, 0.0) <= now]
+        return ready or models
+
+    def _cool_down(self, model: str, exc: Exception) -> None:
+        seconds = _COOLDOWN_RATE_LIMIT_S if isinstance(exc, RateLimitError) else _COOLDOWN_BAD_REQUEST_S
+        self._cooldown_until[model] = time.monotonic() + seconds
+        log.warning(
+            "llm_model_cooldown",
+            extra={
+                "data": {
+                    "model": model,
+                    "status": getattr(exc, "status_code", None),
+                    "error": type(exc).__name__,
+                    "cooldown_s": seconds,
+                }
+            },
+        )
+
+    async def _create(self, meter: "UsageMeter", **kwargs):  # noqa: ANN202
+        """Call the first healthy model. Transient network errors are retried on the same model;
+        429 / 4xx move straight to the next model and put the failing one in cooldown."""
+        if self._client is None:
+            raise UpstreamError()
         if self.s.llm_reasoning_effort:
             kwargs["reasoning_effort"] = self.s.llm_reasoning_effort
         last: Exception | None = None
-        for model in models:
+        for model in self._candidates():
             try:
                 async for attempt in AsyncRetrying(
                     stop=stop_after_attempt(self.s.llm_max_retries + 1),
                     wait=wait_exponential(multiplier=0.5, max=4),
-                    retry=retry_if_exception_type(_RETRYABLE),
+                    retry=retry_if_exception_type(_TRANSIENT),
                     reraise=True,
                 ):
                     with attempt:
-                        return await self._client.chat.completions.create(model=model, **kwargs)
-            except (*_RETRYABLE, APIStatusError) as exc:
+                        resp = await self._client.chat.completions.create(model=model, **kwargs)
+                meter.model = model  # report the model that actually served the request
+                return resp
+            except (RateLimitError, APIStatusError) as exc:
                 last = exc
-                log_event(log, "llm_error", model=model, error=type(exc).__name__)
+                self._cool_down(model, exc)
+            except _TRANSIENT as exc:
+                last = exc
+                log.warning("llm_error", extra={"data": {"model": model, "error": type(exc).__name__}})
         raise UpstreamError() from last
 
     async def complete_json(
@@ -118,6 +152,7 @@ class LLMClient:
         for attempt in range(2):
             t0 = time.perf_counter()
             resp = await self._create(
+                meter,
                 messages=msgs,
                 temperature=temperature,
                 max_tokens=max_tokens,
@@ -162,6 +197,7 @@ class LLMClient:
             return
         t0 = time.perf_counter()
         stream = await self._create(
+            meter,
             messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
@@ -175,7 +211,7 @@ class LLMClient:
                     prompt, completion = chunk.usage.prompt_tokens, chunk.usage.completion_tokens
                 if chunk.choices and chunk.choices[0].delta.content:
                     yield chunk.choices[0].delta.content
-        except (*_RETRYABLE, APIStatusError) as exc:
+        except _STREAM_ERRORS as exc:
             raise UpstreamError() from exc
         finally:
             meter.add(prompt, completion)

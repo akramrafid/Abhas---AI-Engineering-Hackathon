@@ -19,8 +19,12 @@ async def _llm() -> str:
     if llm.mock:
         return "MOCK (no LLM_API_KEY or LLM_MOCK=1)"
     msgs = [{"role": "user", "content": 'Reply with the JSON object {"ok": true}'}]
-    await llm.complete_json(msgs, _Pong, llm.meter(), max_tokens=200)
-    return "OK"
+    meter = llm.meter()
+    await llm.complete_json(msgs, _Pong, meter, max_tokens=200)
+    primary = llm.s.llm_model
+    if meter.model != primary:
+        return f"DEGRADED (primary {primary} failed; served by {meter.model})"
+    return f"OK ({meter.model})"
 
 
 def main() -> None:
