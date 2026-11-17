@@ -120,7 +120,10 @@ _HUMAN_CATEGORIES = {Category.account_security, Category.cancellation, Category.
 _ACTION_RULES: list[tuple[str, re.Pattern[str]]] = [
     (
         "refund / compensation",
-        _rx(r"\brefund|\breimburs|\bcompensat|\bmoney back\b|রিফান্ড|ক্ষতিপূরণ|টাকা\s*ফেরত|ফেরত\s*(?:দিন|চাই|দেন)"),
+        _rx(
+            r"\brefund|\breimburs|\bcompensat|\bmoney back\b|\bcredit\b|রিফান্ড|ক্রেডিট|ক্ষতিপূরণ"
+            r"|টাকা\s*ফেরত|ফেরত\s*(?:দিন|চাই|দেন)"
+        ),
     ),
     (
         "technician visit",
@@ -164,6 +167,10 @@ def compromise_signal(text: str) -> bool:
 # --------------------------------------------------------------------------------------------------
 # Reply safety
 # --------------------------------------------------------------------------------------------------
+# "must be approved", "needs to be approved", "can be refunded": a condition, not a promise
+_CONDITIONAL = _rx(
+    r"\b(?:must|should|can|may|might|could|would|requires?|(?:needs?|has|have)\s+to)\W+(?:be\W+)?$"
+)
 _NEGATION = _rx(
     r"(?:\bnot|\bnever|n't|\bunless|\buntil|\bonce|\bif|\bbefore|\bwhen|\bonly after)\W+(?:\w+\W+){0,2}$"
 )
@@ -222,7 +229,8 @@ def promise_violations(reply: str) -> list[str]:
     found: list[str] = []
     for rx in _PROMISE_RULES:
         for m in rx.finditer(norm):
-            if _NEGATION.search(norm[max(0, m.start() - 24) : m.start()]):
+            before = norm[max(0, m.start() - 24) : m.start()]
+            if _NEGATION.search(before) or _CONDITIONAL.search(before):
                 continue
             found.append(m.group(0).strip())
             break
@@ -331,9 +339,10 @@ def apply_guardrails(
     if not cleaned or not language_matches(cleaned, language):
         reasons.append(f"Reply was not in the customer's language ({language.value}): safe template used")
         cleaned = safe_reply(language)
-    elif needs_human or injection:
+    else:  # checked on EVERY reply: a promise is never allowed, whatever the ticket looked like
         bad = promise_violations(cleaned)
         if bad:
+            needs_human = True
             reasons.append("Reply promised a refund/credit/approval (" + ", ".join(bad[:3]) + "): replaced")
             cleaned = safe_reply(language)
 

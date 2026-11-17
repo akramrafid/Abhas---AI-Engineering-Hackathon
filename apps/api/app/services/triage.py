@@ -6,11 +6,13 @@ Mock mode (no LLM key) uses a deterministic keyword classifier so the UI and tes
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 import secrets
 import time
 import uuid
+from collections import OrderedDict
 from datetime import UTC, datetime
 
 from pydantic import BaseModel, Field, field_validator
@@ -19,7 +21,7 @@ from app.adapters.llm import UsageMeter, get_llm
 from app.core.config import get_settings
 from app.core.errors import AppError, UpstreamError
 from app.prompts.triage_mock import MOCK_BODY, MOCK_INTRO
-from app.prompts.triage_prompt import build_messages
+from app.prompts.triage_prompt import build_messages, safe_channel
 from app.schemas import (
     BatchTriageItem,
     BatchTriageResult,
@@ -33,13 +35,15 @@ from app.schemas import (
     Urgency,
     Usage,
 )
-from app.services import guardrails
+from app.services import guardrails, retrieval
 from app.services import history as history_store
 from app.services.language import detect_language
 
 log = logging.getLogger("app.triage")
 
-RETRIEVAL_TIMEOUT_S = 3.0
+RETRIEVAL_TIMEOUT_S = 5.0  # the first query after startup also cold-loads the embedder
+CACHE_TTL_S = 3600.0
+CACHE_MAX = 256
 LLM_BUDGET_S = 25.0
 BATCH_CONCURRENCY = 4
 MAX_CITATIONS = 3
@@ -65,18 +69,33 @@ class LLMTriage(BaseModel):
 # --------------------------------------------------------------------------------------------------
 # Retrieval (owned by another worker; optional here)
 # --------------------------------------------------------------------------------------------------
+# Language-independent query expansion: Bangla/Banglish tickets share no words with the English KB, so the
+# (deterministic) keyword classifier's category adds the English topic words the retriever can match.
+_CATEGORY_HINTS = {
+    Category.outage: "outage credit SLA area outage",
+    Category.technical: "slow speed troubleshooting router restart",
+    Category.billing: "bill payment refund charge",
+    Category.plan_change: "change plan upgrade downgrade price",
+    Category.cancellation: "cancel cancellation notice router return fee",
+    Category.account_security: "account security hacked password OTP",
+}
+
+
 async def _retrieve(text: str) -> list[Citation]:
+    hint = _CATEGORY_HINTS.get(guardrails.heuristic_triage(text).category, "")
+    query = f"{' '.join(text.split())[:500]} {hint}".strip()
     try:
-        from app.services.retrieval import search  # lazy: module may not exist yet
-    except ImportError:
-        return []
-    query = " ".join(text.split())[:500]
-    try:
-        hits = await asyncio.wait_for(search(query, k=MAX_CITATIONS), timeout=RETRIEVAL_TIMEOUT_S)
+        result = await asyncio.wait_for(
+            retrieval.retrieve(query, k=MAX_CITATIONS, lenient=not get_llm().mock),
+            timeout=RETRIEVAL_TIMEOUT_S,
+        )
     except Exception:
         log.warning("retrieval unavailable, continuing without citations", exc_info=True)
         return []
-    return [c.model_copy(update={"id": i}) for i, c in enumerate(list(hits)[:MAX_CITATIONS], start=1)]
+    return [
+        retrieval.to_citation(i, chunk, query)
+        for i, chunk in enumerate(result.chunks[:MAX_CITATIONS], start=1)
+    ]
 
 
 # --------------------------------------------------------------------------------------------------
@@ -129,7 +148,37 @@ def _clip(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
+_cache: OrderedDict[str, tuple[float, TriageResult]] = OrderedDict()
+
+
+def clear_cache() -> None:
+    _cache.clear()
+
+
+def _cache_key(text: str, channel: str, model: str) -> str:
+    return hashlib.sha256(f"{model}\x00{safe_channel(channel)}\x00{text}".encode()).hexdigest()
+
+
+def _cache_get(key: str) -> TriageResult | None:
+    entry = _cache.get(key)
+    if entry is None:
+        return None
+    if time.monotonic() - entry[0] > CACHE_TTL_S:
+        del _cache[key]
+        return None
+    _cache.move_to_end(key)
+    return entry[1]
+
+
+def _cache_put(key: str, result: TriageResult) -> None:
+    _cache[key] = (time.monotonic(), result)
+    _cache.move_to_end(key)
+    while len(_cache) > CACHE_MAX:
+        _cache.popitem(last=False)
+
+
 async def triage(req: TriageRequest) -> TriageResult:
+    started = time.perf_counter()
     meter = get_llm().meter()
     language = Language(detect_language(req.text))
 
@@ -150,6 +199,23 @@ async def triage(req: TriageRequest) -> TriageResult:
             citations=[],
             usage=meter.to_usage(),
             created_at=datetime.now(UTC),
+        )
+        return result  # nothing worth keeping: not stored in history
+
+    key = _cache_key(req.text, req.channel, meter.model)
+    hit = _cache_get(key)
+    if hit is not None:  # same ticket text + channel: no retrieval, no LLM call, no cost
+        usage = Usage(
+            model=hit.usage.model, latency_ms=round((time.perf_counter() - started) * 1000, 1), cached=True
+        )
+        result = hit.model_copy(
+            update={
+                "id": uuid.uuid4().hex,
+                "ticket_id": req.ticket_id,
+                "created_at": datetime.now(UTC),
+                "usage": usage,
+            },
+            deep=True,
         )
         await history_store.save(result)
         return result
@@ -183,6 +249,7 @@ async def triage(req: TriageRequest) -> TriageResult:
         usage=meter.to_usage(),
         created_at=datetime.now(UTC),
     )
+    _cache_put(key, result)
     await history_store.save(result)
     return result
 
@@ -253,6 +320,7 @@ async def triage_batch() -> BatchTriageResult:
         completion_tokens=sum(u.completion_tokens for u in usages),
         cost_usd=round(sum(u.cost_usd for u in usages), 6),
         latency_ms=round((time.perf_counter() - started) * 1000, 1),
+        cached=bool(usages) and all(u.cached for u in usages),
     )
     return BatchTriageResult(
         items=items,
