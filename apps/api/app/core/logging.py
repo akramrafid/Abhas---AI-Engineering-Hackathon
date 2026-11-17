@@ -8,7 +8,10 @@ import sys
 from datetime import UTC, datetime
 
 request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="-")
-_SECRET_RE = re.compile(r"(sk-[A-Za-z0-9_\-]{8,}|Bearer\s+[A-Za-z0-9._\-]+)")
+_SECRET_RE = re.compile(
+    r"(sk-[A-Za-z0-9_\-]{8,}|AIza[0-9A-Za-z_\-]{20,}|AQ\.[A-Za-z0-9_\-]{20,}|gsk_[A-Za-z0-9_\-]{20,}"
+    r"|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|Bearer\s+[A-Za-z0-9._\-]+)"
+)
 
 
 def redact(text: str) -> str:
@@ -26,10 +29,11 @@ class JsonFormatter(logging.Formatter):
         }
         extra = getattr(record, "data", None)
         if isinstance(extra, dict):
-            payload.update(extra)
+            for key, value in extra.items():
+                payload.setdefault(key, value)  # never overwrite reserved fields
         if record.exc_info:
-            payload["exc"] = redact(self.formatException(record.exc_info))
-        return json.dumps(payload, ensure_ascii=False, default=str)
+            payload["exc"] = self.formatException(record.exc_info)
+        return redact(json.dumps(payload, ensure_ascii=False, default=str))
 
 
 def configure_logging(level: str = "INFO") -> None:
