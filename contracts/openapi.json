@@ -1,0 +1,1086 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "LumaDesk API",
+    "description": "AI copilot for LumaNet Fiber support agents: grounded KB answers + ticket triage.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Healthz",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Healthz Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readyz",
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Readyz Readyz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kb/index": {
+      "post": {
+        "tags": [
+          "kb"
+        ],
+        "summary": "Index",
+        "description": "(Re)index every file in data/kb. Idempotent: unchanged chunks skipped, stale ones deleted.",
+        "operationId": "index_kb_index_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndexResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kb/documents": {
+      "get": {
+        "tags": [
+          "kb"
+        ],
+        "summary": "Documents",
+        "operationId": "documents_kb_documents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentSummary"
+                  },
+                  "type": "array",
+                  "title": "Response Documents Kb Documents Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kb/documents/{doc_id}": {
+      "get": {
+        "tags": [
+          "kb"
+        ],
+        "summary": "Document",
+        "operationId": "document_kb_documents__doc_id__get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Doc Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask": {
+      "post": {
+        "tags": [
+          "ask"
+        ],
+        "summary": "Ask Sync",
+        "description": "Non-streaming answer (evals, scripts).",
+        "operationId": "ask_sync_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ask/stream": {
+      "post": {
+        "tags": [
+          "ask"
+        ],
+        "summary": "Ask Stream",
+        "operationId": "ask_stream_ask_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "SSE events: meta, citations, token (repeated), done (AskResponse) | error",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/triage": {
+      "post": {
+        "tags": [
+          "triage"
+        ],
+        "summary": "Triage",
+        "description": "Always returns a schema-valid TriageResult or an ErrorResponse, never free text.",
+        "operationId": "triage_triage_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriageResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/triage/batch": {
+      "post": {
+        "tags": [
+          "triage"
+        ],
+        "summary": "Triage Batch",
+        "description": "Triage every labelled sample ticket and report accuracy against the labels.",
+        "operationId": "triage_batch_triage_batch_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchTriageResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/triage/history": {
+      "get": {
+        "tags": [
+          "triage"
+        ],
+        "summary": "History",
+        "operationId": "history_triage_history_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TriageHistoryItem"
+                  },
+                  "title": "Response History Triage History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AskRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AskRequest"
+      },
+      "AskResponse": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "answered": {
+            "type": "boolean",
+            "title": "Answered",
+            "description": "False when the KB does not cover the question"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Detected question language: en | bn | banglish"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer",
+          "answered",
+          "language",
+          "citations",
+          "usage"
+        ],
+        "title": "AskResponse",
+        "description": "Non-streaming answer (used by evals and as the payload of the final SSE `done` event)."
+      },
+      "BatchTriageItem": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "title": "Ticket Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TriageResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "label_category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "label_urgency": {
+            "$ref": "#/components/schemas/Urgency"
+          },
+          "category_correct": {
+            "type": "boolean",
+            "title": "Category Correct"
+          },
+          "urgency_correct": {
+            "type": "boolean",
+            "title": "Urgency Correct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticket_id",
+          "text",
+          "result",
+          "label_category",
+          "label_urgency",
+          "category_correct",
+          "urgency_correct"
+        ],
+        "title": "BatchTriageItem"
+      },
+      "BatchTriageResult": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BatchTriageItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "category_accuracy": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Category Accuracy"
+          },
+          "urgency_accuracy": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Urgency Accuracy"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "category_accuracy",
+          "urgency_accuracy",
+          "usage"
+        ],
+        "title": "BatchTriageResult"
+      },
+      "Category": {
+        "type": "string",
+        "enum": [
+          "billing",
+          "outage",
+          "technical",
+          "plan_change",
+          "account_security",
+          "cancellation",
+          "other"
+        ],
+        "title": "Category"
+      },
+      "ChatTurn": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "pattern": "^(user|assistant)$",
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatTurn"
+      },
+      "Citation": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Id",
+            "description": "Marker number used in the answer text, e.g. [1]"
+          },
+          "doc_id": {
+            "type": "string",
+            "title": "Doc Id",
+            "description": "Stable document id (file stem), e.g. 'outage-sla'"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "section": {
+            "type": "string",
+            "title": "Section",
+            "description": "Heading of the cited chunk",
+            "default": ""
+          },
+          "snippet": {
+            "type": "string",
+            "title": "Snippet",
+            "description": "Short excerpt of the cited chunk"
+          },
+          "score": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "doc_id",
+          "title",
+          "snippet",
+          "score"
+        ],
+        "title": "Citation"
+      },
+      "DocumentDetail": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "title": "Doc Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Path relative to the data dir"
+          },
+          "trusted": {
+            "type": "boolean",
+            "title": "Trusted",
+            "description": "False for untrusted user-generated content (e.g. forum posts)"
+          },
+          "chunks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Chunks"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Full markdown content (for the citation viewer)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_id",
+          "title",
+          "path",
+          "trusted",
+          "chunks",
+          "content"
+        ],
+        "title": "DocumentDetail"
+      },
+      "DocumentSummary": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "title": "Doc Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "description": "Path relative to the data dir"
+          },
+          "trusted": {
+            "type": "boolean",
+            "title": "Trusted",
+            "description": "False for untrusted user-generated content (e.g. forum posts)"
+          },
+          "chunks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Chunks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_id",
+          "title",
+          "path",
+          "trusted",
+          "chunks"
+        ],
+        "title": "DocumentSummary"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IndexResult": {
+        "properties": {
+          "files": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Files"
+          },
+          "chunks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Chunks"
+          },
+          "upserted": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Upserted",
+            "description": "Chunks new or changed since last run"
+          },
+          "unchanged": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Unchanged"
+          },
+          "deleted": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Deleted",
+            "description": "Stale chunks removed"
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Duration Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files",
+          "chunks",
+          "upserted",
+          "unchanged",
+          "deleted",
+          "duration_ms"
+        ],
+        "title": "IndexResult"
+      },
+      "Language": {
+        "type": "string",
+        "enum": [
+          "en",
+          "bn",
+          "banglish"
+        ],
+        "title": "Language"
+      },
+      "Sentiment": {
+        "type": "string",
+        "enum": [
+          "positive",
+          "neutral",
+          "negative",
+          "angry"
+        ],
+        "title": "Sentiment"
+      },
+      "TriageHistoryItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "urgency": {
+            "$ref": "#/components/schemas/Urgency"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "needs_human": {
+            "type": "boolean",
+            "title": "Needs Human"
+          },
+          "injection_detected": {
+            "type": "boolean",
+            "title": "Injection Detected"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ticket_id",
+          "category",
+          "urgency",
+          "language",
+          "needs_human",
+          "injection_detected",
+          "summary",
+          "created_at"
+        ],
+        "title": "TriageHistoryItem"
+      },
+      "TriageRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "channel": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Channel",
+            "default": "chat"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "TriageRequest"
+      },
+      "TriageResult": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Server-generated triage id"
+          },
+          "ticket_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ticket Id"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "urgency": {
+            "$ref": "#/components/schemas/Urgency"
+          },
+          "sentiment": {
+            "$ref": "#/components/schemas/Sentiment"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Summary"
+          },
+          "needs_human": {
+            "type": "boolean",
+            "title": "Needs Human"
+          },
+          "injection_detected": {
+            "type": "boolean",
+            "title": "Injection Detected"
+          },
+          "suggested_reply": {
+            "type": "string",
+            "title": "Suggested Reply"
+          },
+          "urgency_evidence": {
+            "type": "string",
+            "title": "Urgency Evidence",
+            "description": "Sentence from the ticket that drove urgency",
+            "default": ""
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons",
+            "description": "Why needs_human / injection were set"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "urgency",
+          "sentiment",
+          "language",
+          "summary",
+          "needs_human",
+          "injection_detected",
+          "suggested_reply",
+          "citations",
+          "usage",
+          "created_at"
+        ],
+        "title": "TriageResult"
+      },
+      "Urgency": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "title": "Urgency"
+      },
+      "Usage": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "description": "Model that served the request, or 'mock'"
+          },
+          "llm_calls": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Llm Calls",
+            "default": 0
+          },
+          "prompt_tokens": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Prompt Tokens",
+            "default": 0
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Completion Tokens",
+            "default": 0
+          },
+          "cost_usd": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Cost Usd",
+            "default": 0.0
+          },
+          "latency_ms": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Latency Ms",
+            "default": 0.0
+          },
+          "cached": {
+            "type": "boolean",
+            "title": "Cached",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "title": "Usage",
+        "description": "Per-request cost/latency accounting (shown in the UI and logged)."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

@@ -38,3 +38,8 @@ Thumbs.db
 
 # local Claude settings (project settings in .claude/settings.json ARE committed)
 .claude/settings.local.json
+
+# app runtime data
+.qdrant/
+*.db
+.fastembed_cache/
