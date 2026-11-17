@@ -5,6 +5,7 @@ import json
 import sys
 
 from app.core.config import get_settings
+from app.core.errors import AppError
 from app.core.logging import configure_logging
 from app.services.kb import index_kb
 
@@ -15,7 +16,11 @@ def main() -> None:
     if cmd != "index":
         print("usage: python -m app.cli index", file=sys.stderr)
         sys.exit(2)
-    result = asyncio.run(index_kb())
+    try:
+        result = asyncio.run(index_kb())
+    except AppError as exc:
+        print(f"error: {exc.message}", file=sys.stderr)
+        sys.exit(1)
     print(json.dumps(result.model_dump(), indent=2))
 
 
