@@ -83,6 +83,8 @@ class LLMClient:
     async def _create(self, **kwargs):  # noqa: ANN202
         assert self._client is not None
         models = [self.s.llm_model] + ([self.s.llm_fallback_model] if self.s.llm_fallback_model else [])
+        if self.s.llm_reasoning_effort:
+            kwargs["reasoning_effort"] = self.s.llm_reasoning_effort
         last: Exception | None = None
         for model in models:
             try:

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     llm_fallback_model: str = ""
     llm_mock: bool = False
+    llm_reasoning_effort: str = ""  # optional: none|low|medium|high (Gemini/OpenAI reasoning models)
     llm_timeout_s: float = 30.0
     llm_max_retries: int = 2
     llm_price_in_per_mtok: float = 0.15
