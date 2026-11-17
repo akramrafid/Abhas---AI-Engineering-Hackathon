@@ -163,7 +163,38 @@ def test_evidence_is_grounded_in_ticket():
     assert g.ground_evidence("", text) == ""
 
 
-def test_promise_check_skipped_when_no_human_needed():
-    out = _guard("how do I change wifi password", reply="Your request is approved by the guide.")
-    assert out.needs_human is False
-    assert out.reply == "Your request is approved by the guide."
+def test_promise_check_runs_on_every_reply():
+    """SEC-2: a billing ticket that looks harmless to the rules must still never get a promise."""
+    out = _guard(
+        "My bill was 1800 BDT instead of 1200 BDT, please give me 5 days of credit",
+        category=Category.billing,
+        urgency=Urgency.medium,
+        reply="We will refund 600 BDT to your account and your 5 days of credit has been approved.",
+    )
+    assert out.reply == g.safe_reply(Language.en)
+    assert out.needs_human is True
+    assert any("promised" in r for r in out.reasons)
+
+    plain = _guard("how do I change wifi password", reply="Your request is approved by the guide.")
+    assert plain.reply == g.safe_reply(Language.en) and plain.needs_human is True
+
+
+def test_credit_request_needs_human():
+    assert "refund / compensation" in g.action_requests("please give me 5 days of credit")
+    assert "refund / compensation" in g.action_requests("আমাকে ক্রেডিট দিন")
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        "A refund must be approved by a supervisor first.",
+        "Credits can be applied only after the outage is confirmed.",
+        "Cancellation needs to be approved by our team.",
+    ],
+)
+def test_conditional_policy_statements_are_not_promises(reply):
+    assert g.promise_violations(reply) == []
+
+
+def test_has_been_approved_is_still_a_promise():
+    assert g.promise_violations("Your request has been approved.")

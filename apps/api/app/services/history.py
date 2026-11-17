@@ -13,6 +13,7 @@ from app.schemas import TriageHistoryItem, TriageResult
 log = logging.getLogger("app.history")
 
 _PREFIX = "sqlite:///"
+_ready: set[Path] = set()
 _DDL = """
 CREATE TABLE IF NOT EXISTS triage_history (
     id TEXT PRIMARY KEY,
@@ -41,8 +42,11 @@ def _db_path() -> Path:
 def _connect() -> sqlite3.Connection:
     path = _db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
+    needs_schema = path not in _ready or not path.exists()  # created once per db file, not on every read
     conn = sqlite3.connect(path, timeout=5)
-    conn.executescript(_DDL)
+    if needs_schema:
+        conn.executescript(_DDL)
+        _ready.add(path)
     return conn
 
 
