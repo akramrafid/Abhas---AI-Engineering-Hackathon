@@ -44,6 +44,12 @@ def install_error_handlers(app: FastAPI) -> None:
         return JSONResponse(_body("validation_error", msg), status_code=422)
 
     @app.exception_handler(Exception)
-    async def _unhandled(_: Request, exc: Exception) -> JSONResponse:
-        log.exception("unhandled_error")
-        return JSONResponse(_body("internal_error", "Something went wrong. Please try again."), 500)
+    async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
+        rid = getattr(request.state, "request_id", None) or request_id_var.get()
+        token = request_id_var.set(rid)
+        try:
+            log.exception("unhandled_error")
+            body = _body("internal_error", "Something went wrong. Please try again.")
+        finally:
+            request_id_var.reset(token)
+        return JSONResponse(body, status_code=500, headers={"x-request-id": rid})
