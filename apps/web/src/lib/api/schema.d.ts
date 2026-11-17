@@ -160,7 +160,7 @@ export interface paths {
         put?: never;
         /**
          * Triage Batch
-         * @description Triage every labelled sample ticket and report accuracy against the labels.
+         * @description Triage every labelled sample ticket and report accuracy against the labels. One run at a time.
          */
         post: operations["triage_batch_triage_batch_post"];
         delete?: never;
@@ -778,6 +778,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BatchTriageResult"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

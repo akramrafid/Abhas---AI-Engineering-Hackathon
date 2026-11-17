@@ -195,13 +195,6 @@ export function AskWorkspace() {
                 ),
               );
             },
-            onCitations: (citations) => {
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === assistantId ? { ...m, citations } : m,
-                ),
-              );
-            },
             onToken: (text) => {
               setMessages((prev) =>
                 prev.map((m) =>
@@ -220,7 +213,7 @@ export function AskWorkspace() {
                         content: done.answer,
                         answered: done.answered,
                         language: done.language,
-                        citations: done.citations,
+                        citations: done.answered ? done.citations : [],
                         usage: done.usage,
                         isStreaming: false,
                       }
@@ -415,6 +408,14 @@ export function AskWorkspace() {
                 }
 
                 const isRefusal = msg.answered === false;
+                const confirmedCitations =
+                  !msg.isStreaming && msg.answered === true
+                    ? (msg.citations ?? [])
+                    : [];
+                const isUnverifiedAnswer =
+                  !msg.isStreaming &&
+                  msg.answered === true &&
+                  confirmedCitations.length === 0;
                 return (
                   <article
                     key={msg.id}
@@ -442,6 +443,14 @@ export function AskWorkspace() {
                           >
                             <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
                             Not in the knowledge base
+                          </span>
+                        ) : null}
+                        {isUnverifiedAnswer ? (
+                          <span
+                            data-testid="no-citation-badge"
+                            className="inline-flex items-center gap-1 rounded-md border border-border-subtle bg-surface px-2 py-0.5 text-xs font-medium text-ink-muted"
+                          >
+                            Unverified (no citation)
                           </span>
                         ) : null}
                         {msg.stopped ? (
@@ -482,7 +491,7 @@ export function AskWorkspace() {
                       <div className="space-y-3">
                         <MarkdownContent
                           content={msg.content}
-                          citations={msg.citations}
+                          citations={confirmedCitations}
                           activeCitationKey={activeCitationKey}
                           onSelectCitation={handleSelectCitation}
                         />
@@ -496,14 +505,17 @@ export function AskWorkspace() {
                     )}
 
                     {/* Sources row */}
-                    {msg.citations && msg.citations.length > 0 ? (
-                      <div className="mt-4 border-t border-border-subtle pt-3">
+                    {confirmedCitations.length > 0 ? (
+                      <div
+                        data-testid="sources-row"
+                        className="mt-4 border-t border-border-subtle pt-3"
+                      >
                         <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-ink-muted">
                           <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
                           <span>Sources</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {msg.citations.map((citation) => {
+                          {confirmedCitations.map((citation) => {
                             const key = `${citation.doc_id}:${citation.id}:${citation.snippet}`;
                             return (
                               <CitationChip

@@ -2,13 +2,21 @@
 
 import { useMemo, type AnchorHTMLAttributes, type ReactNode } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
-import rehypeSanitize from "rehype-sanitize";
+import rehypeSanitize, {
+  defaultSchema,
+  type Options as SanitizeSchema,
+} from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import type { Citation } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { CitationChip } from "./citation-chip";
 
 const CITATION_HREF_PREFIX = "#lumadesk-citation-";
+
+const SAFE_MARKDOWN_SCHEMA: SanitizeSchema = {
+  ...defaultSchema,
+  tagNames: (defaultSchema.tagNames ?? []).filter((tag) => tag !== "img"),
+};
 
 interface MdastNode {
   type: string;
@@ -249,14 +257,19 @@ export function MarkdownContent({
 
   const rehypePlugins = useMemo(() => {
     const phrases = extractHighlightPhrases(highlightSnippet);
+    const sanitizePlugin: [typeof rehypeSanitize, SanitizeSchema] = [
+      rehypeSanitize,
+      SAFE_MARKDOWN_SCHEMA,
+    ];
     if (phrases.length === 0) {
-      return [rehypeSanitize];
+      return [sanitizePlugin];
     }
-    return [rehypeSanitize, createRehypeHighlightPlugin(phrases)];
+    return [sanitizePlugin, createRehypeHighlightPlugin(phrases)];
   }, [highlightSnippet]);
 
   const components = useMemo<Components>(
     () => ({
+      img: () => null,
       a: ({
         href,
         children,

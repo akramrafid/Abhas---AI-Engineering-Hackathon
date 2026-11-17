@@ -49,9 +49,12 @@ export function UsageBadge({ usage, className }: UsageBadgeProps) {
       </span>
 
       {usage.cached ? (
-        <span className="inline-flex items-center gap-1 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+        <span
+          data-testid="usage-cached-badge"
+          className="inline-flex items-center gap-1 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300"
+        >
           <DatabaseZap className="h-3 w-3" aria-hidden="true" />
-          Cached
+          <span>cached</span>
         </span>
       ) : null}
     </div>
