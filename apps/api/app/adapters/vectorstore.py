@@ -6,6 +6,7 @@ never blocks and the embedded engine is never entered concurrently.
 """
 
 import asyncio
+import atexit
 import logging
 import threading
 import time
@@ -64,6 +65,7 @@ class VectorStore:
         self.dim = dim
         self.uid = uuid.uuid4().hex
         self._remote = bool(url)
+        self._closed = False
         self.version = 0  # bumped on every write; lets readers invalidate caches built from the index
         self._lock = threading.Lock()
         try:
@@ -214,7 +216,9 @@ class VectorStore:
         return await self._run(self._count)
 
     def close(self) -> None:
-        self._client.close()
+        if not self._closed:
+            self._closed = True
+            self._client.close()
 
 
 _store: VectorStore | None = None
@@ -231,6 +235,7 @@ def get_vector_store() -> VectorStore:
             path=None if s.qdrant_url else s.resolve(s.qdrant_path),
             url=s.qdrant_url,
         )
+        atexit.register(_store.close)  # release the folder lock before interpreter teardown
     return _store
 
 

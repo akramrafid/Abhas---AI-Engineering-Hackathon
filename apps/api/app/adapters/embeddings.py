@@ -34,6 +34,7 @@ class FastEmbedEmbedder:
         self.model_name = model_name
         self._model = None
         self._lock = threading.Lock()
+        self._infer_lock = threading.Lock()
 
     def _load(self):  # noqa: ANN202
         with self._lock:
@@ -52,7 +53,8 @@ class FastEmbedEmbedder:
 
     def _embed_sync(self, texts: list[str]) -> list[list[float]]:
         model = self._load()
-        return [vec.tolist() for vec in model.embed(texts)]
+        with self._infer_lock:  # CPU-bound; one inference at a time also avoids tokenizer state races
+            return [vec.tolist() for vec in model.embed(texts)]
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         if not texts:

@@ -195,16 +195,16 @@ async def retrieve(
     language = detect_language(query)
     if k is None:
         k = TOP_K if language == "en" else TOP_K_NON_ENGLISH
-    [vector] = await get_embedder().embed([query])
-    hits = await store.search(vector, DENSE_CANDIDATES, trusted_only=True)
     lexical = await _lexical_index(store)
     lex_scores = lexical.scores(query)
+    hits: list[Hit] = []
+    if lexical.payloads:  # an empty/unindexed KB needs no embedding (and never loads the model)
+        [vector] = await get_embedder().embed([query])
+        hits = await store.search(vector, DENSE_CANDIDATES, trusted_only=True)
 
     best_dense = max((min(max(h.score, 0.0), 1.0) for h in hits), default=0.0)
     best_lexical = max(lex_scores, default=0.0)
-    answerable = bool(hits or lexical.payloads) and _is_answerable(
-        language, best_dense, best_lexical, lenient
-    )
+    answerable = bool(lexical.payloads) and _is_answerable(language, best_dense, best_lexical, lenient)
     chunks = _fuse(hits, lexical, lex_scores, k) if answerable else []
 
     result = RetrievalResult(
