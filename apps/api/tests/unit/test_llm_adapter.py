@@ -114,3 +114,16 @@ def test_unhandled_error_keeps_request_id(client, monkeypatch):
     assert r.status_code == 500
     assert r.json()["error"]["request_id"] == "abc123"
     assert "kaboom" not in r.text
+
+
+async def test_single_bad_request_does_not_cool_down_primary():
+    c, fake = _client(
+        {
+            "primary": [_status_error(BadRequestError, 400), _resp('{"ok": true}')],
+            "fb": [_resp('{"ok": true}')],
+        }
+    )
+    await c.complete_json([{"role": "user", "content": "x"}], _Out, c.meter())
+    meter = c.meter()
+    await c.complete_json([{"role": "user", "content": "y"}], _Out, meter)
+    assert fake.calls == ["primary", "fb", "primary"] and meter.model == "primary"

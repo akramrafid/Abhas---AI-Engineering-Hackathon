@@ -26,6 +26,8 @@ _TRANSIENT = (APIConnectionError, APITimeoutError)
 _STREAM_ERRORS = (APIConnectionError, APITimeoutError, APIStatusError, httpx.HTTPError)
 _COOLDOWN_RATE_LIMIT_S = 60.0
 _COOLDOWN_BAD_REQUEST_S = 600.0
+_CONTENT_STATUSES = {400, 413, 422}
+_BAD_REQUEST_TRIP = 3  # consecutive 400s before a model is treated as misconfigured
 
 
 @dataclass
@@ -67,6 +69,7 @@ class LLMClient:
         self.mock = not settings.llm_enabled
         self.mock_fn = mock_fn
         self._cooldown_until: dict[str, float] = {}
+        self._bad_request_streak: dict[str, int] = {}
         self._client = (
             None
             if self.mock
@@ -93,6 +96,15 @@ class LLMClient:
         return ready or models
 
     def _cool_down(self, model: str, exc: Exception) -> None:
+        """Trip the breaker only for model-health signals. A 400/413/422 can be caused by request content,
+        so it fails over for this request only, and trips the breaker after several in a row."""
+        status = getattr(exc, "status_code", None)
+        if status in _CONTENT_STATUSES:
+            self._bad_request_streak[model] = self._bad_request_streak.get(model, 0) + 1
+            if self._bad_request_streak[model] < _BAD_REQUEST_TRIP:
+                log.warning("llm_request_rejected", extra={"data": {"model": model, "status": status}})
+                return
+        self._bad_request_streak[model] = 0
         seconds = _COOLDOWN_RATE_LIMIT_S if isinstance(exc, RateLimitError) else _COOLDOWN_BAD_REQUEST_S
         self._cooldown_until[model] = time.monotonic() + seconds
         log.warning(
@@ -126,6 +138,7 @@ class LLMClient:
                     with attempt:
                         resp = await self._client.chat.completions.create(model=model, **kwargs)
                 meter.model = model  # report the model that actually served the request
+                self._bad_request_streak[model] = 0
                 return resp
             except (RateLimitError, APIStatusError) as exc:
                 last = exc

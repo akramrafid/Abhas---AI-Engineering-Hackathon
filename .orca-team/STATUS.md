@@ -45,3 +45,4 @@ See CREDENTIALS.md. Open: LLM_API_KEY (asked 17:45). Everything else local.
 - 11e906b lead: test isolation fixture + CLI error
 - Review r1 started: code ctx_4a46558b4c43 (claude opus xhigh), security ctx_4c6bb91cd90b (agy gemini-4-argon-high)
 - 19:15 LLM gemini-2.5-flash free tier exhausted (20/day) -> gemini-flash-lite-latest + fallback gemini-3.1-flash-lite
+| 18:55 | QA | opencode -> LEAD (self) | no output after 50 min; agy/claude pools at cap |
