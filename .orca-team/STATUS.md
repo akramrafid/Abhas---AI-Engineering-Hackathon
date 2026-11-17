@@ -1,7 +1,7 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
-Phase: 6 — W1 kb+triage+ui merged; QA running; review r1 running · Deadline 20:40 · Updated 19:10
+Phase: 7 — r1 fixes merged, QA deliverables done by LEAD; real eval pending (killed by low memory) · Deadline 20:40 passed · Updated 22:40
 Next action: wait for worker_done; merge in order kb -> triage -> qa -> ui; then review round 1.
 Run: run_2da4f3362a3e · LEAD_BRANCH: master
 
@@ -46,3 +46,4 @@ See CREDENTIALS.md. Open: LLM_API_KEY (asked 17:45). Everything else local.
 - Review r1 started: code ctx_4a46558b4c43 (claude opus xhigh), security ctx_4c6bb91cd90b (agy gemini-4-argon-high)
 - 19:15 LLM gemini-2.5-flash free tier exhausted (20/day) -> gemini-flash-lite-latest + fallback gemini-3.1-flash-lite
 | 18:55 | QA | opencode -> LEAD (self) | no output after 50 min; agy/claude pools at cap |
+| 1 | FIX-BLOCKERS (B1 H4 M5 L5) | FIX-BLOCKERS (H3 M3 L1) | 0 (CR-5 done) | CR-4 unverified (core-kb hit limit) |
