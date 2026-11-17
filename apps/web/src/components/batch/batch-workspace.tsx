@@ -11,6 +11,7 @@ import {
 } from "@/components/common/status-badges";
 import { UsageBadge } from "@/components/common/usage-badge";
 import { runBatchTriage } from "@/lib/api/client";
+import { ApiError } from "@/lib/api/errors";
 import type { BatchTriageItem, BatchTriageResult } from "@/lib/api/types";
 import {
   cn,
@@ -24,11 +25,20 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Clock,
   Layers,
   Play,
+  RefreshCw,
   Timer,
   XCircle,
 } from "lucide-react";
+
+function isBatchInProgressError(err: unknown): err is ApiError {
+  return (
+    err instanceof ApiError &&
+    (err.status === 429 || err.code === "batch_in_progress")
+  );
+}
 
 function PassFailMark({
   passed,
@@ -83,6 +93,13 @@ export function BatchWorkspace() {
       );
     },
     onError: (err) => {
+      if (isBatchInProgressError(err)) {
+        toast.warning(
+          err.message ||
+            "A batch triage run is already in progress. Please wait a moment and try again.",
+        );
+        return;
+      }
       toast.error(
         err instanceof Error ? err.message : "Batch triage failed. Please retry.",
       );
@@ -177,11 +194,50 @@ export function BatchWorkspace() {
           </div>
         </section>
       ) : batchMutation.isError ? (
-        <ErrorAlert
-          error={batchMutation.error}
-          title="Batch triage failed"
-          onRetry={handleRun}
-        />
+        isBatchInProgressError(batchMutation.error) ? (
+          <section
+            role="status"
+            aria-live="polite"
+            data-testid="batch-in-progress-alert"
+            className="flex flex-col gap-3 rounded-xl border border-amber-300 bg-amber-50/90 p-4 text-sm text-amber-950 dark:border-amber-800/70 dark:bg-amber-950/40 dark:text-amber-100 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="flex min-w-0 items-start gap-3">
+              <Clock
+                className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
+                aria-hidden="true"
+              />
+              <div className="min-w-0 space-y-1">
+                <p className="font-semibold">Batch run already in progress</p>
+                <p className="text-amber-900 dark:text-amber-200">
+                  {batchMutation.error.message ||
+                    "Another batch evaluation is currently running. Please wait a few seconds and try again."}
+                </p>
+                {batchMutation.error.requestId ? (
+                  <p className="font-mono text-xs text-amber-800/90 dark:text-amber-300/90">
+                    Request ID:{" "}
+                    <span translate="no">{batchMutation.error.requestId}</span>
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRun}
+              data-testid="retry-button"
+              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 dark:border-amber-700 dark:bg-amber-900/60 dark:text-amber-100 dark:hover:bg-amber-900"
+            >
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Try again</span>
+            </button>
+          </section>
+        ) : (
+          <ErrorAlert
+            error={batchMutation.error}
+            title="Batch triage failed"
+            onRetry={handleRun}
+          />
+        )
       ) : !data ? (
         <section
           data-testid="batch-empty"
@@ -267,7 +323,17 @@ export function BatchWorkspace() {
             </div>
           </section>
 
-          <UsageBadge usage={data.usage} />
+          <div className="flex flex-wrap items-center gap-2.5">
+            <UsageBadge usage={data.usage} />
+            {data.usage.model === "mock" ? (
+              <span
+                data-testid="batch-mock-mode-badge"
+                className="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
+              >
+                Mock mode (deterministic classifier)
+              </span>
+            ) : null}
+          </div>
 
           {/* Comparison table */}
           {data.items.length === 0 ? (

