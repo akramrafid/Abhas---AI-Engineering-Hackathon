@@ -1,9 +1,9 @@
 """Hybrid retrieval over TRUSTED chunks only: dense (Qdrant) + lexical (BM25), fused with RRF.
 
-Why hybrid: on this KB a small multilingual dense model alone ranks a generic "Cancellation" chunk above the
-outage-credit table for "30 hours down", and its scores for off-topic questions ("stock price") exceed those of
-valid ones, so no single dense threshold can separate answerable questions. BM25 is exact on the English
-terms agents use; dense covers paraphrases and Bangla.
+Why hybrid: on this KB a small multilingual dense model alone ranks a generic "Cancellation" chunk above
+the outage-credit table for "30 hours down", and its scores for off-topic questions ("stock price") exceed
+those of valid ones, so no single dense threshold can separate answerable questions. BM25 is exact on
+the English terms agents use; dense covers paraphrases and Bangla.
 
 Untrusted documents (e.g. the community forum post) are filtered out in the vector query itself and are never
 part of the lexical corpus, so their text cannot reach the LLM or a citation.
@@ -43,12 +43,14 @@ DENSE_FLOOR = 0.15  # a chunk below this with no lexical hit is noise
 SNIPPET_CHARS = 240
 _WORD_RE = re.compile(r"[\wঀ-৿]+")
 _STOPWORDS = frozenset(
-    "a an the is are was were be been am do does did i you we they it its of to in on at for from by with and "
+    "a an the is are was were be been am do does did i you we they it its of to in on at for from by with "
+    "and "
     "or if my me your our what how when who whom which can could will would should may this that these those "
     "there any not no get got up as than then so about into per has have had but also just very much many "
     "lumanet luma fiber".split()
 )
 _SUFFIXES = ("ing", "ed", "es", "s")
+_CITATION_MARKER_RE = re.compile(r"\[\d{1,2}(?:\s*,\s*\d{1,2})*\]")
 
 
 def tokenize(text: str) -> list[str]:
@@ -115,17 +117,17 @@ class LexicalIndex:
         return out
 
 
-_corpus_cache: tuple[int, int, float, LexicalIndex] | None = None  # (id(store), version, built_at, index)
+_corpus_cache: tuple[str, int, float, LexicalIndex] | None = None  # (store.uid, version, built_at, index)
 
 
 async def _lexical_index(store: VectorStore) -> LexicalIndex:
     global _corpus_cache
     now = time.monotonic()
     cached = _corpus_cache
-    if cached and cached[:2] == (id(store), store.version) and now - cached[2] < CORPUS_TTL_S:
+    if cached and cached[:2] == (store.uid, store.version) and now - cached[2] < CORPUS_TTL_S:
         return cached[3]
     index = LexicalIndex(await store.trusted_payloads())
-    _corpus_cache = (id(store), store.version, now, index)
+    _corpus_cache = (store.uid, store.version, now, index)
     return index
 
 
@@ -228,7 +230,7 @@ async def retrieve(
 def excerpt(text: str, query: str, max_chars: int = SNIPPET_CHARS) -> str:
     """The line of `text` that best matches `query` (table rows flattened), trimmed for display."""
     lines = [ln.strip() for ln in text.split("\n") if ln.strip() and not set(ln.strip()) <= set("|-: ")]
-    terms = set(tokenize(query))
+    terms = set(tokenize(_CITATION_MARKER_RE.sub(" ", query)))  # "[1]" would otherwise match a "1" cell
     best = max(lines, key=lambda ln: len(terms & set(tokenize(ln))), default=text.strip())
     if best.startswith("|"):
         best = " — ".join(c.strip() for c in best.strip("|").split("|"))

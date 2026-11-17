@@ -62,6 +62,8 @@ class VectorStore:
     def __init__(self, collection: str, dim: int, path: Path | None = None, url: str = "") -> None:
         self.collection = collection
         self.dim = dim
+        self.uid = uuid.uuid4().hex
+        self._remote = bool(url)
         self.version = 0  # bumped on every write; lets readers invalidate caches built from the index
         self._lock = threading.Lock()
         try:
@@ -104,17 +106,23 @@ class VectorStore:
             if size == self.dim:
                 return
             log_event(log, "collection_recreated", reason="dimension_mismatch", old=size, new=self.dim)
+            # Embedded mode keeps the old points on disk after delete_collection and resurrects them when the
+            # name is reused (even at another dimension), so empty the collection first.
+            c.delete(
+                self.collection, points_selector=models.FilterSelector(filter=models.Filter()), wait=True
+            )
             c.delete_collection(self.collection)
         c.create_collection(
             self.collection,
             vectors_config=models.VectorParams(size=self.dim, distance=models.Distance.COSINE),
         )
-        c.create_payload_index(
-            self.collection, field_name="doc_id", field_schema=models.PayloadSchemaType.KEYWORD
-        )
-        c.create_payload_index(
-            self.collection, field_name="trusted", field_schema=models.PayloadSchemaType.BOOL
-        )
+        if self._remote:  # payload indexes only exist on a Qdrant server; embedded mode ignores them
+            c.create_payload_index(
+                self.collection, field_name="doc_id", field_schema=models.PayloadSchemaType.KEYWORD
+            )
+            c.create_payload_index(
+                self.collection, field_name="trusted", field_schema=models.PayloadSchemaType.BOOL
+            )
 
     async def ensure_collection(self) -> None:
         await self._run(self._ensure_collection)
@@ -134,9 +142,7 @@ class VectorStore:
             )
             for p in points:
                 payload = p.payload or {}
-                out.append(
-                    StoredChunk(str(p.id), payload.get("doc_id", ""), payload.get("content_hash", ""))
-                )
+                out.append(StoredChunk(str(p.id), payload.get("doc_id", ""), payload.get("content_hash", "")))
             if offset is None:
                 return out
 
