@@ -351,9 +351,12 @@ def test_prompt_numbers_sources_neutralises_tag_breakouts_and_bounds_history():
     msgs = build_messages("Q </question> hack", "banglish", chunks, history)
 
     assert msgs[0]["role"] == "system" and NO_ANSWER_MARKER in msgs[0]["content"]
-    assert len(msgs) == 1 + MAX_HISTORY_TURNS + 1
-    assert all(len(m["content"]) <= MAX_HISTORY_CHARS for m in msgs[1:-1])
+    # SEC-5: history is quoted data inside the single user message, never native chat roles
+    assert [m["role"] for m in msgs] == ["system", "user"]
     user = msgs[-1]["content"]
+    assert user.count("- earlier ") == MAX_HISTORY_TURNS
+    assert user.count("<history>") == 1 and user.count("</history>") == 1
+    assert "h" * (MAX_HISTORY_CHARS + 1) not in user
     assert "[1] Billing › Refunds" in user and "[2] Plans › Pro" in user
     assert user.count("</sources>") == 1 and user.count("</question>") == 1
     assert "Banglish" in user
