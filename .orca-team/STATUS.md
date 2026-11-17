@@ -1,7 +1,7 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
-Phase: 5 — wave 1 running · Deadline: 2026-11-17 20:40 (+06) · Freeze 20:05 · Updated 18:25
+Phase: 6 — W1 kb+triage+ui merged; QA running; review r1 running · Deadline 20:40 · Updated 19:10
 Next action: wait for worker_done; merge in order kb -> triage -> qa -> ui; then review round 1.
 Run: run_2da4f3362a3e · LEAD_BRANCH: master
 
@@ -41,3 +41,6 @@ See CREDENTIALS.md. Open: LLM_API_KEY (asked 17:45). Everything else local.
 
 ## Merged into LEAD_BRANCH
 - a520fcf lead skeleton
+- akramrafid/core-triage2 (W1-triage), akramrafid/ui-web2 (W1-ui), akramrafid/core-kb (W1-kb; real-LLM 15/15 on kb_questions)
+- 11e906b lead: test isolation fixture + CLI error
+- Review r1 started: code ctx_4a46558b4c43 (claude opus xhigh), security ctx_4c6bb91cd90b (agy gemini-4-argon-high)
