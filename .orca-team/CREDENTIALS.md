@@ -6,7 +6,7 @@ Requested 2026-11-17 17:45. Waiting for LLM_API_KEY. Everything else is local.
 ## Needed
 | Variable | Service | Needed for | Required? | Local / mock alternative | Status |
 |---|---|---|---|---|---|
-| LLM_API_KEY, LLM_MODEL, LLM_BASE_URL | OpenAI-compatible chat API | KB answers, triage | yes | `LLM_MOCK=1` deterministic fakes | MISSING |
+| LLM_API_KEY, LLM_MODEL, LLM_BASE_URL | Google AI Studio (OpenAI-compatible), gemini-2.5-flash | KB answers, triage | yes | LLM_MOCK=1 | PROVIDED (healthcheck OK 18:50) |
 | LLM_PRICE_IN/OUT_PER_MTOK | — | cost logs | no | gpt-4o-mini defaults | LOCAL |
 | EMBEDDING_PROVIDER, EMBEDDING_MODEL | fastembed multilingual MiniLM (CPU) | retrieval | yes | — | LOCAL |
 | QDRANT_PATH / QDRANT_COLLECTION | Qdrant local mode | vector search | yes | — | LOCAL |
