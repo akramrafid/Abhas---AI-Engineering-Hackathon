@@ -1,0 +1,40 @@
+# secrets (copied into each Orca worktree via .worktreeinclude, never committed)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# dependencies / builds / caches
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+.next/
+out/
+.cache/
+coverage/
+htmlcov/
+playwright-report/
+test-results/
+
+# local data stores (embedded Qdrant, SQLite, uploads)
+.qdrant/
+*.sqlite
+*.db
+uploads/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# local Claude settings (project settings in .claude/settings.json ARE committed)
+.claude/settings.local.json
