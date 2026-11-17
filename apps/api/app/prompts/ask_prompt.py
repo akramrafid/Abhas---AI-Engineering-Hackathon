@@ -100,35 +100,23 @@ def format_history(history: list[ChatTurn]) -> str:
         f"- earlier {'question' if turn.role == 'user' else 'reply'}: {sanitize_history_text(turn.content)}"
         for turn in history[-MAX_HISTORY_TURNS:]
     ]
-    return "
-".join(line for line in lines if not line.endswith(": "))
+    return "\n".join(line for line in lines if not line.endswith(": "))
 
 
 def build_messages(
     question: str, language: str, chunks: list[tuple[str, str, str]], history: list[ChatTurn]
 ) -> list[dict]:
     history_block = format_history(history)
-    history_part = f"<history>
-{history_block}
-</history>
-
-" if history_block else ""
+    history_part = f"<history>\n{history_block}\n</history>\n\n" if history_block else ""
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
             "role": "user",
             "content": (
-                f"<sources>
-{format_sources(chunks)}
-</sources>
-
-"
+                f"<sources>\n{format_sources(chunks)}\n</sources>\n\n"
                 f"{history_part}"
-                f"Answer language: {LANGUAGE_NAMES.get(language, LANGUAGE_NAMES['en'])}
-"
-                f"<question>
-{_clean(question)}
-</question>"
+                f"Answer language: {LANGUAGE_NAMES.get(language, LANGUAGE_NAMES['en'])}\n"
+                f"<question>\n{_clean(question)}\n</question>"
             ),
         },
     ]
