@@ -1,6 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "model": "opus",
+  "effortLevel": "high",
+  "env": {
+    "ENABLE_COMMIT_REVIEW": "0",
+    "ECC_GATEGUARD": "off"
+  },
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
