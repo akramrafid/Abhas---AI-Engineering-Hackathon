@@ -1,0 +1,20 @@
+{
+  "threshold": 0.8,
+  "eval_min_heldout": 48,
+  "tier_cutoffs": {
+    "Medium": 3,
+    "High": 8,
+    "Critical": 14
+  },
+  "floors": {
+    "mae_h2_max": 1.1,
+    "mae_h3_max": 1.1,
+    "mae_improvement_vs_climatology_min": 0.1,
+    "coverage_80_min": 0.75,
+    "coverage_80_max": 0.9,
+    "within_one_tier_min": 0.95,
+    "critical_recall_min": 0.85,
+    "p95_ward_ms_max": 50.0
+  },
+  "heldout_sha256": "4ab5539f136b5fc7b48986669930be722cf387b9b2772964238e6150639e714b"
+}
