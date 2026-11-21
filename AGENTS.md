@@ -31,49 +31,48 @@ role → skill → hand-off → gate map is in skill `swarm-lead` and `node .orc
 **Models live in one file: `.agents/skills/swarm-lead/references/model-routing.md`** — change them there only;
 this table mirrors it.
 
-| Seat | Roles it fills | Load these skills | Primary: agent · model · effort | Out of quota → (in order) |
+| Seat · worker | Roles it fills | Load these skills | Primary: agent · model · effort | Out of quota → (in order) |
 |---|---|---|---|---|
-| **LEAD** | 1 PRD · 3 architecture · 8 integration; dispatch, merge, ship | `swarm-lead`, `credentials-gate`, `product-requirements`, `solution-architecture`, `tech-lead-integration` | claude · `opus` · max | agy · Gemini 4 Neon · max → opencode · Muse Wonder · max |
-| **DESIGN** | 4 system design · PRD and architecture critiques (read-only) | `system-design` | agy · Gemini 4 Neon · max | opencode · Muse Wonder · max → claude · `opus` · max |
-| **UI** | 2 UX · 10 frontend | `ux-flow-design` / `frontend-engineering` + `frontend-design`, `vercel-react-best-practices`, `web-design-guidelines` | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → opencode · Muse Wonder · max |
-| **UI-2** (optional, second UI slice) | 10 frontend | as UI | agy · Gemini 4 Hydrogen · xhigh | agy · Gemini 4 Neon · xhigh |
-| **CORE** | 5 AI engineer · 9 backend · 15 LLMOps | `ai-engineering` / `backend-engineering` / `llmops-observability` (+ `claude-api`, `qdrant-clients-sdk`, `mcp-builder` when used) | claude · `sonnet` · max | agy · Gemini 4 Neon · xhigh → opencode · Kimi K3.1 Pro · max |
-| **DATA** | 6 data · 7 database | `data-engineering` / `database-engineering` + `supabase-postgres-best-practices` | opencode · Kimi K3.1 Pro · max | agy · Gemini 4 Neon · xhigh → opencode · Muse Wonder · max |
-| **QA** | 11 evals · 12 SQA · 14 deploy prep · 16 demo & docs | `eval-engineering` / `sqa-testing` / `vercel-deploy` / `demo-docs` (+ `webapp-testing`, `property-based-testing`) | opencode · Kimi K3.1 Pro · max | agy · Gemini 4 Neon · xhigh → agy · Gemini 4 Hydrogen · xhigh |
-| **REVIEWER-CODE** | code review of all code | `code-review`, `production-standards`, `find-bugs`, `web-design-guidelines`, `webapp-testing` | claude · `opus` · max | agy · Gemini 4 Neon · max |
-| **REVIEWER-SEC** | 13 red team + security review | `ai-red-team`, `security-review`, `differential-review`, `insecure-defaults`, `semgrep`, `supply-chain-risk-auditor` | opencode · Muse Wonder · max | agy · Gemini 4 Neon · max |
-| **OUTSIDER** | UX hallway test, demo dry run (read-only) | `webapp-testing` | opencode · Muse Wonder · max | agy · Gemini 4 Hydrogen · xhigh (only if the author isn't Gemini) |
+| **LEAD** | 1 PRD · 3 architecture · 8 integration; contracts, `gates.json`, merges, pushes, ARCHITECTURE.md | `swarm-lead`, `credentials-gate`, `product-requirements`, `solution-architecture`, `tech-lead-integration` | claude · `opus` · max | agy · Gemini 4 Neon (XHigh) |
+| **DESIGN** | 4 system design · PRD and architecture critiques (read-only) | `system-design` | agy · Gemini 4 Neon (XHigh) | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
+| **CORE** · `core-forecast` | 5 AI engineer · 9 backend · 15 LLMOps | `ai-engineering` / `backend-engineering` / `llmops-observability` (+ `claude-api` for the advisory) | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
+| **DATA** · `data-pipeline` | 6 data · 7 database | `data-engineering` / `database-engineering` | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
+| **UI** · `ui-dashboard` | 2 UX · 10 frontend | `ux-flow-design` / `frontend-engineering` + `frontend-design`, `vercel-react-best-practices`, `web-design-guidelines`, `webapp-testing` | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
+| **UI-2** · `ui-brand` | brand kit, `/brand` page | `frontend-engineering` + `frontend-design`, `web-design-guidelines` | agy · Gemini 4 Hydrogen · xhigh | agy · Gemini 4 Neon · xhigh → claude · `opus` · max |
+| **QA** · `qa-*` | 11 evals · 12 SQA · 14 deploy prep · 16 demo & docs | `eval-engineering` / `sqa-testing` / `vercel-deploy` / `demo-docs` (+ `webapp-testing`, `property-based-testing`) | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
+| **REVIEWER-CODE** | every merge and review round (all builder code is Gemini-written) | `code-review`, `production-standards`, `find-bugs`, `web-design-guidelines`, `webapp-testing` | claude · `opus` · max | LEAD reviews the merge itself; Claude out → agy · Gemini 4 Neon (XHigh) |
+| **REVIEWER-SEC** | 13 red team + security review | `ai-red-team`, `security-review`, `differential-review`, `semgrep`, `supply-chain-risk-auditor` | claude · `opus` · max; agy · Gemini 4 Neon · xhigh for LEAD-written contracts and core | agy · Gemini 4 Neon · xhigh |
+| **OUTSIDER** | UX hallway test, scored demo dry run (read-only) | `webapp-testing` | claude · `opus` · max, fresh session with no project context | agy · Gemini 4 Neon (XHigh) (same family: log it) |
 
-Every builder also loads `production-standards` and `verification-before-completion`; fix tasks add
-`production-hardening` and `receiving-code-review`.
-One worker per **feature slice** (e.g. `core-ask`, `ui-ask`, `core-triage`): slices own disjoint paths, so two
-CORE or UI workers can run at once. Claude Pro budget: at most LEAD + one more Claude seat at a time — run
-REVIEWER-CODE when CORE is idle, or let it fall back to Neon max.
+Only Claude Code (Opus 5.5) and Antigravity (Gemini 4 Neon, Gemini 4 Hydrogen) are used; no OpenCode,
+Sonnet, Kimi or Muse. Every builder also loads `production-standards` and `verification-before-completion`;
+fix tasks add `production-hardening` and `receiving-code-review`.
+One worker per **feature slice**: slices own disjoint paths, so two builders can run at once.
+Concurrency: Claude = LEAD + 1 Opus worker (REVIEWER-CODE / REVIEWER-SEC / OUTSIDER, one at a time) ·
+Antigravity ≤ 4. Waves: Frame/Design = DESIGN + DATA + UI-2 · Build = CORE + DATA + UI + UI-2, then QA
+replaces UI-2 · Prove = CORE + UI + QA (fix tasks).
 
-### Model names for `worker-start` (verify once: `/model` in agy and Claude, `opencode models`)
+### Model names for `worker-start` (verify once: `/model` in agy and Claude)
 ```
 --agent claude       --model opus    --effort max      # Claude Opus 5.5
---agent claude       --model sonnet  --effort max      # Claude Sonnet 5.5
---agent antigravity  --model "Gemini 4 Neon"      --effort max | xhigh
---agent antigravity  --model "Gemini 4 Hydrogen"  --effort xhigh
---agent opencode     --model opencode-go/kimi-k3.1-pro
---agent opencode     --model <provider>/<muse-wonder id>   # copy the exact id from `opencode models`
+--agent antigravity  --model "Gemini 4 Neon (XHigh)"        # effort is part of the model id; Neon has no max
+--agent antigravity  --model "Gemini 4 Hydrogen (XHigh)"
 ```
-OpenCode serves two models here (Kimi for DATA/QA, Muse for REVIEWER-SEC/OUTSIDER), so its workers get
-`--model`. A name or effort is rejected → start without it, log it in STATUS.md "Model switches", fix
-model-routing.md.
+A name or effort is rejected → start without it, log it in STATUS.md "Model switches", fix model-routing.md.
 
 ### Quota pools
-Claude Code (Opus, Sonnet) · Antigravity Gemini (Neon, Hydrogen — may share one quota) · OpenCode (Kimi, Muse —
-check which plan or provider each comes from). **Out of quota → Gemini 4 Neon** (xhigh to build, max to design
-and review); if Neon is out too, take the next rung — it is in another pool.
+**Human rule: any Claude limit hit → Gemini 4 Neon (XHigh)** (LEAD and every Opus seat); **when the limit resets,
+switch back to Claude Opus 5.5 max** for LEAD and every Opus seat (see model-routing.md rule 0).
+Claude Code (Opus) · Antigravity Gemini (Neon, Hydrogen — may share one quota). **Out of quota → Gemini 4 Neon
+xhigh**; if Neon is out too → Gemini 4 Hydrogen xhigh → Claude Opus 5.5 (only when the Claude slot is free).
+LEAD logs every `LIMIT HIT`, keeps Neon max (DESIGN) tasks short, batches reviews per wave when Opus runs low,
+and queues work rather than over-booking either quota.
 
 ### Review independence
-A checker never shares the author's model family: Anthropic (Opus, Sonnet) · Google (Neon, Hydrogen) · Meta
-(Muse Wonder) · Moonshot (Kimi). Claude-built code (CORE) → security by Muse; Gemini-built UI → code review by
-Opus; hallway test and dry run by an OUTSIDER of another family; the eval judge is a different family than the
-generator. A fallback that puts a checker in the author's family → LEAD adds a second checker from another
-family and logs it in STATUS.md. **Never use Kimi K3.1 Pro for security review or red teaming.**
+A checker never shares the author's model family: Anthropic (Opus) · Google (Neon, Hydrogen). All review of
+Gemini-written code is done by Opus; LEAD-written code (contracts, core) is security-checked by Neon; the
+OUTSIDER hallway test and dry run are Claude because the UI and docs are Gemini-written. A fallback that puts a
+checker in the author's family → LEAD adds a second checker from the other family and logs it in STATUS.md.
 
 ## 3. Skills — where they live and how to load them
 

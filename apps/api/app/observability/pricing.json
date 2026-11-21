@@ -1,0 +1,14 @@
+{
+  "source": "https://www.anthropic.com/pricing (estimated rate card; verify before production budgeting)",
+  "checked": "2026-11-21",
+  "models": {
+    "claude-haiku-5-5": {
+      "input_per_1m": 1.0,
+      "output_per_1m": 5.0
+    },
+    "claude-3-5-haiku-20241022": {
+      "input_per_1m": 0.8,
+      "output_per_1m": 4.0
+    }
+  }
+}

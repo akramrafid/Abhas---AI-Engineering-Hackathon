@@ -1,0 +1,3145 @@
+{
+  "components": {
+    "schemas": {
+      "AdvisoryAction": {
+        "properties": {
+          "action": {
+            "maxLength": 200,
+            "title": "Action",
+            "type": "string"
+          },
+          "when": {
+            "examples": [
+              "this week"
+            ],
+            "maxLength": 60,
+            "title": "When",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "when"
+        ],
+        "title": "AdvisoryAction",
+        "type": "object"
+      },
+      "AdvisoryRequest": {
+        "properties": {
+          "horizon": {
+            "default": 3,
+            "description": "Weeks ahead of the origin week (1–4)",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "language": {
+            "default": "en",
+            "enum": [
+              "en",
+              "bn"
+            ],
+            "title": "Language",
+            "type": "string"
+          },
+          "origin_week": {
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "origin_week"
+        ],
+        "title": "AdvisoryRequest",
+        "type": "object"
+      },
+      "AdvisoryResponse": {
+        "properties": {
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/AdvisoryAction"
+            },
+            "maxItems": 5,
+            "title": "Actions",
+            "type": "array"
+          },
+          "cached": {
+            "title": "Cached",
+            "type": "boolean"
+          },
+          "headline": {
+            "maxLength": 160,
+            "title": "Headline",
+            "type": "string"
+          },
+          "horizon": {
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "language": {
+            "enum": [
+              "en",
+              "bn"
+            ],
+            "title": "Language",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "numbers_validated": {
+            "description": "Every number in the text appears in the forecast input",
+            "title": "Numbers Validated",
+            "type": "boolean"
+          },
+          "origin_week": {
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "template",
+              "llm"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 800,
+            "title": "Summary",
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "origin_week",
+          "horizon",
+          "language",
+          "tier",
+          "headline",
+          "summary",
+          "actions",
+          "source",
+          "cached",
+          "numbers_validated"
+        ],
+        "title": "AdvisoryResponse",
+        "type": "object"
+      },
+      "CallStats": {
+        "properties": {
+          "cache_hits": {
+            "minimum": 0.0,
+            "title": "Cache Hits",
+            "type": "integer"
+          },
+          "calls_today": {
+            "minimum": 0.0,
+            "title": "Calls Today",
+            "type": "integer"
+          },
+          "calls_total": {
+            "minimum": 0.0,
+            "title": "Calls Total",
+            "type": "integer"
+          },
+          "errors": {
+            "minimum": 0.0,
+            "title": "Errors",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calls_today",
+          "calls_total",
+          "cache_hits",
+          "errors"
+        ],
+        "title": "CallStats",
+        "type": "object"
+      },
+      "CityWeatherStatus": {
+        "properties": {
+          "cache_age_hours": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cache Age Hours"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "last_fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Fetched At"
+          },
+          "latitude": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude",
+            "type": "number"
+          },
+          "longitude": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude",
+            "type": "number"
+          },
+          "source": {
+            "enum": [
+              "dataset",
+              "live",
+              "cache",
+              "climatology"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "latitude",
+          "longitude",
+          "source"
+        ],
+        "title": "CityWeatherStatus",
+        "type": "object"
+      },
+      "ConfusionMatrix": {
+        "properties": {
+          "critical_recall": {
+            "description": "Actual Critical predicted High or Critical",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Critical Recall",
+            "type": "number"
+          },
+          "labels": {
+            "items": {
+              "enum": [
+                "Low",
+                "Medium",
+                "High",
+                "Critical"
+              ],
+              "type": "string"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "macro_f1": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Macro F1",
+            "type": "number"
+          },
+          "matrix": {
+            "description": "Rows = actual tier, columns = predicted tier",
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "title": "Matrix",
+            "type": "array"
+          },
+          "within_one_tier": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Within One Tier",
+            "type": "number"
+          }
+        },
+        "required": [
+          "labels",
+          "matrix",
+          "within_one_tier",
+          "critical_recall",
+          "macro_f1"
+        ],
+        "title": "ConfusionMatrix",
+        "type": "object"
+      },
+      "CoverageRow": {
+        "properties": {
+          "coverage_80": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Coverage 80",
+            "type": "number"
+          },
+          "horizon": {
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "period": {
+            "title": "Period",
+            "type": "string"
+          }
+        },
+        "required": [
+          "horizon",
+          "period",
+          "coverage_80"
+        ],
+        "title": "CoverageRow",
+        "type": "object"
+      },
+      "Driver": {
+        "properties": {
+          "direction": {
+            "enum": [
+              "up",
+              "down"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "effect_pct": {
+            "description": "Multiplicative effect on expected cases, in percent (+60 = ×1.6)",
+            "title": "Effect Pct",
+            "type": "number"
+          },
+          "key": {
+            "enum": [
+              "rain_2_4w",
+              "recent_rain",
+              "heat",
+              "humidity",
+              "water_logging",
+              "crowding",
+              "sanitation",
+              "season"
+            ],
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "examples": [
+              "Rain 2–4 weeks ago"
+            ],
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "effect_pct",
+          "direction"
+        ],
+        "title": "Driver",
+        "type": "object"
+      },
+      "FieldError": {
+        "properties": {
+          "field": {
+            "description": "Dotted path of the offending field, e.g. body.ward_ids.0",
+            "title": "Field",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "message"
+        ],
+        "title": "FieldError",
+        "type": "object"
+      },
+      "ForecastRequest": {
+        "properties": {
+          "horizons": {
+            "default": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "items": {
+              "description": "Weeks ahead of the origin week (1–4)",
+              "maximum": 4.0,
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Horizons",
+            "type": "array"
+          },
+          "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29 in dataset mode",
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "source": {
+            "default": "dataset",
+            "enum": [
+              "dataset",
+              "live"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "ward_ids": {
+            "items": {
+              "examples": [
+                "DSCC_Ward_07"
+              ],
+              "maxLength": 32,
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
+              "type": "string"
+            },
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Ward Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ward_ids",
+          "origin_week"
+        ],
+        "title": "ForecastRequest",
+        "type": "object"
+      },
+      "ForecastResponse": {
+        "properties": {
+          "cached": {
+            "title": "Cached",
+            "type": "boolean"
+          },
+          "forecasts": {
+            "items": {
+              "$ref": "#/components/schemas/WardForecast"
+            },
+            "title": "Forecasts",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "origin_week": {
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "dataset",
+              "live"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "weather_source": {
+            "description": "Where the weather actually came from",
+            "enum": [
+              "dataset",
+              "live",
+              "cache",
+              "climatology"
+            ],
+            "title": "Weather Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin_week",
+          "source",
+          "weather_source",
+          "model_version",
+          "generated_at",
+          "cached",
+          "forecasts"
+        ],
+        "title": "ForecastResponse",
+        "type": "object"
+      },
+      "HeatmapCell": {
+        "properties": {
+          "expected_cases": {
+            "minimum": 0.0,
+            "title": "Expected Cases",
+            "type": "number"
+          },
+          "horizon": {
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "risk_score": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Risk Score",
+            "type": "integer"
+          },
+          "target_week": {
+            "format": "date",
+            "title": "Target Week",
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "horizon",
+          "target_week",
+          "tier",
+          "expected_cases",
+          "risk_score"
+        ],
+        "title": "HeatmapCell",
+        "type": "object"
+      },
+      "HeatmapResponse": {
+        "properties": {
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/HeatmapCell"
+            },
+            "title": "Cells",
+            "type": "array"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "horizons": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Horizons",
+            "type": "array"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "origin_week": {
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "dataset",
+              "live"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "ward_ids": {
+            "description": "Row order, sorted by peak risk then ward_id",
+            "items": {
+              "examples": [
+                "DSCC_Ward_07"
+              ],
+              "maxLength": 32,
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
+              "type": "string"
+            },
+            "title": "Ward Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "city",
+          "origin_week",
+          "source",
+          "model_version",
+          "ward_ids",
+          "horizons",
+          "cells"
+        ],
+        "title": "HeatmapResponse",
+        "type": "object"
+      },
+      "HorizonForecast": {
+        "properties": {
+          "drivers": {
+            "description": "Top drivers by absolute effect",
+            "items": {
+              "$ref": "#/components/schemas/Driver"
+            },
+            "maxItems": 4,
+            "title": "Drivers",
+            "type": "array"
+          },
+          "expected_cases": {
+            "minimum": 0.0,
+            "title": "Expected Cases",
+            "type": "number"
+          },
+          "horizon": {
+            "description": "Weeks ahead of the origin week (1–4)",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "p10": {
+            "description": "Lower edge of the 80 % band",
+            "minimum": 0.0,
+            "title": "P10",
+            "type": "number"
+          },
+          "p90": {
+            "description": "Upper edge of the 80 % band (≥ expected_cases)",
+            "minimum": 0.0,
+            "title": "P90",
+            "type": "number"
+          },
+          "risk_score": {
+            "description": "P(cases ≥ High cut-off) × 100",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Risk Score",
+            "type": "integer"
+          },
+          "target_week": {
+            "description": "Monday of the forecast week = origin_week + horizon weeks",
+            "format": "date",
+            "title": "Target Week",
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "tier_escalated": {
+            "description": "True when P90 exceeded the ward's epidemic threshold (+1 tier)",
+            "title": "Tier Escalated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "horizon",
+          "target_week",
+          "expected_cases",
+          "p10",
+          "p90",
+          "risk_score",
+          "tier",
+          "tier_escalated",
+          "drivers"
+        ],
+        "title": "HorizonForecast",
+        "type": "object"
+      },
+      "LLMStats": {
+        "properties": {
+          "budget_usd_per_day": {
+            "minimum": 0.0,
+            "title": "Budget Usd Per Day",
+            "type": "number"
+          },
+          "cache_hits": {
+            "minimum": 0.0,
+            "title": "Cache Hits",
+            "type": "integer"
+          },
+          "calls_today": {
+            "minimum": 0.0,
+            "title": "Calls Today",
+            "type": "integer"
+          },
+          "calls_total": {
+            "minimum": 0.0,
+            "title": "Calls Total",
+            "type": "integer"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "errors": {
+            "minimum": 0.0,
+            "title": "Errors",
+            "type": "integer"
+          },
+          "spend_usd_today": {
+            "minimum": 0.0,
+            "title": "Spend Usd Today",
+            "type": "number"
+          }
+        },
+        "required": [
+          "calls_today",
+          "calls_total",
+          "cache_hits",
+          "errors",
+          "spend_usd_today",
+          "budget_usd_per_day",
+          "enabled"
+        ],
+        "title": "LLMStats",
+        "type": "object"
+      },
+      "LagCorrelation": {
+        "properties": {
+          "dataset_corr": {
+            "description": "Same statistic pooled over all 60 wards",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Dataset Corr",
+            "type": "number"
+          },
+          "lag_weeks": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Lag Weeks",
+            "type": "integer"
+          },
+          "ward_corr": {
+            "description": "Ward × ISO-week-demeaned rain (lagged) vs demeaned cases",
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Ward Corr",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lag_weeks",
+          "ward_corr",
+          "dataset_corr"
+        ],
+        "title": "LagCorrelation",
+        "type": "object"
+      },
+      "LagPoint": {
+        "properties": {
+          "dengue_cases": {
+            "minimum": 0.0,
+            "title": "Dengue Cases",
+            "type": "integer"
+          },
+          "rainfall_mm": {
+            "description": "Observed rain in this week (the UI shifts it by the chosen lag)",
+            "minimum": 0.0,
+            "title": "Rainfall Mm",
+            "type": "number"
+          },
+          "week": {
+            "format": "date",
+            "title": "Week",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "rainfall_mm",
+          "dengue_cases"
+        ],
+        "title": "LagPoint",
+        "type": "object"
+      },
+      "LagResponse": {
+        "properties": {
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "correlations": {
+            "items": {
+              "$ref": "#/components/schemas/LagCorrelation"
+            },
+            "title": "Correlations",
+            "type": "array"
+          },
+          "max_lag": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Max Lag",
+            "type": "integer"
+          },
+          "peak_lag_dataset": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Peak Lag Dataset",
+            "type": "integer"
+          },
+          "peak_lag_ward": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Peak Lag Ward",
+            "type": "integer"
+          },
+          "series": {
+            "description": "Last `weeks` weeks for the ward, date-sorted",
+            "items": {
+              "$ref": "#/components/schemas/LagPoint"
+            },
+            "title": "Series",
+            "type": "array"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "city",
+          "max_lag",
+          "peak_lag_ward",
+          "peak_lag_dataset",
+          "correlations",
+          "series"
+        ],
+        "title": "LagResponse",
+        "type": "object"
+      },
+      "MetricRow": {
+        "properties": {
+          "horizon": {
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "mae": {
+            "minimum": 0.0,
+            "title": "Mae",
+            "type": "number"
+          },
+          "model": {
+            "enum": [
+              "lightgbm",
+              "lightgbm_no_weather",
+              "negbin_glm",
+              "climatology",
+              "seasonal_naive",
+              "persistence"
+            ],
+            "title": "Model",
+            "type": "string"
+          },
+          "n": {
+            "description": "Ward-weeks scored",
+            "minimum": 0.0,
+            "title": "N",
+            "type": "integer"
+          },
+          "period": {
+            "description": "Test fold year (2019–2022), 'tune_2023' or 'holdout_2024_2025'",
+            "examples": [
+              "2021",
+              "holdout_2024_2025"
+            ],
+            "title": "Period",
+            "type": "string"
+          },
+          "poisson_deviance": {
+            "minimum": 0.0,
+            "title": "Poisson Deviance",
+            "type": "number"
+          },
+          "rmse": {
+            "minimum": 0.0,
+            "title": "Rmse",
+            "type": "number"
+          }
+        },
+        "required": [
+          "model",
+          "horizon",
+          "period",
+          "mae",
+          "rmse",
+          "poisson_deviance",
+          "n"
+        ],
+        "title": "MetricRow",
+        "type": "object"
+      },
+      "OpsResponse": {
+        "properties": {
+          "est_monthly_cost_usd": {
+            "description": "Estimated monthly cost for one city office",
+            "minimum": 0.0,
+            "title": "Est Monthly Cost Usd",
+            "type": "number"
+          },
+          "llm": {
+            "$ref": "#/components/schemas/LLMStats"
+          },
+          "model_loads": {
+            "description": "Must stay 1: the model is loaded once at startup",
+            "minimum": 0.0,
+            "title": "Model Loads",
+            "type": "integer"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "predictions": {
+            "$ref": "#/components/schemas/PredictionStats"
+          },
+          "uptime_s": {
+            "minimum": 0.0,
+            "title": "Uptime S",
+            "type": "number"
+          },
+          "weather": {
+            "$ref": "#/components/schemas/CallStats"
+          }
+        },
+        "required": [
+          "model_version",
+          "model_loads",
+          "uptime_s",
+          "predictions",
+          "weather",
+          "llm",
+          "est_monthly_cost_usd"
+        ],
+        "title": "OpsResponse",
+        "type": "object"
+      },
+      "PredictionStats": {
+        "properties": {
+          "cache_hit_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Cache Hit Rate",
+            "type": "number"
+          },
+          "cache_hits": {
+            "minimum": 0.0,
+            "title": "Cache Hits",
+            "type": "integer"
+          },
+          "p50_ms": {
+            "minimum": 0.0,
+            "title": "P50 Ms",
+            "type": "number"
+          },
+          "p95_ms": {
+            "description": "In-process inference latency per ward",
+            "minimum": 0.0,
+            "title": "P95 Ms",
+            "type": "number"
+          },
+          "requests": {
+            "minimum": 0.0,
+            "title": "Requests",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "requests",
+          "cache_hits",
+          "cache_hit_rate",
+          "p50_ms",
+          "p95_ms"
+        ],
+        "title": "PredictionStats",
+        "type": "object"
+      },
+      "Problem": {
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "errors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/FieldError"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errors"
+          },
+          "instance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instance"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "description": "URI identifying the problem type",
+            "examples": [
+              "https://abhas.dev/problems/unknown-ward"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "title": "Problem",
+        "type": "object"
+      },
+      "ScenarioRequest": {
+        "properties": {
+          "horizons": {
+            "default": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "items": {
+              "description": "Weeks ahead of the origin week (1–4)",
+              "maximum": 4.0,
+              "minimum": 1.0,
+              "type": "integer"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Horizons",
+            "type": "array"
+          },
+          "origin_week": {
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          },
+          "weather": {
+            "$ref": "#/components/schemas/WeatherOverride"
+          }
+        },
+        "required": [
+          "ward_id",
+          "origin_week",
+          "weather"
+        ],
+        "title": "ScenarioRequest",
+        "type": "object"
+      },
+      "ScenarioResponse": {
+        "properties": {
+          "baseline": {
+            "items": {
+              "$ref": "#/components/schemas/HorizonForecast"
+            },
+            "title": "Baseline",
+            "type": "array"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "origin_week": {
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "scenario": {
+            "items": {
+              "$ref": "#/components/schemas/HorizonForecast"
+            },
+            "title": "Scenario",
+            "type": "array"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          },
+          "weather": {
+            "$ref": "#/components/schemas/WeatherOverride"
+          }
+        },
+        "required": [
+          "ward_id",
+          "origin_week",
+          "model_version",
+          "weather",
+          "baseline",
+          "scenario"
+        ],
+        "title": "ScenarioResponse",
+        "type": "object"
+      },
+      "ValidationResponse": {
+        "properties": {
+          "confusion": {
+            "$ref": "#/components/schemas/ConfusionMatrix"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageRow"
+            },
+            "title": "Coverage",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "holdout_locked_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "SHA-256 of the locked hold-out file",
+            "title": "Holdout Locked Sha256"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/MetricRow"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "split": {
+            "description": "Human description of the chronological split",
+            "title": "Split",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_version",
+          "generated_at",
+          "split",
+          "metrics",
+          "coverage",
+          "confusion"
+        ],
+        "title": "ValidationResponse",
+        "type": "object"
+      },
+      "Ward": {
+        "properties": {
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "population_density_sqkm": {
+            "minimum": 0.0,
+            "title": "Population Density Sqkm",
+            "type": "number"
+          },
+          "sanitation_score": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Sanitation Score",
+            "type": "number"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          },
+          "water_logging_risk_index": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Water Logging Risk Index",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ward_id",
+          "city",
+          "population_density_sqkm",
+          "water_logging_risk_index",
+          "sanitation_score"
+        ],
+        "title": "Ward",
+        "type": "object"
+      },
+      "WardForecast": {
+        "properties": {
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "horizons": {
+            "items": {
+              "$ref": "#/components/schemas/HorizonForecast"
+            },
+            "title": "Horizons",
+            "type": "array"
+          },
+          "peak_tier": {
+            "description": "Highest tier across the requested horizons",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Peak Tier",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "city",
+          "peak_tier",
+          "horizons"
+        ],
+        "title": "WardForecast",
+        "type": "object"
+      },
+      "WardHistory": {
+        "properties": {
+          "ward": {
+            "$ref": "#/components/schemas/Ward"
+          },
+          "weeks": {
+            "description": "Date-sorted weekly rows, inclusive range",
+            "items": {
+              "$ref": "#/components/schemas/WeekObservation"
+            },
+            "title": "Weeks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ward",
+          "weeks"
+        ],
+        "title": "WardHistory",
+        "type": "object"
+      },
+      "WardList": {
+        "properties": {
+          "cities": {
+            "items": {
+              "enum": [
+                "Dhaka North",
+                "Dhaka South",
+                "Chattogram",
+                "Gazipur",
+                "Narayanganj"
+              ],
+              "type": "string"
+            },
+            "title": "Cities",
+            "type": "array"
+          },
+          "data_end": {
+            "description": "Last observed week in the dataset (Monday)",
+            "format": "date",
+            "title": "Data End",
+            "type": "string"
+          },
+          "data_start": {
+            "description": "First week in the dataset (Monday)",
+            "format": "date",
+            "title": "Data Start",
+            "type": "string"
+          },
+          "first_forecast_origin": {
+            "description": "Earliest origin week with all 0–8 week lags (Monday)",
+            "format": "date",
+            "title": "First Forecast Origin",
+            "type": "string"
+          },
+          "wards": {
+            "items": {
+              "$ref": "#/components/schemas/Ward"
+            },
+            "title": "Wards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "wards",
+          "cities",
+          "data_start",
+          "data_end",
+          "first_forecast_origin"
+        ],
+        "title": "WardList",
+        "type": "object"
+      },
+      "WeatherOverride": {
+        "description": "What-if weather for the origin week (this week). Omitted fields keep the observed value.",
+        "properties": {
+          "avg_temp_c": {
+            "anyOf": [
+              {
+                "maximum": 45.0,
+                "minimum": 5.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Temp C"
+          },
+          "rainfall_mm": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rainfall Mm"
+          },
+          "relative_humidity_pct": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative Humidity Pct"
+          }
+        },
+        "title": "WeatherOverride",
+        "type": "object"
+      },
+      "WeatherStatus": {
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "bias_check_passed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Open-Meteo vs dataset historical check",
+            "title": "Bias Check Passed"
+          },
+          "calls_today": {
+            "minimum": 0.0,
+            "title": "Calls Today",
+            "type": "integer"
+          },
+          "cities": {
+            "items": {
+              "$ref": "#/components/schemas/CityWeatherStatus"
+            },
+            "title": "Cities",
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "dataset",
+              "live"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "provider": {
+            "examples": [
+              "Open-Meteo (CC BY 4.0)"
+            ],
+            "title": "Provider",
+            "type": "string"
+          },
+          "ttl_hours": {
+            "minimum": 0.0,
+            "title": "Ttl Hours",
+            "type": "number"
+          }
+        },
+        "required": [
+          "mode",
+          "provider",
+          "attribution",
+          "ttl_hours",
+          "calls_today",
+          "cities"
+        ],
+        "title": "WeatherStatus",
+        "type": "object"
+      },
+      "WeekObservation": {
+        "properties": {
+          "avg_temp_c": {
+            "title": "Avg Temp C",
+            "type": "number"
+          },
+          "dengue_cases": {
+            "minimum": 0.0,
+            "title": "Dengue Cases",
+            "type": "integer"
+          },
+          "max_temp_c": {
+            "title": "Max Temp C",
+            "type": "number"
+          },
+          "min_temp_c": {
+            "title": "Min Temp C",
+            "type": "number"
+          },
+          "rainfall_mm": {
+            "minimum": 0.0,
+            "title": "Rainfall Mm",
+            "type": "number"
+          },
+          "relative_humidity_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Relative Humidity Pct",
+            "type": "number"
+          },
+          "week": {
+            "format": "date",
+            "title": "Week",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week",
+          "avg_temp_c",
+          "max_temp_c",
+          "min_temp_c",
+          "rainfall_mm",
+          "relative_humidity_pct",
+          "dengue_cases"
+        ],
+        "title": "WeekObservation",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Ward-level dengue early warning: lag features, LightGBM forecasts, tiers and drivers.",
+    "title": "Abhas API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/advisory": {
+      "post": {
+        "operationId": "advisory_api_v1_advisory_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdvisoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdvisoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Short officer advisory for one ward",
+        "tags": [
+          "advisory"
+        ]
+      }
+    },
+    "/api/v1/forecast": {
+      "post": {
+        "operationId": "forecast_api_v1_forecast_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForecastRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Forecast cases, band, tier and drivers",
+        "tags": [
+          "forecast"
+        ]
+      }
+    },
+    "/api/v1/heatmap": {
+      "get": {
+        "operationId": "heatmap_api_v1_heatmap_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "city",
+            "required": true,
+            "schema": {
+              "enum": [
+                "Dhaka North",
+                "Dhaka South",
+                "Chattogram",
+                "Gazipur",
+                "Narayanganj"
+              ],
+              "title": "City",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "origin_week",
+            "required": true,
+            "schema": {
+              "examples": [
+                "2025-08-04"
+              ],
+              "format": "date",
+              "title": "Origin Week",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "dataset",
+              "enum": [
+                "dataset",
+                "live"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Tier per ward × horizon for a city",
+        "tags": [
+          "heatmap"
+        ]
+      }
+    },
+    "/api/v1/ops": {
+      "get": {
+        "operationId": "ops_api_v1_ops_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-ops-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Ops-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Cost, cache and call counters",
+        "tags": [
+          "ops"
+        ]
+      }
+    },
+    "/api/v1/scenario": {
+      "post": {
+        "operationId": "scenario_api_v1_scenario_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "What-if weather for the origin week",
+        "tags": [
+          "forecast"
+        ]
+      }
+    },
+    "/api/v1/validation": {
+      "get": {
+        "operationId": "validation_api_v1_validation_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Backtest metrics vs baselines",
+        "tags": [
+          "validation"
+        ]
+      }
+    },
+    "/api/v1/wards": {
+      "get": {
+        "operationId": "list_wards_api_v1_wards_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Dhaka North",
+                    "Dhaka South",
+                    "Chattogram",
+                    "Gazipur",
+                    "Narayanganj"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "City"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WardList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "List wards (optionally for one city)",
+        "tags": [
+          "wards"
+        ]
+      }
+    },
+    "/api/v1/wards/{ward_id}/history": {
+      "get": {
+        "operationId": "ward_history_api_v1_wards__ward_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ward_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
+              "title": "Ward Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WardHistory"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Weekly observations for one ward",
+        "tags": [
+          "wards"
+        ]
+      }
+    },
+    "/api/v1/wards/{ward_id}/lags": {
+      "get": {
+        "operationId": "ward_lags_api_v1_wards__ward_id__lags_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ward_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
+              "title": "Ward Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "weeks",
+            "required": false,
+            "schema": {
+              "default": 156,
+              "maximum": 522,
+              "minimum": 26,
+              "title": "Weeks",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LagResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Rainfall lag 0–8 evidence for one ward",
+        "tags": [
+          "lags"
+        ]
+      }
+    },
+    "/api/v1/weather/status": {
+      "get": {
+        "operationId": "weather_status_api_v1_weather_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Weather source, cache age and call count",
+        "tags": [
+          "weather"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Healthz Healthz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Liveness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Readyz Readyz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Readiness: model loaded and data seeded",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}
