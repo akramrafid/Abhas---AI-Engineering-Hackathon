@@ -1,7 +1,7 @@
 # Abhas Eval Report (heldout)
 
-- **Timestamp:** 2026-11-21T20:35:17+00:00 · **Commit:** `bc8db76` · **Model:** `abhas-lgbm-1.1.2` · **Judge:** `-`
-- **Golden pass rate:** 83.33% (40/48, threshold 80%) · **p95 inference:** 0.60 ms/ward
+- **Timestamp:** 2026-11-21T20:54:59+00:00 · **Commit:** `c5200f4` · **Model:** `abhas-lgbm-1.1.2` · **Judge:** `-`
+- **Golden pass rate:** 83.33% (40/48, threshold 80%) · **p95 inference:** 0.59 ms/ward
 - **Global hold-out:** coverage_80=0.845 · within_one_tier=0.960 · critical_recall=0.932 · macro_f1=0.509 · floors_passed=True
 
 ## Global Metrics by Horizon
