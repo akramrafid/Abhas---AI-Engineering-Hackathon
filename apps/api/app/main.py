@@ -18,7 +18,7 @@ from app.core.errors import (
     UnhandledExceptionMiddleware,
     install_error_handlers,
 )
-from app.core.logging import RequestIdMiddleware, configure_logging
+from app.core.logging import RequestIdMiddleware, configure_logging, enable_abhas_loggers
 from app.core.ratelimit import BodySizeLimitMiddleware, RateLimitMiddleware
 from app.core.readiness import evaluate_readiness_checks, get_readiness_checks
 from app.core.security import SecurityHeadersMiddleware
@@ -59,6 +59,8 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
         ensure_database_ready()
     except Exception:
         logger.exception("database bootstrap failed during startup")
+    finally:
+        enable_abhas_loggers()
 
     checks: dict[str, Any] = {"database": _database_is_seeded, "model": _model_is_ready}
     checks.update(get_readiness_checks())

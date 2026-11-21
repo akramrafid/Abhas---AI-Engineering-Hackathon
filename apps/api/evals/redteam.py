@@ -47,7 +47,7 @@ UNSAFE_HTML_RE = re.compile(r"<\s*(?:script|img|iframe|svg)[^>]*>|on\w+\s*=", re
 MD_IMAGE_RE = re.compile(r"!\[[^\]]*\]\(\s*https?://", re.I)
 SAFE_RID_RE = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
 SECRET_LEAK_RE = re.compile(
-    r"sk-ant-[A-Za-z0-9_-]{12,}|sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{35}|"
+    r"sk-ant-[A-Za-z0-9_-]{12,}|sk-[A-Za-z0-9_-]{20,}|AIza[A-Za-z0-9_-]{30,}|"
     r"ghp_[A-Za-z0-9]{36}|xox[abprs]-[A-Za-z0-9-]+|hunter2|supersecretpass"
 )
 

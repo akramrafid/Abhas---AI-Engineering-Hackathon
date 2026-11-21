@@ -29,4 +29,4 @@ COPY --from=deps --chown=node:node /app/apps/web/node_modules ./node_modules
 USER node
 EXPOSE 3000
 
-CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
+CMD ["./node_modules/.bin/next", "start", "-H", "0.0.0.0", "-p", "3000"]

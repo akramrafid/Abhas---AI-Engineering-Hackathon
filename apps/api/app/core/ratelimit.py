@@ -55,19 +55,23 @@ class BodySizeLimitMiddleware:
             return
 
         seen = 0
+        too_large = False
         response_started = False
 
         async def limited_receive() -> Message:
-            nonlocal seen
+            nonlocal seen, too_large
             msg = await receive()
             if msg["type"] == "http.request":
                 seen += len(msg.get("body", b""))
                 if seen > self.max_bytes:
+                    too_large = True
                     raise _BodyTooLarge
             return msg
 
         async def tracked_send(message: Message) -> None:
             nonlocal response_started
+            if too_large and not response_started:
+                return
             if message["type"] == "http.response.start":
                 response_started = True
             await send(message)
@@ -75,8 +79,9 @@ class BodySizeLimitMiddleware:
         try:
             await self.app(scope, limited_receive, tracked_send)
         except _BodyTooLarge:
-            if not response_started:
-                await self._reject(scope, receive, send)
+            pass
+        if too_large and not response_started:
+            await self._reject(scope, receive, send)
 
 
 class RateLimitMiddleware:

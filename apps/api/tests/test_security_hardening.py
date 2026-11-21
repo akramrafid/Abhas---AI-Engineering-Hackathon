@@ -556,3 +556,23 @@ def test_csv_formula_injection_sanitizer() -> None:
         assert sanitize_csv_cell(dangerous).startswith("'")
     assert sanitize_csv_cell("DSCC_Ward_07") == "DSCC_Ward_07"
     assert sanitize_csv_cell(42) == "42"
+
+
+def test_py_runner_reports_clear_api_port_in_use_error() -> None:
+    """scripts/py.mjs detects an occupied API port before launching uvicorn and prints API_PORT hint."""
+    import socket
+
+    py_script = REPO_ROOT / "scripts" / "py.mjs"
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as srv:
+        srv.bind(("127.0.0.1", 0))
+        srv.listen(1)
+        busy_port = srv.getsockname()[1]
+        proc = subprocess.run(
+            ["node", str(py_script), "-m", "app", "--port", str(busy_port), "--no-reload"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    assert proc.returncode != 0
+    assert str(busy_port) in proc.stderr
+    assert "API_PORT" in proc.stderr

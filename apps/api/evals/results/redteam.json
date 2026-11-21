@@ -1,11 +1,9 @@
 {
   "n": 30,
-  "passed": 29,
-  "failed": 1,
-  "pass_rate": 0.9667,
-  "high_failures": [
-    "RT-02"
-  ],
+  "passed": 30,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "high_failures": [],
   "by_owasp": {
     "A01:2025": "2/2",
     "A02:2025": "2/2",
@@ -16,7 +14,7 @@
     "LLM01": "2/2",
     "LLM02": "1/1",
     "LLM04": "1/1",
-    "LLM06": "4/5",
+    "LLM06": "5/5",
     "LLM07": "1/1",
     "LLM10": "2/2"
   },
@@ -34,10 +32,8 @@
       "owasp": "LLM06",
       "severity": "high",
       "title": "Chunked streaming 2 MB body abort (<=2 chunks)",
-      "pass": false,
-      "problems": [
-        "expected 413, got 400"
-      ]
+      "pass": true,
+      "problems": []
     },
     {
       "id": "RT-03",

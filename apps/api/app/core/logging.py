@@ -19,7 +19,7 @@ _PG_DSN_RE = re.compile(r"(postgres(?:ql)?://[^:/\s]+:)[^@\s]+(@)", re.IGNORECAS
 _SECRET_RE = re.compile(
     r"sk-ant-[A-Za-z0-9_-]{12,}"
     r"|sk-[A-Za-z0-9_-]{20,}"
-    r"|AIza[A-Za-z0-9_-]{35}"
+    r"|AIza[A-Za-z0-9_-]{30,}"
     r"|ghp_[A-Za-z0-9]{36}"
     r"|xox[abprs]-[A-Za-z0-9-]+"
     r"|AKIA[0-9A-Z]{16}"
@@ -58,6 +58,15 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(payload, ensure_ascii=False)
 
 
+def enable_abhas_loggers() -> None:
+    """Re-enable abhas.* loggers if Alembic's logging.config.fileConfig disabled existing loggers."""
+    root = logging.getLogger("abhas")
+    root.disabled = False
+    for name, obj in logging.root.manager.loggerDict.items():
+        if (name == "abhas" or name.startswith("abhas.")) and isinstance(obj, logging.Logger):
+            obj.disabled = False
+
+
 def configure_logging(level: str = "INFO") -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())
@@ -65,6 +74,7 @@ def configure_logging(level: str = "INFO") -> None:
     root.handlers[:] = [handler]
     root.setLevel(level)
     root.propagate = False
+    enable_abhas_loggers()
 
 
 class RequestIdMiddleware:
