@@ -30,6 +30,9 @@ export type ValidationResponse = components["schemas"]["ValidationResponse"];
 export type CallStats = components["schemas"]["CallStats"];
 export type PredictionStats = components["schemas"]["PredictionStats"];
 export type LLMStats = components["schemas"]["LLMStats"];
+export type AdvisoryAction = components["schemas"]["AdvisoryAction"];
+export type AdvisoryRequest = components["schemas"]["AdvisoryRequest"];
+export type AdvisoryResponse = components["schemas"]["AdvisoryResponse"];
 export type OpsResponse = components["schemas"]["OpsResponse"];
 export type CityWeatherStatus = components["schemas"]["CityWeatherStatus"];
 export type WeatherStatus = components["schemas"]["WeatherStatus"];
@@ -321,6 +324,18 @@ export function fetchWeatherStatus(signal?: AbortSignal): Promise<WeatherStatus>
 
 export function fetchOps(signal?: AbortSignal): Promise<OpsResponse> {
   return apiRequest<OpsResponse>("/api/v1/ops", { signal });
+}
+
+export function postAdvisory(
+  body: AdvisoryRequest,
+  signal?: AbortSignal,
+): Promise<AdvisoryResponse> {
+  return apiRequest<AdvisoryResponse>("/api/v1/advisory", {
+    method: "POST",
+    body,
+    signal,
+    timeoutMs: 25_000,
+  });
 }
 
 // --- Shared TanStack Query Hooks ---

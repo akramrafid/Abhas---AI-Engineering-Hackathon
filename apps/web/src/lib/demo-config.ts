@@ -47,24 +47,6 @@ export const DEFAULT_DATA_END = "2025-12-29";
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const MS_PER_WEEK = 7 * MS_PER_DAY;
 
-function parseIsoUtc(isoDate: string): number | null {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const ts = Date.UTC(year, month - 1, day);
-  return Number.isFinite(ts) ? ts : null;
-}
-
-function formatUtcIso(ts: number): string {
-  const d = new Date(ts);
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
 /**
  * Generate every Monday ISO date within [firstOrigin, dataEnd], newest first.
  */
