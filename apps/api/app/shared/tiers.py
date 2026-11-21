@@ -173,20 +173,20 @@ def calibrate_negbin_conformal(
     crit_mask = yt >= DEFAULT_TIER_CUTOFFS[2]
     high_mask = (yt >= DEFAULT_TIER_CUTOFFS[1]) & (~crit_mask)
     med_mask = (yt >= DEFAULT_TIER_CUTOFFS[0]) & (yt < DEFAULT_TIER_CUTOFFS[1])
-    active_mask = yt >= 1.0
+    low_mask = yt < DEFAULT_TIER_CUTOFFS[0]
 
     best_cal = HorizonCalibration(
         nb_r=round(nb_r, 4),
         use_sigma_conformal=True,
-        z_low=1.05,
-        z_high=2.30,
+        z_low=0.80,
+        z_high=2.80,
     )
     best_score = float("inf")
     fallback_cal = best_cal
     fallback_dist = float("inf")
 
-    for z_lo in (0.65, 0.75, 0.85, 0.95, 1.05, 1.15, 1.25, 1.35):
-        for z_hi in (1.5, 1.65, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8):
+    for z_lo in (0.75, 0.80, 0.85, 0.90, 0.95, 1.05):
+        for z_hi in (2.2, 2.4, 2.6, 2.8, 3.0):
             cal = HorizonCalibration(
                 nb_r=round(nb_r, 4),
                 use_sigma_conformal=True,
@@ -201,24 +201,21 @@ def calibrate_negbin_conformal(
                 fallback_dist = dist
                 fallback_cal = cal
             # Keep safe margin inside [0.75, 0.90] so hold-out stays squarely calibrated
-            if not (0.81 <= cov_all <= 0.875):
+            if not (0.81 <= cov_all <= 0.870):
                 continue
             cov_crit = float(np.mean(covered[crit_mask])) if np.any(crit_mask) else cov_all
             cov_high = float(np.mean(covered[high_mask])) if np.any(high_mask) else cov_all
             cov_med = float(np.mean(covered[med_mask])) if np.any(med_mask) else cov_all
-            cov_act = float(np.mean(covered[active_mask])) if np.any(active_mask) else cov_all
-            # Check tail balance on active counts (avoid pinching lower tail)
-            below_p10_act = float(np.mean(yt[active_mask] < p10[active_mask])) if np.any(active_mask) else 0.0
-            above_p90_act = float(np.mean(yt[active_mask] > p90[active_mask])) if np.any(active_mask) else 0.0
-            tail_imbalance = abs(below_p10_act - above_p90_act)
+            cov_low = float(np.mean(covered[low_mask])) if np.any(low_mask) else cov_all
 
+            # Right-skewed NegBin count distribution + asymmetric outbreak risk: protect upper
+            # surge tails (Critical & High) while keeping overall coverage squarely near 85.5%.
             score = (
-                abs(cov_all - target_coverage) * 2.0
-                + max(0.0, 0.86 - cov_crit) * 3.0
-                + max(0.0, 0.84 - cov_high) * 2.5
-                + max(0.0, 0.82 - cov_med) * 2.5
-                + max(0.0, 0.80 - cov_act) * 2.0
-                + tail_imbalance * 1.0
+                abs(cov_all - target_coverage) * 1.5
+                + max(0.0, 0.94 - cov_crit) * 4.0
+                + max(0.0, 0.92 - cov_high) * 2.5
+                + max(0.0, 0.80 - cov_med) * 2.5
+                + max(0.0, 0.80 - cov_low) * 1.0
             )
             if score < best_score:
                 best_score = score
@@ -252,8 +249,10 @@ def select_cost_sensitive_cutoffs(
     soft_cutoffs = DEFAULT_TIER_CUTOFFS
     soft_loss = float("inf")
 
-    for med in (2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0):
-        for high in (6.5, 7.0, 7.5, 8.0, 8.5):
+    # Under asymmetric 5x missed-Critical cost (ADR-0004), predicted High/Critical cut-offs
+    # never exceed the fixed actual High (8) / Critical (14) boundaries.
+    for med in (2.5, 2.75, 3.0, 3.25, 3.5):
+        for high in (6.5, 7.0, 7.5, 8.0):
             for crit in (11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0):
                 if not (med < high < crit):
                     continue

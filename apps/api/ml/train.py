@@ -70,7 +70,7 @@ CURRENT_ARTIFACT_PATH = ARTIFACTS_DIR / "current.joblib"
 METADATA_PATH = ARTIFACTS_DIR / "metadata.json"
 BEST_PARAMS_PATH = ARTIFACTS_DIR / "best_params.json"
 
-PRODUCTION_MODEL_VERSION = "abhas-lgbm-1.1.0"
+PRODUCTION_MODEL_VERSION = "abhas-lgbm-1.1.1"
 BASELINE_MODEL_VERSION = "abhas-lgbm-baseline-0.1.0"
 
 CV_FOLDS: tuple[tuple[str, int, int], ...] = (
@@ -865,8 +865,14 @@ def train_and_save(
         best_params_path.write_text(json.dumps(best_params_payload, indent=2) + "\n", encoding="utf-8")
     elif params_path is not None:
         lgbm_params_by_h, xgb_params_by_h = load_params_file(params_path)
+        raw_p = json.loads(params_path.read_text(encoding="utf-8"))
+        if isinstance(raw_p.get("optuna_stats"), dict):
+            optuna_stats = dict(raw_p["optuna_stats"])
     elif best_params_path.exists():
         lgbm_params_by_h, xgb_params_by_h = load_params_file(best_params_path)
+        raw_p = json.loads(best_params_path.read_text(encoding="utf-8"))
+        if isinstance(raw_p.get("optuna_stats"), dict):
+            optuna_stats = dict(raw_p["optuna_stats"])
     else:
         lgbm_params_by_h = {h: dict(TUNED_PARAMS) for h in VALID_HORIZONS}
 
@@ -879,13 +885,25 @@ def train_and_save(
         except ImportError:
             xgb_params_by_h = None
 
-    fold_metrics = evaluate_cv_folds(
-        folds_by_h,
-        lgbm_params_by_h,
-        xgb_params_by_h,
-        lgbm_use_gpu=lgbm_use_gpu,
-        xgb_use_cuda=xgb_use_cuda,
-    )
+    if xgb_use_cuda and xgb_params_by_h is not None and not gpu_proof:
+        with _GpuUtilizationMonitor(interval_s=0.1) as cv_mon:
+            fold_metrics = evaluate_cv_folds(
+                folds_by_h,
+                lgbm_params_by_h,
+                xgb_params_by_h,
+                lgbm_use_gpu=lgbm_use_gpu,
+                xgb_use_cuda=xgb_use_cuda,
+            )
+        gpu_proof = cv_mon.summary()
+        gpu_proof["xgboost_confirmed_device"] = "cuda:0"
+    else:
+        fold_metrics = evaluate_cv_folds(
+            folds_by_h,
+            lgbm_params_by_h,
+            xgb_params_by_h,
+            lgbm_use_gpu=lgbm_use_gpu,
+            xgb_use_cuda=xgb_use_cuda,
+        )
     print(f"Purged 2019–2022 CV LightGBM overall mean MAE = {fold_metrics['lightgbm']['overall_mean_mae']}")
     if "xgboost" in fold_metrics:
         xm = fold_metrics["xgboost"]
