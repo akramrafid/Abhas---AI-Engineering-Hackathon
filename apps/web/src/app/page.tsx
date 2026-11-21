@@ -1,18 +1,17 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { clsx } from "clsx";
-import { AbhasLogo } from "@/components/brand/AbhasLogo";
-import { BrandRibbon } from "@/components/brand/BrandRibbon";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { SelectionBar } from "@/components/dashboard/SelectionBar";
 import { Providers } from "@/components/Providers";
-import { ErrorBanner } from "@/components/ui/ErrorBanner";
-import { SelectField } from "@/components/ui/Select";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import { TabNav, type TabItem } from "@/components/ui/Tabs";
+import { AboutCostView } from "@/features/about/components/AboutCostView";
 import { HeatmapView } from "@/features/heatmap/components/HeatmapView";
 import { LagsPanel } from "@/features/lags/components/LagsPanel";
+import { PriorityListView } from "@/features/priority/components/PriorityListView";
 import { ScenarioPanel } from "@/features/scenario/components/ScenarioPanel";
 import { ValidationView } from "@/features/validation/components/ValidationView";
 import { WardForecastView } from "@/features/ward-risk/components/WardForecastView";
@@ -27,32 +26,42 @@ import {
   DEFAULT_FIRST_FORECAST_ORIGIN,
   DEMO_CONFIG,
   generateMondayWeeks,
+  isHorizonWindow,
   isValidMondayInRange,
   type HorizonWindow,
 } from "@/lib/demo-config";
-
-type DashboardTab = "ward-risk" | "lags" | "scenario" | "heatmap" | "validation";
-
-const DASHBOARD_TABS: readonly TabItem<DashboardTab>[] = [
-  { id: "ward-risk", label: "Ward Forecast", testId: "tab-ward-risk" },
-  { id: "lags", label: "Lags", testId: "tab-lags" },
-  { id: "scenario", label: "Scenario", testId: "tab-scenario" },
-  { id: "heatmap", label: "City Heatmap", testId: "tab-heatmap" },
-  { id: "validation", label: "Validation", testId: "tab-validation" },
-];
+import {
+  isDashboardTab,
+  isLang,
+  UI_COPY,
+  type DashboardTab,
+  type Lang,
+} from "@/lib/i18n";
 
 function DashboardWorkspace() {
   const searchParams = useSearchParams();
   const isDemoMode = searchParams.get("demo") === "1";
   const urlWardParam = searchParams.get("ward")?.trim() || null;
+  const urlOriginParam = searchParams.get("origin")?.trim() || null;
+  const urlWindowParam = searchParams.get("window")?.trim() || null;
+  const urlTabParam = searchParams.get("tab")?.trim() || null;
+  const urlLangParam = searchParams.get("lang")?.trim() || null;
 
-  const [activeTab, setActiveTab] = useState<DashboardTab>("ward-risk");
+  const [activeTab, setActiveTab] = useState<DashboardTab>(() =>
+    isDashboardTab(urlTabParam) ? urlTabParam : "ward-risk",
+  );
+  const [lang, setLang] = useState<Lang>(() =>
+    isLang(urlLangParam) ? urlLangParam : "en",
+  );
   const [cityOverride, setCityOverride] = useState<City | null>(null);
   const [wardOverride, setWardOverride] = useState<string | null>(null);
-  const [originWeekOverride, setOriginWeekOverride] = useState<string | null>(null);
-  const [windowKey, setWindowKey] = useState<HorizonWindow>(
-    isDemoMode ? DEMO_CONFIG.window : "2-4w",
+  const [originWeekOverride, setOriginWeekOverride] = useState<string | null>(
+    () => urlOriginParam,
   );
+  const [windowKey, setWindowKey] = useState<HorizonWindow>(() => {
+    if (isHorizonWindow(urlWindowParam)) return urlWindowParam;
+    return isDemoMode ? DEMO_CONFIG.window : "2-4w";
+  });
   const [dismissedUrlWard, setDismissedUrlWard] = useState(false);
   const [scenarioManualSelection, setScenarioManualSelection] = useState(false);
 
@@ -83,7 +92,6 @@ function DashboardWorkspace() {
   const unknownWardId =
     activeUrlWard && wardsData && !matchedUrlWard ? activeUrlWard : null;
 
-  // Determine selected city cleanly (derived during render, no cascading setState effects).
   const selectedCity: City = useMemo(() => {
     if (cityOverride && cities.includes(cityOverride)) return cityOverride;
     if (matchedUrlWard) return matchedUrlWard.city;
@@ -96,7 +104,6 @@ function DashboardWorkspace() {
     [allWards, selectedCity],
   );
 
-  // Determine selected ward cleanly.
   const selectedWardId: string = useMemo(() => {
     if (unknownWardId) return "";
     if (wardOverride && cityWards.some((w) => w.ward_id === wardOverride)) {
@@ -135,6 +142,39 @@ function DashboardWorkspace() {
     return mondayWeeks[0] ?? DEMO_CONFIG.originWeek;
   }, [originWeekOverride, firstOrigin, dataEnd, mondayWeeks]);
 
+  // Synchronize HTML lang attribute and shareable URL state (?ward=&origin=&window=&tab=&lang=).
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!wardsData) return;
+
+    const params = new URLSearchParams();
+    if (isDemoMode) params.set("demo", "1");
+    const effectiveWard = unknownWardId ?? selectedWardId;
+    if (effectiveWard) params.set("ward", effectiveWard);
+    if (selectedOriginWeek) params.set("origin", selectedOriginWeek);
+    params.set("window", windowKey);
+    params.set("tab", activeTab);
+    params.set("lang", lang);
+
+    const nextSearch = `?${params.toString()}`;
+    if (window.location.search !== nextSearch) {
+      window.history.replaceState(null, "", `${window.location.pathname}${nextSearch}`);
+    }
+  }, [
+    wardsData,
+    isDemoMode,
+    unknownWardId,
+    selectedWardId,
+    selectedOriginWeek,
+    windowKey,
+    activeTab,
+    lang,
+  ]);
+
   // In demo mode, ScenarioPanel uses the pinned dry (< 20 mm) non-Critical baseline (CR-2 / AC-7)
   // unless the officer manually overrides the selection while on the Scenario tab.
   const scenarioUsesDemoBaseline =
@@ -159,15 +199,23 @@ function DashboardWorkspace() {
   const cityWeatherSummary = weatherStatusQuery.data?.cities.find(
     (c) => c.city === selectedCity,
   );
-  const weatherBadgeText = isDemoMode
-    ? "Dataset mode (offline)"
-    : cityWeatherSummary?.source === "live"
-      ? "Live · Open-Meteo (city centroid)"
-      : cityWeatherSummary?.source === "cache"
-        ? "Cached weather"
-        : cityWeatherSummary?.source === "climatology"
-          ? "Climatology fallback"
-          : "Dataset mode (offline)";
+  const weatherSourceUsed = isDemoMode
+    ? "dataset"
+    : cityWeatherSummary?.source ?? "dataset";
+  const weatherBadgeText = UI_COPY[lang].weatherSource[weatherSourceUsed];
+
+  const tabs = useMemo<readonly TabItem<DashboardTab>[]>(() => {
+    const labels = UI_COPY[lang].tabs;
+    return [
+      { id: "ward-risk", label: labels["ward-risk"], testId: "tab-ward-risk" },
+      { id: "lags", label: labels.lags, testId: "tab-lags" },
+      { id: "scenario", label: labels.scenario, testId: "tab-scenario" },
+      { id: "heatmap", label: labels.heatmap, testId: "tab-heatmap" },
+      { id: "priority", label: labels.priority, testId: "tab-priority" },
+      { id: "validation", label: labels.validation, testId: "tab-validation" },
+      { id: "about", label: labels.about, testId: "tab-about" },
+    ];
+  }, [lang]);
 
   const handleResetUnknownWard = () => {
     setDismissedUrlWard(true);
@@ -185,86 +233,25 @@ function DashboardWorkspace() {
     }
   };
 
-  const cityOptions = useMemo(
-    () => cities.map((c) => ({ value: c, label: c })),
-    [cities],
-  );
-
-  const wardOptions = useMemo(() => {
-    if (unknownWardId) {
-      return [
-        { value: "", label: `Unknown ward (${unknownWardId})` },
-        ...cityWards.map((w) => ({ value: w.ward_id, label: w.ward_id })),
-      ];
-    }
-    return cityWards.map((w) => ({ value: w.ward_id, label: w.ward_id }));
-  }, [cityWards, unknownWardId]);
-
-  const weekOptions = useMemo(
-    () => mondayWeeks.map((w) => ({ value: w, label: `${w} (Mon)` })),
-    [mondayWeeks],
-  );
+  const showSelectionBar = activeTab !== "validation" && activeTab !== "about";
 
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink">
-      {/* Dark Ink Brand Header (sole surface carrying reverse logo with Lime cap) */}
-      <header className="relative overflow-hidden bg-ink text-white">
-        <BrandRibbon variant="strip" surface="ink" />
+      <DashboardHeader
+        selectedCity={selectedCity}
+        isDemoMode={isDemoMode}
+        weatherBadgeText={weatherBadgeText}
+        lang={lang}
+        onChangeLang={setLang}
+      />
 
-        <div className="relative z-10 mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <div className="flex flex-wrap items-center gap-4">
-            <AbhasLogo
-              variant="reverse"
-              size="sm"
-              showBangla
-              city={selectedCity}
-            />
-            <div className="border-l border-white/20 pl-3 sm:pl-4">
-              <h1 className="font-sans text-sm font-semibold text-white">
-                Ward-level dengue early warning
-              </h1>
-              <p className="hidden text-xs text-mist sm:block">
-                Rain today. Risk in three weeks. Act now.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {isDemoMode ? (
-              <span
-                data-testid="demo-mode-badge"
-                className="inline-flex items-center rounded-sm border border-white/25 bg-navy px-2.5 py-1 font-mono text-xs font-semibold text-white"
-              >
-                Demo mode · offline
-              </span>
-            ) : null}
-
-            <span
-              data-testid="weather-source-badge"
-              className="inline-flex items-center rounded-sm border border-white/20 bg-navy/80 px-2.5 py-1 font-mono text-xs text-mist"
-            >
-              {weatherBadgeText}
-            </span>
-
-            <Link
-              href="/brand"
-              data-testid="nav-brand-link"
-              className="inline-flex min-h-9 items-center rounded-md border border-white/25 bg-navy px-3 text-xs font-semibold text-white hover:bg-royal"
-            >
-              Brand System
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Primary View Tabs */}
       <nav
         aria-label="Dashboard views"
-        className="border-b border-mist bg-white"
+        className="no-print border-b border-mist bg-white"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <TabNav
-            tabs={DASHBOARD_TABS}
+            tabs={tabs}
             activeTab={activeTab}
             onChange={setActiveTab}
           />
@@ -276,111 +263,42 @@ function DashboardWorkspace() {
         data-view="data"
         className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-5 sm:px-6"
       >
-        {/* Shared Selection Bar (hidden on Validation tab where backtests span all 60 wards) */}
-        {activeTab !== "validation" ? (
-          <section
-            aria-label="Forecast selection controls"
-            className="rounded-lg border border-mist bg-white p-4"
-          >
-            {wardsQuery.isError ? (
-              <ErrorBanner
-                testId="wards-error-banner"
-                retryTestId="retry-button"
-                title="Could not load ward directory"
-                error={wardsQuery.error}
-                onRetry={() => {
-                  void wardsQuery.refetch();
-                }}
-              />
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
-                <SelectField
-                  id="city-select"
-                  label="City"
-                  testId="city-select"
-                  value={selectedCity}
-                  disabled={wardsQuery.isPending}
-                  options={cityOptions}
-                  onChange={(e) => {
-                    setDismissedUrlWard(true);
-                    setCityOverride(e.target.value as City);
-                    setWardOverride(null);
-                    if (activeTab === "scenario") setScenarioManualSelection(true);
-                  }}
-                />
-
-                <SelectField
-                  id="ward-select"
-                  label="Ward"
-                  testId="ward-select"
-                  mono
-                  value={selectedWardId}
-                  disabled={wardsQuery.isPending || wardOptions.length === 0}
-                  options={
-                    wardOptions.length > 0
-                      ? wardOptions
-                      : [{ value: "", label: "Loading wards…" }]
-                  }
-                  onChange={(e) => {
-                    if (!e.target.value) return;
-                    setDismissedUrlWard(true);
-                    setWardOverride(e.target.value);
-                    if (activeTab === "scenario") setScenarioManualSelection(true);
-                  }}
-                />
-
-                <SelectField
-                  id="origin-week-select"
-                  label="Origin week (Monday)"
-                  testId="origin-week-select"
-                  mono
-                  value={selectedOriginWeek}
-                  disabled={wardsQuery.isPending}
-                  options={weekOptions}
-                  onChange={(e) => {
-                    setOriginWeekOverride(e.target.value);
-                    if (activeTab === "scenario") setScenarioManualSelection(true);
-                  }}
-                />
-
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-semibold text-slate">
-                    Forecast window
-                  </span>
-                  <div
-                    data-testid="window-toggle"
-                    role="group"
-                    aria-label="Forecast horizon window"
-                    className="inline-flex min-h-10 rounded-md border border-mist bg-paper p-0.5"
-                  >
-                    {(["1-4w", "2-4w"] as const).map((w) => {
-                      const active = windowKey === w;
-                      return (
-                        <button
-                          key={w}
-                          type="button"
-                          data-testid={`window-${w}`}
-                          aria-pressed={active}
-                          onClick={() => setWindowKey(w)}
-                          className={clsx(
-                            "cursor-pointer rounded-sm px-3 font-mono text-xs font-semibold tnum",
-                            active
-                              ? "bg-royal text-white"
-                              : "text-navy hover:bg-white",
-                          )}
-                        >
-                          {w === "1-4w" ? "1–4w" : "2–4w"}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-          </section>
+        {showSelectionBar ? (
+          <SelectionBar
+            cities={cities}
+            selectedCity={selectedCity}
+            cityWards={cityWards}
+            selectedWardId={selectedWardId}
+            unknownWardId={unknownWardId}
+            mondayWeeks={mondayWeeks}
+            selectedOriginWeek={selectedOriginWeek}
+            windowKey={windowKey}
+            lang={lang}
+            isLoading={wardsQuery.isPending}
+            isError={wardsQuery.isError}
+            error={wardsQuery.error}
+            onRetryWards={() => {
+              void wardsQuery.refetch();
+            }}
+            onChangeCity={(nextCity) => {
+              setDismissedUrlWard(true);
+              setCityOverride(nextCity);
+              setWardOverride(null);
+              if (activeTab === "scenario") setScenarioManualSelection(true);
+            }}
+            onChangeWard={(nextWard) => {
+              setDismissedUrlWard(true);
+              setWardOverride(nextWard);
+              if (activeTab === "scenario") setScenarioManualSelection(true);
+            }}
+            onChangeOriginWeek={(nextWeek) => {
+              setOriginWeekOverride(nextWeek);
+              if (activeTab === "scenario") setScenarioManualSelection(true);
+            }}
+            onChangeWindow={setWindowKey}
+          />
         ) : null}
 
-        {/* Active Tab Panel */}
         <section
           id={`tabpanel-${activeTab}`}
           role="tabpanel"
@@ -402,6 +320,7 @@ function DashboardWorkspace() {
                 originWeek={selectedOriginWeek}
                 windowKey={windowKey}
                 source={activeSource}
+                lang={lang}
                 onSelectWard={(wid) => {
                   setDismissedUrlWard(true);
                   setWardOverride(wid);
@@ -415,6 +334,7 @@ function DashboardWorkspace() {
             <LagsPanel
               wardId={selectedWardId}
               unknownWardId={unknownWardId}
+              lang={lang}
               onResetUnknownWard={handleResetUnknownWard}
             />
           ) : null}
@@ -426,6 +346,7 @@ function DashboardWorkspace() {
               unknownWardId={unknownWardId}
               onResetUnknownWard={handleResetUnknownWard}
               isDemoBaseline={scenarioUsesDemoBaseline}
+              lang={lang}
             />
           ) : null}
 
@@ -434,6 +355,7 @@ function DashboardWorkspace() {
               city={selectedCity}
               originWeek={selectedOriginWeek}
               source={activeSource}
+              lang={lang}
               onSelectWard={handleSelectWardFromMatrix}
               onResetCity={() => {
                 setCityOverride(DEMO_CONFIG.city);
@@ -442,15 +364,34 @@ function DashboardWorkspace() {
             />
           ) : null}
 
-          {activeTab === "validation" ? <ValidationView /> : null}
+          {activeTab === "priority" && !wardsQuery.isError ? (
+            <PriorityListView
+              city={selectedCity}
+              cityWards={cityWards}
+              selectedWardId={selectedWardId}
+              originWeek={selectedOriginWeek}
+              windowKey={windowKey}
+              source={activeSource}
+              lang={lang}
+              onSelectWard={handleSelectWardFromMatrix}
+              onResetCity={() => {
+                setCityOverride(DEMO_CONFIG.city);
+                setWardOverride(null);
+              }}
+            />
+          ) : null}
+
+          {activeTab === "validation" ? <ValidationView lang={lang} /> : null}
+
+          {activeTab === "about" ? <AboutCostView lang={lang} /> : null}
         </section>
       </main>
 
-      <footer className="border-t border-mist bg-white">
+      <footer className="no-print border-t border-mist bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-xs text-slate sm:px-6">
           <span>
             Abhas (<span lang="bn" className="font-bangla">আভাস</span>) · Multi-week rainfall lag
-            early warning · Weather attribution: Open-Meteo (CC BY 4.0)
+            early warning · Weather data by Open-Meteo.com (CC BY 4.0)
           </span>
           <Link href="/brand" className="font-semibold text-royal hover:underline">
             Brand tokens &amp; tier scale
