@@ -6,7 +6,9 @@ from threading import RLock
 
 from app.adapters.db.factory import get_observation_repository
 
-from .service import LagsService
+from .service import LagsService, warm_lags_cache
+
+__all__ = ["get_lags_service", "warm_lags_cache"]
 
 _lock = RLock()
 _service: LagsService | None = None
