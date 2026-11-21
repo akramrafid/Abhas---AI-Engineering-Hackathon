@@ -239,6 +239,7 @@ export interface components {
             /**
              * Origin Week
              * Format: date
+             * @description Monday of the last observed week; 2016-02-29 … 2025-12-29
              * @example 2025-08-04
              */
             origin_week: string;
@@ -716,6 +717,7 @@ export interface components {
             /**
              * Origin Week
              * Format: date
+             * @description Monday of the last observed week; 2016-02-29 … 2025-12-29
              * @example 2025-08-04
              */
             origin_week: string;
