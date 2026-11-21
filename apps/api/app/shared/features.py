@@ -223,6 +223,19 @@ def _attach_static_wards(df: pd.DataFrame, wards_df: pd.DataFrame | None) -> pd.
     return merged
 
 
+def _assert_consecutive_weeks(df: pd.DataFrame) -> None:
+    """Reject duplicate or non-consecutive weekly rows per ward before positional lag shifts (CR-7)."""
+    if df.duplicated(subset=["ward_id", "week"]).any():
+        raise ValueError("Duplicate (ward_id, week) rows detected in observation input")
+    if df.empty:
+        return
+    step = pd.to_datetime(df["week"]).groupby(df["ward_id"], sort=False).diff().dropna()
+    if not (step == pd.Timedelta(weeks=1)).all():
+        raise ValueError(
+            "non-consecutive weekly rows per ward; reindex to a full Monday calendar before building lags"
+        )
+
+
 def build_features(
     obs_df: pd.DataFrame,
     wards_df: pd.DataFrame | None = None,
@@ -253,8 +266,7 @@ def build_features(
         df = df.loc[df["week"] <= cutoff].copy()
 
     df = df.sort_values(["ward_id", "week"], kind="mergesort").reset_index(drop=True)
-    if df.duplicated(subset=["ward_id", "week"]).any():
-        raise ValueError("Duplicate (ward_id, week) rows detected in observation input")
+    _assert_consecutive_weeks(df)
 
     if df.empty:
         cols = ["ward_id", "week", *REQUIRED_WEATHER_COLUMNS, *FEATURE_COLUMNS, "horizon", "target_week"]
@@ -417,6 +429,7 @@ def compute_all_lag_correlations(
     if "dengue_cases" not in df.columns:
         raise ValueError("Observation DataFrame must include 'dengue_cases'")
     df = df.sort_values(["ward_id", "week"], kind="mergesort").reset_index(drop=True)
+    _assert_consecutive_weeks(df)
     df["_iso_week"] = [canonical_iso_week(d) for d in df["week"].tolist()]
 
     # Demean within each (ward_id, iso_week) to remove seasonal cycle

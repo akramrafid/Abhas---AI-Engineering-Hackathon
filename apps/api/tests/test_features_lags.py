@@ -170,10 +170,13 @@ def test_rain_normals_train_years_only_and_iso_week_53() -> None:
     assert (sin53, cos53) == (sin52, cos52)
     assert -1.0 <= sin53 <= 1.0 and -1.0 <= cos53 <= 1.0
 
-    feats = build_features(df, horizon=2, rain_normals=normals)
-    assert feats["rain_anomaly"].notna().all()
-    assert feats["iso_week_sin"].notna().all()
-    assert feats["iso_week_cos"].notna().all()
+    df_2020 = df.loc[df["week"].isin(weeks_2020)].reset_index(drop=True)
+    df_2024 = df.loc[df["week"].isin(weeks_2024)].reset_index(drop=True)
+    for slice_df in (df_2020, df_2024):
+        feats = build_features(slice_df, horizon=2, rain_normals=normals)
+        assert feats["rain_anomaly"].notna().all()
+        assert feats["iso_week_sin"].notna().all()
+        assert feats["iso_week_cos"].notna().all()
 
 
 def test_serving_features_weather_override_is_isolated() -> None:
@@ -221,3 +224,18 @@ def test_build_features_with_separate_wards_df() -> None:
     assert len(feats) == 24
     for col in static_cols:
         assert int(feats[col].isna().sum()) == 0
+
+
+def test_cr_7_non_consecutive_weeks_raises() -> None:
+    """CR-7: Dropped week for any ward raises ValueError before positional lag shifts."""
+    raw = _synthetic_two_ward_df(n_weeks=15)
+    drop_week = date(2023, 1, 2) + timedelta(weeks=5)
+    gapped = raw.loc[
+        ~((raw["ward_id"] == "DSCC_Ward_01") & (pd.to_datetime(raw["date"]).dt.date == drop_week))
+    ].reset_index(drop=True)
+
+    with pytest.raises(ValueError, match="non-consecutive|Non-consecutive"):
+        build_features(gapped, horizon=3)
+
+    with pytest.raises(ValueError, match="non-consecutive|Non-consecutive"):
+        compute_lag_correlations(gapped, ward_id="DSCC_Ward_01", max_lag=8)
