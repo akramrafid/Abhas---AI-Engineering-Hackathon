@@ -8,7 +8,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
   test("en_bn_switch: header EN/BN toggle switches headings, promise, tabs, and officer brief", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await expect(page.getByTestId("header-promise")).toContainText(
       "Rain today. Risk in three weeks. Act now.",
@@ -43,7 +43,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
   test("origin_iso_format_act_by_waterfall_and_advisory: shows ISO week range, Act by date, waterfall + other, and real advisory", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
 
     // Origin selector displays ISO week + Mon–Sun date range alongside ISO Monday value
@@ -72,7 +72,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
   test("ac_7_real_api_monotonicity: 120 mm and 250 mm rain presets increase h=3 forecast monotonically against real tuned API", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-scenario").click();
     await expect(page.getByTestId("scenario-panel")).toBeVisible();
 
@@ -113,7 +113,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
     expect(sanitizeCsvCell("\r1+1")).toBe(`"'\r1+1"`);
     expect(sanitizeCsvCell("DSCC_Ward_04")).toBe("DSCC_Ward_04");
 
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-priority").click();
     await expect(page.getByTestId("priority-panel")).toBeVisible();
     await expect(page.getByTestId("priority-table")).toBeVisible();
@@ -134,7 +134,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
       await route.fulfill({ response, json });
     });
 
-    await page.goto("/?demo=1&tab=priority");
+    await page.goto("/dashboard?demo=1&tab=priority");
     await expect(page.getByTestId("priority-table")).toBeVisible();
 
     const downloadPromise = page.waitForEvent("download");
@@ -160,7 +160,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
       if (msg.type() === "error") consoleErrors.push(msg.text());
     });
 
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
 
     await page.getByTestId("window-1-4w").click();
@@ -194,7 +194,7 @@ test.describe("Abhas §11 Operations Console Features", () => {
   test("about_and_cost_tab: renders live /api/v1/ops telemetry, honest model card, and Open-Meteo CC BY 4.0 attribution", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-about").click();
 
     await expect(page.getByTestId("about-panel")).toBeVisible();

@@ -44,6 +44,8 @@ export default defineConfig({
       env: {
         ...process.env,
         NEXT_PUBLIC_API_BASE_URL: API_URL,
+        // e2e exercises the product, not Clerk's hosted sign-in.
+        NEXT_PUBLIC_AUTH_DISABLED: "1",
       },
     },
   ],

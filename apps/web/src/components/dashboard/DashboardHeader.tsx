@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { clsx } from "clsx";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import { BrandRibbon } from "@/components/brand/BrandRibbon";
 import type { City } from "@/lib/api/client";
@@ -134,6 +135,8 @@ export function DashboardHeader({
           >
             {copy.brandLink}
           </Link>
+
+          <UserMenu />
         </div>
       </div>
     </header>

@@ -14,7 +14,7 @@ test.describe("UX Screenshots Capture (1280x720 & 375x812)", () => {
     fs.mkdirSync(OUT_DIR, { recursive: true });
 
     await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await expect(page.getByTestId("advisory-panel")).toBeVisible();
@@ -74,7 +74,7 @@ test.describe("UX Screenshots Capture (1280x720 & 375x812)", () => {
     });
 
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await expect(page.getByTestId("advisory-headline")).not.toBeEmpty();

@@ -12,6 +12,7 @@ import { AboutCostView } from "@/features/about/components/AboutCostView";
 import { HeatmapView } from "@/features/heatmap/components/HeatmapView";
 import { LagsPanel } from "@/features/lags/components/LagsPanel";
 import { PriorityListView } from "@/features/priority/components/PriorityListView";
+import { RiskMapView } from "@/features/risk-map/components/RiskMapView";
 import { ScenarioPanel } from "@/features/scenario/components/ScenarioPanel";
 import { ValidationView } from "@/features/validation/components/ValidationView";
 import { WardForecastView } from "@/features/ward-risk/components/WardForecastView";
@@ -208,6 +209,7 @@ function DashboardWorkspace() {
     const labels = UI_COPY[lang].tabs;
     return [
       { id: "ward-risk", label: labels["ward-risk"], testId: "tab-ward-risk" },
+      { id: "map", label: labels.map, testId: "tab-map" },
       { id: "lags", label: labels.lags, testId: "tab-lags" },
       { id: "scenario", label: labels.scenario, testId: "tab-scenario" },
       { id: "heatmap", label: labels.heatmap, testId: "tab-heatmap" },
@@ -326,6 +328,23 @@ function DashboardWorkspace() {
                   setWardOverride(wid);
                 }}
                 onResetUnknownWard={handleResetUnknownWard}
+              />
+            )
+          ) : null}
+
+          {activeTab === "map" && !wardsQuery.isError ? (
+            wardsQuery.isPending ? (
+              <PanelSkeleton testId="risk-map-loading" label="Loading wards…" />
+            ) : (
+              <RiskMapView
+                wards={allWards}
+                selectedCity={selectedCity}
+                selectedWardId={selectedWardId}
+                originWeek={selectedOriginWeek}
+                windowKey={windowKey}
+                source={activeSource}
+                lang={lang}
+                onSelectWard={handleSelectWardFromMatrix}
               />
             )
           ) : null}

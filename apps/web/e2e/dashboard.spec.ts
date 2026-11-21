@@ -6,7 +6,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_11: demo mode (/?demo=1) preselects Dhaka South, pinned week, and 2-4w window offline", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
 
     await expect(page.getByTestId("demo-mode-badge")).toBeVisible();
     await expect(page.getByTestId("weather-source-badge")).toContainText(/dataset mode/i);
@@ -20,7 +20,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_6: ward forecast displays EN/BN tier with 1-4 meter, 80% band chart, per-horizon rows, and drivers", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
 
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     const badge = page.getByTestId("peak-tier-badge");
@@ -52,7 +52,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_1: lags panel shifts rendered rainfall series by k=3 weeks and highlights lag-3 peak", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-lags").click();
 
     await expect(page.getByTestId("lags-panel")).toBeVisible();
@@ -84,7 +84,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_7: scenario computes 120 mm rainfall increase, rejects 600 mm client-side, and renders API 422 problem+json", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-scenario").click();
 
     await expect(page.getByTestId("scenario-panel")).toBeVisible();
@@ -170,7 +170,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   }) => {
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8011";
 
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await page.getByTestId("tab-scenario").click();
     await expect(page.getByTestId("scenario-panel")).toBeVisible();
@@ -232,7 +232,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_8: API 503 clears stale tier and recovers on Retry; unknown ward URL shows Ward not found", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
 
     await page.route("**/api/v1/forecast", (route) =>
@@ -259,7 +259,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await page.getByTestId("forecast-retry").click();
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
 
-    await page.goto("/?ward=UNKNOWN_99");
+    await page.goto("/dashboard?ward=UNKNOWN_99");
     await expect(page.getByTestId("ward-not-found")).toBeVisible();
     await expect(page.getByTestId("ward-not-found")).toContainText("Ward not found");
     await expect(page.getByTestId("ward-not-found")).toContainText("UNKNOWN_99");
@@ -273,7 +273,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_13: city heatmap renders ward x horizon matrix and schematic tile map disclaimer", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-heatmap").click();
 
     await expect(page.getByTestId("heatmap-panel")).toBeVisible();
@@ -289,7 +289,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_14: validation tab renders baseline comparison, 80% coverage, confusion matrix, and /api/v1/ops metrics", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await page.getByTestId("tab-validation").click();
 
     await expect(page.getByTestId("validation-panel")).toBeVisible();
@@ -320,7 +320,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await page.route("**/api/v1/heatmap*", overrideModelVersion);
     await page.route("**/api/v1/validation", overrideModelVersion);
 
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toContainText(
       "Sample data — model not loaded",
@@ -340,7 +340,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await assertZeroLimeInDataView(page);
 
     forcedVersion = "lgbm-v1.0.0";
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
 
@@ -363,7 +363,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByRole("heading", { name: /4-Tier Risk Scale/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Logo Lockups/i })).toBeVisible();
 
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await assertZeroLimeInDataView(page);
 
@@ -388,7 +388,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("nfr_6 / test_cr_18_wcag_aa: WCAG 2.2 A/AA axe scan has zero violations of any impact across all views", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await assertWcagAA(page, "Ward Forecast (/?demo=1)");
 
@@ -422,7 +422,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await assertWcagAA(page, "Brand System (/brand)");
 
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await assertWcagAA(page, "Ward Forecast (375px mobile)");
   });
@@ -430,7 +430,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("test_design_hook_ward_list_no_side_tab_border: selected ward row uses subtle brand highlight without thick one-side accent border", async ({
     page,
   }) => {
-    await page.goto("/?demo=1");
+    await page.goto("/dashboard?demo=1");
     const list = page.getByTestId("ward-priority-list");
     await expect(list).toBeVisible();
 
