@@ -6,7 +6,8 @@ Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`
 
 Phase 2 Gates Verified (`0a73566`): `adr` PASS · `contracts` PASS · `resilience` PASS · `slices` PASS · `migrations` PASS · `retrieval` PASS (`recall@15=0.5704`, `n=36`) · `ci` PASS (27/27 pytest, 6/6 smoke).
 
-Next action (LEAD):
+Next action (LEAD) — 19:30 BST:
+0. Antigravity (Neon + Hydrogen) quota out until ~20:45 BST. Then: send "continue" to ctx_dfe7c933572c (sec review); dispatch UI fix tasks from r1. When CORE reports: Opus-review is not possible (same family) → Neon review of CORE; re-dispatch r1 code review (task_b76712188034) on Opus.
 1. Push `lead` + fast-forward `main` (Phase 2 milestone) to GitHub; broadcast `"contracts locked"` to `@all`.
 2. Release completed Wave 1A workers (`data-pipeline`, `qa-evals`); dispatch Wave 1B **`core-forecast`** (running in parallel with **`ui-dashboard`** = 2 active Antigravity workers).
 3. As `core-forecast` and `ui-dashboard` finish: review, merge via `gates.mjs merge`, wire `lifespan` startup model/DB readiness probe in `app/main.py`, run `gates.mjs all`, push to GitHub, then dispatch Wave 2 (`qa-ship` README/demo/fresh-clone + `reviewer-sec` redteam + cross-family review rounds when Claude resets at 19:20 BST!).
@@ -20,7 +21,10 @@ Next action (LEAD):
 | task_cc6f8c7a168f | DATA | SQLite/Alembic + seed + features.py + Open-Meteo + wards/lags/weather | antigravity / Gemini 4 Neon (XHigh) | akramrafid/data-pipeline | ctx_b3be0c5e846b | 1A | merged (`3312553`, released) |
 | task_72869ad95cf5 | QA | Locked 48-case hold-out eval + retrieval + k6 smoke + test plan | antigravity / Gemini 4 Neon (XHigh) | akramrafid/qa-evals | ctx_7beb2831257a | 1A | merged (`0a73566`, released) |
 | task_d4fb8f89dc74 | UI | UX flow + Abhas dashboard (ward-risk, lags, scenario, heatmap, validation) + Playwright e2e | antigravity / Gemini 4 Neon (XHigh) | akramrafid/ui-dashboard | ctx_679d91731a13 | 1B | merged (released) |
-| task_c92a61243ecf | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | ctx_1dee172a0b2b | 1B | running |
+| task_c92a61243ecf | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | ctx_1dee172a0b2b | 1B | stopped (quota) — WIP `9d9b4ca` |
+| task_1edc9e2e9c71 | CORE | same, continue from `akramrafid/core-forecast` | claude / opus max | core-forecast-opus | ctx_e83dc4e01e44 | 1B | running |
+| task_b76712188034 | REVIEWER-CODE | r1 cross-family review of c0a05a8...lead | claude / opus max | — | (stopped ctx_320c8e21dfba) | Prove | paused — re-dispatch when CORE frees the Claude slot |
+| task_1fbad5b953e2 | REVIEWER-SEC | r1 security of LEAD-written code | antigravity / Gemini 4 Neon (XHigh) | reviewer-sec-lead-r1 | ctx_dfe7c933572c | Prove | idle at quota — send "continue" after ~20:45 |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
@@ -32,6 +36,7 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 | 16:05 | DESIGN | "Gemini 4 Neon" + `--effort max` → "Gemini 4 Neon (XHigh)" | Antigravity model ids carry the effort; Neon has no max tier; "Gemini 4 Neon" alone is an unknown id |
 | 16:20 | all Claude seats | rule set by human | Any Claude limit hit → Gemini 4 Neon (XHigh), including LEAD; when the limit resets → back to Claude Opus 5.5 max |
 | 16:00 | LEAD | Claude Opus 5.5 max → Gemini 4 Neon (XHigh) | Claude hit 5-hour usage limit (resets 19:20 BST); hand back to Claude Opus 5.5 max after reset |
+| 19:28 | CORE, REVIEWER-SEC | Gemini 4 Neon (XHigh) → (CORE) Claude Opus 5.5 max | Antigravity quota exhausted for Neon and Hydrogen, resets ~20:45 BST; CORE is the critical path, so the one Opus worker slot goes to CORE and the r1 code review waits. CORE (Opus-written) then needs a Neon review |
 | 19:21 | LEAD | Gemini 4 Neon (XHigh) → Claude Opus 5.5 max | Claude limit reset; Opus LEAD resumed from STATUS.md. Note: merges 16:21–16:55 were approved by the Neon LEAD (same family as the Gemini authors) → cross-family Opus review round r1 dispatched |
 
 ## Assumptions
