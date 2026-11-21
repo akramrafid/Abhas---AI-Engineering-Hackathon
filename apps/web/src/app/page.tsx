@@ -54,6 +54,7 @@ function DashboardWorkspace() {
     isDemoMode ? DEMO_CONFIG.window : "2-4w",
   );
   const [dismissedUrlWard, setDismissedUrlWard] = useState(false);
+  const [scenarioManualSelection, setScenarioManualSelection] = useState(false);
 
   const wardsQuery = useWardsQuery();
   const weatherStatusQuery = useWeatherStatusQuery();
@@ -133,6 +134,22 @@ function DashboardWorkspace() {
     }
     return mondayWeeks[0] ?? DEMO_CONFIG.originWeek;
   }, [originWeekOverride, firstOrigin, dataEnd, mondayWeeks]);
+
+  // In demo mode, ScenarioPanel uses the pinned dry (< 20 mm) non-Critical baseline (CR-2 / AC-7)
+  // unless the officer manually overrides the selection while on the Scenario tab.
+  const scenarioUsesDemoBaseline =
+    isDemoMode &&
+    !scenarioManualSelection &&
+    !unknownWardId &&
+    (allWards.length === 0 ||
+      allWards.some((w) => w.ward_id === DEMO_CONFIG.scenarioBaseline.wardId)) &&
+    isValidMondayInRange(DEMO_CONFIG.scenarioBaseline.originWeek, firstOrigin, dataEnd);
+  const scenarioWardId = scenarioUsesDemoBaseline
+    ? DEMO_CONFIG.scenarioBaseline.wardId
+    : selectedWardId;
+  const scenarioOriginWeek = scenarioUsesDemoBaseline
+    ? DEMO_CONFIG.scenarioBaseline.originWeek
+    : selectedOriginWeek;
 
   // Demo mode stays 100% offline in dataset mode (AC-11).
   const activeSource: WeatherMode = isDemoMode
@@ -288,6 +305,7 @@ function DashboardWorkspace() {
                     setDismissedUrlWard(true);
                     setCityOverride(e.target.value as City);
                     setWardOverride(null);
+                    if (activeTab === "scenario") setScenarioManualSelection(true);
                   }}
                 />
 
@@ -307,6 +325,7 @@ function DashboardWorkspace() {
                     if (!e.target.value) return;
                     setDismissedUrlWard(true);
                     setWardOverride(e.target.value);
+                    if (activeTab === "scenario") setScenarioManualSelection(true);
                   }}
                 />
 
@@ -318,7 +337,10 @@ function DashboardWorkspace() {
                   value={selectedOriginWeek}
                   disabled={wardsQuery.isPending}
                   options={weekOptions}
-                  onChange={(e) => setOriginWeekOverride(e.target.value)}
+                  onChange={(e) => {
+                    setOriginWeekOverride(e.target.value);
+                    if (activeTab === "scenario") setScenarioManualSelection(true);
+                  }}
                 />
 
                 <div className="flex flex-col gap-1">
@@ -399,10 +421,11 @@ function DashboardWorkspace() {
 
           {activeTab === "scenario" && !wardsQuery.isError ? (
             <ScenarioPanel
-              wardId={selectedWardId}
-              originWeek={selectedOriginWeek}
+              wardId={scenarioWardId}
+              originWeek={scenarioOriginWeek}
               unknownWardId={unknownWardId}
               onResetUnknownWard={handleResetUnknownWard}
+              isDemoBaseline={scenarioUsesDemoBaseline}
             />
           ) : null}
 

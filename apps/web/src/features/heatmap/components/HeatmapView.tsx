@@ -14,6 +14,7 @@ import {
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
+import { StubDataBanner } from "@/components/ui/StubDataBanner";
 import { useHeatmapQuery } from "../hooks";
 
 export interface HeatmapViewProps {
@@ -132,6 +133,8 @@ export function HeatmapView({
 
   return (
     <div data-testid="heatmap-panel" className="space-y-5">
+      <StubDataBanner modelVersion={data.model_version} />
+
       {/* Summary Strip */}
       <Card>
         <CardHeader className="sm:flex-row sm:items-center sm:justify-between">
@@ -314,7 +317,6 @@ export function HeatmapView({
                   type="button"
                   data-testid={`heatmap-tile-${wid}`}
                   onClick={() => onSelectWard(wid)}
-                  aria-label={`${wid}: ${cell.tier} risk, ${cell.expected_cases.toFixed(1)} expected cases. Open ward forecast.`}
                   className="flex cursor-pointer flex-col items-start justify-between gap-2.5 rounded-lg border border-mist bg-paper p-3 text-left hover:border-royal hover:bg-white"
                 >
                   <span className="font-mono text-xs font-bold text-navy tnum">
@@ -325,6 +327,7 @@ export function HeatmapView({
                     <span>{cell.expected_cases.toFixed(1)} cases</span>
                     <span>score {cell.risk_score}</span>
                   </div>
+                  <span className="sr-only">Open ward forecast</span>
                 </button>
               );
             })}

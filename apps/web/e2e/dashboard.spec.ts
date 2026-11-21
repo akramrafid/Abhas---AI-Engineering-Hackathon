@@ -36,19 +36,16 @@ async function assertZeroLimeInDataView(page: Page) {
 
 async function assertWcagAA(page: Page, contextLabel: string) {
   const scan = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
-  const severe = scan.violations.filter((v) =>
-    ["serious", "critical"].includes(v.impact ?? ""),
-  );
   expect(
-    severe.map((v) => ({
+    scan.violations.map((v) => ({
       id: v.id,
       impact: v.impact,
       help: v.help,
       nodes: v.nodes.map((n) => n.target),
     })),
-    `WCAG 2.2 AA serious/critical violations on ${contextLabel}`,
+    `WCAG 2.2 A/AA violations on ${contextLabel}`,
   ).toEqual([]);
 }
 
@@ -156,7 +153,26 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("scenario-validation-error")).toBeVisible();
 
     // Valid 120 mm preset runs POST /api/v1/scenario and updates side-by-side cards
+    const ac7ScenarioResponse = page.waitForResponse(
+      (res) => res.url().includes("/api/v1/scenario") && res.request().method() === "POST",
+    );
     await page.getByTestId("scenario-preset-120").click();
+    const ac7Res = await ac7ScenarioResponse;
+    expect(ac7Res.ok()).toBe(true);
+    const ac7Json = (await ac7Res.json()) as {
+      ward_id: string;
+      origin_week: string;
+      baseline: Array<{ horizon: number; expected_cases: number }>;
+      scenario: Array<{ horizon: number; expected_cases: number }>;
+    };
+    expect(ac7Json.ward_id).toBe(DEMO_CONFIG.scenarioBaseline.wardId);
+    expect(ac7Json.origin_week).toBe(DEMO_CONFIG.scenarioBaseline.originWeek);
+    const apiBaseH3 = ac7Json.baseline.find((h) => h.horizon === 3);
+    const apiScenH3 = ac7Json.scenario.find((h) => h.horizon === 3);
+    expect(apiBaseH3).toBeDefined();
+    expect(apiScenH3).toBeDefined();
+    expect(apiScenH3!.expected_cases).toBeGreaterThan(apiBaseH3!.expected_cases);
+
     await expect(page.getByTestId("scenario-comparison")).toBeVisible();
     await expect(page.getByTestId("scenario-baseline-card")).toBeVisible();
     await expect(page.getByTestId("scenario-result-card")).toBeVisible();
@@ -201,6 +217,73 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("scenario-error-banner")).toContainText("e2e-422-rid");
     await expect(page.getByTestId("scenario-comparison")).toHaveCount(0);
     await page.unroute("**/api/v1/scenario");
+  });
+
+  test("test_cr_2_demo_scenario_baseline: demo mode uses a dry (<20 mm) non-Critical baseline and 120 mm raises h=3 cases", async ({
+    page,
+    request,
+  }) => {
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8011";
+
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await page.getByTestId("tab-scenario").click();
+    await expect(page.getByTestId("scenario-panel")).toBeVisible();
+    await expect(page.getByTestId("scenario-demo-baseline-note")).toBeVisible();
+    await expect(page.getByTestId("scenario-panel")).toContainText(
+      DEMO_CONFIG.scenarioBaseline.wardId,
+    );
+    await expect(page.getByTestId("scenario-panel")).toContainText(
+      DEMO_CONFIG.scenarioBaseline.originWeek,
+    );
+
+    const scenarioRequestPromise = page.waitForRequest(
+      (req) => req.url().includes("/api/v1/scenario") && req.method() === "POST",
+    );
+    const scenarioResponsePromise = page.waitForResponse(
+      (res) => res.url().includes("/api/v1/scenario") && res.request().method() === "POST",
+    );
+
+    await page.getByTestId("scenario-preset-120").click();
+
+    const [scenarioReq, scenarioRes] = await Promise.all([
+      scenarioRequestPromise,
+      scenarioResponsePromise,
+    ]);
+    const sentBody = scenarioReq.postDataJSON() as {
+      ward_id: string;
+      origin_week: string;
+      weather: { rainfall_mm?: number };
+    };
+    expect(sentBody.ward_id).toBe(DEMO_CONFIG.scenarioBaseline.wardId);
+    expect(sentBody.origin_week).toBe(DEMO_CONFIG.scenarioBaseline.originWeek);
+    expect(sentBody.weather.rainfall_mm).toBe(120);
+
+    // Verify observed rainfall and non-Critical cases from the real API history
+    const histRes = await request.get(
+      `${apiBase}/api/v1/wards/${encodeURIComponent(sentBody.ward_id)}/history?start=${sentBody.origin_week}&end=${sentBody.origin_week}`,
+    );
+    expect(histRes.ok()).toBe(true);
+    const histJson = (await histRes.json()) as {
+      weeks: Array<{ week: string; rainfall_mm: number; dengue_cases: number }>;
+    };
+    expect(histJson.weeks).toHaveLength(1);
+    const observed = histJson.weeks[0];
+    expect(observed.rainfall_mm).toBeLessThan(20);
+    expect(observed.dengue_cases).toBeLessThan(14);
+
+    // Verify API response h=3 expected_cases strictly increases under 120 mm override
+    const payload = (await scenarioRes.json()) as {
+      baseline: Array<{ horizon: number; expected_cases: number }>;
+      scenario: Array<{ horizon: number; expected_cases: number }>;
+    };
+    const baseH3 = payload.baseline.find((h) => h.horizon === 3);
+    const scenH3 = payload.scenario.find((h) => h.horizon === 3);
+    expect(baseH3).toBeDefined();
+    expect(scenH3).toBeDefined();
+    expect(scenH3!.expected_cases).toBeGreaterThan(baseH3!.expected_cases);
+
+    await expect(page.getByTestId("scenario-comparison")).toBeVisible();
   });
 
   test("ac_8: API 503 clears stale tier and recovers on Retry; unknown ward URL shows Ward not found", async ({
@@ -283,6 +366,66 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("validation-ops-model-loads")).toHaveText("1");
   });
 
+  test("test_cr_9_stub_data_banner: shows sample-data banner for stub model_version and hides it for real models", async ({
+    page,
+  }) => {
+    let forcedVersion = "stub-0";
+
+    const overrideModelVersion = async (route: Parameters<Parameters<Page["route"]>[1]>[0]) => {
+      const response = await route.fetch();
+      const json = (await response.json()) as Record<string, unknown>;
+      json.model_version = forcedVersion;
+      await route.fulfill({ response, json });
+    };
+
+    await page.route("**/api/v1/forecast", overrideModelVersion);
+    await page.route("**/api/v1/heatmap*", overrideModelVersion);
+    await page.route("**/api/v1/validation", overrideModelVersion);
+
+    // 1. Stub model_version -> visible banner on forecast, heatmap, and validation views (zero Lime)
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toContainText(
+      "Sample data — model not loaded",
+    );
+    await assertZeroLimeInDataView(page);
+
+    await page.getByTestId("tab-heatmap").click();
+    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toContainText(
+      "Sample data — model not loaded",
+    );
+    await assertZeroLimeInDataView(page);
+
+    await page.getByTestId("tab-validation").click();
+    await expect(page.getByTestId("validation-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toContainText(
+      "Sample data — model not loaded",
+    );
+    await assertZeroLimeInDataView(page);
+
+    // 2. Non-stub model_version -> banner hidden on all three views
+    forcedVersion = "lgbm-v1.0.0";
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
+
+    await page.getByTestId("tab-heatmap").click();
+    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
+
+    await page.getByTestId("tab-validation").click();
+    await expect(page.getByTestId("validation-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
+
+    await page.unroute("**/api/v1/forecast", overrideModelVersion);
+    await page.unroute("**/api/v1/heatmap*", overrideModelVersion);
+    await page.unroute("**/api/v1/validation", overrideModelVersion);
+  });
+
   test("ac_16: /brand renders tokens, risk scale & logo, and zero Lime appears inside [data-view='data']", async ({
     page,
   }) => {
@@ -315,7 +458,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await assertZeroLimeInDataView(page);
   });
 
-  test("nfr_6: WCAG 2.2 AA axe scan has zero serious or critical violations across all views", async ({
+  test("nfr_6 / test_cr_18_wcag_aa: WCAG 2.2 A/AA axe scan has zero violations of any impact across all views", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
@@ -342,5 +485,48 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await page.goto("/brand");
     await expect(page.getByRole("heading", { name: /Colour Palette/i })).toBeVisible();
     await assertWcagAA(page, "Brand System (/brand)");
+
+    // Also verify 375px mobile viewport has zero WCAG A/AA violations
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await assertWcagAA(page, "Ward Forecast (375px mobile)");
+  });
+
+  test("test_design_hook_ward_list_no_side_tab_border: selected ward row uses subtle brand highlight without thick one-side accent border", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    const list = page.getByTestId("ward-priority-list");
+    await expect(list).toBeVisible();
+
+    const selectedRow = list.locator('button[aria-current="true"]');
+    await expect(selectedRow).toHaveCount(1);
+
+    const styles = await selectedRow.evaluate((el) => {
+      const cs = window.getComputedStyle(el);
+      return {
+        borderLeftWidth: parseFloat(cs.borderLeftWidth),
+        borderRightWidth: parseFloat(cs.borderRightWidth),
+        borderTopWidth: parseFloat(cs.borderTopWidth),
+        borderBottomWidth: parseFloat(cs.borderBottomWidth),
+        backgroundColor: cs.backgroundColor,
+      };
+    });
+
+    // No thick one-side accent ("side-tab") border
+    expect(styles.borderLeftWidth).toBeLessThanOrEqual(1);
+    expect(styles.borderRightWidth).toBeLessThanOrEqual(1);
+    expect(styles.borderTopWidth).toBeLessThanOrEqual(1);
+    expect(styles.borderBottomWidth).toBeLessThanOrEqual(1);
+
+    // Selected row remains visually distinct from unselected rows (Paper vs White ground)
+    const unselectedRow = list.locator("button:not([aria-current])").first();
+    if ((await unselectedRow.count()) > 0) {
+      const unselectedBg = await unselectedRow.evaluate(
+        (el) => window.getComputedStyle(el).backgroundColor,
+      );
+      expect(styles.backgroundColor).not.toBe(unselectedBg);
+    }
   });
 });
