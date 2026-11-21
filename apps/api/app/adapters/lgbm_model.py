@@ -88,6 +88,9 @@ def _deserialize_calibration(raw: Any) -> HorizonCalibration:
             q_high=float(raw.get("q_high", 0.90)),
             use_cqr=bool(raw.get("use_cqr", False)),
             cqr_q=float(raw.get("cqr_q", 0.0)),
+            use_sigma_conformal=bool(raw.get("use_sigma_conformal", False)),
+            z_low=float(raw.get("z_low", 0.75)),
+            z_high=float(raw.get("z_high", 2.15)),
         )
     return HorizonCalibration(nb_r=5.0)
 

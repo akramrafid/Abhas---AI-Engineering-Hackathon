@@ -289,6 +289,8 @@ def train_and_save(
             "coverage_80_2023": round(cov_23, 4),
             "nb_r": cal_h.nb_r,
             "conformal_scale": cal_h.conformal_scale,
+            "z_low": cal_h.z_low,
+            "z_high": cal_h.z_high,
         }
 
     tier_cutoffs = select_cost_sensitive_cutoffs(

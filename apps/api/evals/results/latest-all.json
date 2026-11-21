@@ -1,14 +1,14 @@
 {
-  "ts": "2026-11-21T10:25:34+00:00",
-  "commit": "0b1687b",
+  "ts": "2026-11-21T14:57:17+00:00",
+  "commit": "574f78a",
   "split": "all",
   "tag": "baseline",
   "n": 96,
-  "passed": 79,
+  "passed": 70,
   "skipped": 0,
-  "pass_rate": 0.8229,
+  "pass_rate": 0.7292,
   "threshold": 0.8,
-  "generator_model": "climatology-le2023",
+  "generator_model": "abhas-lgbm-baseline-0.1.0",
   "judge_model": "-",
   "prompt_versions": {},
   "cost_usd": 0.0,
@@ -17,42 +17,42 @@
     "dev": 48,
     "heldout": 48
   },
-  "p50_ms": 0.179,
-  "p95_ms": 0.208,
+  "p50_ms": 1.29,
+  "p95_ms": 2.188,
   "by_tier": {
     "Low": {
       "n": 20,
-      "pass_rate": 0.95
+      "pass_rate": 0.85
     },
     "Medium": {
       "n": 20,
-      "pass_rate": 0.65
+      "pass_rate": 0.6
     },
     "High": {
       "n": 22,
-      "pass_rate": 1.0
+      "pass_rate": 0.8182
     },
     "Critical": {
       "n": 34,
-      "pass_rate": 0.7353
+      "pass_rate": 0.6765
     }
   },
   "floors": {
-    "mae_h2_le_1_10": false,
-    "mae_h3_le_1_10": false,
-    "mae_h2_beats_climatology_10pct": false,
-    "mae_h3_beats_climatology_10pct": false,
-    "mae_h4_beats_climatology": false,
+    "mae_h2_le_1_10": true,
+    "mae_h3_le_1_10": true,
+    "mae_h2_beats_climatology_10pct": true,
+    "mae_h3_beats_climatology_10pct": true,
+    "mae_h4_beats_climatology": true,
     "weather_ablation_worse_all_h": false,
     "coverage_80_in_range": false,
-    "within_one_tier_ge_0_95": false,
-    "critical_recall_ge_0_85": false,
+    "within_one_tier_ge_0_95": true,
+    "critical_recall_ge_0_85": true,
     "p95_ward_ms_lt_50": true,
-    "golden_pass_rate_ge_threshold": true
+    "golden_pass_rate_ge_threshold": false
   },
   "floors_passed": false,
   "metrics": {
-    "pass_rate": 0.8229,
+    "pass_rate": 0.7292,
     "global": {
       "target_years": [
         2024,
@@ -63,13 +63,13 @@
         "h1": {
           "horizon": 1,
           "n": 6300,
-          "mae": 1.2591,
-          "rmse": 2.4526,
-          "poisson_deviance": 1.3326,
-          "coverage_80": 0.957,
-          "within_one_tier": 0.9427,
-          "critical_recall": 0.7673,
-          "macro_f1": 0.4698,
+          "mae": 0.9687,
+          "rmse": 1.8882,
+          "poisson_deviance": 0.8016,
+          "coverage_80": 0.9083,
+          "within_one_tier": 0.9795,
+          "critical_recall": 0.9748,
+          "macro_f1": 0.5903,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -87,22 +87,22 @@
               "poisson_deviance": 4.872
             },
             "no_weather": {
-              "mae": null,
-              "worse_than_full_model": null
+              "mae": 1.2341,
+              "worse_than_full_model": true
             }
           },
-          "mae_improvement_vs_climatology_pct": 0.0
+          "mae_improvement_vs_climatology_pct": 23.06
         },
         "h2": {
           "horizon": 2,
           "n": 6300,
-          "mae": 1.2591,
-          "rmse": 2.4526,
-          "poisson_deviance": 1.3326,
-          "coverage_80": 0.957,
-          "within_one_tier": 0.9427,
-          "critical_recall": 0.7673,
-          "macro_f1": 0.4698,
+          "mae": 1.0359,
+          "rmse": 2.097,
+          "poisson_deviance": 0.8622,
+          "coverage_80": 0.9059,
+          "within_one_tier": 0.9721,
+          "critical_recall": 0.9497,
+          "macro_f1": 0.5681,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -120,22 +120,22 @@
               "poisson_deviance": 7.6141
             },
             "no_weather": {
-              "mae": null,
-              "worse_than_full_model": null
+              "mae": 1.2339,
+              "worse_than_full_model": true
             }
           },
-          "mae_improvement_vs_climatology_pct": 0.0
+          "mae_improvement_vs_climatology_pct": 17.72
         },
         "h3": {
           "horizon": 3,
           "n": 6300,
-          "mae": 1.2591,
-          "rmse": 2.4526,
-          "poisson_deviance": 1.3326,
-          "coverage_80": 0.957,
-          "within_one_tier": 0.9427,
-          "critical_recall": 0.7673,
-          "macro_f1": 0.4698,
+          "mae": 1.0264,
+          "rmse": 1.9945,
+          "poisson_deviance": 0.8846,
+          "coverage_80": 0.9124,
+          "within_one_tier": 0.9714,
+          "critical_recall": 0.9686,
+          "macro_f1": 0.564,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -153,22 +153,22 @@
               "poisson_deviance": 9.9031
             },
             "no_weather": {
-              "mae": null,
-              "worse_than_full_model": null
+              "mae": 1.234,
+              "worse_than_full_model": true
             }
           },
-          "mae_improvement_vs_climatology_pct": 0.0
+          "mae_improvement_vs_climatology_pct": 18.48
         },
         "h4": {
           "horizon": 4,
           "n": 6300,
-          "mae": 1.2591,
-          "rmse": 2.4526,
-          "poisson_deviance": 1.3326,
-          "coverage_80": 0.957,
-          "within_one_tier": 0.9427,
-          "critical_recall": 0.7673,
-          "macro_f1": 0.4698,
+          "mae": 1.2349,
+          "rmse": 2.425,
+          "poisson_deviance": 1.1042,
+          "coverage_80": 0.9152,
+          "within_one_tier": 0.941,
+          "critical_recall": 0.9434,
+          "macro_f1": 0.488,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -186,18 +186,18 @@
               "poisson_deviance": 12.3609
             },
             "no_weather": {
-              "mae": null,
-              "worse_than_full_model": null
+              "mae": 1.2343,
+              "worse_than_full_model": false
             }
           },
-          "mae_improvement_vs_climatology_pct": 0.0
+          "mae_improvement_vs_climatology_pct": 1.92
         }
       },
-      "coverage_80": 0.957,
-      "within_one_tier": 0.9427,
-      "critical_recall": 0.7673,
+      "coverage_80": 0.9104,
+      "within_one_tier": 0.966,
+      "critical_recall": 0.9591,
       "critical_n_total": 636,
-      "macro_f1": 0.4698,
+      "macro_f1": 0.5507,
       "confusion_matrix": {
         "labels": [
           "Low",
@@ -207,33 +207,33 @@
         ],
         "matrix": [
           [
-            17096,
-            632,
-            320,
-            88
+            17203,
+            678,
+            182,
+            73
           ],
           [
-            360,
-            1384,
-            1588,
-            880
+            388,
+            1875,
+            1378,
+            571
           ],
           [
-            8,
-            596,
-            820,
-            792
+            5,
+            442,
+            1110,
+            659
           ],
           [
             0,
-            148,
-            216,
-            272
+            26,
+            279,
+            331
           ]
         ]
       },
-      "p50_ward_ms": 0.174,
-      "p95_ward_ms": 0.269
+      "p50_ward_ms": 1.466,
+      "p95_ward_ms": 1.985
     }
   },
   "cases": [
@@ -247,15 +247,15 @@
       "target_week": "2019-01-07",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.0,
+      "expected_cases": 0.029,
       "p10": 0.0,
-      "p90": 0.0,
+      "p90": 0.029,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.305,
+      "ms": 3.426,
       "ac_refs": [
         "AC-5"
       ]
@@ -270,15 +270,15 @@
       "target_week": "2019-02-04",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.0,
+      "expected_cases": 0.041,
       "p10": 0.0,
-      "p90": 0.0,
+      "p90": 0.041,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.204,
+      "ms": 1.726,
       "ac_refs": [
         "AC-5"
       ]
@@ -293,15 +293,15 @@
       "target_week": "2019-05-13",
       "actual_cases": 1,
       "actual_tier": "Low",
-      "expected_cases": 1.375,
+      "expected_cases": 0.839,
       "p10": 0.0,
-      "p90": 3.0,
+      "p90": 1.542,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.193,
+      "ms": 1.825,
       "ac_refs": [
         "AC-5"
       ]
@@ -316,15 +316,15 @@
       "target_week": "2019-05-20",
       "actual_cases": 3,
       "actual_tier": "Medium",
-      "expected_cases": 1.875,
+      "expected_cases": 1.614,
       "p10": 0.0,
-      "p90": 4.0,
+      "p90": 2.735,
       "pred_tier": "Low",
-      "risk_score": 1,
+      "risk_score": 0,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.19,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.782,
       "ac_refs": [
         "AC-5"
       ]
@@ -339,15 +339,15 @@
       "target_week": "2019-06-24",
       "actual_cases": 9,
       "actual_tier": "High",
-      "expected_cases": 7.0,
-      "p10": 2.0,
-      "p90": 14.0,
+      "expected_cases": 4.989,
+      "p10": 0.511,
+      "p90": 8.476,
       "pred_tier": "Medium",
-      "risk_score": 38,
+      "risk_score": 27,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.192,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.69,
       "ac_refs": [
         "AC-5"
       ]
@@ -362,15 +362,15 @@
       "target_week": "2019-07-08",
       "actual_cases": 3,
       "actual_tier": "Medium",
-      "expected_cases": 2.75,
-      "p10": 0.0,
-      "p90": 6.0,
-      "pred_tier": "Medium",
-      "risk_score": 4,
+      "expected_cases": 4.799,
+      "p10": 0.714,
+      "p90": 8.117,
+      "pred_tier": "High",
+      "risk_score": 24,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.185,
+      "ms": 1.414,
       "ac_refs": [
         "AC-5"
       ]
@@ -385,15 +385,15 @@
       "target_week": "2019-07-22",
       "actual_cases": 19,
       "actual_tier": "Critical",
-      "expected_cases": 8.875,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "High",
-      "risk_score": 51,
+      "expected_cases": 14.595,
+      "p10": 3.512,
+      "p90": 24.694,
+      "pred_tier": "Critical",
+      "risk_score": 91,
       "within_one_tier": true,
-      "in_80_band": false,
-      "pass": false,
-      "ms": 0.198,
+      "in_80_band": true,
+      "pass": true,
+      "ms": 1.663,
       "ac_refs": [
         "AC-5"
       ]
@@ -408,15 +408,15 @@
       "target_week": "2019-07-29",
       "actual_cases": 21,
       "actual_tier": "Critical",
-      "expected_cases": 13.0,
-      "p10": 4.0,
-      "p90": 25.0,
+      "expected_cases": 18.902,
+      "p10": 6.415,
+      "p90": 31.231,
       "pred_tier": "Critical",
-      "risk_score": 70,
+      "risk_score": 97,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.181,
+      "ms": 1.563,
       "ac_refs": [
         "AC-5"
       ]
@@ -431,15 +431,15 @@
       "target_week": "2019-08-05",
       "actual_cases": 11,
       "actual_tier": "High",
-      "expected_cases": 7.0,
-      "p10": 2.0,
-      "p90": 14.0,
-      "pred_tier": "Medium",
-      "risk_score": 38,
+      "expected_cases": 13.425,
+      "p10": 4.195,
+      "p90": 22.274,
+      "pred_tier": "Critical",
+      "risk_score": 90,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.181,
+      "ms": 1.578,
       "ac_refs": [
         "AC-5"
       ]
@@ -454,15 +454,15 @@
       "target_week": "2019-08-19",
       "actual_cases": 27,
       "actual_tier": "Critical",
-      "expected_cases": 13.375,
-      "p10": 4.0,
-      "p90": 25.0,
-      "pred_tier": "High",
-      "risk_score": 72,
+      "expected_cases": 19.797,
+      "p10": 5.282,
+      "p90": 34.523,
+      "pred_tier": "Critical",
+      "risk_score": 96,
       "within_one_tier": true,
-      "in_80_band": false,
-      "pass": false,
-      "ms": 0.179,
+      "in_80_band": true,
+      "pass": true,
+      "ms": 1.477,
       "ac_refs": [
         "AC-5"
       ]
@@ -477,15 +477,15 @@
       "target_week": "2019-09-09",
       "actual_cases": 10,
       "actual_tier": "High",
-      "expected_cases": 9.0,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "High",
-      "risk_score": 52,
+      "expected_cases": 12.195,
+      "p10": 2.817,
+      "p90": 21.341,
+      "pred_tier": "Critical",
+      "risk_score": 83,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.18,
+      "ms": 1.29,
       "ac_refs": [
         "AC-5"
       ]
@@ -500,15 +500,15 @@
       "target_week": "2019-09-09",
       "actual_cases": 3,
       "actual_tier": "Medium",
-      "expected_cases": 5.625,
-      "p10": 1.0,
-      "p90": 11.0,
-      "pred_tier": "Medium",
-      "risk_score": 27,
+      "expected_cases": 7.1,
+      "p10": 1.175,
+      "p90": 12.502,
+      "pred_tier": "High",
+      "risk_score": 50,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.187,
+      "ms": 1.342,
       "ac_refs": [
         "AC-5"
       ]
@@ -523,15 +523,15 @@
       "target_week": "2020-01-20",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.125,
+      "expected_cases": 0.029,
       "p10": 0.0,
-      "p90": 1.0,
+      "p90": 0.029,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.177,
+      "ms": 1.393,
       "ac_refs": [
         "AC-5"
       ]
@@ -546,15 +546,15 @@
       "target_week": "2020-04-20",
       "actual_cases": 2,
       "actual_tier": "Low",
-      "expected_cases": 0.875,
+      "expected_cases": 1.203,
       "p10": 0.0,
-      "p90": 2.0,
+      "p90": 2.08,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.174,
+      "ms": 1.507,
       "ac_refs": [
         "AC-5"
       ]
@@ -569,15 +569,15 @@
       "target_week": "2020-06-01",
       "actual_cases": 4,
       "actual_tier": "Medium",
-      "expected_cases": 1.375,
+      "expected_cases": 1.27,
       "p10": 0.0,
-      "p90": 3.0,
+      "p90": 2.099,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.18,
+      "ms": 1.213,
       "ac_refs": [
         "AC-5"
       ]
@@ -592,15 +592,15 @@
       "target_week": "2020-06-08",
       "actual_cases": 2,
       "actual_tier": "Low",
-      "expected_cases": 2.0,
+      "expected_cases": 1.486,
       "p10": 0.0,
-      "p90": 4.0,
+      "p90": 2.696,
       "pred_tier": "Low",
-      "risk_score": 1,
+      "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.189,
+      "ms": 1.252,
       "ac_refs": [
         "AC-5"
       ]
@@ -615,15 +615,15 @@
       "target_week": "2020-07-06",
       "actual_cases": 10,
       "actual_tier": "High",
-      "expected_cases": 6.875,
-      "p10": 2.0,
-      "p90": 13.0,
-      "pred_tier": "High",
-      "risk_score": 37,
+      "expected_cases": 7.28,
+      "p10": 1.226,
+      "p90": 12.345,
+      "pred_tier": "Critical",
+      "risk_score": 53,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.212,
+      "ms": 1.177,
       "ac_refs": [
         "AC-5"
       ]
@@ -638,15 +638,15 @@
       "target_week": "2020-07-13",
       "actual_cases": 7,
       "actual_tier": "Medium",
-      "expected_cases": 7.5,
-      "p10": 2.0,
-      "p90": 15.0,
-      "pred_tier": "Medium",
-      "risk_score": 42,
+      "expected_cases": 6.851,
+      "p10": 1.531,
+      "p90": 11.509,
+      "pred_tier": "High",
+      "risk_score": 49,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.19,
+      "ms": 1.363,
       "ac_refs": [
         "AC-5"
       ]
@@ -661,15 +661,15 @@
       "target_week": "2020-08-03",
       "actual_cases": 14,
       "actual_tier": "Critical",
-      "expected_cases": 12.0,
-      "p10": 3.0,
-      "p90": 23.0,
-      "pred_tier": "Critical",
-      "risk_score": 67,
+      "expected_cases": 6.659,
+      "p10": 1.036,
+      "p90": 11.294,
+      "pred_tier": "High",
+      "risk_score": 46,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.187,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.242,
       "ac_refs": [
         "AC-5"
       ]
@@ -684,15 +684,15 @@
       "target_week": "2020-08-10",
       "actual_cases": 5,
       "actual_tier": "Medium",
-      "expected_cases": 7.625,
-      "p10": 2.0,
-      "p90": 15.0,
-      "pred_tier": "High",
+      "expected_cases": 6.362,
+      "p10": 0.942,
+      "p90": 11.211,
+      "pred_tier": "Medium",
       "risk_score": 43,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.184,
+      "ms": 1.23,
       "ac_refs": [
         "AC-5"
       ]
@@ -707,15 +707,15 @@
       "target_week": "2020-08-17",
       "actual_cases": 11,
       "actual_tier": "High",
-      "expected_cases": 11.5,
-      "p10": 3.0,
-      "p90": 22.0,
-      "pred_tier": "Critical",
-      "risk_score": 65,
+      "expected_cases": 5.625,
+      "p10": 1.062,
+      "p90": 9.496,
+      "pred_tier": "Medium",
+      "risk_score": 34,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.184,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.273,
       "ac_refs": [
         "AC-5"
       ]
@@ -730,15 +730,15 @@
       "target_week": "2020-09-07",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 13.375,
-      "p10": 4.0,
-      "p90": 25.0,
+      "expected_cases": 13.154,
+      "p10": 4.089,
+      "p90": 21.827,
       "pred_tier": "Critical",
-      "risk_score": 72,
+      "risk_score": 89,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.182,
+      "ms": 1.286,
       "ac_refs": [
         "AC-5"
       ]
@@ -753,15 +753,15 @@
       "target_week": "2020-09-21",
       "actual_cases": 11,
       "actual_tier": "High",
-      "expected_cases": 11.875,
-      "p10": 3.0,
-      "p90": 22.0,
+      "expected_cases": 12.404,
+      "p10": 2.887,
+      "p90": 21.704,
       "pred_tier": "Critical",
-      "risk_score": 66,
+      "risk_score": 84,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.214,
+      "ms": 1.249,
       "ac_refs": [
         "AC-5"
       ]
@@ -776,15 +776,15 @@
       "target_week": "2020-09-28",
       "actual_cases": 17,
       "actual_tier": "Critical",
-      "expected_cases": 10.5,
-      "p10": 3.0,
-      "p90": 20.0,
+      "expected_cases": 14.733,
+      "p10": 3.637,
+      "p90": 25.742,
       "pred_tier": "Critical",
-      "risk_score": 60,
+      "risk_score": 90,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.187,
+      "ms": 1.318,
       "ac_refs": [
         "AC-5"
       ]
@@ -799,15 +799,15 @@
       "target_week": "2021-01-11",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.0,
+      "expected_cases": 0.029,
       "p10": 0.0,
-      "p90": 0.0,
+      "p90": 0.029,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.172,
+      "ms": 1.232,
       "ac_refs": [
         "AC-5"
       ]
@@ -822,15 +822,15 @@
       "target_week": "2021-07-05",
       "actual_cases": 2,
       "actual_tier": "Low",
-      "expected_cases": 3.375,
+      "expected_cases": 1.9,
       "p10": 0.0,
-      "p90": 7.0,
-      "pred_tier": "Medium",
-      "risk_score": 8,
+      "p90": 3.321,
+      "pred_tier": "Low",
+      "risk_score": 1,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.232,
       "ac_refs": [
         "AC-5"
       ]
@@ -845,15 +845,15 @@
       "target_week": "2021-07-12",
       "actual_cases": 4,
       "actual_tier": "Medium",
-      "expected_cases": 4.625,
-      "p10": 1.0,
-      "p90": 9.0,
+      "expected_cases": 5.162,
+      "p10": 0.564,
+      "p90": 8.762,
       "pred_tier": "Medium",
-      "risk_score": 18,
+      "risk_score": 29,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.205,
+      "ms": 1.2,
       "ac_refs": [
         "AC-5"
       ]
@@ -868,15 +868,15 @@
       "target_week": "2021-08-30",
       "actual_cases": 6,
       "actual_tier": "Medium",
-      "expected_cases": 9.875,
-      "p10": 3.0,
-      "p90": 19.0,
-      "pred_tier": "Critical",
-      "risk_score": 57,
-      "within_one_tier": false,
+      "expected_cases": 5.93,
+      "p10": 1.176,
+      "p90": 9.972,
+      "pred_tier": "Medium",
+      "risk_score": 38,
+      "within_one_tier": true,
       "in_80_band": true,
-      "pass": false,
-      "ms": 0.191,
+      "pass": true,
+      "ms": 1.311,
       "ac_refs": [
         "AC-5"
       ]
@@ -891,15 +891,15 @@
       "target_week": "2021-09-06",
       "actual_cases": 10,
       "actual_tier": "High",
-      "expected_cases": 15.0,
-      "p10": 4.0,
-      "p90": 28.0,
-      "pred_tier": "Critical",
-      "risk_score": 76,
+      "expected_cases": 9.477,
+      "p10": 1.912,
+      "p90": 16.044,
+      "pred_tier": "High",
+      "risk_score": 71,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.18,
+      "ms": 1.19,
       "ac_refs": [
         "AC-5"
       ]
@@ -914,15 +914,15 @@
       "target_week": "2021-09-20",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 7.75,
-      "p10": 2.0,
-      "p90": 15.0,
-      "pred_tier": "Medium",
-      "risk_score": 44,
-      "within_one_tier": false,
+      "expected_cases": 6.776,
+      "p10": 1.072,
+      "p90": 11.496,
+      "pred_tier": "High",
+      "risk_score": 48,
+      "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.183,
+      "ms": 1.203,
       "ac_refs": [
         "AC-5"
       ]
@@ -937,15 +937,15 @@
       "target_week": "2021-09-20",
       "actual_cases": 17,
       "actual_tier": "Critical",
-      "expected_cases": 13.25,
-      "p10": 4.0,
-      "p90": 25.0,
+      "expected_cases": 16.372,
+      "p10": 5.387,
+      "p90": 27.088,
       "pred_tier": "Critical",
-      "risk_score": 71,
+      "risk_score": 95,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.182,
+      "ms": 1.277,
       "ac_refs": [
         "AC-5"
       ]
@@ -960,15 +960,15 @@
       "target_week": "2021-10-11",
       "actual_cases": 10,
       "actual_tier": "High",
-      "expected_cases": 6.5,
-      "p10": 1.0,
-      "p90": 13.0,
-      "pred_tier": "Medium",
-      "risk_score": 34,
+      "expected_cases": 9.138,
+      "p10": 2.453,
+      "p90": 15.253,
+      "pred_tier": "Critical",
+      "risk_score": 70,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.184,
+      "ms": 1.467,
       "ac_refs": [
         "AC-5"
       ]
@@ -983,15 +983,15 @@
       "target_week": "2022-04-18",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.25,
+      "expected_cases": 0.417,
       "p10": 0.0,
-      "p90": 1.0,
+      "p90": 0.742,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.377,
       "ac_refs": [
         "AC-5"
       ]
@@ -1006,15 +1006,15 @@
       "target_week": "2022-06-13",
       "actual_cases": 6,
       "actual_tier": "Medium",
-      "expected_cases": 1.375,
+      "expected_cases": 2.67,
       "p10": 0.0,
-      "p90": 3.0,
+      "p90": 4.775,
       "pred_tier": "Low",
-      "risk_score": 0,
+      "risk_score": 4,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.176,
+      "ms": 1.385,
       "ac_refs": [
         "AC-5"
       ]
@@ -1029,15 +1029,15 @@
       "target_week": "2022-06-13",
       "actual_cases": 4,
       "actual_tier": "Medium",
-      "expected_cases": 1.125,
-      "p10": 0.0,
-      "p90": 3.0,
-      "pred_tier": "Low",
-      "risk_score": 0,
+      "expected_cases": 5.277,
+      "p10": 0.599,
+      "p90": 8.943,
+      "pred_tier": "High",
+      "risk_score": 30,
       "within_one_tier": true,
-      "in_80_band": false,
-      "pass": false,
-      "ms": 0.175,
+      "in_80_band": true,
+      "pass": true,
+      "ms": 1.357,
       "ac_refs": [
         "AC-5"
       ]
@@ -1052,15 +1052,15 @@
       "target_week": "2022-06-27",
       "actual_cases": 22,
       "actual_tier": "Critical",
-      "expected_cases": 9.125,
-      "p10": 2.0,
-      "p90": 18.0,
-      "pred_tier": "High",
-      "risk_score": 53,
+      "expected_cases": 20.843,
+      "p10": 5.62,
+      "p90": 36.335,
+      "pred_tier": "Critical",
+      "risk_score": 97,
       "within_one_tier": true,
-      "in_80_band": false,
-      "pass": false,
-      "ms": 0.178,
+      "in_80_band": true,
+      "pass": true,
+      "ms": 1.349,
       "ac_refs": [
         "AC-5"
       ]
@@ -1075,15 +1075,15 @@
       "target_week": "2022-06-27",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 6.0,
-      "p10": 1.0,
-      "p90": 12.0,
-      "pred_tier": "Medium",
-      "risk_score": 30,
-      "within_one_tier": false,
-      "in_80_band": false,
-      "pass": false,
-      "ms": 0.179,
+      "expected_cases": 13.191,
+      "p10": 3.075,
+      "p90": 22.324,
+      "pred_tier": "Critical",
+      "risk_score": 87,
+      "within_one_tier": true,
+      "in_80_band": true,
+      "pass": true,
+      "ms": 1.872,
       "ac_refs": [
         "AC-5"
       ]
@@ -1098,15 +1098,15 @@
       "target_week": "2022-08-22",
       "actual_cases": 13,
       "actual_tier": "High",
-      "expected_cases": 12.0,
-      "p10": 3.0,
-      "p90": 23.0,
-      "pred_tier": "High",
-      "risk_score": 67,
+      "expected_cases": 14.714,
+      "p10": 3.631,
+      "p90": 25.71,
+      "pred_tier": "Critical",
+      "risk_score": 90,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.373,
       "ac_refs": [
         "AC-5"
       ]
@@ -1121,15 +1121,15 @@
       "target_week": "2022-09-12",
       "actual_cases": 2,
       "actual_tier": "Low",
-      "expected_cases": 6.5,
-      "p10": 1.0,
-      "p90": 13.0,
-      "pred_tier": "High",
-      "risk_score": 34,
-      "within_one_tier": false,
+      "expected_cases": 5.829,
+      "p10": 0.771,
+      "p90": 9.882,
+      "pred_tier": "Medium",
+      "risk_score": 37,
+      "within_one_tier": true,
       "in_80_band": true,
-      "pass": false,
-      "ms": 0.18,
+      "pass": true,
+      "ms": 1.869,
       "ac_refs": [
         "AC-5"
       ]
@@ -1144,15 +1144,15 @@
       "target_week": "2022-09-26",
       "actual_cases": 8,
       "actual_tier": "High",
-      "expected_cases": 10.25,
-      "p10": 3.0,
-      "p90": 20.0,
-      "pred_tier": "Critical",
-      "risk_score": 59,
+      "expected_cases": 7.862,
+      "p10": 1.405,
+      "p90": 13.329,
+      "pred_tier": "High",
+      "risk_score": 58,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.179,
+      "ms": 1.311,
       "ac_refs": [
         "AC-5"
       ]
@@ -1167,15 +1167,15 @@
       "target_week": "2023-02-13",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.125,
+      "expected_cases": 0.066,
       "p10": 0.0,
-      "p90": 1.0,
+      "p90": 0.066,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.17,
+      "ms": 1.428,
       "ac_refs": [
         "AC-5"
       ]
@@ -1190,15 +1190,15 @@
       "target_week": "2023-06-12",
       "actual_cases": 1,
       "actual_tier": "Low",
-      "expected_cases": 0.375,
+      "expected_cases": 0.969,
       "p10": 0.0,
-      "p90": 1.0,
+      "p90": 1.76,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.171,
+      "ms": 1.252,
       "ac_refs": [
         "AC-5"
       ]
@@ -1213,15 +1213,15 @@
       "target_week": "2023-06-19",
       "actual_cases": 5,
       "actual_tier": "Medium",
-      "expected_cases": 3.625,
-      "p10": 1.0,
-      "p90": 7.0,
-      "pred_tier": "Medium",
-      "risk_score": 10,
+      "expected_cases": 2.315,
+      "p10": 0.0,
+      "p90": 3.974,
+      "pred_tier": "Low",
+      "risk_score": 2,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.184,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.304,
       "ac_refs": [
         "AC-5"
       ]
@@ -1236,15 +1236,15 @@
       "target_week": "2023-06-26",
       "actual_cases": 4,
       "actual_tier": "Medium",
-      "expected_cases": 4.0,
-      "p10": 1.0,
-      "p90": 8.0,
+      "expected_cases": 4.717,
+      "p10": 0.407,
+      "p90": 8.356,
       "pred_tier": "Medium",
-      "risk_score": 13,
+      "risk_score": 24,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.179,
+      "ms": 1.269,
       "ac_refs": [
         "AC-5"
       ]
@@ -1259,15 +1259,15 @@
       "target_week": "2023-06-26",
       "actual_cases": 10,
       "actual_tier": "High",
-      "expected_cases": 7.625,
-      "p10": 2.0,
-      "p90": 15.0,
-      "pred_tier": "Medium",
-      "risk_score": 43,
+      "expected_cases": 8.049,
+      "p10": 2.031,
+      "p90": 13.474,
+      "pred_tier": "High",
+      "risk_score": 61,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.179,
+      "ms": 1.278,
       "ac_refs": [
         "AC-5"
       ]
@@ -1282,15 +1282,15 @@
       "target_week": "2023-07-31",
       "actual_cases": 14,
       "actual_tier": "Critical",
-      "expected_cases": 9.25,
-      "p10": 2.0,
-      "p90": 18.0,
-      "pred_tier": "High",
-      "risk_score": 53,
+      "expected_cases": 13.665,
+      "p10": 4.289,
+      "p90": 22.667,
+      "pred_tier": "Critical",
+      "risk_score": 90,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.289,
       "ac_refs": [
         "AC-5"
       ]
@@ -1305,15 +1305,15 @@
       "target_week": "2023-08-07",
       "actual_cases": 12,
       "actual_tier": "High",
-      "expected_cases": 9.0,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "High",
-      "risk_score": 52,
+      "expected_cases": 13.707,
+      "p10": 3.306,
+      "p90": 23.955,
+      "pred_tier": "Critical",
+      "risk_score": 87,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.176,
+      "ms": 1.263,
       "ac_refs": [
         "AC-5"
       ]
@@ -1328,15 +1328,15 @@
       "target_week": "2023-09-11",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 12.125,
-      "p10": 3.0,
-      "p90": 23.0,
+      "expected_cases": 16.207,
+      "p10": 4.119,
+      "p90": 28.297,
       "pred_tier": "Critical",
-      "risk_score": 67,
+      "risk_score": 92,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.175,
+      "ms": 1.389,
       "ac_refs": [
         "AC-5"
       ]
@@ -1351,15 +1351,15 @@
       "target_week": "2024-01-01",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.0,
+      "expected_cases": 0.029,
       "p10": 0.0,
-      "p90": 0.0,
+      "p90": 0.029,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.168,
+      "ms": 1.178,
       "ac_refs": [
         "AC-5"
       ]
@@ -1374,15 +1374,15 @@
       "target_week": "2024-01-08",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.0,
+      "expected_cases": 0.03,
       "p10": 0.0,
-      "p90": 0.0,
+      "p90": 0.03,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.166,
+      "ms": 1.23,
       "ac_refs": [
         "AC-5"
       ]
@@ -1397,15 +1397,15 @@
       "target_week": "2024-01-15",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.0,
+      "expected_cases": 0.03,
       "p10": 0.0,
-      "p90": 0.0,
+      "p90": 0.03,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.169,
+      "ms": 1.264,
       "ac_refs": [
         "AC-5"
       ]
@@ -1420,15 +1420,15 @@
       "target_week": "2024-02-12",
       "actual_cases": 0,
       "actual_tier": "Low",
-      "expected_cases": 0.125,
+      "expected_cases": 0.093,
       "p10": 0.0,
-      "p90": 1.0,
+      "p90": 0.093,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.169,
+      "ms": 1.157,
       "ac_refs": [
         "AC-5"
       ]
@@ -1443,15 +1443,15 @@
       "target_week": "2024-04-22",
       "actual_cases": 4,
       "actual_tier": "Medium",
-      "expected_cases": 1.0,
+      "expected_cases": 1.147,
       "p10": 0.0,
-      "p90": 3.0,
+      "p90": 1.894,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.175,
+      "ms": 1.353,
       "ac_refs": [
         "AC-5"
       ]
@@ -1466,15 +1466,15 @@
       "target_week": "2024-07-08",
       "actual_cases": 7,
       "actual_tier": "Medium",
-      "expected_cases": 3.75,
-      "p10": 1.0,
-      "p90": 8.0,
-      "pred_tier": "High",
-      "risk_score": 11,
+      "expected_cases": 3.34,
+      "p10": 0.163,
+      "p90": 5.723,
+      "pred_tier": "Medium",
+      "risk_score": 8,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.181,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.303,
       "ac_refs": [
         "AC-5"
       ]
@@ -1489,15 +1489,15 @@
       "target_week": "2024-07-08",
       "actual_cases": 7,
       "actual_tier": "Medium",
-      "expected_cases": 9.0,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "Critical",
-      "risk_score": 52,
-      "within_one_tier": false,
+      "expected_cases": 6.094,
+      "p10": 0.85,
+      "p90": 10.749,
+      "pred_tier": "Medium",
+      "risk_score": 40,
+      "within_one_tier": true,
       "in_80_band": true,
-      "pass": false,
-      "ms": 0.177,
+      "pass": true,
+      "ms": 1.307,
       "ac_refs": [
         "AC-5"
       ]
@@ -1512,15 +1512,15 @@
       "target_week": "2024-07-15",
       "actual_cases": 8,
       "actual_tier": "High",
-      "expected_cases": 7.625,
-      "p10": 2.0,
-      "p90": 15.0,
+      "expected_cases": 4.413,
+      "p10": 0.337,
+      "p90": 7.501,
       "pred_tier": "Medium",
-      "risk_score": 43,
+      "risk_score": 20,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.177,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.283,
       "ac_refs": [
         "AC-5"
       ]
@@ -1535,15 +1535,15 @@
       "target_week": "2024-07-15",
       "actual_cases": 15,
       "actual_tier": "Critical",
-      "expected_cases": 8.25,
-      "p10": 2.0,
-      "p90": 16.0,
-      "pred_tier": "Critical",
-      "risk_score": 47,
+      "expected_cases": 6.945,
+      "p10": 1.124,
+      "p90": 11.776,
+      "pred_tier": "High",
+      "risk_score": 49,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.176,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.242,
       "ac_refs": [
         "AC-5"
       ]
@@ -1558,15 +1558,15 @@
       "target_week": "2024-07-22",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 11.75,
-      "p10": 3.0,
-      "p90": 22.0,
-      "pred_tier": "High",
-      "risk_score": 66,
+      "expected_cases": 14.248,
+      "p10": 4.523,
+      "p90": 23.622,
+      "pred_tier": "Critical",
+      "risk_score": 92,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.185,
+      "ms": 1.493,
       "ac_refs": [
         "AC-5"
       ]
@@ -1581,15 +1581,15 @@
       "target_week": "2024-07-29",
       "actual_cases": 14,
       "actual_tier": "Critical",
-      "expected_cases": 18.25,
-      "p10": 5.0,
-      "p90": 34.0,
-      "pred_tier": "Critical",
-      "risk_score": 83,
+      "expected_cases": 10.324,
+      "p10": 2.213,
+      "p90": 18.087,
+      "pred_tier": "High",
+      "risk_score": 75,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.181,
+      "ms": 1.282,
       "ac_refs": [
         "AC-5"
       ]
@@ -1604,15 +1604,15 @@
       "target_week": "2024-08-05",
       "actual_cases": 17,
       "actual_tier": "Critical",
-      "expected_cases": 15.5,
-      "p10": 5.0,
-      "p90": 29.0,
+      "expected_cases": 11.815,
+      "p10": 2.64,
+      "p90": 19.991,
       "pred_tier": "Critical",
-      "risk_score": 78,
+      "risk_score": 83,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.186,
       "ac_refs": [
         "AC-5"
       ]
@@ -1627,15 +1627,15 @@
       "target_week": "2024-08-12",
       "actual_cases": 9,
       "actual_tier": "High",
-      "expected_cases": 6.75,
-      "p10": 2.0,
-      "p90": 13.0,
-      "pred_tier": "High",
-      "risk_score": 36,
+      "expected_cases": 4.489,
+      "p10": 0.589,
+      "p90": 7.627,
+      "pred_tier": "Medium",
+      "risk_score": 20,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.179,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.502,
       "ac_refs": [
         "AC-5"
       ]
@@ -1650,15 +1650,15 @@
       "target_week": "2024-08-12",
       "actual_cases": 15,
       "actual_tier": "Critical",
-      "expected_cases": 12.125,
-      "p10": 3.0,
-      "p90": 23.0,
-      "pred_tier": "Critical",
+      "expected_cases": 8.801,
+      "p10": 2.32,
+      "p90": 14.704,
+      "pred_tier": "High",
       "risk_score": 67,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.178,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.462,
       "ac_refs": [
         "AC-5"
       ]
@@ -1673,15 +1673,15 @@
       "target_week": "2024-08-19",
       "actual_cases": 19,
       "actual_tier": "Critical",
-      "expected_cases": 13.75,
-      "p10": 4.0,
-      "p90": 26.0,
-      "pred_tier": "Critical",
-      "risk_score": 73,
+      "expected_cases": 9.531,
+      "p10": 1.961,
+      "p90": 16.719,
+      "pred_tier": "High",
+      "risk_score": 70,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.178,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.266,
       "ac_refs": [
         "AC-5"
       ]
@@ -1696,15 +1696,15 @@
       "target_week": "2024-08-26",
       "actual_cases": 29,
       "actual_tier": "Critical",
-      "expected_cases": 12.5,
-      "p10": 4.0,
-      "p90": 24.0,
-      "pred_tier": "High",
-      "risk_score": 69,
+      "expected_cases": 15.555,
+      "p10": 3.814,
+      "p90": 26.315,
+      "pred_tier": "Critical",
+      "risk_score": 92,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.176,
+      "ms": 1.159,
       "ac_refs": [
         "AC-5"
       ]
@@ -1719,15 +1719,15 @@
       "target_week": "2024-09-02",
       "actual_cases": 11,
       "actual_tier": "High",
-      "expected_cases": 13.5,
-      "p10": 4.0,
-      "p90": 25.0,
+      "expected_cases": 21.153,
+      "p10": 5.722,
+      "p90": 36.869,
       "pred_tier": "Critical",
-      "risk_score": 72,
+      "risk_score": 97,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.253,
       "ac_refs": [
         "AC-5"
       ]
@@ -1742,15 +1742,15 @@
       "target_week": "2024-09-02",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 13.125,
-      "p10": 4.0,
-      "p90": 25.0,
-      "pred_tier": "High",
-      "risk_score": 71,
+      "expected_cases": 13.931,
+      "p10": 4.396,
+      "p90": 23.096,
+      "pred_tier": "Critical",
+      "risk_score": 91,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.175,
+      "ms": 1.541,
       "ac_refs": [
         "AC-5"
       ]
@@ -1765,15 +1765,15 @@
       "target_week": "2024-09-09",
       "actual_cases": 12,
       "actual_tier": "High",
-      "expected_cases": 12.125,
-      "p10": 3.0,
-      "p90": 23.0,
-      "pred_tier": "Critical",
-      "risk_score": 67,
+      "expected_cases": 10.31,
+      "p10": 2.173,
+      "p90": 17.464,
+      "pred_tier": "High",
+      "risk_score": 76,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.177,
+      "ms": 1.137,
       "ac_refs": [
         "AC-5"
       ]
@@ -1788,15 +1788,15 @@
       "target_week": "2024-09-16",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 12.5,
-      "p10": 4.0,
-      "p90": 24.0,
+      "expected_cases": 15.157,
+      "p10": 3.776,
+      "p90": 26.479,
       "pred_tier": "Critical",
-      "risk_score": 69,
+      "risk_score": 91,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.176,
+      "ms": 1.222,
       "ac_refs": [
         "AC-5"
       ]
@@ -1811,15 +1811,15 @@
       "target_week": "2024-09-23",
       "actual_cases": 14,
       "actual_tier": "Critical",
-      "expected_cases": 9.625,
-      "p10": 3.0,
-      "p90": 18.0,
-      "pred_tier": "Critical",
-      "risk_score": 56,
+      "expected_cases": 8.192,
+      "p10": 1.507,
+      "p90": 13.878,
+      "pred_tier": "High",
+      "risk_score": 61,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.177,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.133,
       "ac_refs": [
         "AC-5"
       ]
@@ -1834,15 +1834,15 @@
       "target_week": "2024-09-23",
       "actual_cases": 4,
       "actual_tier": "Medium",
-      "expected_cases": 7.5,
-      "p10": 2.0,
-      "p90": 15.0,
+      "expected_cases": 7.392,
+      "p10": 1.26,
+      "p90": 12.536,
       "pred_tier": "High",
-      "risk_score": 42,
+      "risk_score": 54,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.177,
+      "ms": 1.195,
       "ac_refs": [
         "AC-5"
       ]
@@ -1857,15 +1857,15 @@
       "target_week": "2024-10-07",
       "actual_cases": 8,
       "actual_tier": "High",
-      "expected_cases": 8.625,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "High",
-      "risk_score": 50,
+      "expected_cases": 4.948,
+      "p10": 0.777,
+      "p90": 8.381,
+      "pred_tier": "Medium",
+      "risk_score": 26,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.176,
+      "ms": 1.438,
       "ac_refs": [
         "AC-5"
       ]
@@ -1880,15 +1880,15 @@
       "target_week": "2025-04-21",
       "actual_cases": 1,
       "actual_tier": "Low",
-      "expected_cases": 0.375,
+      "expected_cases": 0.321,
       "p10": 0.0,
-      "p90": 1.0,
+      "p90": 0.573,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.17,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.37,
       "ac_refs": [
         "AC-5"
       ]
@@ -1903,15 +1903,15 @@
       "target_week": "2025-05-12",
       "actual_cases": 1,
       "actual_tier": "Low",
-      "expected_cases": 0.875,
+      "expected_cases": 1.117,
       "p10": 0.0,
-      "p90": 2.0,
+      "p90": 1.967,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.171,
+      "ms": 1.232,
       "ac_refs": [
         "AC-5"
       ]
@@ -1926,15 +1926,15 @@
       "target_week": "2025-06-16",
       "actual_cases": 3,
       "actual_tier": "Medium",
-      "expected_cases": 2.5,
+      "expected_cases": 1.319,
       "p10": 0.0,
-      "p90": 5.0,
+      "p90": 2.333,
       "pred_tier": "Low",
-      "risk_score": 3,
+      "risk_score": 0,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.175,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.36,
       "ac_refs": [
         "AC-5"
       ]
@@ -1949,15 +1949,15 @@
       "target_week": "2025-06-23",
       "actual_cases": 10,
       "actual_tier": "High",
-      "expected_cases": 8.25,
-      "p10": 2.0,
-      "p90": 16.0,
+      "expected_cases": 7.869,
+      "p10": 1.416,
+      "p90": 13.829,
       "pred_tier": "High",
-      "risk_score": 47,
+      "risk_score": 58,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.228,
       "ac_refs": [
         "AC-5"
       ]
@@ -1972,15 +1972,15 @@
       "target_week": "2025-06-23",
       "actual_cases": 20,
       "actual_tier": "Critical",
-      "expected_cases": 9.25,
-      "p10": 2.0,
-      "p90": 18.0,
+      "expected_cases": 8.356,
+      "p10": 2.148,
+      "p90": 13.96,
       "pred_tier": "High",
-      "risk_score": 53,
+      "risk_score": 64,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.178,
+      "ms": 2.188,
       "ac_refs": [
         "AC-5"
       ]
@@ -1995,15 +1995,15 @@
       "target_week": "2025-06-30",
       "actual_cases": 23,
       "actual_tier": "Critical",
-      "expected_cases": 7.125,
-      "p10": 2.0,
-      "p90": 14.0,
-      "pred_tier": "Medium",
-      "risk_score": 39,
-      "within_one_tier": false,
-      "in_80_band": false,
-      "pass": false,
-      "ms": 0.179,
+      "expected_cases": 26.208,
+      "p10": 7.364,
+      "p90": 45.635,
+      "pred_tier": "Critical",
+      "risk_score": 99,
+      "within_one_tier": true,
+      "in_80_band": true,
+      "pass": true,
+      "ms": 1.222,
       "ac_refs": [
         "AC-5"
       ]
@@ -2018,15 +2018,15 @@
       "target_week": "2025-06-30",
       "actual_cases": 12,
       "actual_tier": "High",
-      "expected_cases": 7.0,
-      "p10": 2.0,
-      "p90": 14.0,
-      "pred_tier": "Medium",
-      "risk_score": 38,
+      "expected_cases": 17.143,
+      "p10": 4.312,
+      "p90": 28.987,
+      "pred_tier": "Critical",
+      "risk_score": 95,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.192,
+      "ms": 1.15,
       "ac_refs": [
         "AC-5"
       ]
@@ -2041,15 +2041,15 @@
       "target_week": "2025-07-07",
       "actual_cases": 16,
       "actual_tier": "Critical",
-      "expected_cases": 9.0,
-      "p10": 2.0,
-      "p90": 17.0,
+      "expected_cases": 19.266,
+      "p10": 4.98,
+      "p90": 32.577,
       "pred_tier": "Critical",
-      "risk_score": 52,
+      "risk_score": 96,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.196,
+      "ms": 1.148,
       "ac_refs": [
         "AC-5"
       ]
@@ -2064,15 +2064,15 @@
       "target_week": "2025-07-14",
       "actual_cases": 21,
       "actual_tier": "Critical",
-      "expected_cases": 9.625,
-      "p10": 3.0,
-      "p90": 18.0,
-      "pred_tier": "Critical",
-      "risk_score": 56,
+      "expected_cases": 9.483,
+      "p10": 2.592,
+      "p90": 15.817,
+      "pred_tier": "High",
+      "risk_score": 72,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.181,
+      "ms": 2.129,
       "ac_refs": [
         "AC-5"
       ]
@@ -2087,15 +2087,15 @@
       "target_week": "2025-07-14",
       "actual_cases": 6,
       "actual_tier": "Medium",
-      "expected_cases": 7.75,
-      "p10": 2.0,
-      "p90": 15.0,
-      "pred_tier": "Medium",
-      "risk_score": 44,
-      "within_one_tier": true,
+      "expected_cases": 13.987,
+      "p10": 3.395,
+      "p90": 24.451,
+      "pred_tier": "Critical",
+      "risk_score": 88,
+      "within_one_tier": false,
       "in_80_band": true,
-      "pass": true,
-      "ms": 0.196,
+      "pass": false,
+      "ms": 1.229,
       "ac_refs": [
         "AC-5"
       ]
@@ -2110,15 +2110,15 @@
       "target_week": "2025-07-21",
       "actual_cases": 14,
       "actual_tier": "Critical",
-      "expected_cases": 8.625,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "High",
-      "risk_score": 50,
+      "expected_cases": 11.945,
+      "p10": 2.734,
+      "p90": 20.901,
+      "pred_tier": "Critical",
+      "risk_score": 82,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.182,
+      "ms": 1.279,
       "ac_refs": [
         "AC-5"
       ]
@@ -2133,15 +2133,15 @@
       "target_week": "2025-07-28",
       "actual_cases": 15,
       "actual_tier": "Critical",
-      "expected_cases": 13.125,
-      "p10": 4.0,
-      "p90": 25.0,
+      "expected_cases": 9.015,
+      "p10": 1.765,
+      "p90": 15.274,
       "pred_tier": "High",
-      "risk_score": 71,
+      "risk_score": 68,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.2,
       "ac_refs": [
         "AC-5"
       ]
@@ -2156,15 +2156,15 @@
       "target_week": "2025-08-04",
       "actual_cases": 8,
       "actual_tier": "High",
-      "expected_cases": 16.5,
-      "p10": 5.0,
-      "p90": 31.0,
-      "pred_tier": "Critical",
-      "risk_score": 80,
+      "expected_cases": 9.843,
+      "p10": 2.741,
+      "p90": 16.413,
+      "pred_tier": "High",
+      "risk_score": 75,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.174,
+      "ms": 2.236,
       "ac_refs": [
         "AC-5"
       ]
@@ -2179,15 +2179,15 @@
       "target_week": "2025-08-18",
       "actual_cases": 16,
       "actual_tier": "Critical",
-      "expected_cases": 14.25,
-      "p10": 4.0,
-      "p90": 27.0,
-      "pred_tier": "Critical",
-      "risk_score": 74,
+      "expected_cases": 9.62,
+      "p10": 2.648,
+      "p90": 16.031,
+      "pred_tier": "High",
+      "risk_score": 73,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.175,
+      "ms": 1.636,
       "ac_refs": [
         "AC-5"
       ]
@@ -2202,15 +2202,15 @@
       "target_week": "2025-08-18",
       "actual_cases": 7,
       "actual_tier": "Medium",
-      "expected_cases": 11.625,
-      "p10": 3.0,
-      "p90": 22.0,
-      "pred_tier": "Critical",
-      "risk_score": 65,
-      "within_one_tier": false,
+      "expected_cases": 6.434,
+      "p10": 0.966,
+      "p90": 10.904,
+      "pred_tier": "Medium",
+      "risk_score": 44,
+      "within_one_tier": true,
       "in_80_band": true,
-      "pass": false,
-      "ms": 0.177,
+      "pass": true,
+      "ms": 1.422,
       "ac_refs": [
         "AC-5"
       ]
@@ -2225,15 +2225,15 @@
       "target_week": "2025-08-25",
       "actual_cases": 17,
       "actual_tier": "Critical",
-      "expected_cases": 13.75,
-      "p10": 4.0,
-      "p90": 26.0,
-      "pred_tier": "Critical",
+      "expected_cases": 10.08,
+      "p10": 2.136,
+      "p90": 17.673,
+      "pred_tier": "High",
       "risk_score": 73,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.175,
+      "ms": 1.471,
       "ac_refs": [
         "AC-5"
       ]
@@ -2248,15 +2248,15 @@
       "target_week": "2025-09-01",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 13.5,
-      "p10": 4.0,
-      "p90": 25.0,
-      "pred_tier": "High",
-      "risk_score": 72,
+      "expected_cases": 12.651,
+      "p10": 2.905,
+      "p90": 21.414,
+      "pred_tier": "Critical",
+      "risk_score": 86,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.177,
+      "ms": 1.264,
       "ac_refs": [
         "AC-5"
       ]
@@ -2271,15 +2271,15 @@
       "target_week": "2025-09-01",
       "actual_cases": 9,
       "actual_tier": "High",
-      "expected_cases": 13.125,
-      "p10": 4.0,
-      "p90": 25.0,
-      "pred_tier": "Critical",
-      "risk_score": 71,
+      "expected_cases": 9.213,
+      "p10": 1.854,
+      "p90": 16.162,
+      "pred_tier": "High",
+      "risk_score": 68,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.174,
+      "ms": 1.365,
       "ac_refs": [
         "AC-5"
       ]
@@ -2294,15 +2294,15 @@
       "target_week": "2025-09-08",
       "actual_cases": 7,
       "actual_tier": "Medium",
-      "expected_cases": 6.125,
-      "p10": 1.0,
-      "p90": 12.0,
-      "pred_tier": "High",
-      "risk_score": 31,
+      "expected_cases": 5.692,
+      "p10": 1.087,
+      "p90": 9.606,
+      "pred_tier": "Medium",
+      "risk_score": 35,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.208,
+      "ms": 2.256,
       "ac_refs": [
         "AC-5"
       ]
@@ -2317,15 +2317,15 @@
       "target_week": "2025-09-08",
       "actual_cases": 18,
       "actual_tier": "Critical",
-      "expected_cases": 9.75,
-      "p10": 3.0,
-      "p90": 19.0,
-      "pred_tier": "Critical",
-      "risk_score": 56,
+      "expected_cases": 8.914,
+      "p10": 2.365,
+      "p90": 14.88,
+      "pred_tier": "High",
+      "risk_score": 68,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.188,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 2.367,
       "ac_refs": [
         "AC-5"
       ]
@@ -2340,15 +2340,15 @@
       "target_week": "2025-09-08",
       "actual_cases": 11,
       "actual_tier": "High",
-      "expected_cases": 9.0,
-      "p10": 2.0,
-      "p90": 17.0,
-      "pred_tier": "High",
-      "risk_score": 52,
+      "expected_cases": 10.575,
+      "p10": 2.254,
+      "p90": 17.902,
+      "pred_tier": "Critical",
+      "risk_score": 77,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.188,
+      "ms": 1.238,
       "ac_refs": [
         "AC-5"
       ]
@@ -2363,15 +2363,15 @@
       "target_week": "2025-09-15",
       "actual_cases": 14,
       "actual_tier": "Critical",
-      "expected_cases": 13.25,
-      "p10": 4.0,
-      "p90": 25.0,
+      "expected_cases": 11.679,
+      "p10": 2.647,
+      "p90": 20.447,
       "pred_tier": "Critical",
-      "risk_score": 71,
+      "risk_score": 81,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.178,
+      "ms": 1.259,
       "ac_refs": [
         "AC-5"
       ]
@@ -2386,15 +2386,15 @@
       "target_week": "2025-09-29",
       "actual_cases": 16,
       "actual_tier": "Critical",
-      "expected_cases": 12.375,
-      "p10": 3.0,
-      "p90": 23.0,
+      "expected_cases": 8.865,
+      "p10": 1.718,
+      "p90": 15.008,
       "pred_tier": "High",
-      "risk_score": 68,
+      "risk_score": 67,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.18,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.193,
       "ac_refs": [
         "AC-5"
       ]
@@ -2409,15 +2409,15 @@
       "target_week": "2025-10-20",
       "actual_cases": 1,
       "actual_tier": "Low",
-      "expected_cases": 0.5,
+      "expected_cases": 0.632,
       "p10": 0.0,
-      "p90": 2.0,
+      "p90": 0.95,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.196,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 1.156,
       "ac_refs": [
         "AC-5"
       ]
@@ -2432,15 +2432,15 @@
       "target_week": "2025-10-20",
       "actual_cases": 1,
       "actual_tier": "Low",
-      "expected_cases": 0.5,
+      "expected_cases": 0.257,
       "p10": 0.0,
-      "p90": 2.0,
+      "p90": 0.423,
       "pred_tier": "Low",
       "risk_score": 0,
       "within_one_tier": true,
-      "in_80_band": true,
-      "pass": true,
-      "ms": 0.226,
+      "in_80_band": false,
+      "pass": false,
+      "ms": 2.039,
       "ac_refs": [
         "AC-5"
       ]
