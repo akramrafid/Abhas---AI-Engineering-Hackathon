@@ -24,45 +24,56 @@ This file is short on purpose. The detailed playbooks are **skills** (§2). Load
 2. the first line of your prompt says `ROLE: <NAME>`, or
 3. you were started by the human in the `lead` worktree (or via `/kickoff`) → **LEAD**.
 
-## 2. Roles, skills, models, fallbacks
+## 2. Seats, skills, models, fallbacks
 
-Three subscriptions = separate quota pools. Spread parallel work across pools.
+Sixteen roles in five hats (Frame · Design · Build · Prove · Ship) are filled by the seats below. The full
+role → skill → hand-off → gate map is in skill `swarm-lead` and `node .orca-team/tools/gates.mjs list`.
+**Models live in one file: `.agents/skills/swarm-lead/references/model-routing.md`** — change them there only;
+this table mirrors it.
 
-| Role | Owns | Load these skills | Orca `--agent` | Primary model | Fallback ladder (move right when out of quota) |
-|---|---|---|---|---|---|
-| **LEAD** | plan, contracts, skeleton, dispatch, merge, ship | `swarm-lead`, `credentials-gate`, `architecture-blueprint` | `claude` | `opus`, effort `high` | agy `AG_OPUS` → agy `ARGON` → opencode `OC_STRONG` |
-| **BUILDER-CORE** | API, domain logic, LLM / RAG / agent pipelines | `production-standards` + per task: `backend-api`, `llm-engineering`, `rag-pipeline`, `ai-agents`, `data-layer` | `claude` | `sonnet`, effort `high` | agy `AG_SONNET` → opencode `OC_STRONG` → agy `G_PRO` |
-| **BUILDER-UI** | frontend, UX, client state | `production-standards`, `frontend-app` | `antigravity` | `G_HYDROGEN`, effort `xhigh` | agy `G_PRO` → claude `sonnet` → opencode `OC_STRONG` |
-| **BUILDER-DATA** (optional) | DB schema, migrations, ingestion/ETL, seed data | `production-standards`, `data-layer`, `rag-pipeline` | `opencode` | `OC_STRONG` | agy `G_HYDROGEN` (high) → claude `sonnet` |
-| **BUILDER-QA** | tests, evals, CI, Docker, scripts, README, demo | `production-standards`, `testing-qa`, `devops-deploy`, `demo-readiness` | `opencode` | `OC_STRONG` | claude `haiku` → agy `G_FLASH` → claude `sonnet` |
-| **REVIEWER-CODE** | correctness / quality review | `production-standards`, `code-review` | `claude` | `best`, effort `xhigh` | claude `opus` (xhigh) → agy `AG_OPUS` → agy `ARGON` |
-| **REVIEWER-SEC** | security review | `security-review` | `antigravity` | `ARGON` | agy `G_PRO` → claude `opus` (xhigh) → opencode `OC_STRONG` |
-| **SCOUT** (optional) | read-only lookups, docs, codebase Q&A | — | `claude` | `haiku` | agy `G_FLASH` → opencode `OC_STRONG` |
+| Seat | Roles it fills | Load these skills | Primary: agent · model · effort | Out of quota → (in order) |
+|---|---|---|---|---|
+| **LEAD** | 1 PRD · 3 architecture · 8 integration; dispatch, merge, ship | `swarm-lead`, `credentials-gate`, `product-requirements`, `solution-architecture`, `tech-lead-integration` | claude · `opus` · max | agy · Gemini 4 Neon · max → opencode · Muse Wonder · max |
+| **DESIGN** | 4 system design · PRD and architecture critiques (read-only) | `system-design` | agy · Gemini 4 Neon · max | opencode · Muse Wonder · max → claude · `opus` · max |
+| **UI** | 2 UX · 10 frontend | `ux-flow-design` / `frontend-engineering` + `frontend-design`, `vercel-react-best-practices`, `web-design-guidelines` | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → opencode · Muse Wonder · max |
+| **UI-2** (optional, second UI slice) | 10 frontend | as UI | agy · Gemini 4 Hydrogen · xhigh | agy · Gemini 4 Neon · xhigh |
+| **CORE** | 5 AI engineer · 9 backend · 15 LLMOps | `ai-engineering` / `backend-engineering` / `llmops-observability` (+ `claude-api`, `qdrant-clients-sdk`, `mcp-builder` when used) | claude · `sonnet` · max | agy · Gemini 4 Neon · xhigh → opencode · Kimi K3.1 Pro · max |
+| **DATA** | 6 data · 7 database | `data-engineering` / `database-engineering` + `supabase-postgres-best-practices` | opencode · Kimi K3.1 Pro · max | agy · Gemini 4 Neon · xhigh → opencode · Muse Wonder · max |
+| **QA** | 11 evals · 12 SQA · 14 deploy prep · 16 demo & docs | `eval-engineering` / `sqa-testing` / `vercel-deploy` / `demo-docs` (+ `webapp-testing`, `property-based-testing`) | opencode · Kimi K3.1 Pro · max | agy · Gemini 4 Neon · xhigh → agy · Gemini 4 Hydrogen · xhigh |
+| **REVIEWER-CODE** | code review of all code | `code-review`, `production-standards`, `find-bugs`, `web-design-guidelines`, `webapp-testing` | claude · `opus` · max | agy · Gemini 4 Neon · max |
+| **REVIEWER-SEC** | 13 red team + security review | `ai-red-team`, `security-review`, `differential-review`, `insecure-defaults`, `semgrep`, `supply-chain-risk-auditor` | opencode · Muse Wonder · max | agy · Gemini 4 Neon · max |
+| **OUTSIDER** | UX hallway test, demo dry run (read-only) | `webapp-testing` | opencode · Muse Wonder · max | agy · Gemini 4 Hydrogen · xhigh (only if the author isn't Gemini) |
 
-LEAD may run two workers of the same role at once (e.g. `core-rag`, `core-api`) only with disjoint owned paths.
-Concurrency caps (defaults): Claude workers ≤ 2 besides LEAD · Antigravity ≤ 2 · OpenCode ≤ 2 · builders ≤ 5.
+Every builder also loads `production-standards` and `verification-before-completion`; fix tasks add
+`production-hardening` and `receiving-code-review`.
+One worker per **feature slice** (e.g. `core-ask`, `ui-ask`, `core-triage`): slices own disjoint paths, so two
+CORE or UI workers can run at once. Claude Pro budget: at most LEAD + one more Claude seat at a time — run
+REVIEWER-CODE when CORE is idle, or let it fall back to Neon max.
 
-### Model IDs (verify once with `/model` in each tool)
+### Model names for `worker-start` (verify once: `/model` in agy and Claude, `opencode models`)
 ```
-claude:      best | opus | sonnet | haiku        (aliases for `claude --model`)
-             best = newest Fable your plan allows, else Opus 5.5. If Fable asks for usage credits and you
-             don't want that, set REVIEWER-CODE primary to `opus`.
-antigravity: G_HYDROGEN = "Gemini 4 Hydrogen"    (BUILDER-UI with --effort xhigh; agy's default)
-             ARGON      = "Gemini 4 Argon"
-             G_PRO      = "Gemini 3.1 Pro (High)"
-             G_FLASH    = "Gemini 3.8 Flash"
-             AG_OPUS    = "Claude Opus 5.5 (Thinking)"
-             AG_SONNET  = "Claude Sonnet 5.5 (Thinking)"
-opencode:    OC_STRONG  = OpenCode's default model (picked by the human in `/models`). Never pass --model.
+--agent claude       --model opus    --effort max      # Claude Opus 5.5
+--agent claude       --model sonnet  --effort max      # Claude Sonnet 5.5
+--agent antigravity  --model "Gemini 4 Neon"      --effort max | xhigh
+--agent antigravity  --model "Gemini 4 Hydrogen"  --effort xhigh
+--agent opencode     --model opencode-go/kimi-k3.1-pro
+--agent opencode     --model <provider>/<muse-wonder id>   # copy the exact id from `opencode models`
 ```
-### Quota pools (Orca's bottom usage bar)
-Claude Code · Antigravity "Gemini" · Antigravity "Claude/GPT" (AG_OPUS + AG_SONNET) · Antigravity "Gemini 4 Argon" ·
-OpenCode Go (one dollar budget for all its models). A fallback in the SAME pool doesn't help when that pool is
-exhausted — skip to a rung in another pool.
+OpenCode serves two models here (Kimi for DATA/QA, Muse for REVIEWER-SEC/OUTSIDER), so its workers get
+`--model`. A name or effort is rejected → start without it, log it in STATUS.md "Model switches", fix
+model-routing.md.
+
+### Quota pools
+Claude Code (Opus, Sonnet) · Antigravity Gemini (Neon, Hydrogen — may share one quota) · OpenCode (Kimi, Muse —
+check which plan or provider each comes from). **Out of quota → Gemini 4 Neon** (xhigh to build, max to design
+and review); if Neon is out too, take the next rung — it is in another pool.
 
 ### Review independence
-Claude-written code gets its security review from Gemini; Gemini-written code (BUILDER-UI) gets its code review
-from Claude. If fallbacks put both reviewers on one model family, LEAD logs it and adds the missing checklist.
+A checker never shares the author's model family: Anthropic (Opus, Sonnet) · Google (Neon, Hydrogen) · Meta
+(Muse Wonder) · Moonshot (Kimi). Claude-built code (CORE) → security by Muse; Gemini-built UI → code review by
+Opus; hallway test and dry run by an OUTSIDER of another family; the eval judge is a different family than the
+generator. A fallback that puts a checker in the author's family → LEAD adds a second checker from another
+family and logs it in STATUS.md. **Never use Kimi K3.1 Pro for security review or red teaming.**
 
 ## 3. Skills — where they live and how to load them
 
@@ -80,43 +91,60 @@ Signs: output contains `usage limit`, `rate limit`, `quota`, `429`, `exhausted`,
 3. Re-start the same task on the next ladder rung (another pool). New spec says
    "Continue from branch `<old-branch>`: run `git merge <old-branch>` first."
 4. Log in STATUS.md → "Model switches". If `worker-start` rejects `--model`, start without it and log it.
-LEAD's own quota runs out → human opens agy in the `lead` worktree, `/model` → `AG_OPUS` (or `ARGON`), types:
+Next rung = the seat's fallback in §2 (Gemini 4 Neon first).
+LEAD's own quota runs out → human opens agy in the `lead` worktree, `/model` → Gemini 4 Neon (max), types:
 `ROLE: LEAD. Load swarm-lead. Resume from .orca-team/STATUS.md.` — so keep STATUS.md current.
 
 ## 5. LEAD protocol (summary — full detail in skill `swarm-lead`)
 
+Every phase ends on a runnable gate: `node .orca-team/tools/gates.mjs <id>` (`list` shows all 18).
 0. Bootstrap: `orca status --json`; `orca skills get orchestration --full`; `orca skills get orca-cli`
-   (the version-matched guides win over anything here); `orca repo list --json`; `LEAD_BRANCH` = current branch.
-1. Intake → `.orca-team/PLAN.md` (requirements, MUST/SHOULD/WOW, acceptance criteria).
-2. Credentials gate (skill `credentials-gate`): ask the human ONCE, early; keep working while they fill `.env`.
-3. Architecture + contracts + runnable skeleton (skill `architecture-blueprint`); commit on `LEAD_BRANCH`.
-4. Decompose into ≤ 45-min tasks with disjoint ownership; route by §2; dispatch all ready tasks:
+   (the version-matched guides win over anything here); `orca repo list --json`; `LEAD_BRANCH` = current branch;
+   `node .orca-team/tools/doctor.mjs`. Roles not needed (e.g. `Deploy: no`) → `skip` in `.orca-team/gates.json`.
+1. Frame: `docs/PRD.md` (skill `product-requirements`; rubric, golden path, MUSTs, Given/When/Then ACs) and
+   `.orca-team/PLAN.md` (template `swarm-lead/references/plan-template.md`). In parallel: credentials gate
+   (skill `credentials-gate` — ask the human ONCE, keep working), UI → `ux-flow-design`, DESIGN → PRD critique.
+   Exit: gate `prd`.
+2. Design + contracts lock (skill `solution-architecture`): modular monolith, one vertical slice per MUST
+   capability (`apps/api/app/features/<name>/`, `apps/web/src/features/<name>/`), ports & adapters around the
+   LLM, embeddings, vector store and DB (blueprint §3). C4 + ADRs, walking skeleton from
+   `solution-architecture/references/blueprint.md`, OpenAPI exported, first migration, eval set ≥ 30 cases.
+   DESIGN seat → `system-design` once the architecture views are committed. Commit on `LEAD_BRANCH`.
+   Exit: gates `prd adr contracts resilience slices`; broadcast "contracts locked" to `@all`.
+3. Build one thin hardened slice (wave 1), then widen (waves 2–3). Tasks ≤ 45 min, disjoint ownership, specs from
+   `swarm-lead/references/task-spec-template.md`, routed by §2:
    `orca orchestration run-create --objective "<one line>" --json`
-   `orca orchestration task-create --task-title "<ROLE>: <title>" --spec "<spec>" [--deps '["<taskId>"]'] --json`
-   `orca orchestration worker-start --task <taskId> --worktree new-child --name <role>-<slug> --agent <agent> [--model <m>] [--effort <e>] --setup run --json`
+   `orca orchestration task-create --task-title "<SEAT>: <title>" --spec "<spec>" [--deps '["<taskId>"]'] --json`
+   `orca orchestration worker-start --task <taskId> --worktree new-child --name <seat>-<slug> --agent <agent> [--model <m>] [--effort <e>] --setup run --json`
    (`--effort` for claude/antigravity only; never `--model` for opencode.)
-5. Wait without polling loops: end the turn, or one blocking
+4. Wait without polling loops: end the turn, or one blocking
    `orca orchestration check --wait --types worker_done,escalation,question --timeout-ms 900000 --json`.
    Reply: `orca orchestration reply --id <msgId> --body "..."` · one worker: `orca orchestration send --to dispatch:<id> --subject "..." --body "..." --json` · all: `--to @all`.
-6. Integrate each finished branch into `LEAD_BRANCH` (`git merge --no-ff`), run all tests + smoke.
-7. Reviews in parallel (`--worktree current`, read-only): REVIEWER-CODE + REVIEWER-SEC → `.orca-team/reviews/`.
+5. Integrate (skill `tech-lead-integration`): non-author review → `.orca-team/reviews/merge-<branch>.md` →
+   `node .orca-team/tools/gates.mjs merge <branch>` (no-commit merge + `slices` check + `npm run ci`, commit or abort).
+6. Prove — review rounds in parallel (`--worktree current`, read-only): REVIEWER-CODE + REVIEWER-SEC →
+   `.orca-team/reviews/r<N>-*.md`; then `gates.mjs all` → `.orca-team/GATES.md`. BLOCKER/HIGH and red gates →
+   fix tasks to the owner seat with `production-hardening`. Max 2 full rounds.
    Gate shipping: `orca orchestration gate-create --task <id> --reason "..."` / `gate-resolve --gate <id> --decision approve --note "..."`.
-8. Fix loop (max 2 full rounds), then `demo-readiness`, then report to the human. Release workers with
-   `orca orchestration worker-release --dispatch <id> --json`. Update STATUS.md after every step.
+7. Ship (freeze = fixes only): gates `traces`, `fresh-clone`; ask the human before deploying; then `deploy`,
+   OUTSIDER dry run (`dryrun`), and `gates.mjs promote`. Tell the human the exact merge/tag commands and wait.
+   Release workers with `orca orchestration worker-release --dispatch <id> --json`. Update STATUS.md after every step.
 
-## 6. BUILDER rules
+## 6. BUILDER rules (seats UI, CORE, DATA, QA)
 
 1. Read `TASK.md`, `.orca-team/PLAN.md`, your spec; load the skills your spec lists (+ `production-standards`).
    If PLAN.md still says `PLACEHOLDER`, run `git merge <LEAD_BRANCH>` first.
 2. Run `node .orca-team/tools/envtool.mjs check`. Missing keys you need → `orca orchestration ask` LEAD, build
    against the mock/local path meanwhile. `.env` changed upstream → `node .orca-team/tools/envtool.mjs sync`.
-3. Edit only owned paths. Contract change needed → `ask` LEAD and end your turn.
+3. Edit only owned paths — normally your feature slice. Never import another feature; services stay free of
+   FastAPI, SDKs and the ORM (gate `slices`). Contract change needed → `ask` LEAD and end your turn.
 4. Dependencies: only what your task needs, only in the manifest you own; list them in your report.
-5. Small commits on your branch: `<role>: <what>`. Never push, never touch `main`, never rebase/merge others
+5. Small commits on your branch: `<seat>: <what>`. Never push, never touch `main`, never rebase/merge others
    (except merging `LEAD_BRANCH` when told).
-6. Use the dev port PLAN.md assigns you. Shared infra (DB, Qdrant, Redis) is started once by LEAD; don't start
-   your own copies.
-7. Done = the definition of done in `production-standards` + your acceptance criteria pass.
+6. Use the dev port PLAN.md assigns you. State is managed services (Neon Postgres branches, Qdrant Cloud or
+   pgvector) set up by LEAD; no Docker, don't start your own copies.
+7. Done = the definition of done in `production-standards` + your acceptance criteria pass + the gate on your
+   spec's `GATE TO PASS` line (`node .orca-team/tools/gates.mjs <id>`) and `npm run ci` are green.
 8. Finish: final commit, then send `worker_done` exactly as your Orca preamble shows (its injected IDs and
    `--outcome succeeded|failed`). Body: branch · commits · what works · how to test · gaps · new deps · new env vars.
 9. Usage/rate limit hit → print `LIMIT HIT: <agent>/<model>` and stop. Manual mode (no Orca orchestration) →
@@ -124,16 +152,21 @@ LEAD's own quota runs out → human opens agy in the `lead` worktree, `/model` �
 
 ## 7. REVIEWER rules
 
-Read-only except your report file. Load your skill (`code-review` / `security-review`) and follow its report
-format: severity BLOCKER/HIGH/MEDIUM/LOW · `file:line` · why · concrete fix · verdict `SHIP` / `FIX-BLOCKERS` /
-`REWORK`. Commit the report, then `worker_done` with the verdict and counts.
+Read-only except your report file. Load the skills on your spec (REVIEWER-CODE: `code-review` · REVIEWER-SEC:
+`security-review`, `ai-red-team`) and follow the report format: severity BLOCKER/HIGH/MEDIUM/LOW · `file:line` ·
+why · concrete fix · verdict `SHIP` / `FIX-BLOCKERS` / `REWORK`. Run `npm run ci` and the gates your spec names
+as evidence. DESIGN critiques and OUTSIDER runs write only the output file their spec names, max 15 bullets. Commit the
+report, then `worker_done` with the verdict and counts.
 
 ## 8. Conventions
 
-- Branches: `<role>-<slug>` builders · `race-<slug>-<agent>` races · `LEAD_BRANCH` integrates.
-- Commands: the project's root `package.json` scripts are the single task runner (`npm run dev|test|lint|smoke|eval`).
+- Branches: `<seat>-<feature>` builders, one per slice (e.g. `core-ask`, `ui-ask`) · `race-<slug>-<agent>` races · `LEAD_BRANCH` integrates.
+- Commands: the project's root `package.json` scripts are the single task runner (`npm run dev:api|dev:web|ci|
+  contracts|eval|eval:retrieval|db:check|test:contract|e2e|load|redteam|check:traces`); the gates call them.
+- Checks: `node .orca-team/tools/gates.mjs list|<id>|hat <hat>|all|merge <branch>|promote` → `.orca-team/GATES.md`.
 - Secrets: only in `.env` (gitignored; Orca copies it into new worktrees via `.worktreeinclude`). `.env.example`
   is committed and documents every variable.
 - Files: `TASK.md` (problem) · `.orca-team/PLAN.md` (LEAD) · `.orca-team/STATUS.md` (LEAD) ·
-  `.orca-team/CREDENTIALS.md` (LEAD) · `.orca-team/reviews/` · `.orca-team/handoff/`.
+  `.orca-team/CREDENTIALS.md` (LEAD) · `.orca-team/gates.json` (gate config, `skip`) · `docs/` (PRD, ux, adr,
+  architecture, system-design) · `contracts/openapi.json` · `.orca-team/reviews/` · `.orca-team/handoff/`.
 - Nobody edits `AGENTS.md`, `CLAUDE.md` or the skills during the event.

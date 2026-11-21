@@ -1,6 +1,6 @@
 ---
 name: production-standards
-description: The production-grade bar and definition of done for every line of code the swarm ships. Load before building or reviewing anything (all BUILDER and REVIEWER roles). Covers config and secrets, errors, logging, timeouts and retries, validation, data integrity, security baseline, performance, tests, docs and the done checklist.
+description: The production-grade bar and definition of done for every line of code the swarm ships. Load before building or reviewing anything (all builder and reviewer seats). Covers config and secrets, errors, logging, timeouts and retries, validation, data integrity, security baseline, performance, tests, docs, the AI-specific bar, the done checklist with role gates, and anti-patterns that fail review automatically.
 ---
 
 # Production Standards — the bar every task must clear
@@ -52,7 +52,7 @@ feature — never cut the items marked **MUST**.
   user input without normalisation + allow-listing.
 - CORS: explicit allow-list from config, never `*` with credentials. Security headers on the web app.
 - Rate-limit expensive endpoints (LLM, uploads, search). Cap tokens per request and per user.
-- Treat LLM output and retrieved documents as **untrusted input** (see `llm-engineering`).
+- Treat LLM output, tool output and retrieved documents as **untrusted input** (see `ai-engineering`, `ai-red-team`).
 - Dependencies: well-known packages only, pinned via lockfile; no packages typed from memory without checking
   they exist (typosquatting).
 
@@ -80,22 +80,25 @@ feature — never cut the items marked **MUST**.
   error path); one end-to-end smoke test of the demo golden path.
 - LLM-dependent code is tested with a fake/recorded LLM (deterministic), plus a small live eval set run
   separately (`npm run eval`).
-- Tests run with one command (`npm run test`) and in CI. A red test is a blocker.
+- Tests run with one command (`npm run test`) and in the merge gate (`npm run ci`). A red test is a blocker.
 
 ## 10. Docs and operability — MUST
 - README: what it does, architecture diagram, how to run (one command), env vars, how to test, demo script.
-- One-command local run (`npm run dev` or `docker compose up`). Dockerfile per service with a healthcheck,
-  non-root user.
+- One-command local run (`npm run up`) proven by `gates.mjs fresh-clone`; deploys to Vercel (no Docker,
+  no servers) per `vercel-deploy`.
 - ADR line in STATUS.md "Decisions" for every non-obvious choice.
 
 ## 11. AI-specific production bar — MUST when the feature uses an LLM
 - Prompts live in files (`prompts/*.md`), versioned, with explicit variables. No prompt strings scattered in code.
 - Structured outputs validated against a schema; one repair retry; then a safe fallback.
 - Grounding: answers that claim facts cite their sources (RAG) or say "I don't know".
-- An eval set (≥ 15 cases) with a pass threshold, run before shipping. Track cost per request.
+- An eval set (30–100 cases per capability, dev/held-out split, cross-family judge) with a threshold and a
+  baseline (`eval-engineering`). Every LLM call traced with tokens, cost, latency (`llmops-observability`).
 - A demo-safety switch: recorded responses for the golden path (`DEMO_REPLAY=1`) in case the provider fails on stage.
 
 ## Definition of done (copy into your worker_done report and tick it)
+Prove each tick with `verification-before-completion` (run the command, paste the output). If anything fails,
+use `systematic-debugging` to find the root cause before changing code.
 ```
 [ ] Acceptance criteria from my spec pass (how verified: ...)
 [ ] Lint/format/typecheck clean          [ ] Tests added and passing (npm run test)
@@ -103,6 +106,7 @@ feature — never cut the items marked **MUST**.
 [ ] Timeouts on every external call      [ ] Errors use the standard error shape
 [ ] Structured logs incl. request_id     [ ] README/run steps updated for my part
 [ ] Only owned paths edited              [ ] New dependencies listed in my report
+[ ] npm run ci green                     [ ] My role's gate passes: node .orca-team/tools/gates.mjs <id>
 ```
 
 ## Anti-patterns that fail review automatically

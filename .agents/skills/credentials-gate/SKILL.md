@@ -1,6 +1,6 @@
 ---
 name: credentials-gate
-description: How LEAD discovers every credential and external service the project needs (LLM API keys, Postgres, Qdrant or other vector DBs, Redis, object storage, OAuth, third-party APIs, deploy tokens), prefers local or embedded alternatives, writes .env.example, asks the human once in a fixed format, verifies keys without ever reading or printing values, and distributes .env to worktrees. Use at intake and whenever any worker reports a missing key.
+description: How LEAD discovers every credential and external service the project needs (app LLM keys, an eval judge key from another provider, Neon Postgres branches, Qdrant Cloud or pgvector, Vercel login, object storage, auth, third-party APIs, observability), prefers mock or test-mode alternatives while waiting, writes .env.example, asks the human once in a fixed format, verifies keys without ever reading or printing values, gates dependent tasks and distributes .env to worktrees. Use at intake and whenever any worker reports a missing key.
 ---
 
 # Credentials Gate
@@ -9,90 +9,101 @@ Credentials come **only from the human**. Agents never invent, guess, reuse from
 or put secrets into prompts. Only LEAD asks the human; workers ask LEAD (`orca orchestration ask`).
 The human writes secret values **directly into the main `.env` file**, never into chat.
 
-## 1. Inventory (5 minutes, from TASK.md + architecture)
-Walk this list and mark each line needed / not needed:
-
-| Category | Typical variables | Local/embedded alternative (no credential) |
+## 1. Inventory (5 minutes, from TASK.md + the architecture)
+| Category | Variables | While missing |
 |---|---|---|
-| App LLM provider | `LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_FALLBACK_MODEL` | none for real output → `LLM_MOCK=1` fake responses for dev/tests |
-| Embeddings | `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, `EMBEDDING_MODEL`, `EMBEDDING_DIM` | local `fastembed`/`sentence-transformers` model (CPU, slower) |
-| Relational DB | `DATABASE_URL` | Docker `pgvector/pgvector` → `postgresql+psycopg://app:app@localhost:5432/app`; no Docker → SQLite file |
-| Vector DB | `QDRANT_URL`, `QDRANT_API_KEY`, `QDRANT_COLLECTION` | Docker Qdrant `http://localhost:6333` (no key); no Docker → Qdrant local mode `QDRANT_PATH=./.qdrant` |
-| Cache/queue | `REDIS_URL` | Docker `redis://localhost:6379/0`; or in-process cache |
-| Object storage | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | local `./uploads` folder or Docker MinIO |
-| Auth | `AUTH_SECRET`, `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET` | generated local `AUTH_SECRET`; email/password demo users |
-| Third-party APIs from TASK.md | `<VENDOR>_API_KEY` | recorded fixtures for dev |
-| Observability | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST` | JSON logs only |
-| Deploy | `VERCEL_TOKEN`, `RENDER_API_KEY`, `FLY_API_TOKEN`, ... | local demo |
+| App LLM (required for real output) | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_FALLBACK_MODEL` | `APP_ENV=test` / `LLM_MOCK=1` |
+| Eval judge (other family than `LLM_MODEL`) | `EVAL_JUDGE_BASE_URL`, `EVAL_JUDGE_API_KEY`, `EVAL_JUDGE_MODEL` | deterministic checks only; gate warns |
+| Embeddings | `EMBEDDING_BASE_URL`, `EMBEDDING_API_KEY`, `EMBEDDING_MODEL`, `EMBEDDING_DIM` | mock hash embeddings in test mode |
+| Postgres (Neon project with branches) | `DATABASE_URL` (dev), `TEST_DATABASE_URL` (test), `PROD_DATABASE_URL` (main) | SQLite for dev/test only — blocks deploy |
+| Vector DB | pgvector (no extra key) or `QDRANT_URL`/`QDRANT_API_KEY` (+ `PROD_QDRANT_URL`/`PROD_QDRANT_API_KEY`) | Qdrant local mode `.data/qdrant`, in-memory in tests |
+| Deploy (Vercel) | none in `.env` — the human runs `vercel login` once | local demo |
+| Rate limits (optional) | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | in-process limiter |
+| Object storage (if uploads) | `BLOB_READ_WRITE_TOKEN` or `S3_*` | parse in request, store text only |
+| Auth (if users) | `AUTH_SECRET`, `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET` | seeded demo user |
+| Ops | `OPS_TOKEN` (generated), `CANARY` (generated), `LLM_DAILY_BUDGET_USD` | — |
+| Observability (optional) | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST` | stdout + Postgres traces |
+| Third-party APIs in TASK.md | `<VENDOR>_API_KEY` | recorded fixtures |
 
 Decision rules:
-- **Prefer local** for databases/vector stores/caches during the hackathon (zero latency, no quota, no key).
-  Use cloud only when TASK.md requires it, a public deploy needs it, or Docker is unavailable and embedded
-  mode can't do the job.
-- **The app's LLM key is separate from the coding agents.** Claude / Google AI Pro / OpenCode Go
-  subscriptions power the coding agents; the product needs its own API key (hackathon credits, Google AI
-  Studio, OpenAI, Anthropic API, OpenRouter, or an OpenAI-compatible endpoint). Always ask for it explicitly.
-- Prefer one OpenAI-compatible endpoint (`LLM_BASE_URL` + `LLM_API_KEY`) so providers can be swapped by config.
+- **The app's LLM key is separate from the coding agents.** Claude Pro, Google AI Pro and OpenCode Go power
+  the agents; the product needs its own API key (hackathon credits, Google AI Studio — OpenAI-compatible at
+  `https://generativelanguage.googleapis.com/v1beta/openai/`, OpenAI, Anthropic API, OpenRouter).
+- Ask for a **second provider** for the eval judge if possible (builders and checkers on different models).
+- Random values that no provider issues (`OPS_TOKEN`, `CANARY`, `AUTH_SECRET`): generate them yourself with
+  `node .orca-team/tools/envtool.mjs gen OPS_TOKEN CANARY` — fills empty keys in the main `.env`, prints
+  names only. Never ask the human for these.
+- Deploy target Vercel + any stored state → Neon is required (SQLite and local Qdrant files don't persist).
 
-## 2. Write `.env.example` (committed) — every variable, no real secrets
+## 2. `.env.example` (committed) — every variable, no real secrets
 ```
 # --- App LLM (REQUIRED) ---
-LLM_BASE_URL=https://api.openai.com/v1        # any OpenAI-compatible endpoint
-LLM_API_KEY=                                  # secret — from your provider console
-LLM_MODEL=                                    # e.g. the model name your provider lists
-LLM_FALLBACK_MODEL=                           # optional — cheaper/faster backup model
-LLM_MOCK=0                                    # 1 = fake responses (dev/tests without a key)
-# --- Vector DB ---
-QDRANT_URL=http://localhost:6333              # local Docker default; cloud URL if using Qdrant Cloud
-QDRANT_API_KEY=                               # optional — only for Qdrant Cloud
-# --- Database ---
-DATABASE_URL=postgresql+psycopg://app:app@localhost:5432/app   # local Docker default (not a secret)
+LLM_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/   # any OpenAI-compatible endpoint
+LLM_API_KEY=                     # secret — provider console
+LLM_MODEL=                       # model id from your provider
+LLM_FALLBACK_MODEL=              # optional — different provider/model if possible
+# --- Eval judge (different family from LLM_MODEL) ---
+EVAL_JUDGE_BASE_URL=             # optional — e.g. https://api.openai.com/v1
+EVAL_JUDGE_API_KEY=              # optional — secret
+EVAL_JUDGE_MODEL=                # optional
+# --- Postgres on Neon (one project, three branches) ---
+DATABASE_URL=                    # dev branch, pooled connection string
+TEST_DATABASE_URL=               # test branch, pooled — tests and db:check wipe it
+PROD_DATABASE_URL=               # optional — main branch; only pushed to Vercel, never used locally
+# --- Vector DB (skip if pgvector) ---
+QDRANT_URL=                      # optional — Qdrant Cloud cluster URL
+QDRANT_API_KEY=                  # optional — secret
+# --- Ops ---
+OPS_TOKEN=                       # optional — random string, protects /ops metrics
+CANARY=                          # optional — random string placed in the system prompt for leak tests
+LLM_DAILY_BUDGET_USD=5           # optional
+APP_ENV=dev
 ```
-Conventions: a line whose comment contains `optional` is optional; empty = missing; values like `changeme`,
-`your-key`, `xxx`, `<...>` count as placeholders. Local Docker defaults are fine to commit — they are not secrets.
+Conventions: a comment containing `optional` marks an optional key; empty = missing; `changeme`, `your-key`,
+`xxx`, `<...>` count as placeholders.
 
 ## 3. Prepare the human's `.env` and CREDENTIALS.md
 ```
-node .orca-team/tools/envtool.mjs init      # creates/updates the MAIN folder's .env from .env.example (never prints values)
-node .orca-team/tools/envtool.mjs where     # prints the path the human must edit
-node .orca-team/tools/envtool.mjs check --main   # MISSING / EMPTY / PLACEHOLDER / OK per variable, names only
+node .orca-team/tools/envtool.mjs init          # creates/updates the MAIN folder's .env (never prints values)
+node .orca-team/tools/envtool.mjs where         # path the human must edit
+node .orca-team/tools/envtool.mjs check --main  # MISSING / EMPTY / PLACEHOLDER / OK per variable, names only
 ```
-Fill `.orca-team/CREDENTIALS.md` → table with variable, service, why, required?, local alternative, status.
+`.orca-team/CREDENTIALS.md` → variable · service · why · required? · alternative · status.
 
-## 4. Ask the human ONCE (exact format, early in Phase 2)
+## 4. Ask the human ONCE (exact format, early)
 ```
-🔑 CREDENTIALS NEEDED — please fill these in <path from envtool where>, then reply "creds done".
+🔑 CREDENTIALS NEEDED — fill these in <path from envtool where>, then reply "creds done".
 Don't paste secrets here in chat.
 
 REQUIRED
-1. LLM_API_KEY + LLM_MODEL (+ LLM_BASE_URL if not OpenAI) — the app's own model access.
-   Get it from: your provider's API console / hackathon credits.
-2. <VAR> — <service> — needed for <feature>. Get it from: <console page name>.
+1. LLM_API_KEY + LLM_MODEL (+ LLM_BASE_URL) — the app's own model. Get it: <provider console>.
+2. Neon Postgres (free): neon.tech → New project → Branches: create "dev" and "test" →
+   Connect → copy the *pooled* connection string of each branch →
+   DATABASE_URL = dev, TEST_DATABASE_URL = test. (Main branch → PROD_DATABASE_URL, needed only for deploy.)
 
-OPTIONAL (I'll use the local alternative if you skip)
-3. QDRANT_URL + QDRANT_API_KEY — Qdrant Cloud. Skip → local Qdrant in Docker.
+OPTIONAL (I use the alternative if you skip)
+3. EVAL_JUDGE_* — a second provider so a different model family grades our AI. Skip → weaker evals.
+4. QDRANT_URL + QDRANT_API_KEY — Qdrant Cloud free cluster. Skip → pgvector / local mode.
+5. Vercel: run `npm i -g vercel` then `vercel login` once in a terminal — only when we deploy.
 
 To skip one: reply "skip <VAR> → mock" (or "→ local").
 Meanwhile I'm continuing with everything that doesn't need these.
 ```
-Repeat the request (shorter) at the end of your turn if still missing. Never block the whole swarm on it.
+Repeat (shorter) at the end of your turn if still missing. Never block the swarm on it.
 
 ## 5. Gate, verify, distribute
 - Tasks needing missing keys: `orca orchestration gate-create --task <id> --reason "waiting for credentials: ..."`;
-  meanwhile builders implement against `LLM_MOCK=1` / local defaults.
-- Human replies "creds done" → `node .orca-team/tools/envtool.mjs check --main` → all required OK →
-  run the project's connectivity check (`npm run healthcheck`, built by CORE/DATA: one tiny request per
-  service, prints service name + OK/FAIL + latency, never values) → `gate-resolve --gate <id> --decision approve`.
-- Distribute: new worktrees get `.env` automatically (Orca copies it via `.worktreeinclude` at creation).
-  Existing worktrees: `orca orchestration send --to @all --subject ".env updated" --body "run: node .orca-team/tools/envtool.mjs sync"`.
-- CREDENTIALS.md status → PROVIDED / LOCAL / MOCK. STATUS.md → "Credentials".
+  builders work in test mode meanwhile.
+- "creds done" → `envtool check --main` → `npm run healthcheck` (one tiny call per service; prints name,
+  OK/FAIL, latency — never values) → `gate-resolve --gate <id> --decision approve`.
+- New worktrees get `.env` via `.worktreeinclude`; existing ones: `orca orchestration send --to @all
+  --subject ".env updated" --body "run: node .orca-team/tools/envtool.mjs sync"`.
+- Vercel env vars are pushed only by `vercel-env.mjs` (role 14), which reads `.env` and prints names only.
 
 ## 6. Rules that never bend
-- Never `cat`/open/print `.env`; never echo env vars; never include secrets in logs, errors, test fixtures,
-  screenshots, commits, PR text, or LLM prompts. Redact in logs (`sk-…` → `***`).
-- Server-side only: secrets never reach browser code or `NEXT_PUBLIC_*`.
-- Least privilege: ask for read-only or scoped keys when the provider supports it; test/sandbox keys for
-  payments/email.
-- A secret was exposed (printed, committed, pasted)? Stop, tell the human which variable, ask them to rotate
-  it, purge it from the file/commit, continue only after rotation.
-- `.env` must stay gitignored. Before every commit you make: `git diff --cached --name-only` must not list `.env`.
+- Never `cat`/open/print `.env`; never echo env vars; no secrets in logs, errors, fixtures, screenshots,
+  commits, PR text, prompts, or `NEXT_PUBLIC_*`. Redact in logs (`sk-…` → `***`).
+- Least privilege and sandbox keys where offered. Production DB (`PROD_DATABASE_URL`) is touched only by the
+  approved deploy/ingest steps.
+- Exposed secret → stop, tell the human which variable, they rotate it, purge it, continue after rotation.
+- `.env` stays gitignored; before each commit `git diff --cached --name-only` must not list `.env`.

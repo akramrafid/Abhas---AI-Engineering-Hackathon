@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: REVIEWER-CODE protocol - verify by running lint, tests, smoke and the golden path, then review the diff for correctness against acceptance criteria, contract consistency across merged slices, error handling, async and resource misuse, data integrity, test quality, AI-specific quality and frontend states. Uses fixed severity definitions, a verdict rule, a RACE comparison rubric and a report template with concrete patches. Use when assigned a code review round or asked to pick a RACE winner.
+description: REVIEWER-CODE protocol - verify by running npm run ci and the role gates, walk the golden path, then review the diff for correctness against PRD acceptance criteria, contract consistency, reliability, async and resource misuse, data integrity, AI quality, frontend states and test quality, and score it on a production-grade scorecard (industry standards). Fixed severity definitions, verdict rule, RACE comparison rubric, report template with concrete patches, and fix routing to the owner seat with production-hardening. Use when assigned a code review round, a re-check after fixes, or a RACE decision.
 ---
 
 # Code Review
@@ -11,14 +11,27 @@ propose patches — don't rewrite the codebase. Read-only except your report fil
 ## 1. Procedure
 1. Read `TASK.md`, PLAN.md §2 (golden path) and §3 (MUST features + acceptance criteria), your spec (diff range).
 2. Verify mechanically — record each result in the report:
-   `npm run lint` · `npm run test` · start the app (`npm run dev:api -- --port 8010`, web if relevant) ·
-   `SMOKE_API_URL=http://localhost:8010` smoke (PowerShell: `$env:SMOKE_API_URL="http://localhost:8010"; npm run smoke`) ·
-   walk the golden path by hand (curl or browser) · `npm run eval` if LLM features changed.
-3. Read the diff (`git diff <range> --stat`, then file by file). Start with schemas/contracts, then services,
-   adapters, routes, UI, tests.
+   `npm run ci` (lint, typecheck, tests, smoke in test mode) · the gates of the roles whose code changed
+   (`node .orca-team/tools/gates.mjs contract e2e eval …`, or `gates.mjs all` at the final round) ·
+   start the app (`npm run dev:api -- --port 8010`, web if relevant) and walk the golden path by hand
+   (curl or browser via `webapp-testing`).
+3. Read the diff (`git diff <range> --stat`, then file by file). Start with schemas/contracts and ports, then
+   each slice (service → deps → router → its UI → its tests), then shared/ and adapters.
 4. Check integration across slices: UI calls match the contract; CORE returns what UI expects; error shapes
    handled in UI; env vars documented.
 5. Write findings. Only report what you can point to (`file:line`) and explain. Mark uncertainty explicitly.
+
+## 1b. Tools that make the review stronger (use them, then report in OUR format)
+- **`/pr-review-toolkit:review-pr code errors tests types parallel`** (Claude plugin): parallel sub-agents incl.
+  `silent-failure-hunter` (swallowed errors, bad fallbacks) and `pr-test-analyzer`. Don't run its `simplify`
+  aspect — you are read-only. Re-grade its findings with the severity table in §3.
+- **`find-bugs`** skill: a second, security-aware pass over the diff. Use the diff range from your spec instead
+  of its default-branch detection.
+- **`web-design-guidelines`** for any UI files in the diff (accessibility, UX, interface rules).
+- **`webapp-testing`**: drive the golden path in a real browser; attach screenshot paths and console errors
+  as evidence.
+- **`supabase-postgres-best-practices`** when migrations, schemas or queries changed.
+- **`verification-before-completion`**: every ✅ in your report is backed by command output you actually ran.
 
 ## 2. Checklist
 **Correctness** — acceptance criteria met · edge cases (empty, huge, unicode, duplicates, concurrent) ·
@@ -37,9 +50,26 @@ replay modes work.
 **Frontend** — types generated from contract · loading/empty/error states · streaming with Stop · sanitised
 Markdown · test IDs on golden path · no secrets/provider calls in browser.
 **Tests** — assert behaviour not just status · error paths covered · fakes instead of network · no sleeps.
-**Maintainability** — layering respected (routes thin, services framework-free) · no dead code/TODO in MUST
+**Maintainability** — slice rules kept (no feature imports another feature; router thin; service imports
+only ports/schemas/shared; SDK and ORM code only in `adapters/`; `main.py` and `schemas.py` touched only
+by LEAD) · no dead code/TODO in MUST
 features · names clear · duplicated logic from parallel merges removed.
 **Production-standards anti-patterns** — any one is at least HIGH.
+
+## 2b. Production-grade scorecard (1–5 each; put the table in the report)
+| Dimension | Standard it is judged against | 5 means |
+|---|---|---|
+| Correctness | PRD acceptance criteria | every MUST AC proven by a named test |
+| Contract & API | OpenAPI 3.1, RFC 9457 | Schemathesis clean, errors documented |
+| Reliability | SRE practice, resilience register | timeouts, retries, fallback, fault tests pass |
+| Security | OWASP Top 10 2025, LLM Top 10 2026 | REVIEWER-SEC finds nothing above LOW |
+| AI quality | eval held-out vs baseline | above threshold, judged cross-family, no regression |
+| Performance | PRD NFRs | k6 thresholds and TTFT target met |
+| Maintainability | slice rules, typing, lint | small modules, strict types, no dead code |
+| Tests | test plan | behaviour asserted, error paths, coverage ≥ 80 % on feature services + shared |
+| Operability | 12-Factor, golden signals | one-command run, traces, health/readiness, docs true |
+| UX & a11y | WCAG 2.2 AA, docs/ux | four states, axe clean, hallway test passed |
+Any dimension ≤ 2 on the golden path is at least a HIGH finding.
 
 ## 3. Severity and verdict
 | Severity | Meaning |
@@ -52,6 +82,9 @@ Verdict: any BLOCKER → `FIX-BLOCKERS` (or `REWORK` if the design is wrong, e.g
 or the wrong approach for a MUST) · only HIGH and below → `FIX-BLOCKERS` if any HIGH is on the golden path,
 else `SHIP` · none → `SHIP`.
 
+Fixes go to the **owner seat** (not you) as a fix task with skills `production-hardening` +
+`receiving-code-review`. Re-check rounds review only the changed files and the findings list.
+
 ## 4. RACE comparison (when asked to pick a winner)
 Gate: tests pass. Then score each branch 1–5 on: acceptance-criteria coverage · correctness on edge cases ·
 simplicity (code size, dependencies) · latency/cost · readability and fit with the codebase. Table + winner +
@@ -60,9 +93,11 @@ one paragraph why + anything worth porting from the losers.
 ## 5. Report — `.orca-team/reviews/r<N>-code.md`
 ~~~markdown
 # Code review r<N> — <date/time> — reviewer: <agent/model>
+Authors reviewed: <seat/agent/model, …>
 Verdict: SHIP | FIX-BLOCKERS | REWORK
 Summary: <3 lines: overall state, biggest risk, what's solid>
-Verified: lint ✅/❌ · tests ✅/❌ (<n> passed) · smoke ✅/❌ · golden path by hand ✅/❌ · evals <rate>
+Verified: ci ✅/❌ · gates <ids> ✅/❌ · golden path by hand ✅/❌ · evals <held-out rate>
+Scorecard: <table from §2b>
 Counts: BLOCKER <n> · HIGH <n> · MEDIUM <n> · LOW <n>
 
 ## Findings

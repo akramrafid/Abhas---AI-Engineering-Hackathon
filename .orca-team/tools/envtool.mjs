@@ -6,10 +6,13 @@
 //                                                     (adds missing variables only; never overwrites values)
 //   node .orca-team/tools/envtool.mjs check [--main]  status per variable: OK / MISSING / EMPTY / PLACEHOLDER
 //   node .orca-team/tools/envtool.mjs sync            copy the main .env into this worktree
+//   node .orca-team/tools/envtool.mjs gen KEY [KEY..] fill EMPTY keys in the main .env with random values
+//                                                     (for OPS_TOKEN, CANARY, AUTH_SECRET — not provider keys)
 //
 // Conventions in .env.example: a variable whose inline comment (or the comment line right above it)
 // contains the word "optional" is optional.
 import { execFileSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -148,8 +151,32 @@ function main() {
       if (!isIgnored(here, ".env")) console.log("WARNING: .env is NOT gitignored in this worktree. Do not commit it.");
       return 0;
     }
+    case "gen": {
+      const keys = flags.filter((k) => /^[A-Z][A-Z0-9_]*$/.test(k));
+      if (!keys.length) { console.log("Usage: envtool gen OPS_TOKEN CANARY ..."); return 1; }
+      const text = readIfExists(mainEnv);
+      if (text === null) { console.log(`Main .env not found at ${mainEnv}. Run envtool init first.`); return 1; }
+      const lines = text.split(/\r?\n/);
+      for (const key of keys) {
+        const re = new RegExp(`^(\\s*(?:export\\s+)?${key}\\s*=)\\s*(#.*)?$`);
+        const idx = lines.findIndex((l) => re.test(l));
+        const value = crypto.randomBytes(24).toString("base64url");
+        if (idx >= 0) {
+          const m = lines[idx].match(re);
+          lines[idx] = `${m[1]}${value}${m[2] ? "   " + m[2] : ""}`;
+          console.log(`${key}: generated (value not shown)`);
+        } else if (lines.some((l) => new RegExp(`^\\s*(?:export\\s+)?${key}\\s*=`).test(l))) {
+          console.log(`${key}: already has a value — left unchanged`);
+        } else {
+          lines.push(`${key}=${value}`);
+          console.log(`${key}: added and generated (value not shown)`);
+        }
+      }
+      fs.writeFileSync(mainEnv, lines.join("\n"), "utf8");
+      return 0;
+    }
     default:
-      console.log("Usage: node .orca-team/tools/envtool.mjs <where|init|check [--main]|sync>");
+      console.log("Usage: node .orca-team/tools/envtool.mjs <where|init|check [--main]|sync|gen KEY..>");
       return cmd ? 1 : 0;
   }
 }
