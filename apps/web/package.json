@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "e2e": "playwright test",
     "api:types": "openapi-typescript ../../contracts/openapi.json -o src/lib/api/schema.d.ts"
   },
   "dependencies": {

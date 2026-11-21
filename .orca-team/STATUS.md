@@ -1,23 +1,23 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
-Phase: 2 — Design + contracts lock (skeleton + ADRs + PLAN.md ready; dispatching Wave 1A) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
-Updated 2026-11-21 16:05 BST (≈ 21.9 h left) · LEAD_BRANCH: `lead` · Run: `run_de147862c969` · Active LEAD: `antigravity / Gemini 4 Neon (XHigh)` (Claude Opus 5.5 limit resets 19:20 BST — hand back on reset).
+Phase: 2/3 — Design + Wave 1A Build (4 workers running in parallel) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
+Updated 2026-11-21 16:11 BST (≈ 21.8 h left) · LEAD_BRANCH: `lead` (pushed `0b1687b` to origin) · Run: `run_de147862c969` · Active LEAD: `antigravity / Gemini 4 Neon (XHigh)` (Claude Opus 5.5 limit resets 19:20 BST — hand back on reset).
 
 Next action (LEAD):
-1. Verify `npm run web:types`, `npm run ci`, `gates.mjs adr slices` green on `lead`, commit walking skeleton + ADRs 0001–0008 + `PLAN.md` + `STATUS.md`, push `lead` to `origin`.
-2. Dispatch Wave 1A in parallel (≤ 4 Antigravity workers):
-   - `design-system` (DESIGN · Neon XHigh): `docs/system-design.md` + `.orca-team/reviews/arch-critique.md` (`resilience` gate)
-   - `data-pipeline` (DATA · Neon XHigh): Alembic migrations + `seed.py` + `db_check.py` + `shared/features.py` + `wards`/`lags`/`weather` slices + Open-Meteo adapter (`migrations` + DB half of `contracts`)
-   - `qa-evals` (QA · Neon XHigh): 48-case SHA-256 locked hold-out (`forecast.jsonl`) + `retrieval.jsonl` + `evals/run.py` + `evals/retrieval.py` + `tests/load/smoke.js` (eval half of `contracts`)
-   - `ui-brand` (UI-2 · Hydrogen XHigh): Abhas tokens CSS + SVGs + favicons + `/brand` page + reusable `RiskTierBadge` (`AC-16`)
-3. As soon as `design-system` & `ui-brand` finish → dispatch `ui-dashboard` (UI · Neon XHigh); as soon as `data-pipeline` finishes → dispatch `core-forecast` (CORE · Neon XHigh).
-4. Once `data-pipeline` + `qa-evals` + `design-system` merge → run `gates.mjs prd adr contracts resilience slices` → broadcast `"contracts locked"` to `@all`.
+1. Wait for Orca wake on Wave 1A workers (`design-system`, `data-pipeline`, `qa-evals`, `ui-brand`).
+2. As each settles: non-author review → `.orca-team/reviews/merge-<branch>.md` → `node .orca-team/tools/gates.mjs merge <branch>` → push `lead` to GitHub immediately (small, frequent pushes per human instruction).
+3. As soon as `design-system` & `ui-brand` merge → dispatch `ui-dashboard` (`.orca-team/specs/ui-dashboard.md`); as soon as `data-pipeline` merges → dispatch `core-forecast` (`.orca-team/specs/core-forecast.md`).
+4. Once `design-system` + `data-pipeline` + `qa-evals` merge → run `gates.mjs prd adr contracts resilience slices` → fast-forward `main` & push → broadcast `"contracts locked"` to `@all`.
 
 ## Tasks
 | Task id | Role | Title | Agent / model | Branch | Dispatch id | Wave | State |
 |---|---|---|---|---|---|---|---|
 | task_0eb53049fa9f | DESIGN | PRD critique → `.orca-team/reviews/prd-critique.md` | antigravity / Gemini 4 Neon (XHigh) | akramrafid/design-prd-critique-2 | ctx_33e498a5723c | Frame | merged (`211561f`) |
+| task_bdcb7fc98a59 | DESIGN | System design + architecture critique | antigravity / Gemini 4 Neon (XHigh) | design-system | ctx_e12d4424c44c | 1A | running |
+| task_cc6f8c7a168f | DATA | SQLite/Alembic + seed + features.py + Open-Meteo + wards/lags/weather | antigravity / Gemini 4 Neon (XHigh) | data-pipeline | ctx_b3be0c5e846b | 1A | running |
+| task_72869ad95cf5 | QA | Locked 48-case hold-out eval + retrieval + k6 smoke + test plan | antigravity / Gemini 4 Neon (XHigh) | qa-evals | ctx_7beb2831257a | 1A | running |
+| task_e68beba5a5d3 | UI-2 | Abhas brand tokens, SVGs, favicons, brand components, /brand | antigravity / Gemini 4 Hydrogen (XHigh) | ui-brand | ctx_0d41c9000339 | 1A | running |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
@@ -57,3 +57,4 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 - `4d27783` docs(prd): frame Abhas and route seats to Opus + Gemini
 - `211561f` Merge branch `akramrafid/design-prd-critique-2` into `lead` (15 PRD critique bullets)
 - `c0a05a8` docs(prd): apply DESIGN critique and lock the PRD
+- `0b1687b` feat(skeleton): walking skeleton, OpenAPI contracts, ADRs 0001-0008, PLAN.md, Wave 1A specs
