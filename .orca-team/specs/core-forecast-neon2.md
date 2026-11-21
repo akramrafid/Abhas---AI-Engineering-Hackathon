@@ -69,3 +69,5 @@ ENV VARS NEEDED: none (runs offline; ANTHROPIC_API_KEY optional -> template fall
 DEV PORT: 8002
 OUT OF SCOPE: Do not edit `app/main.py`, `app/core/`, `app/ports/`, any `schemas.py`, `app/shared/features.py`, `migrations/`, `apps/api/evals/datasets/`, or `apps/web/**`.
 DONE WHEN: Artifact committed, `baseline`, `eval`, `retrieval`, `traces`, `slices`, and `npm run ci` are green, committed on your branch, and `worker_done` is sent.
+
+ALSO FROM r1 REVIEW (.orca-team/reviews/r1-code.md) — yours to implement in this task: CR-3 unknown ward on /forecast and /scenario → 404 problem+json type …/unknown-ward naming ward_id (and heatmap unknown city handled); CR-16 extend /readyz checks with model artifact loaded + SHA-256 verified; CR-5/CR-13 store rain normals, max_normal_year and train_end_year in the artifact metadata and always pass stored normals when building serving features.

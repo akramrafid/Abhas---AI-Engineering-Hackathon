@@ -7,7 +7,7 @@ Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`
 Phase 2 Gates Verified (`0a73566`): `adr` PASS · `contracts` PASS · `resilience` PASS · `slices` PASS · `migrations` PASS · `retrieval` PASS (`recall@15=0.5704`, `n=36`) · `ci` PASS (27/27 pytest, 6/6 smoke).
 
 Next action (LEAD) — 19:35 BST:
-**Human rule (19:33): all code is written by Antigravity Gemini 4 Neon (XHigh); Claude Opus only reviews. Wait for Antigravity rather than coding on Opus.** One-shot wake scheduled 20:48 BST: restart CORE from `.orca-team/specs/core-forecast-neon2.md` on Neon.
+**Human rule (19:33): all code is written by Antigravity Gemini 4 Neon (XHigh); Claude Opus only reviews. Wait for Antigravity rather than coding on Opus.** One-shot wake scheduled 20:48 BST. Dispatch on Neon (Antigravity cap 4), in this order: (1) CORE from `.orca-team/specs/core-forecast-neon2.md` + tell it to implement CR-3 unknown-ward 404, CR-16 model readiness, CR-5/13 normals + train_end_year in artifact metadata; (2) `fix-r1-lead.md` (CR-1 BLOCKER, CR-3, CR-10, CR-16); (3) `fix-r1-ui.md` (CR-2, CR-9, CR-18, side-tab); (4) send "continue" to REVIEWER-SEC ctx_dfe7c933572c. When a slot frees: `fix-r1-data.md`; after CORE merges: `fix-r1-qa.md`. Every Neon branch is reviewed by Opus before `gates.mjs merge`.
 0. Antigravity (Neon + Hydrogen) quota out until ~20:45 BST. Then: send "continue" to ctx_dfe7c933572c (sec review); dispatch UI fix tasks from r1. When CORE reports: Opus-review is not possible (same family) → Neon review of CORE; re-dispatch r1 code review (task_b76712188034) on Opus.
 1. Push `lead` + fast-forward `main` (Phase 2 milestone) to GitHub; broadcast `"contracts locked"` to `@all`.
 2. Release completed Wave 1A workers (`data-pipeline`, `qa-evals`); dispatch Wave 1B **`core-forecast`** (running in parallel with **`ui-dashboard`** = 2 active Antigravity workers).
@@ -24,7 +24,7 @@ Next action (LEAD) — 19:35 BST:
 | task_d4fb8f89dc74 | UI | UX flow + Abhas dashboard (ward-risk, lags, scenario, heatmap, validation) + Playwright e2e | antigravity / Gemini 4 Neon (XHigh) | akramrafid/ui-dashboard | ctx_679d91731a13 | 1B | merged (released) |
 | task_c92a61243ecf | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | ctx_1dee172a0b2b | 1B | stopped (quota) — WIP `9d9b4ca` |
 | task_1edc9e2e9c71 | CORE | same, continue from `akramrafid/core-forecast` | claude / opus max | core-forecast-opus | ctx_e83dc4e01e44 | 1B | stopped — human rule: code only on Neon |
-| task_b76712188034 | REVIEWER-CODE | r1 cross-family review of c0a05a8...lead | claude / opus max | reviewer-code-r1b | ctx_56fff24cd545 | Prove | running |
+| task_b76712188034 | REVIEWER-CODE | r1 cross-family review of c0a05a8...lead | claude / opus max | reviewer-code-r1b | ctx_56fff24cd545 | Prove | done — FIX-BLOCKERS (B1 H2 M8 L8), report merged |
 | task_1fbad5b953e2 | REVIEWER-SEC | r1 security of LEAD-written code | antigravity / Gemini 4 Neon (XHigh) | reviewer-sec-lead-r1 | ctx_dfe7c933572c | Prove | idle at quota — send "continue" after ~20:45 |
 
 ## Credentials
@@ -57,6 +57,7 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 ## Review rounds
 | Round | Code verdict | Security verdict | Open BLOCKER | Open HIGH |
 |---|---|---|---|---|
+| r1 (19:45) | FIX-BLOCKERS — B1 H2 M8 L8 (`.orca-team/reviews/r1-code.md`) | pending (Neon, quota) | CR-1 setup no-uv path with spaces | CR-2 demo scenario baseline, CR-3 origin range + unknown-ward 404 |
 
 ## Merged into LEAD_BRANCH
 - `4d27783` docs(prd): frame Abhas and route seats to Opus + Gemini
