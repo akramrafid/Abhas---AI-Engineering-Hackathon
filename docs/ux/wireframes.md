@@ -21,11 +21,13 @@ All colours use generated CSS tokens from `docs/brand/tokens.json` (`apps/web/sr
 
 Global test IDs:
 - `demo-mode-badge`: visible when loaded with `/?demo=1`
-- `weather-source-badge`: shows active weather source (`Dataset mode`, `Live · city centroid`, `Cached weather`, or `Climatology fallback`)
+- `weather-source-badge`: shows active weather source (`Dataset mode (offline)`, `Live · Open-Meteo (city centroid)`, `Cached weather`, or `Climatology fallback`)
+- `lang-toggle`, `lang-btn-en`, `lang-btn-bn`: EN/BN language switch syncing `?lang=en|bn`
+- `header-heading`, `header-promise`: localized title and promise (`Rain today. Risk in three weeks. Act now.` / `আজ বৃষ্টি। তিন সপ্তাহ পরে ঝুঁকি। এখনই ব্যবস্থা নিন।`)
 - `nav-brand-link`: link to `/brand`
-- `tab-ward-risk`, `tab-lags`, `tab-scenario`, `tab-heatmap`, `tab-validation`: top tab buttons (`role="tab"`)
-- `city-select`, `ward-select`, `origin-week-select`: labelled `<select>` controls
-- `window-toggle`, `window-1-4w`, `window-2-4w`: forecast window buttons
+- `tab-ward-risk`, `tab-lags`, `tab-scenario`, `tab-heatmap`, `tab-priority`, `tab-validation`, `tab-about`: top tab buttons (`role="tab"`)
+- `city-select`, `ward-search-input`, `ward-select`, `origin-week-select` (ISO week + date range): labelled controls
+- `window-toggle`, `window-1w`, `window-2-4w`, `window-1-4w`: forecast window buttons
 - `ward-not-found`, `ward-not-found-reset`: rendered when `?ward=<id>` is unknown or API returns 404 `/unknown-ward`
 - `wards-error-banner`, `retry-button`: rendered when initial ward list fetch fails
 
@@ -225,3 +227,35 @@ States:
 - **Success**: Renders period/metric filters, baseline comparison bar chart, full tabular metrics, 80% band coverage cards, 4×4 tier confusion matrix with recall/accuracy KPIs, live `/api/v1/ops` telemetry card, and the simulated-dataset model card notice.
 
 A11y: All tables use semantic headers and right-aligned tabular numerals (`font-mono tnum`); filter controls use `aria-pressed`; confusion matrix explicitly labels row axis (`Actual tier`) and column axis (`Predicted tier`).
+
+---
+
+### Screen: Priority List & Printable Ward Brief
+Purpose: Rank every ward in the selected city by window risk tier and expected cases, display Act-by larviciding deadlines and deterministic field actions from SHAP drivers, export formula-safe CSV, and print a clean one-page ward brief · Entry: `Priority List` tab (`tab-priority`) · Exit: Click any ward row to jump to Ward Forecast, export CSV, or print brief.
+
+Components & test IDs:
+- `priority-panel`, `priority-table`, `priority-row-<ward_id>`
+- `priority-filter-all`, `priority-filter-critical`, `priority-filter-high`, `priority-filter-medium`, `priority-filter-low`
+- `priority-export-csv`, `priority-print-brief`, `printable-ward-brief`
+- `priority-loading`, `priority-empty-state`, `priority-error-banner`, `priority-retry`
+
+States:
+- **Empty**: When no wards are ranked for the selected city/week, displays `priority-empty-state` with `"Reset to Dhaka South"` action.
+- **Loading**: Static skeleton panel (`priority-loading`) with `"Ranking city wards by dengue risk…"`.
+- **Error**: Renders `priority-error-banner` (`role="alert"`) with RFC 9457 details, `Request ID`, and `Retry` (`priority-retry`).
+- **Success**: Ranked table with EN/BN tier badges + 1–4 meter, expected cases + 80% band, Act-by date (peak week minus 14 days), deterministic field actions, formula-safe CSV export (`=`, `+`, `-`, `@`, tab, CR prefixed with `'`), and `@media print` one-page brief.
+
+---
+
+### Screen: About & Cost
+Purpose: Show live `/api/v1/ops` telemetry (model loads = 1, cache hit rate, p50/p95 inference latency, weather/LLM counters, estimated monthly cost), honest model card limitations, and Open-Meteo CC BY 4.0 attribution · Entry: `About & Cost` tab (`tab-about`) · Exit: Any other tab or `/brand`.
+
+Components & test IDs:
+- `about-panel`, `about-ops-card`, `about-ops-model-loads`, `about-ops-cache-rate`, `about-ops-monthly-cost`
+- `about-cost-breakdown`, `about-model-card`, `about-attribution`
+
+States:
+- **Empty**: When counters have zero requests yet, displays `0` counts and `$0.00` clearly without blank cards.
+- **Loading**: Displays `"Loading operations telemetry…"` inline inside `about-ops-card` while keeping static model card and attribution visible.
+- **Error**: If `/api/v1/ops` returns 401/503, displays a self-contained fallback notice inside `about-ops-card` without blocking the model card or attribution.
+- **Success**: Live telemetry cards (`model_loads = 1`), operational cost breakdown, simulated-dataset disclaimer (not validated on DGHS surveillance; recalibration required), and Open-Meteo CC BY 4.0 + self-hosted font attribution.

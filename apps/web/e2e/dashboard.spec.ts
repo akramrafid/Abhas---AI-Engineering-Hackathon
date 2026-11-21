@@ -1,53 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
 import { DEMO_CONFIG } from "../src/lib/demo-config";
-
-const LIME_RGB = "rgb(212, 245, 60)";
-
-async function assertZeroLimeInDataView(page: Page) {
-  const offenders = await page.evaluate((limeRgb) => {
-    const root = document.querySelector('[data-view="data"]');
-    if (!root) return ["missing [data-view='data']"];
-    const found: string[] = [];
-    const nodes = [root, ...Array.from(root.querySelectorAll("*"))];
-    for (const el of nodes) {
-      const style = window.getComputedStyle(el);
-      const props = [
-        style.color,
-        style.backgroundColor,
-        style.borderTopColor,
-        style.borderRightColor,
-        style.borderBottomColor,
-        style.borderLeftColor,
-        style.fill,
-        style.stroke,
-      ];
-      if (props.some((val) => val === limeRgb)) {
-        found.push(
-          `${el.tagName.toLowerCase()}${el.getAttribute("data-testid") ? `[data-testid=${el.getAttribute("data-testid")}]` : ""}`,
-        );
-      }
-    }
-    return found;
-  }, LIME_RGB);
-
-  expect(offenders, "Lime (#D4F53C) must never appear inside [data-view='data']").toEqual([]);
-}
-
-async function assertWcagAA(page: Page, contextLabel: string) {
-  const scan = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze();
-  expect(
-    scan.violations.map((v) => ({
-      id: v.id,
-      impact: v.impact,
-      help: v.help,
-      nodes: v.nodes.map((n) => n.target),
-    })),
-    `WCAG 2.2 A/AA violations on ${contextLabel}`,
-  ).toEqual([]);
-}
+import { assertWcagAA, assertZeroLimeInDataView } from "./helpers";
 
 test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_11: demo mode (/?demo=1) preselects Dhaka South, pinned week, and 2-4w window offline", async ({
@@ -81,18 +34,16 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
 
     await expect(page.getByTestId("peak-risk-score")).toContainText(/\d+\s*\/\s*100/);
     await expect(page.getByTestId("peak-expected-cases")).toContainText(/\d+\.\d/);
+    await expect(page.getByTestId("peak-act-by")).toBeVisible();
     await expect(page.getByTestId("forecast-chart")).toBeVisible();
 
-    // 2-4w window renders horizons 2, 3, 4
     await expect(page.getByTestId("horizon-row-2")).toBeVisible();
     await expect(page.getByTestId("horizon-row-3")).toBeVisible();
     await expect(page.getByTestId("horizon-row-4")).toBeVisible();
 
-    // Toggling to 1-4w adds horizon 1
     await page.getByTestId("window-1-4w").click();
     await expect(page.getByTestId("horizon-row-1")).toBeVisible();
 
-    // Drivers panel shows sign and percentage
     const driversPanel = page.getByTestId("drivers-panel");
     await expect(driversPanel).toBeVisible();
     await expect(driversPanel).toContainText(/[+-]?\d+%/);
@@ -109,7 +60,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("lags-corr-chart")).toBeVisible();
     await expect(page.getByTestId("lags-peak-dataset")).toContainText("Lag 3w");
 
-    // Select lag 0 and verify source rain week equals case week
     await page.getByTestId("lag-btn-0").click();
     const sample = page.getByTestId("lag-shifted-sample");
     await expect(sample).toHaveAttribute("data-lag", "0");
@@ -118,7 +68,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     expect(caseWeek0).toBeTruthy();
     expect(rainWeek0).toBe(caseWeek0);
 
-    // Shift to lag k=3 and confirm rainfall source week moves exactly 21 days (3 weeks) earlier
     await page.getByTestId("lag-btn-3").click();
     await expect(sample).toHaveAttribute("data-lag", "3");
     await expect(page.getByTestId("lags-series-chart")).toHaveAttribute("data-lag", "3");
@@ -141,18 +90,15 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("scenario-panel")).toBeVisible();
     await expect(page.getByTestId("scenario-empty-state")).toBeVisible();
 
-    // Client validation rejects > 500 mm
     await page.getByTestId("scenario-rain-input").fill("600");
     await page.getByTestId("scenario-submit").click();
     await expect(page.getByTestId("scenario-validation-error")).toBeVisible();
     await expect(page.getByTestId("scenario-validation-error")).toContainText("0 and 500");
     await expect(page.getByTestId("scenario-comparison")).toHaveCount(0);
 
-    // Client validation rejects negative rainfall
     await page.getByTestId("scenario-rain-input").fill("-15");
     await expect(page.getByTestId("scenario-validation-error")).toBeVisible();
 
-    // Valid 120 mm preset runs POST /api/v1/scenario and updates side-by-side cards
     const ac7ScenarioResponse = page.waitForResponse(
       (res) => res.url().includes("/api/v1/scenario") && res.request().method() === "POST",
     );
@@ -188,7 +134,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     expect(Number.isFinite(scenVal)).toBe(true);
     expect(scenVal).toBeGreaterThan(baseVal);
 
-    // Verify RFC 9457 422 problem+json errors render cleanly
     await page.route("**/api/v1/scenario", (route) =>
       route.fulfill({
         status: 422,
@@ -259,7 +204,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     expect(sentBody.origin_week).toBe(DEMO_CONFIG.scenarioBaseline.originWeek);
     expect(sentBody.weather.rainfall_mm).toBe(120);
 
-    // Verify observed rainfall and non-Critical cases from the real API history
     const histRes = await request.get(
       `${apiBase}/api/v1/wards/${encodeURIComponent(sentBody.ward_id)}/history?start=${sentBody.origin_week}&end=${sentBody.origin_week}`,
     );
@@ -272,7 +216,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     expect(observed.rainfall_mm).toBeLessThan(20);
     expect(observed.dengue_cases).toBeLessThan(14);
 
-    // Verify API response h=3 expected_cases strictly increases under 120 mm override
     const payload = (await scenarioRes.json()) as {
       baseline: Array<{ horizon: number; expected_cases: number }>;
       scenario: Array<{ horizon: number; expected_cases: number }>;
@@ -289,7 +232,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_8: API 503 clears stale tier and recovers on Retry; unknown ward URL shows Ward not found", async ({
     page,
   }) => {
-    // Load valid forecast first so we prove stale tier is cleared on subsequent 503
     await page.goto("/?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
 
@@ -307,20 +249,16 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
       }),
     );
 
-    // Change forecast window to trigger fresh request against failing API
     await page.getByTestId("window-1-4w").click();
     await expect(page.getByTestId("forecast-error-banner")).toBeVisible();
     await expect(page.getByTestId("forecast-error-banner")).toContainText("e2e-503-rid");
     await expect(page.getByTestId("forecast-retry")).toBeVisible();
-    // Stale tier card must NOT remain visible
     await expect(page.getByTestId("peak-tier-card")).toHaveCount(0);
 
-    // Unroute and click Retry to recover
     await page.unroute("**/api/v1/forecast");
     await page.getByTestId("forecast-retry").click();
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
 
-    // Unknown ward URL shows explicit "Ward not found" instead of blank chart
     await page.goto("/?ward=UNKNOWN_99");
     await expect(page.getByTestId("ward-not-found")).toBeVisible();
     await expect(page.getByTestId("ward-not-found")).toContainText("Ward not found");
@@ -328,7 +266,6 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("peak-tier-card")).toHaveCount(0);
     await expect(page.getByTestId("forecast-chart")).toHaveCount(0);
 
-    // Recovery action restores default Dhaka South ward
     await page.getByTestId("ward-not-found-reset").click();
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
   });
@@ -356,6 +293,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await page.getByTestId("tab-validation").click();
 
     await expect(page.getByTestId("validation-panel")).toBeVisible();
+    await expect(page.getByTestId("validation-split-timeline")).toBeVisible();
     await expect(page.getByTestId("validation-metrics-chart")).toBeVisible();
     await expect(page.getByTestId("validation-metrics-table")).toBeVisible();
     await expect(page.getByTestId("validation-metrics-table")).toContainText("Abhas LightGBM");
@@ -382,43 +320,34 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await page.route("**/api/v1/heatmap*", overrideModelVersion);
     await page.route("**/api/v1/validation", overrideModelVersion);
 
-    // 1. Stub model_version -> visible banner on forecast, heatmap, and validation views (zero Lime)
     await page.goto("/?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
-    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toContainText(
       "Sample data — model not loaded",
     );
     await assertZeroLimeInDataView(page);
 
     await page.getByTestId("tab-heatmap").click();
-    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
-    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toContainText(
       "Sample data — model not loaded",
     );
     await assertZeroLimeInDataView(page);
 
     await page.getByTestId("tab-validation").click();
-    await expect(page.getByTestId("validation-panel")).toBeVisible();
-    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toContainText(
       "Sample data — model not loaded",
     );
     await assertZeroLimeInDataView(page);
 
-    // 2. Non-stub model_version -> banner hidden on all three views
     forcedVersion = "lgbm-v1.0.0";
     await page.goto("/?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
 
     await page.getByTestId("tab-heatmap").click();
-    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
 
     await page.getByTestId("tab-validation").click();
-    await expect(page.getByTestId("validation-panel")).toBeVisible();
     await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
 
     await page.unroute("**/api/v1/forecast", overrideModelVersion);
@@ -429,32 +358,30 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("ac_16: /brand renders tokens, risk scale & logo, and zero Lime appears inside [data-view='data']", async ({
     page,
   }) => {
-    // Check /brand page
     await page.goto("/brand");
     await expect(page.getByRole("heading", { name: /Colour Palette/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /4-Tier Risk Scale/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Logo Lockups/i })).toBeVisible();
 
-    // Check zero Lime inside [data-view="data"] across all 5 dashboard tabs
     await page.goto("/?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await assertZeroLimeInDataView(page);
 
-    await page.getByTestId("tab-lags").click();
-    await expect(page.getByTestId("lags-panel")).toBeVisible();
-    await assertZeroLimeInDataView(page);
+    for (const [tabId, panelId] of [
+      ["tab-lags", "lags-panel"],
+      ["tab-heatmap", "heatmap-panel"],
+      ["tab-priority", "priority-panel"],
+      ["tab-validation", "validation-panel"],
+      ["tab-about", "about-panel"],
+    ] as const) {
+      await page.getByTestId(tabId).click();
+      await expect(page.getByTestId(panelId)).toBeVisible();
+      await assertZeroLimeInDataView(page);
+    }
 
     await page.getByTestId("tab-scenario").click();
     await page.getByTestId("scenario-preset-120").click();
     await expect(page.getByTestId("scenario-comparison")).toBeVisible();
-    await assertZeroLimeInDataView(page);
-
-    await page.getByTestId("tab-heatmap").click();
-    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
-    await assertZeroLimeInDataView(page);
-
-    await page.getByTestId("tab-validation").click();
-    await expect(page.getByTestId("validation-panel")).toBeVisible();
     await assertZeroLimeInDataView(page);
   });
 
@@ -478,15 +405,22 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("heatmap-panel")).toBeVisible();
     await assertWcagAA(page, "City Heatmap");
 
+    await page.getByTestId("tab-priority").click();
+    await expect(page.getByTestId("priority-panel")).toBeVisible();
+    await assertWcagAA(page, "Priority List");
+
     await page.getByTestId("tab-validation").click();
     await expect(page.getByTestId("validation-panel")).toBeVisible();
     await assertWcagAA(page, "Validation Tab");
+
+    await page.getByTestId("tab-about").click();
+    await expect(page.getByTestId("about-panel")).toBeVisible();
+    await assertWcagAA(page, "About & Cost Tab");
 
     await page.goto("/brand");
     await expect(page.getByRole("heading", { name: /Colour Palette/i })).toBeVisible();
     await assertWcagAA(page, "Brand System (/brand)");
 
-    // Also verify 375px mobile viewport has zero WCAG A/AA violations
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
@@ -514,13 +448,11 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
       };
     });
 
-    // No thick one-side accent ("side-tab") border
     expect(styles.borderLeftWidth).toBeLessThanOrEqual(1);
     expect(styles.borderRightWidth).toBeLessThanOrEqual(1);
     expect(styles.borderTopWidth).toBeLessThanOrEqual(1);
     expect(styles.borderBottomWidth).toBeLessThanOrEqual(1);
 
-    // Selected row remains visually distinct from unselected rows (Paper vs White ground)
     const unselectedRow = list.locator("button:not([aria-current])").first();
     if ((await unselectedRow.count()) > 0) {
       const unselectedBg = await unselectedRow.evaluate(

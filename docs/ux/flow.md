@@ -36,7 +36,10 @@ flowchart TD
     ViewForecast -->|Open Lags tab| LagsTab[Screen 2: Lags Panel<br/>GET /api/v1/wards/id/lags]
     ViewForecast -->|Open Scenario tab| ScenarioTab[Screen 3: What-If Scenario<br/>POST /api/v1/scenario]
     ViewForecast -->|Open City Heatmap tab| HeatmapTab[Screen 4: City Heatmap<br/>GET /api/v1/heatmap]
-    ViewForecast -->|Open Validation tab| ValidationTab[Screen 5: Validation & Ops<br/>GET /api/v1/validation + /api/v1/ops]
+    ViewForecast -->|Open Priority List tab| PriorityTab[Screen 5: Priority List & CSV / Print<br/>POST /api/v1/forecast]
+    ViewForecast -->|Open Validation tab| ValidationTab[Screen 6: Validation & Timeline<br/>GET /api/v1/validation + /api/v1/ops]
+    ViewForecast -->|Open About & Cost tab| AboutTab[Screen 7: About, Ops Cost & Model Card<br/>GET /api/v1/ops]
+    ViewForecast -->|Toggle EN/BN| LangSync[Update ?lang=en|bn & Officer Brief POST /api/v1/advisory]
     ViewForecast -->|Open /brand link| BrandPage[Brand Kit Showcase /brand]
 
     LagsTab --> LagsOk{Lags 200?}
