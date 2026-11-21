@@ -48,7 +48,7 @@ ignore = ["S101", "B008", "E501"]  # ruff format owns line length
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S"]
 "evals/**" = ["S"]
-"ml/**" = ["S"]
+"ml/**" = ["S607"]  # nvidia-smi PATH lookup in gpu_probe/train; S301/S324/S602 remain enforced
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -25,6 +25,7 @@ from app.core.security import SecurityHeadersMiddleware
 from app.features.advisory.router import router as advisory_router
 from app.features.forecast.router import router as forecast_router
 from app.features.heatmap.router import router as heatmap_router
+from app.features.lags.deps import warm_lags_cache
 from app.features.lags.router import router as lags_router
 from app.features.ops.router import router as ops_router
 from app.features.validation.router import router as validation_router
@@ -61,6 +62,13 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
         logger.exception("database bootstrap failed during startup")
     finally:
         enable_abhas_loggers()
+
+    try:
+        if _database_is_seeded():
+            warmed = warm_lags_cache()
+            logger.info("lags cache warmed during startup (wards=%d)", warmed)
+    except Exception:
+        logger.exception("lags cache warm-up failed during startup")
 
     checks: dict[str, Any] = {"database": _database_is_seeded, "model": _model_is_ready}
     checks.update(get_readiness_checks())

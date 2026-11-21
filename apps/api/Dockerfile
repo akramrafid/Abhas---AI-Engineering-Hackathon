@@ -21,7 +21,7 @@ WORKDIR /app
 
 # Install runtime Python dependencies only (training dependencies stay out of the serving image)
 COPY apps/api/requirements.txt /app/apps/api/requirements.txt
-RUN pip install --no-cache-dir -r /app/apps/api/requirements.txt
+RUN pip install --no-cache-dir --require-hashes --only-binary=:all: -r /app/apps/api/requirements.txt
 
 COPY apps/api /app/apps/api
 COPY data/raw /app/data/raw
