@@ -1,5 +1,6 @@
 import type { HTMLAttributes } from "react";
 import { clsx } from "clsx";
+import { TIER_ACTIONS_BN, type Lang } from "@/lib/i18n";
 
 export type RiskTier = "Low" | "Medium" | "High" | "Critical";
 
@@ -85,6 +86,8 @@ export interface RiskTierBadgeProps
   size?: RiskTierBadgeSize;
   /** Optionally render the recommended public-health action beneath the badge label. */
   showAction?: boolean;
+  /** Active display language for action copy and primary label ordering. */
+  lang?: Lang;
 }
 
 const SIZE_CLASSES: Record<
@@ -115,11 +118,13 @@ export function RiskTierBadge({
   tier,
   size = "md",
   showAction = false,
+  lang = "en",
   className,
   ...props
 }: RiskTierBadgeProps) {
   const meta = TIER_META[tier];
   const s = SIZE_CLASSES[size];
+  const actionText = lang === "bn" ? TIER_ACTIONS_BN[tier] : meta.action;
 
   return (
     <span
@@ -156,18 +161,38 @@ export function RiskTierBadge({
           })}
         </span>
         <span className={clsx("inline-flex items-baseline gap-1.5 leading-none", s.text)}>
-          <span>{meta.labelEn}</span>
-          <span aria-hidden="true" className="opacity-65">
-            /
-          </span>
-          <span lang="bn" className="font-bangla font-semibold">
-            {meta.labelBn}
-          </span>
+          {lang === "bn" ? (
+            <>
+              <span lang="bn" className="font-bangla font-semibold">
+                {meta.labelBn}
+              </span>
+              <span aria-hidden="true" className="opacity-65">
+                /
+              </span>
+              <span className="text-[0.85em] opacity-90">{meta.labelEn}</span>
+            </>
+          ) : (
+            <>
+              <span>{meta.labelEn}</span>
+              <span aria-hidden="true" className="opacity-65">
+                /
+              </span>
+              <span lang="bn" className="font-bangla font-semibold">
+                {meta.labelBn}
+              </span>
+            </>
+          )}
         </span>
       </span>
       {showAction ? (
-        <span className="text-xs font-normal leading-snug opacity-95">
-          {meta.action}
+        <span
+          lang={lang}
+          className={clsx(
+            "text-xs font-normal leading-snug opacity-95",
+            lang === "bn" && "font-bangla",
+          )}
+        >
+          {actionText}
         </span>
       ) : null}
     </span>
