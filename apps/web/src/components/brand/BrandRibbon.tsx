@@ -64,7 +64,8 @@ export function BrandRibbon({
         width={asset.width}
         height={asset.height}
         unoptimized
-        priority={variant === "hero"}
+        loading="eager"
+        preload={variant === "hero" || variant === "strip"}
         className="h-full w-full object-cover object-right opacity-65"
       />
       <div className={clsx("absolute inset-0", SCRIM_CLASS[surface])} />

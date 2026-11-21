@@ -1,17 +1,65 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+"use client";
+
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { clsx } from "clsx";
 import type { Driver } from "@/lib/api/client";
+import { formatDriverLabel, UI_COPY, type Lang } from "@/lib/i18n";
 
 export interface DriversListProps {
   drivers: readonly Driver[];
   horizonLabel: string;
+  lang?: Lang;
 }
 
-export function DriversList({ drivers, horizonLabel }: DriversListProps) {
-  const topDrivers = drivers.slice(0, 4);
-  const maxAbs = Math.max(10, ...topDrivers.map((d) => Math.abs(d.effect_pct)));
+interface WaterfallRow {
+  key: string;
+  label: string;
+  effectPct: number;
+  isOther?: boolean;
+}
 
-  if (topDrivers.length === 0) {
+function buildWaterfallRows(
+  drivers: readonly Driver[],
+  lang: Lang,
+): WaterfallRow[] {
+  const topFour = drivers.slice(0, 4).map<WaterfallRow>((d) => ({
+    key: d.key,
+    label: formatDriverLabel(d, lang),
+    effectPct: d.effect_pct,
+  }));
+
+  if (topFour.length === 0) return [];
+
+  const rest = drivers.slice(4);
+  let otherPct = 0;
+  if (rest.length > 0) {
+    const product = rest.reduce(
+      (acc, d) => acc * Math.max(0.01, 1 + d.effect_pct / 100),
+      1,
+    );
+    otherPct = Number(((product - 1) * 100).toFixed(1));
+  }
+
+  return [
+    ...topFour,
+    {
+      key: "other",
+      label: UI_COPY[lang].wardRisk.otherDriversLabel,
+      effectPct: otherPct,
+      isOther: true,
+    },
+  ];
+}
+
+export function DriversList({
+  drivers,
+  horizonLabel,
+  lang = "en",
+}: DriversListProps) {
+  const rows = buildWaterfallRows(drivers, lang);
+  const copy = UI_COPY[lang].wardRisk;
+
+  if (rows.length === 0) {
     return (
       <div
         data-testid="drivers-panel"
@@ -22,59 +70,93 @@ export function DriversList({ drivers, horizonLabel }: DriversListProps) {
     );
   }
 
+  const maxAbs = Math.max(15, ...rows.map((r) => Math.abs(r.effectPct)));
+
   return (
     <div data-testid="drivers-panel" className="space-y-3">
-      <p className="text-xs font-medium text-slate">
-        Multiplicative SHAP effect on expected cases ({horizonLabel})
-      </p>
+      <div className="flex items-center justify-between gap-2 text-xs font-medium text-slate">
+        <p className={lang === "bn" ? "font-bangla" : undefined}>
+          {copy.driversWaterfallCaption} ({horizonLabel})
+        </p>
+        <span className="font-mono text-[11px] tnum">−{Math.round(maxAbs)}% · 0 · +{Math.round(maxAbs)}%</span>
+      </div>
+
       <ul className="space-y-3">
-        {topDrivers.map((driver) => {
-          const isUp = driver.direction === "up";
-          const sign = driver.effect_pct > 0 ? "+" : "";
-          const formattedPct = `${sign}${Math.round(driver.effect_pct)}%`;
-          const widthPct = Math.max(6, Math.min(100, (Math.abs(driver.effect_pct) / maxAbs) * 100));
+        {rows.map((row) => {
+          const isPositive = row.effectPct > 0;
+          const isNegative = row.effectPct < 0;
+          const rounded = Math.round(row.effectPct);
+          const sign = rounded > 0 ? "+" : "";
+          const formattedPct = `${sign}${rounded}%`;
+          // Each side of the centered 0% axis occupies 50% width.
+          const halfPct =
+            row.effectPct === 0
+              ? 0
+              : Math.max(4, Math.min(50, (Math.abs(row.effectPct) / maxAbs) * 50));
 
           return (
             <li
-              key={driver.key}
-              data-testid={`driver-row-${driver.key}`}
-              className="space-y-1.5"
+              key={row.key}
+              data-testid={`driver-row-${row.key}`}
+              className={clsx(
+                "space-y-1.5",
+                row.isOther && "border-t border-mist pt-2.5",
+              )}
             >
               <div className="flex items-center justify-between gap-2 text-sm">
-                <span className="inline-flex items-center gap-1.5 font-medium text-ink">
-                  {isUp ? (
+                <span
+                  lang={lang}
+                  className={clsx(
+                    "inline-flex items-center gap-1.5 font-medium",
+                    row.isOther ? "text-slate" : "text-ink",
+                    lang === "bn" && "font-bangla",
+                  )}
+                >
+                  {isPositive ? (
                     <ArrowUpRight
                       className="h-4 w-4 shrink-0 text-royal"
                       aria-hidden="true"
                     />
-                  ) : (
+                  ) : isNegative ? (
                     <ArrowDownRight
                       className="h-4 w-4 shrink-0 text-slate"
                       aria-hidden="true"
                     />
+                  ) : (
+                    <Minus
+                      className="h-4 w-4 shrink-0 text-slate"
+                      aria-hidden="true"
+                    />
                   )}
-                  <span>{driver.label}</span>
+                  <span>{row.label}</span>
                 </span>
                 <span
                   className={clsx(
                     "font-mono text-sm font-semibold tnum",
-                    isUp ? "text-navy" : "text-slate",
+                    isPositive ? "text-navy" : "text-slate",
                   )}
                 >
                   {formattedPct}
                 </span>
               </div>
+
+              {/* Horizontal diverging waterfall bar centered on 0% baseline */}
               <div
-                className="h-2 w-full overflow-hidden rounded-sm bg-paper border border-mist"
+                className="relative h-2.5 w-full overflow-hidden rounded-sm border border-mist bg-paper"
                 aria-hidden="true"
               >
-                <div
-                  className={clsx(
-                    "h-full rounded-sm",
-                    isUp ? "bg-royal" : "bg-slate",
-                  )}
-                  style={{ width: `${widthPct}%` }}
-                />
+                <span className="absolute inset-y-0 left-1/2 w-px bg-slate/50" />
+                {isPositive ? (
+                  <div
+                    className="absolute inset-y-0 bg-royal"
+                    style={{ left: "50%", width: `${halfPct}%` }}
+                  />
+                ) : isNegative ? (
+                  <div
+                    className="absolute inset-y-0 bg-slate"
+                    style={{ left: `${50 - halfPct}%`, width: `${halfPct}%` }}
+                  />
+                ) : null}
               </div>
             </li>
           );

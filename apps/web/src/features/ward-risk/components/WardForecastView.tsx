@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { clsx } from "clsx";
 import {
   isUnknownWardError,
   type City,
@@ -12,7 +11,7 @@ import {
   type WeatherMode,
 } from "@/lib/api/client";
 import { WINDOW_HORIZONS, type HorizonWindow } from "@/lib/demo-config";
-import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
+import { UI_COPY, type Lang } from "@/lib/i18n";
 import {
   Card,
   CardContent,
@@ -24,9 +23,15 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import { StubDataBanner } from "@/components/ui/StubDataBanner";
+import { WardNotFoundCard } from "@/components/ui/WardNotFoundCard";
+import { PrintableWardBrief } from "@/components/ward-brief/PrintableWardBrief";
 import { useCityForecastQuery } from "../hooks";
+import { AdvisoryCard } from "./AdvisoryCard";
 import { DriversList } from "./DriversList";
 import { ForecastChart } from "./ForecastChart";
+import { HorizonTable } from "./HorizonTable";
+import { PeakTierCard } from "./PeakTierCard";
+import { WardRailList } from "./WardRailList";
 
 export interface WardForecastViewProps {
   city: City;
@@ -36,6 +41,7 @@ export interface WardForecastViewProps {
   originWeek: string;
   windowKey: HorizonWindow;
   source: WeatherMode;
+  lang: Lang;
   onSelectWard: (wardId: string) => void;
   onResetUnknownWard: () => void;
 }
@@ -56,19 +62,6 @@ function findPeakHorizon(horizons: readonly HorizonForecast[]): HorizonForecast 
   }, horizons[0]);
 }
 
-function formatWeatherSourceLabel(ws: string): string {
-  switch (ws) {
-    case "live":
-      return "Live · Open-Meteo (city centroid)";
-    case "cache":
-      return "Cached weather (stale fallback)";
-    case "climatology":
-      return "Climatology fallback";
-    default:
-      return "Dataset mode (offline)";
-  }
-}
-
 export function WardForecastView({
   city,
   cityWards,
@@ -77,10 +70,12 @@ export function WardForecastView({
   originWeek,
   windowKey,
   source,
+  lang,
   onSelectWard,
   onResetUnknownWard,
 }: WardForecastViewProps) {
   const [inspectedHorizon, setInspectedHorizon] = useState<number | null>(null);
+  const copy = UI_COPY[lang].wardRisk;
 
   const wardIds = useMemo(() => cityWards.map((w) => w.ward_id), [cityWards]);
   const horizons = WINDOW_HORIZONS[windowKey];
@@ -111,54 +106,25 @@ export function WardForecastView({
     });
   }, [forecastQuery.data?.forecasts]);
 
-  // Unknown ward guard (AC-8): show explicit message, never a blank chart or stale tier.
   if (unknownWardId) {
     return (
-      <div
-        data-testid="ward-not-found"
-        role="alert"
-        className="rounded-lg border border-risk-high bg-white p-6 space-y-3"
-      >
-        <h2 className="font-sans text-lg font-bold text-navy">Ward not found</h2>
-        <p className="text-sm text-slate">
-          No ward matching{" "}
-          <code className="rounded-sm bg-paper px-1.5 py-0.5 font-mono text-xs text-ink">
-            {unknownWardId}
-          </code>{" "}
-          exists in the seeded dataset. Select a valid ward to view its early-warning forecast.
-        </p>
-        <button
-          type="button"
-          data-testid="ward-not-found-reset"
-          onClick={onResetUnknownWard}
-          className="inline-flex min-h-10 cursor-pointer items-center rounded-md bg-royal px-4 py-2 text-sm font-semibold text-white hover:bg-navy"
-        >
-          Select Dhaka South default ward
-        </button>
-      </div>
+      <WardNotFoundCard
+        wardId={unknownWardId}
+        onReset={onResetUnknownWard}
+        lang={lang}
+      />
     );
   }
 
-  // Error guard (AC-8): NEVER display a stale tier card when forecast request fails.
+  // Error guard (AC-8): never display a stale tier card when forecast request fails.
   if (forecastQuery.isError) {
     if (isUnknownWardError(forecastQuery.error)) {
       return (
-        <div
-          data-testid="ward-not-found"
-          role="alert"
-          className="rounded-lg border border-risk-high bg-white p-6 space-y-3"
-        >
-          <h2 className="font-sans text-lg font-bold text-navy">Ward not found</h2>
-          <p className="text-sm text-slate">{forecastQuery.error.detail ?? forecastQuery.error.title}</p>
-          <button
-            type="button"
-            data-testid="ward-not-found-reset"
-            onClick={onResetUnknownWard}
-            className="inline-flex min-h-10 cursor-pointer items-center rounded-md bg-royal px-4 py-2 text-sm font-semibold text-white hover:bg-navy"
-          >
-            Select Dhaka South default ward
-          </button>
-        </div>
+        <WardNotFoundCard
+          detail={forecastQuery.error.detail ?? forecastQuery.error.title}
+          onReset={onResetUnknownWard}
+          lang={lang}
+        />
       );
     }
 
@@ -175,7 +141,7 @@ export function WardForecastView({
     );
   }
 
-  if (forecastQuery.isPending || forecastQuery.isFetching && !forecastQuery.data) {
+  if (forecastQuery.isPending || (forecastQuery.isFetching && !forecastQuery.data)) {
     return (
       <PanelSkeleton
         testId="ward-forecast-loading"
@@ -206,7 +172,6 @@ export function WardForecastView({
   const wardMeta = wardMetaMap.get(selectedForecast.ward_id);
   const escalated = selectedForecast.horizons.some((h) => h.tier_escalated);
 
-  // Count wards per tier in the selected city
   const tierCounts: Record<RiskTier, number> = {
     Low: 0,
     Medium: 0,
@@ -220,309 +185,118 @@ export function WardForecastView({
   return (
     <div className="space-y-4">
       <StubDataBanner modelVersion={response.model_version} />
-      <div className="grid gap-5 lg:grid-cols-[310px_1fr] lg:items-start">
-      {/* Left rail: City Ward Priority List */}
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-paper py-3.5">
-          <div className="flex items-center justify-between gap-2">
-            <CardTitle className="text-sm">{city} wards</CardTitle>
-            <span className="font-mono text-xs text-slate tnum">
-              {sortedForecasts.length} total
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap gap-1.5 font-mono text-[11px] text-slate tnum">
-            {([...TIER_ORDER].reverse() as RiskTier[]).map((t) => (
-              <span
-                key={t}
-                className="rounded-sm border border-mist bg-white px-1.5 py-0.5"
-              >
-                {t}: {tierCounts[t]}
-              </span>
-            ))}
-          </div>
-        </CardHeader>
 
-        <ul
-          data-testid="ward-priority-list"
-          className="max-h-[640px] divide-y divide-mist overflow-y-auto"
-        >
-          {sortedForecasts.map((wf) => {
-            const isSelected = wf.ward_id === selectedForecast.ward_id;
-            const wfPeak = findPeakHorizon(wf.horizons);
-            return (
-              <li key={wf.ward_id}>
-                <button
-                  type="button"
-                  data-testid={`ward-row-${wf.ward_id}`}
-                  aria-current={isSelected ? "true" : undefined}
-                  onClick={() => {
-                    setInspectedHorizon(null);
-                    onSelectWard(wf.ward_id);
-                  }}
-                  className={clsx(
-                    "flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-3 text-left",
-                    isSelected
-                      ? "bg-paper ring-1 ring-inset ring-royal/30"
-                      : "bg-white hover:bg-paper/60",
-                  )}
-                >
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-2 font-mono text-sm font-semibold text-navy tnum">
-                      {isSelected ? (
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 shrink-0 rounded-full bg-royal"
-                        />
-                      ) : null}
-                      <span className="truncate">{wf.ward_id}</span>
-                    </p>
-                    {wfPeak ? (
-                      <p className="font-mono text-xs text-slate tnum">
-                        Peak {wfPeak.expected_cases.toFixed(1)} cases (+{wfPeak.horizon}w)
-                      </p>
-                    ) : null}
-                  </div>
-                  <RiskTierBadge tier={wf.peak_tier} size="sm" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </Card>
+      <PrintableWardBrief
+        forecast={selectedForecast}
+        wardMeta={wardMeta}
+        originWeek={response.origin_week}
+        modelVersion={response.model_version}
+        lang={lang}
+      />
 
-      {/* Main content column */}
-      <div className="space-y-5" aria-live="polite">
-        {/* Peak-Window Tier Card */}
-        <Card data-testid="peak-tier-card">
-          <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="font-mono text-lg tnum">
-                  {selectedForecast.ward_id}
-                </CardTitle>
-                <span className="rounded-sm bg-paper px-2 py-0.5 text-xs font-medium text-navy">
-                  {selectedForecast.city}
-                </span>
-                <span className="rounded-sm border border-mist px-2 py-0.5 font-mono text-xs text-slate tnum">
-                  Window {windowKey === "2-4w" ? "2–4w" : "1–4w"}
-                </span>
-              </div>
-              <CardDescription className="font-mono text-xs tnum">
-                Origin week {response.origin_week} · {formatWeatherSourceLabel(response.weather_source)} · Model{" "}
-                {response.model_version}
-                {response.cached ? " · cached" : ""}
-              </CardDescription>
-            </div>
+      <div className="no-print grid gap-5 lg:grid-cols-[296px_1fr] lg:items-start">
+        <WardRailList
+          city={city}
+          sortedForecasts={sortedForecasts}
+          selectedWardId={selectedForecast.ward_id}
+          tierCounts={tierCounts}
+          lang={lang}
+          findPeakHorizon={findPeakHorizon}
+          onSelectWard={(wid) => {
+            setInspectedHorizon(null);
+            onSelectWard(wid);
+          }}
+        />
 
-            <RiskTierBadge
-              tier={selectedForecast.peak_tier}
-              size="lg"
-              showAction
-              data-testid="peak-tier-badge"
-            />
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {peakHorizon ? (
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-md border border-mist bg-paper p-3.5">
-                  <p className="text-xs font-semibold text-slate">Peak risk score</p>
-                  <p
-                    data-testid="peak-risk-score"
-                    className="mt-1 font-mono text-2xl font-bold text-navy tnum"
-                  >
-                    {peakHorizon.risk_score}
-                    <span className="text-sm font-medium text-slate"> / 100</span>
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate">
-                    Probability of reaching High cut-off
-                  </p>
-                </div>
-
-                <div className="rounded-md border border-mist bg-paper p-3.5">
-                  <p className="text-xs font-semibold text-slate">
-                    Peak expected cases (+{peakHorizon.horizon}w)
-                  </p>
-                  <p
-                    data-testid="peak-expected-cases"
-                    className="mt-1 font-mono text-2xl font-bold text-navy tnum"
-                  >
-                    {peakHorizon.expected_cases.toFixed(1)}
-                  </p>
-                  <p className="mt-0.5 font-mono text-xs text-slate tnum">
-                    80% band: {peakHorizon.p10.toFixed(1)} – {peakHorizon.p90.toFixed(1)} cases
-                  </p>
-                </div>
-
-                <div className="rounded-md border border-mist bg-paper p-3.5">
-                  <p className="text-xs font-semibold text-slate">Peak target week</p>
-                  <p className="mt-1 font-mono text-xl font-bold text-navy tnum">
-                    {peakHorizon.target_week}
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate">
-                    +{peakHorizon.horizon} week{peakHorizon.horizon === 1 ? "" : "s"} after origin
-                  </p>
-                </div>
-              </div>
-            ) : null}
-
-            {escalated ? (
-              <p className="rounded-md border border-risk-medium bg-paper px-3 py-2 text-xs font-medium text-ink">
-                Upper 80% bound (P90) exceeds this ward&apos;s seasonal endemic threshold — tier escalated by +1 level.
-              </p>
-            ) : null}
-
-            {wardMeta ? (
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 border-t border-mist pt-3 text-xs text-slate">
-                <span>
-                  Water-logging index:{" "}
-                  <strong className="font-mono text-ink tnum">
-                    {wardMeta.water_logging_risk_index.toFixed(2)}
-                  </strong>
-                </span>
-                <span>
-                  Population density:{" "}
-                  <strong className="font-mono text-ink tnum">
-                    {Math.round(wardMeta.population_density_sqkm).toLocaleString()} / km²
-                  </strong>
-                </span>
-                <span>
-                  Sanitation score:{" "}
-                  <strong className="font-mono text-ink tnum">
-                    {wardMeta.sanitation_score.toFixed(2)}
-                  </strong>
-                </span>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        {/* Forecast Trajectory Chart */}
-        <Card>
-          <CardHeader className="sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle>Weekly forecast trajectory &amp; 80% band</CardTitle>
-              <CardDescription>
-                Expected weekly cases (Royal line) with conformal 80% uncertainty range (P10–P90).
-              </CardDescription>
-            </div>
-            <div className="flex items-center gap-4 text-xs text-slate">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-0.5 w-4 bg-royal" aria-hidden="true" />
-                Expected cases
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-3 w-4 rounded-xs border border-royal/30 bg-forecast-band" aria-hidden="true" />
-                80% band
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ForecastChart horizons={selectedForecast.horizons} />
-          </CardContent>
-        </Card>
-
-        {/* Per-Horizon Table & Top 4 Drivers */}
-        <div className="grid gap-5 xl:grid-cols-[1.35fr_1fr]">
-          <Card className="overflow-hidden">
-            <CardHeader>
-              <CardTitle>Per-horizon outlook</CardTitle>
-              <CardDescription>
-                Select any horizon row to inspect its top four drivers.
-              </CardDescription>
-            </CardHeader>
-            <div
-              className="overflow-x-auto"
-              tabIndex={0}
-              role="region"
-              aria-label="Per-horizon forecast outlook table"
-            >
-              <table
-                data-testid="horizon-table"
-                className="w-full border-collapse text-left text-sm"
-              >
-                <thead>
-                  <tr className="border-b border-mist bg-paper text-xs font-semibold text-slate">
-                    <th scope="col" className="px-4 py-2.5">Horizon</th>
-                    <th scope="col" className="px-4 py-2.5">Target week</th>
-                    <th scope="col" className="px-4 py-2.5 text-right">Expected</th>
-                    <th scope="col" className="px-4 py-2.5 text-right">80% band</th>
-                    <th scope="col" className="px-4 py-2.5 text-right">Score</th>
-                    <th scope="col" className="px-4 py-2.5">Tier</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-mist">
-                  {selectedForecast.horizons.map((h) => {
-                    const active = activeDriverHorizon?.horizon === h.horizon;
-                    return (
-                      <tr
-                        key={h.horizon}
-                        data-testid={`horizon-row-${h.horizon}`}
-                        onClick={() => setInspectedHorizon(h.horizon)}
-                        className={clsx(
-                          "cursor-pointer",
-                          active ? "bg-paper" : "bg-white hover:bg-paper/60",
-                        )}
-                      >
-                        <td className="px-4 py-3 font-mono text-xs font-semibold text-navy tnum">
-                          <button
-                            type="button"
-                            aria-pressed={active}
-                            onClick={() => setInspectedHorizon(h.horizon)}
-                            className="cursor-pointer font-mono text-xs font-semibold text-navy hover:text-royal tnum"
-                          >
-                            +{h.horizon}w
-                          </button>
-                        </td>
-                        <td className="px-4 py-3 font-mono text-xs text-ink tnum">
-                          {h.target_week}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-sm font-semibold text-ink tnum">
-                          {h.expected_cases.toFixed(1)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-xs text-slate tnum">
-                          {h.p10.toFixed(1)}–{h.p90.toFixed(1)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono text-xs text-ink tnum">
-                          {h.risk_score}
-                        </td>
-                        <td className="px-4 py-3">
-                          <RiskTierBadge tier={h.tier} size="sm" />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+        <div className="space-y-5" aria-live="polite">
+          <PeakTierCard
+            response={response}
+            selectedForecast={selectedForecast}
+            peakHorizon={peakHorizon}
+            wardMeta={wardMeta}
+            windowKey={windowKey}
+            escalated={escalated}
+            lang={lang}
+            onPrintBrief={() => {
+              if (typeof window !== "undefined") window.print();
+            }}
+          />
 
           <Card>
-            <CardHeader>
-              <CardTitle>Top drivers</CardTitle>
-              <CardDescription>
-                Primary weather and ward vulnerability signals for{" "}
-                <span className="font-mono text-navy tnum">
-                  {activeDriverHorizon
-                    ? `+${activeDriverHorizon.horizon}w (${activeDriverHorizon.target_week})`
-                    : "selected window"}
+            <CardHeader className="sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className={lang === "bn" ? "font-bangla" : undefined}>
+                  {copy.trajectoryTitle}
+                </CardTitle>
+                <CardDescription className={lang === "bn" ? "font-bangla" : undefined}>
+                  {copy.trajectoryDesc}
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-slate">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="h-0.5 w-4 bg-royal" aria-hidden="true" />
+                  Expected cases
                 </span>
-                .
-              </CardDescription>
+                <span className="inline-flex items-center gap-1.5">
+                  <span
+                    className="h-3 w-4 rounded-xs border border-royal/30 bg-forecast-band"
+                    aria-hidden="true"
+                  />
+                  80% band
+                </span>
+              </div>
             </CardHeader>
             <CardContent>
-              <DriversList
-                drivers={activeDriverHorizon?.drivers ?? []}
-                horizonLabel={
-                  activeDriverHorizon
-                    ? `+${activeDriverHorizon.horizon}w · ${activeDriverHorizon.target_week}`
-                    : "peak horizon"
-                }
-              />
+              <ForecastChart horizons={selectedForecast.horizons} />
             </CardContent>
           </Card>
+
+          <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
+            <HorizonTable
+              horizons={selectedForecast.horizons}
+              activeHorizon={activeDriverHorizon?.horizon ?? null}
+              lang={lang}
+              onSelectHorizon={setInspectedHorizon}
+            />
+
+            <Card>
+              <CardHeader>
+                <CardTitle className={lang === "bn" ? "font-bangla" : undefined}>
+                  {copy.driversTitle}
+                </CardTitle>
+                <CardDescription className={lang === "bn" ? "font-bangla" : undefined}>
+                  {copy.driversDescPrefix}{" "}
+                  <span className="font-mono text-navy tnum">
+                    {activeDriverHorizon
+                      ? `+${activeDriverHorizon.horizon}w (${activeDriverHorizon.target_week})`
+                      : "selected window"}
+                  </span>
+                  .
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <DriversList
+                  drivers={activeDriverHorizon?.drivers ?? []}
+                  horizonLabel={
+                    activeDriverHorizon
+                      ? `+${activeDriverHorizon.horizon}w · ${activeDriverHorizon.target_week}`
+                      : "peak horizon"
+                  }
+                  lang={lang}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {activeDriverHorizon ? (
+            <AdvisoryCard
+              wardId={selectedForecast.ward_id}
+              originWeek={response.origin_week}
+              horizon={activeDriverHorizon.horizon}
+              lang={lang}
+            />
+          ) : null}
         </div>
-      </div>
       </div>
     </div>
   );
