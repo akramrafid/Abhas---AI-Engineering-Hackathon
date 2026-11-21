@@ -1,0 +1,99 @@
+{
+  "operation": "GET /api/v1/heatmap",
+  "method": "GET",
+  "path_template": "/api/v1/heatmap",
+  "fingerprint": "eba5a0f6",
+  "case_id": "d3fPIc",
+  "code_sample": "curl -X GET 'http://127.0.0.1:50709/api/v1/heatmap?city=Gazipur&origin_week=2016-01-25'",
+  "sequence": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:50709/api/v1/heatmap?city=Gazipur&origin_week=2016-01-25",
+      "url_template": "http://127.0.0.1:50709/api/v1/heatmap",
+      "headers": {
+        "User-Agent": "schemathesis/4.33.4",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "d3fPIc"
+      },
+      "response": {
+        "status_code": 422,
+        "headers": {
+          "date": "Sat, 21 Nov 2026 21:11:46 GMT",
+          "server": "uvicorn",
+          "content-length": "258",
+          "content-type": "application/problem+json",
+          "x-request-id": "7bfd34c8cb0c4947",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "vary": "Origin"
+        },
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"origin_week out of range\",\"status\":422,\"detail\":\"origin_week (2016-01-25) must be between 2016-02-29 and 2025-12-29 in dataset mode.\",\"instance\":\"/api/v1/heatmap\",\"request_id\":\"7bfd34c8cb0c4947\"}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "positive_data_acceptance",
+          "status": "failure",
+          "message": "Schema-valid request rejected\n\nValid data should have been accepted\nExpected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.000709100000676699,
+          "mode": "positive"
+        },
+        "components": {
+          "QUERY": "positive"
+        },
+        "phase": {
+          "name": "fuzzing",
+          "data": {
+            "type": "FuzzingPhaseData",
+            "description": "Positive test case",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "mutations": []
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [
+          {
+            "path": [
+              "origin_week"
+            ],
+            "type_token": "string",
+            "format_token": "date",
+            "pattern_hash": null,
+            "normalized_name": "originweek",
+            "value": "2016-01-25",
+            "source_operation": "GET /api/v1/wards/{ward_id}/history"
+          }
+        ],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/heatmap",
+      "path_parameters": {},
+      "query": {
+        "city": "Gazipur",
+        "origin_week": "2016-01-25"
+      },
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "GET /api/v1/heatmap"
+    }
+  ],
+  "aliases": []
+}

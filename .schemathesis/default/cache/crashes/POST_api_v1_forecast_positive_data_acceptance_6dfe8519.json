@@ -1,0 +1,110 @@
+{
+  "operation": "POST /api/v1/forecast",
+  "method": "POST",
+  "path_template": "/api/v1/forecast",
+  "fingerprint": "6dfe8519",
+  "case_id": "rzbUUQ",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"horizons\": [1, 1, 1], \"origin_week\": \"2025-08-04\", \"source\": \"dataset\", \"ward_ids\": [\"DSCC_Ward_07\"]}' http://127.0.0.1:50709/api/v1/forecast",
+  "sequence": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:50709/api/v1/forecast",
+      "url_template": "http://127.0.0.1:50709/api/v1/forecast",
+      "headers": {
+        "User-Agent": "schemathesis/4.33.4",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "rzbUUQ",
+        "Content-Type": "application/json",
+        "Content-Length": "103"
+      },
+      "response": {
+        "status_code": 422,
+        "headers": {
+          "date": "Sat, 21 Nov 2026 21:11:45 GMT",
+          "server": "uvicorn",
+          "content-length": "242",
+          "content-type": "application/problem+json",
+          "x-request-id": "c297d9c1a3604d99",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "vary": "Origin"
+        },
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/forecast\",\"request_id\":\"c297d9c1a3604d99\",\"errors\":[{\"field\":\"body\",\"message\":\"Value error, horizons must be unique\"}]}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "positive_data_acceptance",
+          "status": "failure",
+          "message": "Schema-valid request rejected\n\nValid data should have been accepted\nExpected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.0008368999988306314,
+          "mode": "positive"
+        },
+        "components": {
+          "BODY": "positive"
+        },
+        "phase": {
+          "name": "coverage",
+          "data": {
+            "type": "CoveragePhaseData",
+            "description": "Object with valid 'horizons' value: Near-boundary items array",
+            "location": null,
+            "parameter": "application/json",
+            "parameter_location": "BODY",
+            "scenario": "valid_object"
+          }
+        },
+        "pool_draws": [
+          {
+            "location": "body",
+            "parameter_name": "ward_ids",
+            "resource_name": "Ward",
+            "resource_field": "id",
+            "source_operation": "POST /api/v1/forecast",
+            "source_status": 200,
+            "source_identity": null,
+            "source_input": false,
+            "source_query": null
+          }
+        ],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/forecast",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "json",
+        "value": {
+          "horizons": [
+            1,
+            1,
+            1
+          ],
+          "origin_week": "2025-08-04",
+          "source": "dataset",
+          "ward_ids": [
+            "DSCC_Ward_07"
+          ]
+        }
+      },
+      "media_type": "application/json",
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "POST /api/v1/forecast"
+    }
+  ],
+  "aliases": []
+}

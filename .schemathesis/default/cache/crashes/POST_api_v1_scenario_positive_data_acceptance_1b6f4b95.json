@@ -1,0 +1,95 @@
+{
+  "operation": "POST /api/v1/scenario",
+  "method": "POST",
+  "path_template": "/api/v1/scenario",
+  "fingerprint": "1b6f4b95",
+  "case_id": "5oXpon",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"ward_id\": \"DSCC_Ward_07\", \"origin_week\": \"2025-08-04\", \"horizons\": [1, 2, 3, 4], \"weather\": {}}' http://127.0.0.1:50709/api/v1/scenario",
+  "sequence": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:50709/api/v1/scenario",
+      "url_template": "http://127.0.0.1:50709/api/v1/scenario",
+      "headers": {
+        "User-Agent": "schemathesis/4.33.4",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "5oXpon",
+        "Content-Type": "application/json",
+        "Content-Length": "97"
+      },
+      "response": {
+        "status_code": 422,
+        "headers": {
+          "date": "Sat, 21 Nov 2026 21:11:41 GMT",
+          "server": "uvicorn",
+          "content-length": "293",
+          "content-type": "application/problem+json",
+          "x-request-id": "f49db33b95904d85",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "vary": "Origin"
+        },
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/scenario\",\"request_id\":\"f49db33b95904d85\",\"errors\":[{\"field\":\"body.weather\",\"message\":\"Value error, set at least one of rainfall_mm, avg_temp_c, relative_humidity_pct\"}]}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "positive_data_acceptance",
+          "status": "failure",
+          "message": "Schema-valid request rejected\n\nValid data should have been accepted\nExpected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.000149200001033023,
+          "mode": "positive"
+        },
+        "components": {},
+        "phase": {
+          "name": "examples",
+          "data": {
+            "type": "ExamplesPhaseData",
+            "description": "Positive test case",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "mutations": []
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/scenario",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "json",
+        "value": {
+          "ward_id": "DSCC_Ward_07",
+          "origin_week": "2025-08-04",
+          "horizons": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "weather": {}
+        }
+      },
+      "media_type": "application/json",
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "POST /api/v1/scenario"
+    }
+  ],
+  "aliases": []
+}
