@@ -182,9 +182,11 @@ def calibrate_negbin_conformal(
         z_high=2.30,
     )
     best_score = float("inf")
+    fallback_cal = best_cal
+    fallback_dist = float("inf")
 
-    for z_lo in (0.85, 0.95, 1.05, 1.15, 1.25, 1.35):
-        for z_hi in (1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8):
+    for z_lo in (0.65, 0.75, 0.85, 0.95, 1.05, 1.15, 1.25, 1.35):
+        for z_hi in (1.5, 1.65, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8):
             cal = HorizonCalibration(
                 nb_r=round(nb_r, 4),
                 use_sigma_conformal=True,
@@ -194,6 +196,10 @@ def calibrate_negbin_conformal(
             p10, p90, _ = compute_bands_and_risk_vectorized(mu, cal)
             covered = (yt >= p10) & (yt <= p90)
             cov_all = float(np.mean(covered))
+            dist = abs(cov_all - target_coverage)
+            if 0.77 <= cov_all <= 0.89 and dist < fallback_dist:
+                fallback_dist = dist
+                fallback_cal = cal
             # Keep safe margin inside [0.75, 0.90] so hold-out stays squarely calibrated
             if not (0.81 <= cov_all <= 0.875):
                 continue
@@ -218,7 +224,7 @@ def calibrate_negbin_conformal(
                 best_score = score
                 best_cal = cal
 
-    return best_cal
+    return best_cal if best_score < float("inf") else fallback_cal
 
 
 def select_cost_sensitive_cutoffs(
@@ -243,10 +249,12 @@ def select_cost_sensitive_cutoffs(
 
     best_cutoffs = DEFAULT_TIER_CUTOFFS
     best_loss = float("inf")
+    soft_cutoffs = DEFAULT_TIER_CUTOFFS
+    soft_loss = float("inf")
 
-    for med in (2.5, 2.75, 3.0, 3.25, 3.5):
-        for high in (6.5, 7.0, 7.5, 8.0):
-            for crit in (11.5, 12.0, 12.5, 13.0, 14.0):
+    for med in (2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0):
+        for high in (6.5, 7.0, 7.5, 8.0, 8.5):
+            for crit in (11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0):
                 if not (med < high < crit):
                     continue
                 base_idx = np.where(mu < med, 0, np.where(mu < high, 1, np.where(mu < crit, 2, 3)))
@@ -261,8 +269,6 @@ def select_cost_sensitive_cutoffs(
                     if np.any(high_mask)
                     else 1.0
                 )
-                if within_one < 0.96 or crit_rec < 0.90 or high_within_one < 0.90:
-                    continue
 
                 under_crit = np.sum((actual_idx == 3) & (pred_idx < 2)) * (missed_critical_weight * 2.0)
                 soft_under_crit = np.sum((actual_idx == 3) & (pred_idx == 2)) * missed_critical_weight
@@ -272,11 +278,24 @@ def select_cost_sensitive_cutoffs(
                 loss = float(under_crit + soft_under_crit + other_under + two_tier_err + false_alarm) / max(
                     len(yt), 1
                 )
+
+                penalty = (
+                    max(0.0, 0.96 - within_one) * 50.0
+                    + max(0.0, 0.90 - crit_rec) * 50.0
+                    + max(0.0, 0.90 - high_within_one) * 20.0
+                )
+                if loss + penalty < soft_loss:
+                    soft_loss = loss + penalty
+                    soft_cutoffs = (float(med), float(high), float(crit))
+
+                if within_one < 0.96 or crit_rec < 0.90 or high_within_one < 0.90:
+                    continue
+
                 if loss < best_loss:
                     best_loss = loss
                     best_cutoffs = (float(med), float(high), float(crit))
 
-    return best_cutoffs
+    return best_cutoffs if best_loss < float("inf") else soft_cutoffs
 
 
 def build_endemic_thresholds(

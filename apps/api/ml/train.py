@@ -467,16 +467,16 @@ def _tune_lgbm_optuna(
         def objective(trial: Any, _h: int = h, _folds: Any = folds) -> float:
             params: dict[str, Any] = {
                 "objective": "poisson",
-                "n_estimators": trial.suggest_int("n_estimators", 125, 500, step=25),
+                "n_estimators": trial.suggest_int("n_estimators", 75, 500, step=25),
                 "learning_rate": trial.suggest_float("learning_rate", 0.015, 0.08, log=True),
                 "num_leaves": trial.suggest_int("num_leaves", 15, 63),
-                "max_depth": trial.suggest_int("max_depth", 4, 9),
-                "min_child_samples": trial.suggest_int("min_child_samples", 15, 80),
+                "max_depth": trial.suggest_int("max_depth", 3, 9),
+                "min_child_samples": trial.suggest_int("min_child_samples", 15, 120),
                 "subsample": trial.suggest_float("subsample", 0.65, 1.0),
                 "subsample_freq": 1,
-                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.60, 1.0),
-                "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 10.0, log=True),
-                "reg_lambda": trial.suggest_float("reg_lambda", 1e-2, 20.0, log=True),
+                "colsample_bytree": trial.suggest_float("colsample_bytree", 0.55, 1.0),
+                "reg_alpha": trial.suggest_float("reg_alpha", 1e-3, 15.0, log=True),
+                "reg_lambda": trial.suggest_float("reg_lambda", 1e-2, 30.0, log=True),
                 "max_bin": trial.suggest_categorical("max_bin", [63, 255]),
                 "random_state": 42,
                 "deterministic": True,
@@ -555,7 +555,7 @@ def _tune_xgboost_optuna(
     search_stats: dict[str, Any] = {}
     confirmed_device = "cpu"
 
-    with _GpuUtilizationMonitor(interval_s=0.2) as mon:
+    with _GpuUtilizationMonitor(interval_s=0.1) as mon:
         for h in VALID_HORIZONS:
             folds = folds_by_h[h]
             t0 = time.perf_counter()
@@ -1135,11 +1135,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--trials", type=int, default=35, help="Optuna trials per horizon for LightGBM.")
     ap.add_argument("--xgb-trials", type=int, default=20, help="Optuna trials per horizon for XGBoost.")
-    ap.add_argument("--timeout-per-h", type=float, default=65.0, help="Optuna timeout (s) per horizon (LGBM).")
+    ap.add_argument(
+        "--timeout-per-h", type=float, default=65.0, help="Optuna timeout (s) per horizon (LGBM)."
+    )
     ap.add_argument(
         "--xgb-timeout-per-h", type=float, default=35.0, help="Optuna timeout (s) per horizon (XGB)."
     )
+    ap.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Optional directory to write artifact + metadata (defaults to ml/artifacts).",
+    )
     args = ap.parse_args(argv)
+    out_dir = args.output_dir or ARTIFACTS_DIR
     train_and_save(
         mode=args.mode,
         device=args.device,
@@ -1149,6 +1158,9 @@ def main(argv: list[str] | None = None) -> int:
         xgb_trials=args.xgb_trials,
         timeout_per_h=args.timeout_per_h,
         xgb_timeout_per_h=args.xgb_timeout_per_h,
+        output_path=out_dir / "current.joblib",
+        metadata_path=out_dir / "metadata.json",
+        best_params_path=out_dir / "best_params.json",
     )
     return 0
 

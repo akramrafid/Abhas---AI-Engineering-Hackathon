@@ -308,7 +308,9 @@ def run_backtest(
     # Summarize 2019–2022 LightGBM vs XGBoost challenger comparison
     cv_periods = {"2019", "2020", "2021", "2022"}
     lgbm_cv_mae = float(
-        np.mean([m["mae"] for m in contract_metrics if m["model"] == "lightgbm" and m["period"] in cv_periods])
+        np.mean(
+            [m["mae"] for m in contract_metrics if m["model"] == "lightgbm" and m["period"] in cv_periods]
+        )
     )
     challenger_summary: dict[str, Any] = {
         "serving_engine": "lightgbm",
@@ -317,9 +319,7 @@ def run_backtest(
         "lgbm_cv_2019_2022_mean_mae": round(lgbm_cv_mae, 4),
     }
     if challenger_metrics:
-        xgb_cv_mae = float(
-            np.mean([m["mae"] for m in challenger_metrics if m["period"] in cv_periods])
-        )
+        xgb_cv_mae = float(np.mean([m["mae"] for m in challenger_metrics if m["period"] in cv_periods]))
         delta_pct = ((lgbm_cv_mae - xgb_cv_mae) / max(lgbm_cv_mae, 1e-9)) * 100.0
         challenger_summary.update(
             {
