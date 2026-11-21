@@ -1,0 +1,175 @@
+{
+  "operation": "GET /api/v1/wards/{ward_id}/history",
+  "method": "GET",
+  "path_template": "/api/v1/wards/{ward_id}/history",
+  "fingerprint": "3a24a037",
+  "case_id": "bgi9P1",
+  "code_sample": "curl -X GET http://127.0.0.1:18924/api/v1/wards\ncurl -X GET 'http://127.0.0.1:18924/api/v1/wards/DNCC_Ward_04/history?start=2073-03-09&end=2016-03-14'",
+  "sequence": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18924/api/v1/wards",
+      "url_template": "http://127.0.0.1:18924/api/v1/wards",
+      "headers": {
+        "User-Agent": "schemathesis/4.33.4",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "QC0wxE"
+      },
+      "response": {
+        "status_code": 200,
+        "headers": {
+          "date": "Sat, 21 Nov 2026 21:38:00 GMT",
+          "server": "uvicorn",
+          "content-length": "8391",
+          "content-type": "application/json",
+          "etag": "W/\"a4b8e0cc3d6f533d\"",
+          "cache-control": "public, max-age=300",
+          "x-request-id": "5e73a2152eff4352",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "vary": "Origin"
+        },
+        "body": "{\"wards\":[{\"ward_id\":\"CCC_Ward_01\",\"city\":\"Chattogram\",\"population_density_sqkm\":64024.0,\"water_logging_risk_index\":0.87,\"sanitation_score\":0.46},{\"ward_id\":\"CCC_Ward_02\",\"city\":\"Chattogram\",\"population_density_sqkm\":24272.0,\"water_logging_risk_index\":0.37,\"sanitation_score\":0.53},{\"ward_id\":\"CCC_Ward_03\",\"city\":\"Chattogram\",\"population_density_sqkm\":64626.0,\"water_logging_risk_index\":0.85,\"sanitation_score\":0.25},{\"ward_id\":\"CCC_Ward_04\",\"city\":\"Chattogram\",\"population_density_sqkm\":47112.0,\"water_logging_risk_index\":0.51,\"sanitation_score\":0.39},{\"ward_id\":\"CCC_Ward_05\",\"city\":\"Chattogram\",\"population_density_sqkm\":24832.0,\"water_logging_risk_index\":0.45,\"sanitation_score\":0.86},{\"ward_id\":\"CCC_Ward_06\",\"city\":\"Chattogram\",\"population_density_sqkm\":36422.0,\"water_logging_risk_index\":0.59,\"sanitation_score\":0.71},{\"ward_id\":\"CCC_Ward_07\",\"city\":\"Chattogram\",\"population_density_sqkm\":38726.0,\"water_logging_risk_index\":0.93,\"sanitation_score\":0.88},{\"ward_id\":\"CCC_Ward_08\",\"city\":\"Chattogram\",\"population_density_sqkm\":32351.0,\"water_logging_risk_index\":0.57,\"sanitation_score\":0.45},{\"ward_id\":\"CCC_Ward_09\",\"city\":\"Chattogram\",\"population_density_sqkm\":34235.0,\"water_logging_risk_index\":0.23,\"sanitation_score\":0.65},{\"ward_id\":\"CCC_Ward_10\",\"city\":\"Chattogram\",\"population_density_sqkm\":46652.0,\"water_logging_risk_index\":0.24,\"sanitation_score\":0.43},{\"ward_id\":\"DNCC_Ward_01\",\"city\":\"Dhaka North\",\"population_density_sqkm\":39348.0,\"water_logging_risk_index\":0.91,\"sanitation_score\":0.73},{\"ward_id\":\"DNCC_Ward_02\",\"city\":\"Dhaka North\",\"population_density_sqkm\":52123.0,\"water_logging_risk_index\":0.32,\"sanitation_score\":0.35},{\"ward_id\":\"DNCC_Ward_03\",\"city\":\"Dhaka North\",\"population_density_sqkm\":21310.0,\"water_logging_risk_index\":0.85,\"sanitation_score\":0.64},{\"ward_id\":\"DNCC_Ward_04\",\"city\":\"Dhaka North\",\"population_density_sqkm\":58360.0,\"water_logging_risk_index\":0.22,\"sanitation_score\":0.88},{\"ward_id\":\"DNCC_Ward_05\",\"city\":\"Dhaka North\",\"population_density_sqkm\":65449.0,\"water_logging_risk_index\":0.36,\"sanitation_score\":0.37},{\"ward_id\":\"DNCC_Ward_06\",\"city\":\"Dhaka North\",\"population_density_sqkm\":28454.0,\"water_logging_risk_index\":0.43,\"sanitation_score\":0.59},{\"ward_id\":\"DNCC_Ward_07\",\"city\":\"Dhaka North\",\"population_density_sqkm\":42620.0,\"water_logging_risk_index\":0.42,\"sanitation_score\":0.65},{\"ward_id\":\"DNCC_Ward_08\",\"city\":\"Dhaka North\",\"population_density_sqkm\":25951.0,\"water_logging_risk_index\":0.42,\"sanitation_score\":0.49},{\"ward_id\":\"DNCC_Ward_09\",\"city\":\"Dhaka North\",\"population_density_sqkm\":43995.0,\"water_logging_risk_index\":0.79,\"sanitation_score\":0.38},{\"ward_id\":\"DNCC_Ward_10\",\"city\":\"Dhaka North\",\"population_density_sqkm\":47311.0,\"water_logging_risk_index\":0.64,\"sanitation_score\":0.28},{\"ward_id\":\"DNCC_Ward_11\",\"city\":\"Dhaka North\",\"population_density_sqkm\":52630.0,\"water_logging_risk_index\":0.33,\"sanitation_score\":0.29},{\"ward_id\":\"DNCC_Ward_12\",\"city\":\"Dhaka North\",\"population_density_sqkm\":72086.0,\"water_logging_risk_index\":0.92,\"sanitation_score\":0.78},{\"ward_id\":\"DNCC_Ward_13\",\"city\":\"Dhaka North\",\"population_density_sqkm\":35362.0,\"water_logging_risk_index\":0.27,\"sanitation_score\":0.69},{\"ward_id\":\"DNCC_Ward_14\",\"city\":\"Dhaka North\",\"population_density_sqkm\":43088.0,\"water_logging_risk_index\":0.29,\"sanitation_score\":0.57},{\"ward_id\":\"DNCC_Ward_15\",\"city\":\"Dhaka North\",\"population_density_sqkm\":19960.0,\"water_logging_risk_index\":0.88,\"sanitation_score\":0.42},{\"ward_id\":\"DNCC_Ward_16\",\"city\":\"Dhaka North\",\"population_density_sqkm\":55763.0,\"water_logging_risk_index\":0.43,\"sanitation_score\":0.59},{\"ward_id\":\"DNCC_Ward_17\",\"city\":\"Dhaka North\",\"population_density_sqkm\":49162.0,\"water_logging_risk_index\":0.34,\"sanitation_score\":0.88},{\"ward_id\":\"DNCC_Ward_18\",\"city\":\"Dhaka North\",\"population_density_sqkm\":62182.0,\"water_logging_risk_index\":0.9,\"sanitation_score\":0.83},{\"ward_id\":\"DNCC_Ward_19\",\"city\":\"Dhaka North\",\"population_density_sqkm\":52080.0,\"water_logging_risk_index\":0.89,\"sanitation_score\":0.31},{\"ward_id\":\"DNCC_Ward_20\",\"city\":\"Dhaka North\",\"population_density_sqkm\":29171.0,\"water_logging_risk_index\":0.23,\"sanitation_score\":0.46},{\"ward_id\":\"DSCC_Ward_01\",\"city\":\"Dhaka South\",\"population_density_sqkm\":40154.0,\"water_logging_risk_index\":0.4,\"sanitation_score\":0.79},{\"ward_id\":\"DSCC_Ward_02\",\"city\":\"Dhaka South\",\"population_density_sqkm\":38334.0,\"water_logging_risk_index\":0.41,\"sanitation_score\":0.6},{\"ward_id\":\"DSCC_Ward_03\",\"city\":\"Dhaka South\",\"population_density_sqkm\":26032.0,\"water_logging_risk_index\":0.8,\"sanitation_score\":0.3},{\"ward_id\":\"DSCC_Ward_04\",\"city\":\"Dhaka South\",\"population_density_sqkm\":74252.0,\"water_logging_risk_index\":0.78,\"sanitation_score\":0.38},{\"ward_id\":\"DSCC_Ward_05\",\"city\":\"Dhaka South\",\"population_density_sqkm\":18314.0,\"water_logging_risk_index\":0.81,\"sanitation_score\":0.71},{\"ward_id\":\"DSCC_Ward_06\",\"city\":\"Dhaka South\",\"population_density_sqkm\":59553.0,\"water_logging_risk_index\":0.78,\"sanitation_score\":0.3},{\"ward_id\":\"DSCC_Ward_07\",\"city\":\"Dhaka South\",\"population_density_sqkm\":38432.0,\"water_logging_risk_index\":0.29,\"sanitation_score\":0.81},{\"ward_id\":\"DSCC_Ward_08\",\"city\":\"Dhaka South\",\"population_density_sqkm\":53527.0,\"water_logging_risk_index\":0.45,\"sanitation_score\":0.29},{\"ward_id\":\"DSCC_Ward_09\",\"city\":\"Dhaka South\",\"population_density_sqkm\":35725.0,\"water_logging_risk_index\":0.44,\"sanitation_score\":0.72},{\"ward_id\":\"DSCC_Ward_10\",\"city\":\"Dhaka South\",\"population_density_sqkm\":54340.0,\"water_logging_risk_index\":0.87,\"sanitation_score\":0.56},{\"ward_id\":\"DSCC_Ward_11\",\"city\":\"Dhaka South\",\"population_density_sqkm\":24816.0,\"water_logging_risk_index\":0.73,\"sanitation_score\":0.74},{\"ward_id\":\"DSCC_Ward_12\",\"city\":\"Dhaka South\",\"population_density_sqkm\":49992.0,\"water_logging_risk_index\":0.78,\"sanitation_score\":0.57},{\"ward_id\":\"DSCC_Ward_13\",\"city\":\"Dhaka South\",\"population_density_sqkm\":47795.0,\"water_logging_risk_index\":0.52,\"sanitation_score\":0.27},{\"ward_id\":\"DSCC_Ward_14\",\"city\":\"Dhaka South\",\"population_density_sqkm\":24149.0,\"water_logging_risk_index\":0.22,\"sanitation_score\":0.66},{\"ward_id\":\"DSCC_Ward_15\",\"city\":\"Dhaka South\",\"population_density_sqkm\":35918.0,\"water_logging_risk_index\":0.58,\"sanitation_score\":0.84},{\"ward_id\":\"DSCC_Ward_16\",\"city\":\"Dhaka South\",\"population_density_sqkm\":32209.0,\"water_logging_risk_index\":0.51,\"sanitation_score\":0.74},{\"ward_id\":\"DSCC_Ward_17\",\"city\":\"Dhaka South\",\"population_density_sqkm\":31041.0,\"water_logging_risk_index\":0.26,\"sanitation_score\":0.44},{\"ward_id\":\"DSCC_Ward_18\",\"city\":\"Dhaka South\",\"population_density_sqkm\":27189.0,\"water_logging_risk_index\":0.9,\"sanitation_score\":0.78},{\"ward_id\":\"DSCC_Ward_19\",\"city\":\"Dhaka South\",\"population_density_sqkm\":54104.0,\"water_logging_risk_index\":0.85,\"sanitation_score\":0.77},{\"ward_id\":\"DSCC_Ward_20\",\"city\":\"Dhaka South\",\"population_density_sqkm\":28634.0,\"water_logging_risk_index\":0.87,\"sanitation_score\":0.6},{\"ward_id\":\"GCC_Ward_01\",\"city\":\"Gazipur\",\"population_density_sqkm\":69771.0,\"water_logging_risk_index\":0.38,\"sanitation_score\":0.34},{\"ward_id\":\"GCC_Ward_02\",\"city\":\"Gazipur\",\"population_density_sqkm\":45898.0,\"water_logging_risk_index\":0.94,\"sanitation_score\":0.41},{\"ward_id\":\"GCC_Ward_03\",\"city\":\"Gazipur\",\"population_density_sqkm\":56311.0,\"water_logging_risk_index\":0.77,\"sanitation_score\":0.4},{\"ward_id\":\"GCC_Ward_04\",\"city\":\"Gazipur\",\"population_density_sqkm\":59508.0,\"water_logging_risk_index\":0.48,\"sanitation_score\":0.66},{\"ward_id\":\"GCC_Ward_05\",\"city\":\"Gazipur\",\"population_density_sqkm\":54111.0,\"water_logging_risk_index\":0.6,\"sanitation_score\":0.31},{\"ward_id\":\"NCC_Ward_01\",\"city\":\"Narayanganj\",\"population_density_sqkm\":65612.0,\"water_logging_risk_index\":0.44,\"sanitation_score\":0.37},{\"ward_id\":\"NCC_Ward_02\",\"city\":\"Narayanganj\",\"population_density_sqkm\":20324.0,\"water_logging_risk_index\":0.64,\"sanitation_score\":0.69},{\"ward_id\":\"NCC_Ward_03\",\"city\":\"Narayanganj\",\"population_density_sqkm\":18945.0,\"water_logging_risk_index\":0.58,\"sanitation_score\":0.4},{\"ward_id\":\"NCC_Ward_04\",\"city\":\"Narayanganj\",\"population_density_sqkm\":54774.0,\"water_logging_risk_index\":0.33,\"sanitation_score\":0.7},{\"ward_id\":\"NCC_Ward_05\",\"city\":\"Narayanganj\",\"population_density_sqkm\":40043.0,\"water_logging_risk_index\":0.9,\"sanitation_score\":0.34}],\"cities\":[\"Dhaka North\",\"Dhaka South\",\"Chattogram\",\"Gazipur\",\"Narayanganj\"],\"data_start\":\"2016-01-04\",\"data_end\":\"2025-12-29\",\"first_forecast_origin\":\"2016-02-29\"}"
+      },
+      "link": null,
+      "checks": [],
+      "meta": {
+        "generation": {
+          "time": 0.0003671000013127923,
+          "mode": "positive"
+        },
+        "components": {
+          "QUERY": "positive"
+        },
+        "phase": {
+          "name": "stateful",
+          "data": {
+            "type": "StatefulPhaseData",
+            "description": "Positive test case",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "mutations": []
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/wards",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "GET /api/v1/wards"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:18924/api/v1/wards/DNCC_Ward_04/history?start=2073-03-09&end=2016-03-14",
+      "url_template": "http://127.0.0.1:18924/api/v1/wards/{ward_id}/history",
+      "headers": {
+        "User-Agent": "schemathesis/4.33.4",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "bgi9P1"
+      },
+      "response": {
+        "status_code": 422,
+        "headers": {
+          "date": "Sat, 21 Nov 2026 21:38:00 GMT",
+          "server": "uvicorn",
+          "content-length": "244",
+          "content-type": "application/problem+json",
+          "x-request-id": "2a649ee3c34245ad",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "vary": "Origin"
+        },
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Invalid date range\",\"status\":422,\"detail\":\"start (2073-03-09) must be on or before end (2016-03-14)\",\"instance\":\"/api/v1/wards/DNCC_Ward_04/history\",\"request_id\":\"2a649ee3c34245ad\"}"
+      },
+      "link": {
+        "operationId": "GET /api/v1/wards -> [200] GetWard -> GET /api/v1/wards/{ward_id}/history",
+        "parameters": {
+          "path.ward_id": "$response.body#/wards/*/ward_id"
+        }
+      },
+      "checks": [
+        {
+          "name": "positive_data_acceptance",
+          "status": "failure",
+          "message": "Schema-valid request rejected\n\nValid data should have been accepted\nExpected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.0012398000035318546,
+          "mode": "positive"
+        },
+        "components": {
+          "QUERY": "positive"
+        },
+        "phase": {
+          "name": "stateful",
+          "data": {
+            "type": "StatefulPhaseData",
+            "description": "Positive test case",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "mutations": []
+          }
+        },
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [
+          {
+            "path": [
+              "end"
+            ],
+            "type_token": "string",
+            "format_token": "date",
+            "pattern_hash": null,
+            "normalized_name": "end",
+            "value": "2016-03-14",
+            "source_operation": "GET /api/v1/wards/{ward_id}/lags"
+          }
+        ],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/wards/{ward_id}/history",
+      "path_parameters": {
+        "ward_id": "DNCC_Ward_04"
+      },
+      "query": {
+        "start": "2073-03-09",
+        "end": "2016-03-14"
+      },
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "none"
+      },
+      "media_type": null,
+      "parent_index": 0,
+      "auth_identity": null,
+      "operation": "GET /api/v1/wards/{ward_id}/history"
+    }
+  ],
+  "aliases": []
+}

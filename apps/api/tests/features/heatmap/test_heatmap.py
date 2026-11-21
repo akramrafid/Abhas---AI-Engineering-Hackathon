@@ -54,7 +54,29 @@ def test_cr_3_heatmap_unknown_city_and_out_of_range_origin() -> None:
         r_bad_date = c.get("/api/v1/heatmap", params={"city": "Dhaka South", "origin_week": "2030-01-07"})
         assert r_bad_date.status_code == 422
         assert r_bad_date.headers["content-type"].startswith("application/problem+json")
-        assert "origin_week" in r_bad_date.text
+        fields = {e["field"] for e in r_bad_date.json()["errors"]}
+        assert "query.origin_week" in fields
+
+        # Early out-of-range Monday (< 2016-02-29) rejected at HeatmapQuery boundary
+        r_early = c.get("/api/v1/heatmap", params={"city": "Dhaka South", "origin_week": "2016-01-04"})
+        assert r_early.status_code == 422
+        assert r_early.headers["content-type"].startswith("application/problem+json")
+        assert "query.origin_week" in {e["field"] for e in r_early.json()["errors"]}
+
+        # Extra unknown query param rejected by HeatmapQuery(extra="forbid")
+        r_extra = c.get(
+            "/api/v1/heatmap",
+            params={"city": "Dhaka South", "origin_week": "2025-08-04", "unexpected": "1"},
+        )
+        assert r_extra.status_code == 422
+        assert r_extra.headers["content-type"].startswith("application/problem+json")
+        assert "query.unexpected" in {e["field"] for e in r_extra.json()["errors"]}
+
+        # Dataset boundary Mondays (2016-02-29 and 2025-12-29) accepted
+        for boundary_week in ("2016-02-29", "2025-12-29"):
+            r_ok = c.get("/api/v1/heatmap", params={"city": "Gazipur", "origin_week": boundary_week})
+            assert r_ok.status_code == 200
+            assert r_ok.json()["origin_week"] == boundary_week
 
     # Empty repository returns 404 /unknown-city
     svc = HeatmapService(repo=_EmptyRepo(), engine=None)  # type: ignore[arg-type]

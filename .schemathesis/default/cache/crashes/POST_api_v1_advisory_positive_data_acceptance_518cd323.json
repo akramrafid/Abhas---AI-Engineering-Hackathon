@@ -3,36 +3,36 @@
   "method": "POST",
   "path_template": "/api/v1/advisory",
   "fingerprint": "518cd323",
-  "case_id": "Dy7CAS",
-  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"origin_week\": \"2016-01-04\", \"ward_id\": \"CCC_Ward_01\"}' http://127.0.0.1:54469/api/v1/advisory",
+  "case_id": "REUuSX",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"ward_id\": \"DNCC_Ward_14\", \"horizon\": 2, \"origin_week\": \"0634-10-31\"}' http://127.0.0.1:18924/api/v1/advisory",
   "sequence": [
     {
       "method": "POST",
-      "url": "http://127.0.0.1:54469/api/v1/advisory",
-      "url_template": "http://127.0.0.1:54469/api/v1/advisory",
+      "url": "http://127.0.0.1:18924/api/v1/advisory",
+      "url_template": "http://127.0.0.1:18924/api/v1/advisory",
       "headers": {
         "User-Agent": "schemathesis/4.33.4",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "*/*",
         "Connection": "keep-alive",
-        "X-Schemathesis-TestCaseId": "Dy7CAS",
+        "X-Schemathesis-TestCaseId": "REUuSX",
         "Content-Type": "application/json",
-        "Content-Length": "55"
+        "Content-Length": "70"
       },
       "response": {
         "status_code": 422,
         "headers": {
-          "date": "Sat, 21 Nov 2026 21:27:22 GMT",
+          "date": "Sat, 21 Nov 2026 21:37:59 GMT",
           "server": "uvicorn",
-          "content-length": "288",
+          "content-length": "272",
           "content-type": "application/problem+json",
-          "x-request-id": "af5d1aea91e64469",
+          "x-request-id": "7d16993bae52461e",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "referrer-policy": "no-referrer",
           "vary": "Origin"
         },
-        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/advisory\",\"request_id\":\"af5d1aea91e64469\",\"errors\":[{\"field\":\"body.origin_week\",\"message\":\"Value error, must be between 2016-02-29 and 2025-12-29 in dataset mode\"}]}"
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/advisory\",\"request_id\":\"7d16993bae52461e\",\"errors\":[{\"field\":\"body.origin_week\",\"message\":\"Value error, must be between 2016-01-04 and 2100-12-31\"}]}"
       },
       "link": null,
       "checks": [
@@ -44,7 +44,7 @@
       ],
       "meta": {
         "generation": {
-          "time": 0.022459199994045775,
+          "time": 0.003991400000813883,
           "mode": "positive"
         },
         "components": {
@@ -75,19 +75,7 @@
           }
         ],
         "pool_misses": [],
-        "semantic_draws": [
-          {
-            "path": [
-              "origin_week"
-            ],
-            "type_token": "string",
-            "format_token": "date",
-            "pattern_hash": null,
-            "normalized_name": "originweek",
-            "value": "2016-01-04",
-            "source_operation": "GET /api/v1/wards"
-          }
-        ],
+        "semantic_draws": [],
         "dictionary_draws": [],
         "constants_draws": [],
         "raw_containers": {}
@@ -100,8 +88,9 @@
       "case_body": {
         "encoding": "json",
         "value": {
-          "origin_week": "2016-01-04",
-          "ward_id": "CCC_Ward_01"
+          "ward_id": "DNCC_Ward_14",
+          "horizon": 2,
+          "origin_week": "0634-10-31"
         }
       },
       "media_type": "application/json",

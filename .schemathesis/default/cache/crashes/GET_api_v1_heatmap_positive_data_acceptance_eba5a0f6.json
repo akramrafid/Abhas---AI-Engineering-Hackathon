@@ -3,34 +3,34 @@
   "method": "GET",
   "path_template": "/api/v1/heatmap",
   "fingerprint": "eba5a0f6",
-  "case_id": "0AWqVk",
-  "code_sample": "curl -X GET 'http://127.0.0.1:54469/api/v1/heatmap?city=Gazipur&origin_week=2000-01-01'",
+  "case_id": "3vXwuu",
+  "code_sample": "curl -X GET 'http://127.0.0.1:18924/api/v1/heatmap?source=dataset&origin_week=1907-11-24&city=Dhaka+South'",
   "sequence": [
     {
       "method": "GET",
-      "url": "http://127.0.0.1:54469/api/v1/heatmap?city=Gazipur&origin_week=2000-01-01",
-      "url_template": "http://127.0.0.1:54469/api/v1/heatmap",
+      "url": "http://127.0.0.1:18924/api/v1/heatmap?source=dataset&origin_week=1907-11-24&city=Dhaka+South",
+      "url_template": "http://127.0.0.1:18924/api/v1/heatmap",
       "headers": {
         "User-Agent": "schemathesis/4.33.4",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "*/*",
         "Connection": "keep-alive",
-        "X-Schemathesis-TestCaseId": "0AWqVk"
+        "X-Schemathesis-TestCaseId": "3vXwuu"
       },
       "response": {
         "status_code": 422,
         "headers": {
-          "date": "Sat, 21 Nov 2026 21:27:21 GMT",
+          "date": "Sat, 21 Nov 2026 21:37:58 GMT",
           "server": "uvicorn",
           "content-length": "272",
           "content-type": "application/problem+json",
-          "x-request-id": "6eb51788dacf4519",
+          "x-request-id": "244abad378e54d26",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "referrer-policy": "no-referrer",
           "vary": "Origin"
         },
-        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/heatmap\",\"request_id\":\"6eb51788dacf4519\",\"errors\":[{\"field\":\"query.origin_week\",\"message\":\"Value error, must be between 2016-01-04 and 2100-12-31\"}]}"
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/heatmap\",\"request_id\":\"244abad378e54d26\",\"errors\":[{\"field\":\"query.origin_week\",\"message\":\"Value error, must be between 2016-01-04 and 2100-12-31\"}]}"
       },
       "link": null,
       "checks": [
@@ -42,7 +42,7 @@
       ],
       "meta": {
         "generation": {
-          "time": 0.030924099999538157,
+          "time": 0.0012055999977746978,
           "mode": "positive"
         },
         "components": {
@@ -69,8 +69,9 @@
       "path": "/api/v1/heatmap",
       "path_parameters": {},
       "query": {
-        "city": "Gazipur",
-        "origin_week": "2000-01-01"
+        "source": "dataset",
+        "origin_week": "1907-11-24",
+        "city": "Dhaka South"
       },
       "case_headers": {},
       "cookies": {},
