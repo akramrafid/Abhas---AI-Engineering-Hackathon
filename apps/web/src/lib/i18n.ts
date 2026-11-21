@@ -4,6 +4,7 @@ export type Lang = "en" | "bn";
 
 export type DashboardTab =
   | "ward-risk"
+  | "map"
   | "lags"
   | "scenario"
   | "heatmap"
@@ -13,6 +14,7 @@ export type DashboardTab =
 
 export const VALID_TABS: readonly DashboardTab[] = [
   "ward-risk",
+  "map",
   "lags",
   "scenario",
   "heatmap",
@@ -143,6 +145,7 @@ export const UI_COPY: Record<Lang, UiCopy> = {
     brandLink: "Brand System",
     tabs: {
       "ward-risk": "Ward Forecast",
+      map: "Risk Map",
       lags: "Lags",
       scenario: "Scenario",
       heatmap: "City Heatmap",
@@ -242,6 +245,7 @@ export const UI_COPY: Record<Lang, UiCopy> = {
     brandLink: "ব্র্যান্ড সিস্টেম",
     tabs: {
       "ward-risk": "ওয়ার্ড পূর্বাভাস",
+      map: "ঝুঁকি মানচিত্র",
       lags: "বৃষ্টি-ব্যবধান",
       scenario: "দৃশ্যপট",
       heatmap: "নগর হিটম্যাপ",
