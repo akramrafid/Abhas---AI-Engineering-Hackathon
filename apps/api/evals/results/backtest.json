@@ -1,6 +1,6 @@
 {
-  "model_version": "abhas-lgbm-1.1.1",
-  "generated_at": "2026-11-21T20:24:49+00:00",
+  "model_version": "abhas-lgbm-1.1.2",
+  "generated_at": "2026-11-21T20:30:49+00:00",
   "split": "Expanding-window chronological folds test 2019\u20132022 (purged); 2023 calibrates NegBin conformal bands, endemic channel & cost-sensitive tier cut-offs; 2024\u20132025 hold-out locked by SHA-256 and scored once.",
   "metrics": [
     {
@@ -1657,33 +1657,33 @@
     ],
     "matrix": [
       [
-        17059,
-        558,
-        443,
-        76
+        17157,
+        586,
+        348,
+        45
       ],
       [
-        400,
-        1163,
-        1819,
-        830
+        626,
+        1204,
+        1848,
+        534
       ],
       [
-        18,
-        309,
-        864,
-        1025
+        49,
+        406,
+        961,
+        800
       ],
       [
-        0,
-        26,
-        117,
-        493
+        10,
+        33,
+        151,
+        442
       ]
     ],
-    "within_one_tier": 0.9447,
-    "critical_recall": 0.9591,
-    "macro_f1": 0.492
+    "within_one_tier": 0.9596,
+    "critical_recall": 0.9324,
+    "macro_f1": 0.5088
   },
   "lag_correlation_evidence": {
     "max_lag": 8,

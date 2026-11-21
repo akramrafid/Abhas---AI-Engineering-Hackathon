@@ -1,12 +1,12 @@
 {
-  "model_version": "abhas-lgbm-1.1.1",
+  "model_version": "abhas-lgbm-1.1.2",
   "mode": "tuned",
   "artifact_file": "current.joblib",
-  "versioned_artifact_file": "abhas-lgbm-1.1.1.joblib",
-  "artifact_size_bytes": 977457,
-  "sha256": "6a9657698f00f65db76e92dbaf17eba399a05ce23e16e3db36d9565aa70034fb",
-  "trained_at": "2026-11-21T20:22:33+00:00",
-  "train_seconds": 38.84,
+  "versioned_artifact_file": "abhas-lgbm-1.1.2.joblib",
+  "artifact_size_bytes": 977463,
+  "sha256": "093bd000e5353609fbb4e4d2d2a2397fc247b18c812af0e5c2abc2f08154a32e",
+  "trained_at": "2026-11-21T20:28:32+00:00",
+  "train_seconds": 37.71,
   "train_end_year": 2023,
   "max_normal_year": 2023,
   "train_max_year": 2023,
@@ -34,10 +34,10 @@
   "gpu_proof": {
     "samples": 142,
     "peak_utilization_gpu_pct": 50.0,
-    "mean_utilization_gpu_pct": 24.63,
+    "mean_utilization_gpu_pct": 19.57,
     "peak_memory_used_mib": 139.0,
-    "peak_temperature_c": 53.0,
-    "peak_power_draw_w": 54.18,
+    "peak_temperature_c": 55.0,
+    "peak_power_draw_w": 54.87,
     "xgboost_confirmed_device": "cuda:0"
   },
   "feature_names": [
@@ -76,8 +76,8 @@
     4
   ],
   "tier_cutoffs": [
-    3.5,
-    8.0,
+    4.5,
+    9.0,
     11.0
   ],
   "monotone_constraints": {
@@ -749,8 +749,8 @@
         "use_cqr": false
       }
     },
-    "within_one_tier_2023": 0.9617,
-    "critical_recall_2023": 0.9884
+    "within_one_tier_2023": 0.9728,
+    "critical_recall_2023": 0.9727
   },
   "rain_normals": {
     "CCC_Ward_01|1": 3.69,
