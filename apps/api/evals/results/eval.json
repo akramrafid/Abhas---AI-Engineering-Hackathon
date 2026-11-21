@@ -1,14 +1,14 @@
 {
-  "ts": "2026-11-21T20:25:11+00:00",
-  "commit": "4b6041a",
+  "ts": "2026-11-21T20:31:11+00:00",
+  "commit": "ee77593",
   "split": "heldout",
   "tag": "",
   "n": 48,
-  "passed": 42,
+  "passed": 40,
   "skipped": 0,
-  "pass_rate": 0.875,
+  "pass_rate": 0.8333,
   "threshold": 0.8,
-  "generator_model": "abhas-lgbm-1.1.1",
+  "generator_model": "abhas-lgbm-1.1.2",
   "judge_model": "-",
   "prompt_versions": {},
   "cost_usd": 0.0,
@@ -16,8 +16,8 @@
   "split_counts": {
     "heldout": 48
   },
-  "p50_ms": 0.706,
-  "p95_ms": 1.352,
+  "p50_ms": 0.599,
+  "p95_ms": 1.481,
   "by_tier": {
     "Low": {
       "n": 8,
@@ -29,11 +29,11 @@
     },
     "High": {
       "n": 10,
-      "pass_rate": 0.8
+      "pass_rate": 0.7
     },
     "Critical": {
       "n": 22,
-      "pass_rate": 0.9545
+      "pass_rate": 0.9091
     }
   },
   "floors": {
@@ -44,14 +44,14 @@
     "mae_h4_beats_climatology": true,
     "weather_ablation_worse_all_h": true,
     "coverage_80_in_range": true,
-    "within_one_tier_ge_0_95": false,
+    "within_one_tier_ge_0_95": true,
     "critical_recall_ge_0_85": true,
     "p95_ward_ms_lt_50": true,
     "golden_pass_rate_ge_threshold": true
   },
-  "floors_passed": false,
+  "floors_passed": true,
   "metrics": {
-    "pass_rate": 0.875,
+    "pass_rate": 0.8333,
     "global": {
       "target_years": [
         2024,
@@ -66,9 +66,9 @@
           "rmse": 1.8352,
           "poisson_deviance": 0.7768,
           "coverage_80": 0.8592,
-          "within_one_tier": 0.9589,
-          "critical_recall": 0.9748,
-          "macro_f1": 0.5375,
+          "within_one_tier": 0.9719,
+          "critical_recall": 0.9434,
+          "macro_f1": 0.5532,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -99,9 +99,9 @@
           "rmse": 1.9683,
           "poisson_deviance": 0.8157,
           "coverage_80": 0.8516,
-          "within_one_tier": 0.957,
-          "critical_recall": 0.9623,
-          "macro_f1": 0.5282,
+          "within_one_tier": 0.9706,
+          "critical_recall": 0.9182,
+          "macro_f1": 0.5369,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -132,9 +132,9 @@
           "rmse": 1.9633,
           "poisson_deviance": 0.8615,
           "coverage_80": 0.8316,
-          "within_one_tier": 0.9494,
-          "critical_recall": 0.9811,
-          "macro_f1": 0.4927,
+          "within_one_tier": 0.9627,
+          "critical_recall": 0.956,
+          "macro_f1": 0.5127,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -165,9 +165,9 @@
           "rmse": 2.2948,
           "poisson_deviance": 1.0853,
           "coverage_80": 0.8394,
-          "within_one_tier": 0.9137,
-          "critical_recall": 0.9182,
-          "macro_f1": 0.4155,
+          "within_one_tier": 0.933,
+          "critical_recall": 0.9119,
+          "macro_f1": 0.4377,
           "baselines": {
             "climatology": {
               "mae": 1.2591,
@@ -193,10 +193,10 @@
         }
       },
       "coverage_80": 0.8454,
-      "within_one_tier": 0.9447,
-      "critical_recall": 0.9591,
+      "within_one_tier": 0.9596,
+      "critical_recall": 0.9324,
       "critical_n_total": 636,
-      "macro_f1": 0.492,
+      "macro_f1": 0.5088,
       "confusion_matrix": {
         "labels": [
           "Low",
@@ -206,33 +206,33 @@
         ],
         "matrix": [
           [
-            17059,
-            558,
-            443,
-            76
+            17157,
+            586,
+            348,
+            45
           ],
           [
-            400,
-            1163,
-            1819,
-            830
+            626,
+            1204,
+            1848,
+            534
           ],
           [
-            18,
-            309,
-            864,
-            1025
+            49,
+            406,
+            961,
+            800
           ],
           [
-            0,
-            26,
-            117,
-            493
+            10,
+            33,
+            151,
+            442
           ]
         ]
       },
-      "p50_ward_ms": 0.226,
-      "p95_ward_ms": 0.562
+      "p50_ward_ms": 0.229,
+      "p95_ward_ms": 0.591
     }
   },
   "cases": [
@@ -254,7 +254,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 3.028,
+      "ms": 1.618,
       "ac_refs": [
         "AC-5"
       ]
@@ -277,7 +277,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.528,
+      "ms": 1.481,
       "ac_refs": [
         "AC-5"
       ]
@@ -300,7 +300,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.043,
+      "ms": 2.074,
       "ac_refs": [
         "AC-5"
       ]
@@ -323,7 +323,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.352,
+      "ms": 0.613,
       "ac_refs": [
         "AC-5"
       ]
@@ -346,7 +346,7 @@
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.975,
+      "ms": 0.599,
       "ac_refs": [
         "AC-5"
       ]
@@ -364,12 +364,12 @@
       "expected_cases": 3.692,
       "p10": 1.971,
       "p90": 10.578,
-      "pred_tier": "High",
-      "risk_score": 6,
+      "pred_tier": "Medium",
+      "risk_score": 3,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.061,
+      "ms": 0.849,
       "ac_refs": [
         "AC-5"
       ]
@@ -388,11 +388,11 @@
       "p10": 3.6,
       "p90": 18.423,
       "pred_tier": "High",
-      "risk_score": 37,
+      "risk_score": 28,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.55,
+      "ms": 1.115,
       "ac_refs": [
         "AC-5"
       ]
@@ -411,11 +411,11 @@
       "p10": 2.742,
       "p90": 12.687,
       "pred_tier": "Medium",
-      "risk_score": 15,
+      "risk_score": 9,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.634,
+      "ms": 0.628,
       "ac_refs": [
         "AC-5"
       ]
@@ -434,11 +434,11 @@
       "p10": 4.757,
       "p90": 18.41,
       "pred_tier": "High",
-      "risk_score": 45,
+      "risk_score": 35,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.563,
+      "ms": 0.593,
       "ac_refs": [
         "AC-5"
       ]
@@ -457,11 +457,11 @@
       "p10": 9.936,
       "p90": 33.493,
       "pred_tier": "Critical",
-      "risk_score": 89,
+      "risk_score": 84,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.973,
+      "ms": 0.755,
       "ac_refs": [
         "AC-5"
       ]
@@ -480,11 +480,11 @@
       "p10": 6.573,
       "p90": 29.226,
       "pred_tier": "Critical",
-      "risk_score": 71,
+      "risk_score": 64,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.391,
+      "ms": 0.833,
       "ac_refs": [
         "AC-5"
       ]
@@ -503,11 +503,11 @@
       "p10": 7.581,
       "p90": 26.096,
       "pred_tier": "Critical",
-      "risk_score": 77,
+      "risk_score": 69,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.555,
+      "ms": 0.621,
       "ac_refs": [
         "AC-5"
       ]
@@ -526,11 +526,11 @@
       "p10": 2.67,
       "p90": 12.75,
       "pred_tier": "High",
-      "risk_score": 15,
+      "risk_score": 9,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.034,
+      "ms": 0.733,
       "ac_refs": [
         "AC-5"
       ]
@@ -548,12 +548,12 @@
       "expected_cases": 8.324,
       "p10": 5.293,
       "p90": 20.45,
-      "pred_tier": "High",
-      "risk_score": 53,
-      "within_one_tier": true,
+      "pred_tier": "Medium",
+      "risk_score": 43,
+      "within_one_tier": false,
       "in_80_band": true,
-      "pass": true,
-      "ms": 0.874,
+      "pass": false,
+      "ms": 0.745,
       "ac_refs": [
         "AC-5"
       ]
@@ -572,11 +572,11 @@
       "p10": 6.436,
       "p90": 28.734,
       "pred_tier": "Critical",
-      "risk_score": 70,
+      "risk_score": 63,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.417,
+      "ms": 0.602,
       "ac_refs": [
         "AC-5"
       ]
@@ -595,11 +595,11 @@
       "p10": 9.943,
       "p90": 32.399,
       "pred_tier": "Critical",
-      "risk_score": 89,
+      "risk_score": 84,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.553,
+      "ms": 0.588,
       "ac_refs": [
         "AC-5"
       ]
@@ -618,11 +618,11 @@
       "p10": 12.611,
       "p90": 50.761,
       "pred_tier": "Critical",
-      "risk_score": 94,
+      "risk_score": 92,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.366,
+      "ms": 0.537,
       "ac_refs": [
         "AC-5"
       ]
@@ -641,11 +641,11 @@
       "p10": 9.853,
       "p90": 33.261,
       "pred_tier": "Critical",
-      "risk_score": 89,
+      "risk_score": 84,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.803,
+      "ms": 0.731,
       "ac_refs": [
         "AC-5"
       ]
@@ -664,7 +664,7 @@
       "p10": 7.265,
       "p90": 25.248,
       "pred_tier": "Critical",
-      "risk_score": 74,
+      "risk_score": 66,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
@@ -687,11 +687,11 @@
       "p10": 7.292,
       "p90": 31.809,
       "pred_tier": "Critical",
-      "risk_score": 77,
+      "risk_score": 70,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.379,
+      "ms": 0.403,
       "ac_refs": [
         "AC-5"
       ]
@@ -709,12 +709,12 @@
       "expected_cases": 8.611,
       "p10": 5.589,
       "p90": 20.701,
-      "pred_tier": "Critical",
-      "risk_score": 57,
+      "pred_tier": "High",
+      "risk_score": 46,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.713,
+      "ms": 0.551,
       "ac_refs": [
         "AC-5"
       ]
@@ -733,11 +733,11 @@
       "p10": 4.868,
       "p90": 18.715,
       "pred_tier": "High",
-      "risk_score": 47,
+      "risk_score": 37,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.881,
+      "ms": 0.551,
       "ac_refs": [
         "AC-5"
       ]
@@ -756,11 +756,11 @@
       "p10": 3.358,
       "p90": 14.819,
       "pred_tier": "Medium",
-      "risk_score": 25,
+      "risk_score": 17,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.756,
+      "ms": 0.727,
       "ac_refs": [
         "AC-5"
       ]
@@ -783,7 +783,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.741,
+      "ms": 0.734,
       "ac_refs": [
         "AC-5"
       ]
@@ -806,7 +806,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.367,
+      "ms": 0.378,
       "ac_refs": [
         "AC-5"
       ]
@@ -829,7 +829,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.795,
+      "ms": 0.745,
       "ac_refs": [
         "AC-5"
       ]
@@ -847,12 +847,12 @@
       "expected_cases": 4.437,
       "p10": 2.154,
       "p90": 12.995,
-      "pred_tier": "Medium",
-      "risk_score": 14,
-      "within_one_tier": true,
+      "pred_tier": "Low",
+      "risk_score": 9,
+      "within_one_tier": false,
       "in_80_band": true,
-      "pass": true,
-      "ms": 0.36,
+      "pass": false,
+      "ms": 0.372,
       "ac_refs": [
         "AC-5"
       ]
@@ -871,11 +871,11 @@
       "p10": 6.411,
       "p90": 23.631,
       "pred_tier": "Critical",
-      "risk_score": 66,
+      "risk_score": 57,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.739,
+      "ms": 0.734,
       "ac_refs": [
         "AC-5"
       ]
@@ -894,11 +894,11 @@
       "p10": 8.652,
       "p90": 36.673,
       "pred_tier": "Critical",
-      "risk_score": 84,
+      "risk_score": 79,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.359,
+      "ms": 0.394,
       "ac_refs": [
         "AC-5"
       ]
@@ -917,11 +917,11 @@
       "p10": 12.211,
       "p90": 38.398,
       "pred_tier": "Critical",
-      "risk_score": 95,
+      "risk_score": 92,
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 1.05,
+      "ms": 0.593,
       "ac_refs": [
         "AC-5"
       ]
@@ -940,11 +940,11 @@
       "p10": 11.841,
       "p90": 37.42,
       "pred_tier": "Critical",
-      "risk_score": 94,
+      "risk_score": 91,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.923,
+      "ms": 0.563,
       "ac_refs": [
         "AC-5"
       ]
@@ -963,11 +963,11 @@
       "p10": 6.759,
       "p90": 24.614,
       "pred_tier": "Critical",
-      "risk_score": 70,
+      "risk_score": 61,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.793,
+      "ms": 0.727,
       "ac_refs": [
         "AC-5"
       ]
@@ -986,11 +986,11 @@
       "p10": 8.748,
       "p90": 37.017,
       "pred_tier": "Critical",
-      "risk_score": 84,
+      "risk_score": 79,
       "within_one_tier": false,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.359,
+      "ms": 0.364,
       "ac_refs": [
         "AC-5"
       ]
@@ -1009,11 +1009,11 @@
       "p10": 5.996,
       "p90": 27.147,
       "pred_tier": "Critical",
-      "risk_score": 66,
+      "risk_score": 59,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.36,
+      "ms": 0.371,
       "ac_refs": [
         "AC-5"
       ]
@@ -1032,11 +1032,11 @@
       "p10": 4.92,
       "p90": 18.86,
       "pred_tier": "Medium",
-      "risk_score": 48,
+      "risk_score": 37,
       "within_one_tier": false,
       "in_80_band": true,
       "pass": false,
-      "ms": 0.706,
+      "ms": 0.552,
       "ac_refs": [
         "AC-5"
       ]
@@ -1055,11 +1055,11 @@
       "p10": 6.663,
       "p90": 24.343,
       "pred_tier": "High",
-      "risk_score": 69,
+      "risk_score": 60,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.726,
+      "ms": 0.723,
       "ac_refs": [
         "AC-5"
       ]
@@ -1078,11 +1078,11 @@
       "p10": 6.218,
       "p90": 23.084,
       "pred_tier": "High",
-      "risk_score": 64,
+      "risk_score": 55,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.718,
+      "ms": 0.788,
       "ac_refs": [
         "AC-5"
       ]
@@ -1101,11 +1101,11 @@
       "p10": 3.835,
       "p90": 15.831,
       "pred_tier": "Medium",
-      "risk_score": 31,
+      "risk_score": 22,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.591,
+      "ms": 0.545,
       "ac_refs": [
         "AC-5"
       ]
@@ -1124,11 +1124,11 @@
       "p10": 6.101,
       "p90": 27.527,
       "pred_tier": "Critical",
-      "risk_score": 67,
+      "risk_score": 60,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.358,
+      "ms": 0.363,
       "ac_refs": [
         "AC-5"
       ]
@@ -1147,11 +1147,11 @@
       "p10": 8.246,
       "p90": 27.879,
       "pred_tier": "Critical",
-      "risk_score": 81,
+      "risk_score": 74,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.555,
+      "ms": 0.541,
       "ac_refs": [
         "AC-5"
       ]
@@ -1169,12 +1169,12 @@
       "expected_cases": 8.585,
       "p10": 4.795,
       "p90": 22.798,
-      "pred_tier": "High",
-      "risk_score": 53,
+      "pred_tier": "Medium",
+      "risk_score": 45,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.361,
+      "ms": 0.363,
       "ac_refs": [
         "AC-5"
       ]
@@ -1193,11 +1193,11 @@
       "p10": 3.707,
       "p90": 15.851,
       "pred_tier": "High",
-      "risk_score": 30,
+      "risk_score": 21,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.719,
+      "ms": 0.889,
       "ac_refs": [
         "AC-5"
       ]
@@ -1215,12 +1215,12 @@
       "expected_cases": 8.688,
       "p10": 5.558,
       "p90": 21.208,
-      "pred_tier": "Critical",
-      "risk_score": 57,
+      "pred_tier": "High",
+      "risk_score": 47,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.718,
+      "ms": 0.768,
       "ac_refs": [
         "AC-5"
       ]
@@ -1239,11 +1239,11 @@
       "p10": 6.358,
       "p90": 22.796,
       "pred_tier": "Critical",
-      "risk_score": 66,
+      "risk_score": 56,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.543,
+      "ms": 0.541,
       "ac_refs": [
         "AC-5"
       ]
@@ -1262,11 +1262,11 @@
       "p10": 6.849,
       "p90": 30.219,
       "pred_tier": "Critical",
-      "risk_score": 74,
+      "risk_score": 67,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.384,
+      "ms": 0.359,
       "ac_refs": [
         "AC-5"
       ]
@@ -1285,11 +1285,11 @@
       "p10": 5.985,
       "p90": 21.782,
       "pred_tier": "High",
-      "risk_score": 61,
+      "risk_score": 52,
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.543,
+      "ms": 0.544,
       "ac_refs": [
         "AC-5"
       ]
@@ -1312,7 +1312,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.549,
+      "ms": 0.569,
       "ac_refs": [
         "AC-5"
       ]
@@ -1335,7 +1335,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.732,
+      "ms": 0.789,
       "ac_refs": [
         "AC-5"
       ]
