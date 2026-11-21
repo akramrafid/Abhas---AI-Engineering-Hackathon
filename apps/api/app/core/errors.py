@@ -7,6 +7,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from app.core.logging import request_id_var
+
 PROBLEM_BASE = "https://abhas.dev/problems/"
 PROBLEM_MEDIA = "application/problem+json"
 
@@ -24,6 +26,7 @@ class Problem(BaseModel):
     status: int
     detail: str | None = None
     instance: str | None = None
+    request_id: str | None = None
     errors: list[FieldError] | None = None
 
 
@@ -38,23 +41,31 @@ class AppError(Exception):
 def _problem(
     status: int, slug: str, title: str, detail: str | None, request: Request, **extra: Any
 ) -> JSONResponse:
+    rid = request_id_var.get()
     body = Problem(
         type=PROBLEM_BASE + slug,
         title=title,
         status=status,
         detail=detail,
         instance=request.url.path,
+        request_id=None if rid == "-" else rid,
         **extra,
     )
     return JSONResponse(body.model_dump(exclude_none=True), status_code=status, media_type=PROBLEM_MEDIA)
 
 
 def _p(desc: str) -> dict[str, Any]:
-    return {"model": Problem, "description": desc, "content": {PROBLEM_MEDIA: {}}}
+    return {
+        "model": Problem,
+        "description": desc,
+        "content": {PROBLEM_MEDIA: {"schema": {"$ref": "#/components/schemas/Problem"}}},
+    }
 
 
 PROBLEM_RESPONSES: dict[int | str, dict[str, Any]] = {
+    401: _p("Missing or invalid X-Ops-Token"),
     404: _p("Unknown ward, city or resource"),
+    413: _p("Request body exceeds the 64 KB size limit"),
     422: _p("Request failed validation; `errors` names each field"),
     429: _p("Rate limit exceeded; retry after the Retry-After header"),
     500: _p("Unexpected server error"),

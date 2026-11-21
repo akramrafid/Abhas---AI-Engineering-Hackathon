@@ -14,7 +14,7 @@ from app.core.errors import PROBLEM_RESPONSES, AppError
 from .schemas import CallStats, LLMStats, OpsResponse, PredictionStats
 
 router = APIRouter(
-    prefix="/api/v1", tags=["ops"], responses={**PROBLEM_RESPONSES, 401: PROBLEM_RESPONSES[404]}
+    prefix="/api/v1", tags=["ops"], responses={**PROBLEM_RESPONSES, 401: PROBLEM_RESPONSES[401]}
 )
 
 

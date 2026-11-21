@@ -55,8 +55,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           }
@@ -147,8 +147,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           }
@@ -461,8 +461,8 @@
               "examples": [
                 "DSCC_Ward_07"
               ],
-              "maxLength": 16,
-              "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+              "maxLength": 32,
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
               "type": "string"
             },
             "maxItems": 60,
@@ -575,8 +575,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           }
@@ -642,8 +642,8 @@
               "examples": [
                 "DSCC_Ward_07"
               ],
-              "maxLength": 16,
-              "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+              "maxLength": 32,
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
               "type": "string"
             },
             "title": "Ward Ids",
@@ -897,8 +897,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           }
@@ -1101,6 +1101,17 @@
             ],
             "title": "Instance"
           },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
           "status": {
             "title": "Status",
             "type": "integer"
@@ -1158,8 +1169,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           },
@@ -1204,8 +1215,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           },
@@ -1309,8 +1320,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           },
@@ -1366,8 +1377,8 @@
             "examples": [
               "DSCC_Ward_07"
             ],
-            "maxLength": 16,
-            "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
             "title": "Ward Id",
             "type": "string"
           }
@@ -1643,6 +1654,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -1650,9 +1676,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -1661,7 +1706,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -1672,7 +1721,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -1683,7 +1736,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -1694,7 +1751,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -1729,6 +1790,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -1736,9 +1812,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -1747,7 +1842,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -1758,7 +1857,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -1769,7 +1872,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -1780,7 +1887,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -1850,6 +1961,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -1857,9 +1983,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -1868,7 +2013,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -1879,7 +2028,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -1890,7 +2043,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -1901,7 +2058,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -1951,9 +2112,13 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
-            "description": "Unknown ward, city or resource"
+            "description": "Missing or invalid X-Ops-Token"
           },
           "404": {
             "content": {
@@ -1962,9 +2127,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -1973,7 +2157,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -1984,7 +2172,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -1995,7 +2187,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2006,7 +2202,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2041,6 +2241,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -2048,9 +2263,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -2059,7 +2293,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -2070,7 +2308,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -2081,7 +2323,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2092,7 +2338,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2117,6 +2367,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -2124,9 +2389,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -2135,7 +2419,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -2146,7 +2434,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -2157,7 +2449,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2168,7 +2464,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2218,6 +2518,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -2225,9 +2540,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -2236,7 +2570,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -2247,7 +2585,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -2258,7 +2600,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2269,7 +2615,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2289,7 +2639,7 @@
             "name": "ward_id",
             "required": true,
             "schema": {
-              "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
               "title": "Ward Id",
               "type": "string"
             }
@@ -2340,6 +2690,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -2347,9 +2712,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -2358,7 +2742,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -2369,7 +2757,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -2380,7 +2772,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2391,7 +2787,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2411,7 +2811,7 @@
             "name": "ward_id",
             "required": true,
             "schema": {
-              "pattern": "^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\\d{2}$",
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
               "title": "Ward Id",
               "type": "string"
             }
@@ -2440,6 +2840,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -2447,9 +2862,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -2458,7 +2892,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -2469,7 +2907,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -2480,7 +2922,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2491,7 +2937,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2516,6 +2966,21 @@
             },
             "description": "Successful Response"
           },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -2523,9 +2988,28 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
           },
           "422": {
             "content": {
@@ -2534,7 +3018,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Request failed validation; `errors` names each field"
           },
@@ -2545,7 +3033,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Rate limit exceeded; retry after the Retry-After header"
           },
@@ -2556,7 +3048,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Unexpected server error"
           },
@@ -2567,7 +3063,11 @@
                   "$ref": "#/components/schemas/Problem"
                 }
               },
-              "application/problem+json": {}
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
             },
             "description": "Model or data not ready (run npm run setup)"
           }
@@ -2618,6 +3118,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
           }
         },
         "summary": "Readiness: model loaded and data seeded",

@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 API_DIR = Path(__file__).resolve().parents[2]  # apps/api
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         env_file=(REPO_ROOT / ".env", API_DIR / ".env"), env_file_encoding="utf-8", extra="ignore"
     )
 
-    app_env: Literal["dev", "test", "production"] = "dev"
+    app_env: Literal["dev", "test", "prod", "production"] = "dev"
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     database_url: str = f"sqlite:///{(REPO_ROOT / 'data' / 'abhas.db').as_posix()}"
@@ -39,6 +39,25 @@ class Settings(BaseSettings):
 
     ops_token: SecretStr | None = None
     rate_limit_per_minute: int = Field(default=120, ge=1)
+    fault_inject: str = ""
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def _anchor_sqlite_url(cls, value: str) -> str:
+        prefix = "sqlite:///"
+        if not value.startswith(prefix) or value == "sqlite:///:memory:":
+            return value
+        raw_path = value[len(prefix) :]
+        p = Path(raw_path)
+        if not p.is_absolute():
+            p = (REPO_ROOT / p).resolve()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        return f"{prefix}{p.as_posix()}"
+
+    @field_validator("model_path", "raw_dataset_path", mode="after")
+    @classmethod
+    def _anchor_repo_path(cls, value: Path) -> Path:
+        return value if value.is_absolute() else (REPO_ROOT / value).resolve()
 
     @property
     def cors_origin_list(self) -> list[str]:
@@ -52,3 +71,11 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def active_faults(settings: Settings | None = None) -> frozenset[str]:
+    """Return active FAULT_INJECT tokens strictly when APP_ENV=test; always empty otherwise."""
+    cfg = settings or get_settings()
+    if cfg.app_env != "test" or not cfg.fault_inject.strip():
+        return frozenset()
+    return frozenset(tok.strip().lower() for tok in cfg.fault_inject.split(",") if tok.strip())

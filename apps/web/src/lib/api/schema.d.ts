@@ -688,6 +688,8 @@ export interface components {
             errors?: components["schemas"]["FieldError"][] | null;
             /** Instance */
             instance?: string | null;
+            /** Request Id */
+            request_id?: string | null;
             /** Status */
             status: number;
             /** Title */
@@ -932,6 +934,16 @@ export interface operations {
                     "application/json": components["schemas"]["AdvisoryResponse"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -939,7 +951,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -949,7 +971,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -959,7 +981,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -969,7 +991,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -979,7 +1001,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1006,6 +1028,16 @@ export interface operations {
                     "application/json": components["schemas"]["ForecastResponse"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1013,7 +1045,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1023,7 +1065,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1033,7 +1075,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1043,7 +1085,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1053,7 +1095,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1080,6 +1122,16 @@ export interface operations {
                     "application/json": components["schemas"]["HeatmapResponse"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1087,7 +1139,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1097,7 +1159,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1107,7 +1169,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1117,7 +1179,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1127,7 +1189,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1152,14 +1214,14 @@ export interface operations {
                     "application/json": components["schemas"]["OpsResponse"];
                 };
             };
-            /** @description Unknown ward, city or resource */
+            /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unknown ward, city or resource */
@@ -1169,7 +1231,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1179,7 +1251,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1189,7 +1261,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1199,7 +1271,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1209,7 +1281,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1236,6 +1308,16 @@ export interface operations {
                     "application/json": components["schemas"]["ScenarioResponse"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1243,7 +1325,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1253,7 +1345,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1263,7 +1355,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1273,7 +1365,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1283,7 +1375,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1306,6 +1398,16 @@ export interface operations {
                     "application/json": components["schemas"]["ValidationResponse"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1313,7 +1415,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1323,7 +1435,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1333,7 +1445,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1343,7 +1455,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1353,7 +1465,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1378,6 +1490,16 @@ export interface operations {
                     "application/json": components["schemas"]["WardList"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1385,7 +1507,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1395,7 +1527,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1405,7 +1537,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1415,7 +1547,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1425,7 +1557,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1453,6 +1585,16 @@ export interface operations {
                     "application/json": components["schemas"]["WardHistory"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1460,7 +1602,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1470,7 +1622,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1480,7 +1632,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1490,7 +1642,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1500,7 +1652,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1527,6 +1679,16 @@ export interface operations {
                     "application/json": components["schemas"]["LagResponse"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1534,7 +1696,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1544,7 +1716,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1554,7 +1726,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1564,7 +1736,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1574,7 +1746,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1597,6 +1769,16 @@ export interface operations {
                     "application/json": components["schemas"]["WeatherStatus"];
                 };
             };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Unknown ward, city or resource */
             404: {
                 headers: {
@@ -1604,7 +1786,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Request failed validation; `errors` names each field */
@@ -1614,7 +1806,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Rate limit exceeded; retry after the Retry-After header */
@@ -1624,7 +1816,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Unexpected server error */
@@ -1634,7 +1826,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Model or data not ready (run npm run setup) */
@@ -1644,7 +1836,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Problem"];
-                    "application/problem+json": unknown;
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };
@@ -1689,6 +1881,16 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
         };

@@ -8,14 +8,14 @@ from pydantic import AfterValidator, Field, StringConstraints
 CITIES: tuple[str, ...] = ("Dhaka North", "Dhaka South", "Chattogram", "Gazipur", "Narayanganj")
 City = Literal["Dhaka North", "Dhaka South", "Chattogram", "Gazipur", "Narayanganj"]
 
-WARD_ID_PATTERN = r"^(DNCC|DSCC|CCC|GCC|NCC)_Ward_\d{2}$"
+WARD_ID_PATTERN = r"^[A-Za-z0-9_-]{1,32}$"
 WardId = Annotated[
-    str, StringConstraints(pattern=WARD_ID_PATTERN, max_length=16), Field(examples=["DSCC_Ward_07"])
+    str, StringConstraints(pattern=WARD_ID_PATTERN, max_length=32), Field(examples=["DSCC_Ward_07"])
 ]
 
 TIERS: tuple[str, ...] = ("Low", "Medium", "High", "Critical")
 Tier = Literal["Low", "Medium", "High", "Critical"]
-TIER_BN: dict[str, str] = {"Low": "কম", "Medium": "মাঝারি", "High": "উচ্চ", "Critical": "সংকটজনক"}
+TIER_BN: dict[str, str] = {"Low": "নিম্ন", "Medium": "মাঝারি", "High": "উচ্চ", "Critical": "সংকটপূর্ণ"}
 
 Horizon = Annotated[int, Field(ge=1, le=4, description="Weeks ahead of the origin week (1–4)")]
 WeatherMode = Literal["dataset", "live"]

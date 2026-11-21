@@ -48,7 +48,11 @@ ignore = ["S101", "B008", "E501"]  # ruff format owns line length
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["tracing: checks that every LLM/weather call is traced", "slow: long-running"]
+markers = [
+  "tracing: checks that every LLM/weather call is traced",
+  "faults: fault-injection tests (APP_ENV=test only)",
+  "slow: long-running",
+]
 
 [tool.pyright]
 include = ["app"]

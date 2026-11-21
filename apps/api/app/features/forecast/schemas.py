@@ -85,6 +85,12 @@ class ScenarioRequest(BaseModel):
     horizons: list[Horizon] = Field(default=[1, 2, 3, 4], min_length=1, max_length=4)
     weather: WeatherOverride
 
+    @model_validator(mode="after")
+    def _unique_horizons(self) -> "ScenarioRequest":
+        if len(set(self.horizons)) != len(self.horizons):
+            raise ValueError("horizons must be unique")
+        return self
+
 
 class ScenarioResponse(BaseModel):
     ward_id: WardId
