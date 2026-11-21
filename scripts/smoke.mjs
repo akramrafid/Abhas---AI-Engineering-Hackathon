@@ -36,7 +36,11 @@ check("forecast 4 horizons with tiers", fc.status === 200 && h.length === 4 && h
 const sc = await call("POST", "/api/v1/scenario", { ward_id: wardId, origin_week: origin, weather: { rainfall_mm: 120 } });
 check("scenario", sc.status === 200 && Array.isArray(sc.json?.scenario));
 const bad = await call("GET", "/api/v1/wards/XYZ_Ward_99/lags");
-check("unknown ward → 4xx problem", bad.status === 404 || bad.status === 422);
+check(
+  "unknown ward → 404 unknown-ward",
+  bad.status === 404 && String(bad.json?.type).endsWith("/unknown-ward"),
+  `status=${bad.status} type=${bad.json?.type ?? "none"}`,
+);
 
 for (const c of checks) console.log(`${c.ok ? "PASS" : "FAIL"}  ${c.name}${c.detail ? " — " + c.detail : ""}`);
 const failed = checks.filter((c) => !c.ok).length;

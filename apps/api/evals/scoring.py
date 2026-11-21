@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import hmac
 import importlib
 import json
 import logging
 import math
+import random
 import time
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -19,6 +21,7 @@ import pandas as pd
 from scipy.stats import nbinom
 
 from app.core.config import get_settings
+from scripts.seed import EXPECTED_SHA256, compute_sha256
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +55,24 @@ def iso_week_capped(d: date) -> int:
     return min(52, int(d.isocalendar().week))
 
 
-def load_raw_dataset(path: Path | None = None, sheet: str | None = None) -> pd.DataFrame:
-    """Read hackathon_preli_dataset.xlsx strictly read-only and normalize columns."""
+def load_raw_dataset(
+    path: Path | None = None,
+    sheet: str | None = None,
+    *,
+    verify_sha256: bool = True,
+) -> pd.DataFrame:
+    """Read hackathon_preli_dataset.xlsx strictly read-only, verifying SHA-256 (CR-4)."""
     settings = get_settings()
     src = path or settings.raw_dataset_path
     sheet_name = sheet or settings.raw_dataset_sheet
+    if not src.exists():
+        raise FileNotFoundError(f"Raw dataset not found: {src}")
+    if verify_sha256:
+        actual_sha = compute_sha256(src)
+        if not hmac.compare_digest(actual_sha.lower(), EXPECTED_SHA256.lower()):
+            raise ValueError(
+                f"Raw dataset SHA-256 mismatch for {src.name}: got {actual_sha}, expected {EXPECTED_SHA256}"
+            )
     df = pd.read_excel(src, sheet_name=sheet_name)
     df["date"] = pd.to_datetime(df["date"]).dt.date
     df = df.sort_values(["ward_id", "date"]).reset_index(drop=True)
@@ -154,6 +170,7 @@ class EvalPrediction:
     tier: str
     risk_score: int
     tier_escalated: bool = False
+    used_fallback: bool = False
 
 
 class ClimatologyBaseline:
@@ -270,6 +287,19 @@ class ClimatologyBaseline:
         return preds, latencies_ms
 
 
+def _parse_rain_normals(raw: Any) -> dict[tuple[str, int], float] | None:
+    if not isinstance(raw, Mapping) or not raw:
+        return None
+    parsed: dict[tuple[str, int], float] = {}
+    for k, v in raw.items():
+        if isinstance(k, tuple) and len(k) == 2:
+            parsed[(str(k[0]), int(k[1]))] = float(v)
+        elif isinstance(k, str) and "|" in k:
+            wid, iw = k.rsplit("|", 1)
+            parsed[(wid, int(iw))] = float(v)
+    return parsed or None
+
+
 class ForecasterHook:
     """Unified scoring interface: uses CORE's trained model artifact when present, else climatology."""
 
@@ -281,28 +311,98 @@ class ForecasterHook:
         core_model: Any | None = None,
         feature_builder: Any | None = None,
         no_weather_meta: Mapping[str, Any] | None = None,
+        artifact_meta: Mapping[str, Any] | None = None,
+        rain_normals: Mapping[tuple[str, int], float] | None = None,
+        train_end_year: int | None = None,
+        max_normal_year: int | None = None,
     ) -> None:
         self.model_version = model_version
         self.is_baseline_fallback = is_baseline_fallback
         self.climatology = climatology
         self._core_model = core_model
         self._feature_builder = feature_builder
-        self._no_weather_meta = dict(no_weather_meta) if no_weather_meta else None
+        self._artifact_meta = dict(artifact_meta) if artifact_meta else {}
+
+        if no_weather_meta is not None:
+            self._no_weather_meta: dict[str, Any] | None = dict(no_weather_meta)
+        else:
+            raw_nw = self._artifact_meta.get("no_weather_mae") or self._artifact_meta.get(
+                "ablation_no_weather_mae"
+            )
+            self._no_weather_meta = dict(raw_nw) if isinstance(raw_nw, Mapping) else None
+
+        # CR-5: resolve artifact's stored rain_normals, train_end_year, and max_normal_year.
+        resolved_normals = _parse_rain_normals(rain_normals)
+        if resolved_normals is None and core_model is not None:
+            resolved_normals = _parse_rain_normals(getattr(core_model, "rain_normals", None))
+        if resolved_normals is None:
+            resolved_normals = _parse_rain_normals(self._artifact_meta.get("rain_normals"))
+        self.rain_normals: dict[tuple[str, int], float] | None = resolved_normals
+
+        resolved_train_end = train_end_year
+        if resolved_train_end is None and core_model is not None:
+            raw_te = getattr(core_model, "train_end_year", None)
+            if raw_te is not None:
+                resolved_train_end = int(raw_te)
+        if resolved_train_end is None:
+            meta_te = self._artifact_meta.get("train_end_year") or self._artifact_meta.get("train_max_year")
+            if meta_te is not None:
+                resolved_train_end = int(meta_te)
+        self.train_end_year: int = (
+            int(resolved_train_end) if resolved_train_end is not None else int(climatology.train_end_year)
+        )
+
+        resolved_max_norm = max_normal_year
+        if resolved_max_norm is None and core_model is not None:
+            raw_mn = getattr(core_model, "max_normal_year", None)
+            if raw_mn is not None:
+                resolved_max_norm = int(raw_mn)
+        if resolved_max_norm is None and self._artifact_meta.get("max_normal_year") is not None:
+            resolved_max_norm = int(self._artifact_meta["max_normal_year"])
+        self.max_normal_year: int = (
+            int(resolved_max_norm) if resolved_max_norm is not None else self.train_end_year
+        )
+
         self._feature_cache: dict[int, dict[tuple[str, date], dict[str, float]]] = {}
+
+    def _invoke_feature_builder(
+        self,
+        frame: pd.DataFrame,
+        horizon: int,
+        *,
+        origin_week: date | None = None,
+    ) -> pd.DataFrame | None:
+        if self._feature_builder is None:
+            return None
+        kwargs: dict[str, Any] = {
+            "horizon": horizon,
+            "max_normal_year": self.max_normal_year,
+        }
+        if self.rain_normals is not None:
+            kwargs["rain_normals"] = self.rain_normals
+        if origin_week is not None:
+            kwargs["origin_week"] = origin_week
+        try:
+            feat_df = self._feature_builder(frame, **kwargs)
+        except TypeError:
+            # Support minimal custom/mock feature builders in unit tests that accept fewer kwargs.
+            fallback_kwargs = {k: v for k, v in kwargs.items() if k != "origin_week"}
+            try:
+                feat_df = self._feature_builder(frame, **fallback_kwargs)
+            except TypeError:
+                try:
+                    feat_df = self._feature_builder(frame, horizon=horizon)
+                except TypeError:
+                    feat_df = self._feature_builder(frame)
+        return feat_df if isinstance(feat_df, pd.DataFrame) else None
 
     def _build_feature_lookup(
         self, df: pd.DataFrame, horizon: int
     ) -> dict[tuple[str, date], dict[str, float]]:
         if horizon in self._feature_cache:
             return self._feature_cache[horizon]
-        if self._feature_builder is None:
-            return {}
-        # Support both build_features(df, horizon=h) and build_features(df) signatures.
-        try:
-            feat_df = self._feature_builder(df, horizon=horizon)
-        except TypeError:
-            feat_df = self._feature_builder(df)
-        if not isinstance(feat_df, pd.DataFrame):
+        feat_df = self._invoke_feature_builder(df, horizon)
+        if feat_df is None or feat_df.empty:
             return {}
         feature_names: Sequence[str] = getattr(self._core_model, "feature_names", [])
         if not feature_names:
@@ -317,6 +417,71 @@ class ForecasterHook:
             lookup[(str(wid), dt)] = {str(k): float(v) for k, v in rec.items()}
         self._feature_cache[horizon] = lookup
         return lookup
+
+    def benchmark_single_row_latencies(
+        self,
+        df: pd.DataFrame,
+        pairs: Sequence[tuple[str, date, int]],
+        *,
+        sample_size: int = 200,
+        seed: int = 42,
+    ) -> list[float]:
+        """Time `sample_size` single-ward end-to-end calls (feature build + predict) for NFR-1 (CR-6)."""
+        if not pairs:
+            return []
+        k = min(sample_size, len(pairs))
+        rng = random.Random(seed)
+        sampled = rng.sample(list(pairs), k) if k < len(pairs) else list(pairs)
+
+        if self._core_model is None or self._feature_builder is None:
+            latencies: list[float] = []
+            for wid, ow, h in sampled:
+                t0 = time.perf_counter()
+                self.climatology.predict_one(wid, ow + timedelta(weeks=h))
+                latencies.append((time.perf_counter() - t0) * 1000.0)
+            return latencies
+
+        date_col = "date" if "date" in df.columns else "week"
+        ward_frames: dict[str, pd.DataFrame] = {
+            str(wid): grp.reset_index(drop=True) for wid, grp in df.groupby("ward_id", sort=False)
+        }
+        feature_names: Sequence[str] = getattr(self._core_model, "feature_names", ())
+        exclude = {"date", "week", "ward_id", "city", "dengue_cases", "year", "iso_week"}
+
+        latencies = []
+        for wid, ow, h in sampled:
+            wdf = ward_frames.get(wid)
+            if wdf is None:
+                t0 = time.perf_counter()
+                self.climatology.predict_one(wid, ow + timedelta(weeks=h))
+                latencies.append((time.perf_counter() - t0) * 1000.0)
+                continue
+
+            start_dt = ow - timedelta(weeks=8)
+            dates_series = wdf[date_col]
+            window_df = wdf.loc[(dates_series >= start_dt) & (dates_series <= ow)]
+
+            t0 = time.perf_counter()
+            feat_df = self._invoke_feature_builder(window_df, h, origin_week=ow)
+            if feat_df is not None and not feat_df.empty:
+                f_date_col = "date" if "date" in feat_df.columns else "week"
+                f_dates = pd.to_datetime(feat_df[f_date_col]).dt.date
+                match = feat_df.loc[(feat_df["ward_id"] == wid) & (f_dates == ow)]
+                if not match.empty:
+                    cols = (
+                        [c for c in feature_names if c in match.columns]
+                        if feature_names
+                        else [c for c in match.columns if c not in exclude]
+                    )
+                    row_vals = match.iloc[-1][cols].to_dict()
+                    row_dict = {str(k_col): float(v) for k_col, v in row_vals.items()}
+                    self._core_model.predict([row_dict], horizon=h)
+                else:
+                    self.climatology.predict_one(wid, ow + timedelta(weeks=h))
+            else:
+                self.climatology.predict_one(wid, ow + timedelta(weeks=h))
+            latencies.append((time.perf_counter() - t0) * 1000.0)
+        return latencies
 
     def predict_batch(
         self,
@@ -347,8 +512,6 @@ class ForecasterHook:
                     fallback_items.append((idx, wid, ow))
 
             if rows:
-                # Measure per-ward inference latency by timing chunked calls (1 ward at a time for small batches,
-                # or amortized batch timing for 6,000+ global backtest rows).
                 if len(rows) <= 200:
                     for idx, row in zip(valid_indices, rows, strict=True):
                         t0 = time.perf_counter()
@@ -361,6 +524,7 @@ class ForecasterHook:
                             tier=str(pf.tier),
                             risk_score=int(pf.risk_score),
                             tier_escalated=bool(pf.tier_escalated),
+                            used_fallback=False,
                         )
                 else:
                     t0 = time.perf_counter()
@@ -375,11 +539,27 @@ class ForecasterHook:
                             tier=str(pf.tier),
                             risk_score=int(pf.risk_score),
                             tier_escalated=bool(pf.tier_escalated),
+                            used_fallback=False,
                         )
 
+            if fallback_items:
+                logger.warning(
+                    "Horizon h=%d had %d missing feature row(s); fell back to climatology (counted as skipped)",
+                    h,
+                    len(fallback_items),
+                )
             for idx, wid, ow in fallback_items:
                 t0 = time.perf_counter()
-                results[idx] = self.climatology.predict_one(wid, ow + timedelta(weeks=h))
+                cp = self.climatology.predict_one(wid, ow + timedelta(weeks=h))
+                results[idx] = EvalPrediction(
+                    expected_cases=cp.expected_cases,
+                    p10=cp.p10,
+                    p90=cp.p90,
+                    tier=cp.tier,
+                    risk_score=cp.risk_score,
+                    tier_escalated=cp.tier_escalated,
+                    used_fallback=True,
+                )
                 latencies_ms[idx] = (time.perf_counter() - t0) * 1000.0
 
         return [r for r in results if r is not None], latencies_ms
@@ -414,15 +594,13 @@ def _try_load_core_model(model_path: Path) -> tuple[Any | None, dict[str, Any] |
     if not model_path.exists():
         return None, None
 
-    meta: dict[str, Any] | None = None
+    raw_meta: dict[str, Any] | None = None
     meta_path = model_path.parent / "metadata.json"
     if meta_path.exists():
         try:
-            raw_meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            if isinstance(raw_meta, dict):
-                nw = raw_meta.get("no_weather_mae") or raw_meta.get("ablation_no_weather_mae")
-                if isinstance(nw, dict):
-                    meta = nw
+            loaded = json.loads(meta_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                raw_meta = loaded
         except Exception as exc:  # noqa: BLE001
             logger.warning("Could not parse artifact metadata at %s: %s", meta_path, exc)
 
@@ -431,12 +609,12 @@ def _try_load_core_model(model_path: Path) -> tuple[Any | None, dict[str, Any] |
         for factory_name in ("load_model", "load_forecast_model"):
             factory = getattr(mod, factory_name, None)
             if callable(factory):
-                return factory(model_path), meta
+                return factory(model_path), raw_meta
         cls = getattr(mod, "LGBMForecastModel", None)
         if cls is not None:
             if hasattr(cls, "load") and callable(cls.load):
-                return cls.load(model_path), meta
-            return cls(model_path), meta
+                return cls.load(model_path), raw_meta
+            return cls(model_path), raw_meta
     except ModuleNotFoundError:
         pass
     except Exception as exc:  # noqa: BLE001
@@ -446,17 +624,17 @@ def _try_load_core_model(model_path: Path) -> tuple[Any | None, dict[str, Any] |
     try:
         obj = joblib.load(model_path)
         if hasattr(obj, "predict") and callable(obj.predict):
-            return obj, meta
+            return obj, raw_meta
     except Exception as exc:  # noqa: BLE001
         logger.warning("Could not load joblib artifact at %s: %s", model_path, exc)
-    return None, meta
+    return None, raw_meta
 
 
 def load_forecaster(df: pd.DataFrame, train_end_year: int = 2023) -> ForecasterHook:
     """Load CORE's trained model artifact if present, otherwise fall back cleanly to climatology."""
     settings = get_settings()
     climatology = ClimatologyBaseline.fit(df, train_end_year=train_end_year)
-    core_model, no_weather_meta = _try_load_core_model(settings.model_path)
+    core_model, artifact_meta = _try_load_core_model(settings.model_path)
     feature_builder = _try_load_feature_builder() if core_model is not None else None
     if core_model is not None and feature_builder is not None:
         version = str(getattr(core_model, "version", "lightgbm-artifact"))
@@ -466,13 +644,13 @@ def load_forecaster(df: pd.DataFrame, train_end_year: int = 2023) -> ForecasterH
             climatology=climatology,
             core_model=core_model,
             feature_builder=feature_builder,
-            no_weather_meta=no_weather_meta,
+            artifact_meta=artifact_meta,
         )
     return ForecasterHook(
         model_version=climatology.model_version,
         is_baseline_fallback=True,
         climatology=climatology,
-        no_weather_meta=no_weather_meta,
+        artifact_meta=artifact_meta,
     )
 
 
