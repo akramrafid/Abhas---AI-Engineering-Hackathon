@@ -23,10 +23,13 @@ WeatherSourceUsed = Literal["dataset", "live", "cache", "climatology"]
 
 DATA_START = date(2016, 1, 4)
 DATA_END = date(2025, 12, 29)
+CALENDAR_MAX = date(2100, 12, 31)
 FIRST_FORECAST_ORIGIN = DATA_START + timedelta(weeks=8)  # 2016-02-29: all 0–8-week lags exist
 
 
 def _monday(d: date) -> date:
+    if not DATA_START <= d <= CALENDAR_MAX:
+        raise ValueError(f"must be between {DATA_START} and {CALENDAR_MAX}")
     if d.weekday() != 0:
         raise ValueError("must be a Monday (ISO week start), e.g. 2025-08-04")
     return d

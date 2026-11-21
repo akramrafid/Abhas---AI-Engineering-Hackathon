@@ -1,11 +1,16 @@
 """RFC 9457 problem+json errors. Every route documents PROBLEM_RESPONSES so contract tests check statuses."""
 
+from __future__ import annotations
+
+import logging
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.logging import request_id_var
 
@@ -39,7 +44,13 @@ class AppError(Exception):
 
 
 def _problem(
-    status: int, slug: str, title: str, detail: str | None, request: Request, **extra: Any
+    status: int,
+    slug: str,
+    title: str,
+    detail: str | None,
+    request: Request,
+    headers: dict[str, str] | None = None,
+    **extra: Any,
 ) -> JSONResponse:
     rid = request_id_var.get()
     body = Problem(
@@ -51,7 +62,12 @@ def _problem(
         request_id=None if rid == "-" else rid,
         **extra,
     )
-    return JSONResponse(body.model_dump(exclude_none=True), status_code=status, media_type=PROBLEM_MEDIA)
+    return JSONResponse(
+        body.model_dump(exclude_none=True),
+        status_code=status,
+        media_type=PROBLEM_MEDIA,
+        headers=headers,
+    )
 
 
 def _p(desc: str) -> dict[str, Any]:
@@ -73,6 +89,48 @@ PROBLEM_RESPONSES: dict[int | str, dict[str, Any]] = {
 }
 
 
+class UnhandledExceptionMiddleware:
+    """Catch unhandled exceptions INSIDE CORS/RequestId so 500s keep X-Request-ID and CORS headers (SEC-7)."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        response_started = False
+
+        async def tracked_send(message: Message) -> None:
+            nonlocal response_started
+            if message["type"] == "http.response.start":
+                response_started = True
+            await send(message)
+
+        try:
+            await self.app(scope, receive, tracked_send)
+        except Exception:
+            path = str(scope.get("path", ""))
+            logging.getLogger("abhas").exception("unhandled error on %s", path)
+            if response_started:
+                raise
+            rid = request_id_var.get()
+            body = Problem(
+                type=PROBLEM_BASE + "internal-error",
+                title="Internal server error",
+                status=500,
+                instance=path,
+                request_id=None if rid == "-" else rid,
+            )
+            response = JSONResponse(
+                body.model_dump(exclude_none=True),
+                status_code=500,
+                media_type=PROBLEM_MEDIA,
+            )
+            await response(scope, receive, send)
+
+
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(request: Request, exc: AppError) -> JSONResponse:
@@ -86,16 +144,15 @@ def install_error_handlers(app: FastAPI) -> None:
         ]
         return _problem(422, "validation-error", "Request validation failed", None, request, errors=errors)
 
-    @app.exception_handler(HTTPException)
-    async def _http(request: Request, exc: HTTPException) -> JSONResponse:
+    @app.exception_handler(StarletteHTTPException)
+    async def _http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         slug = {404: "not-found", 405: "method-not-allowed", 429: "rate-limited"}.get(
             exc.status_code, "http-error"
         )
-        return _problem(exc.status_code, slug, str(exc.detail), None, request)
+        headers = {str(k): str(v) for k, v in exc.headers.items()} if exc.headers else None
+        return _problem(exc.status_code, slug, str(exc.detail), None, request, headers=headers)
 
     @app.exception_handler(Exception)
-    async def _unhandled(request: Request, exc: Exception) -> JSONResponse:  # never leak internals
-        import logging
-
+    async def _unhandled(request: Request, exc: Exception) -> JSONResponse:  # defense in depth
         logging.getLogger("abhas").exception("unhandled error on %s", request.url.path)
         return _problem(500, "internal-error", "Internal server error", None, request)

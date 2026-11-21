@@ -1,0 +1,44 @@
+# Optional containerized launch path (sidesteps macOS libomp and Windows VC++ runtime setup).
+# Runs with zero API keys by default: `docker compose up --build` -> http://localhost:3000
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      APP_ENV: "${APP_ENV:-dev}"
+      API_PORT: "8000"
+      CORS_ORIGINS: "${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}"
+      WEATHER_MODE: "${WEATHER_MODE:-dataset}"
+      # Set OPS_TOKEN when accessing /api/v1/ops from outside container loopback.
+      OPS_TOKEN: "${OPS_TOKEN:-}"
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
+      RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-120}"
+    volumes:
+      - abhas_data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: "http://localhost:${API_PORT:-8000}"
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:${API_PORT:-8000}"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  abhas_data:

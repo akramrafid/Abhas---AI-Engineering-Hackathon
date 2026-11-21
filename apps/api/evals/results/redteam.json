@@ -1,0 +1,263 @@
+{
+  "n": 30,
+  "passed": 30,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "high_failures": [],
+  "by_owasp": {
+    "A01:2025": "2/2",
+    "A02:2025": "2/2",
+    "A05:2025": "3/3",
+    "A08:2025": "5/5",
+    "A09:2025": "1/1",
+    "A10:2025": "5/5",
+    "LLM01": "2/2",
+    "LLM02": "1/1",
+    "LLM04": "1/1",
+    "LLM06": "5/5",
+    "LLM07": "1/1",
+    "LLM10": "2/2"
+  },
+  "results": [
+    {
+      "id": "RT-01",
+      "owasp": "LLM06",
+      "severity": "high",
+      "title": "Oversized Content-Length body (>64 KB)",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-02",
+      "owasp": "LLM06",
+      "severity": "high",
+      "title": "Chunked streaming 2 MB body abort (<=2 chunks)",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-03",
+      "owasp": "A08:2025",
+      "severity": "high",
+      "title": "NaN and +/-Infinity weather JSON tokens",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-04",
+      "owasp": "A08:2025",
+      "severity": "high",
+      "title": "Negative and extreme (>500 mm) rainfall",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-05",
+      "owasp": "A08:2025",
+      "severity": "medium",
+      "title": "Out-of-range temp/humidity and empty override",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-06",
+      "owasp": "A05:2025",
+      "severity": "high",
+      "title": "SQL injection in ward_id across routes",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-07",
+      "owasp": "A05:2025",
+      "severity": "high",
+      "title": "Path traversal in ward_id",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-08",
+      "owasp": "A05:2025",
+      "severity": "high",
+      "title": "CRLF and null-byte injection in ward_id",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-09",
+      "owasp": "LLM06",
+      "severity": "high",
+      "title": "Invalid, huge, empty, and duplicate horizons",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-10",
+      "owasp": "LLM06",
+      "severity": "high",
+      "title": "Excess (>60) and duplicate ward_ids",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-11",
+      "owasp": "A08:2025",
+      "severity": "medium",
+      "title": "Unknown extra JSON fields rejected (extra=forbid)",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-12",
+      "owasp": "A08:2025",
+      "severity": "medium",
+      "title": "Simple-CSRF Content-Type smuggling rejected",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-13",
+      "owasp": "A10:2025",
+      "severity": "high",
+      "title": "Calendar overflow origin_week=9999-12-27",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-14",
+      "owasp": "A10:2025",
+      "severity": "medium",
+      "title": "Pre-2016 and out-of-range dataset origin_week",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-15",
+      "owasp": "A10:2025",
+      "severity": "medium",
+      "title": "Non-Monday origin_week rejected across routes",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-16",
+      "owasp": "LLM10",
+      "severity": "high",
+      "title": "CSV formula injection neutralization",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-17",
+      "owasp": "LLM01",
+      "severity": "high",
+      "title": "Direct prompt injection at ward_id boundary (EN/BN/base64/leet)",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-18",
+      "owasp": "LLM01",
+      "severity": "high",
+      "title": "Indirect prompt injection & canary isolation in advisory prompt",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-19",
+      "owasp": "LLM07",
+      "severity": "high",
+      "title": "Hallucinated ASCII/Bangla numbers rejected by grounding validator",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-20",
+      "owasp": "LLM06",
+      "severity": "high",
+      "title": "Rate-limit burst (429 + Retry-After) & prefix bypass blocked",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-21",
+      "owasp": "A09:2025",
+      "severity": "high",
+      "title": "ANSI/CRLF/oversized X-Request-ID header injection sanitized",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-22",
+      "owasp": "A01:2025",
+      "severity": "high",
+      "title": "/api/v1/ops fail-closed (remote, XFF, prod, brute-force)",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-23",
+      "owasp": "A10:2025",
+      "severity": "high",
+      "title": "Non-ASCII X-Ops-Token and whitespace OPS_TOKEN return 401",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-24",
+      "owasp": "A01:2025",
+      "severity": "high",
+      "title": "CORS rejects untrusted Origin on GET and preflight OPTIONS",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-25",
+      "owasp": "A10:2025",
+      "severity": "medium",
+      "title": "Method tampering 405, 404 problem+json, and 500 header/body hygiene",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-26",
+      "owasp": "A02:2025",
+      "severity": "medium",
+      "title": "Security headers, no-store, and production docs disabled",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-27",
+      "owasp": "LLM02",
+      "severity": "high",
+      "title": "Log secret redaction in JsonFormatter (msg & traceback)",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-28",
+      "owasp": "LLM04",
+      "severity": "high",
+      "title": "Tampered model artifact SHA-256 rejected before pickle load",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-29",
+      "owasp": "LLM10",
+      "severity": "high",
+      "title": "Advisory output XSS/markdown-image exfiltration hygiene",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "RT-30",
+      "owasp": "A02:2025",
+      "severity": "high",
+      "title": "Config SSRF, wildcard CORS, timeout bounds & FAULT_INJECT guard",
+      "pass": true,
+      "problems": []
+    }
+  ]
+}

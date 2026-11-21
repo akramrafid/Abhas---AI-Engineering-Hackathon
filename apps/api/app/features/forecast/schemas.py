@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 from app.core.types import (
     City,
@@ -49,6 +49,8 @@ class WardForecast(BaseModel):
 
 
 class ForecastRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
     ward_ids: list[WardId] = Field(min_length=1, max_length=60)
     source: WeatherMode = "dataset"
     origin_week: IsoWeek = Field(
@@ -85,9 +87,11 @@ class ForecastResponse(BaseModel):
 class WeatherOverride(BaseModel):
     """What-if weather for the origin week (this week). Omitted fields keep the observed value."""
 
-    rainfall_mm: float | None = Field(default=None, ge=0, le=500)
-    avg_temp_c: float | None = Field(default=None, ge=5, le=45)
-    relative_humidity_pct: float | None = Field(default=None, ge=0, le=100)
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    rainfall_mm: float | None = Field(default=None, ge=0, le=500, allow_inf_nan=False)
+    avg_temp_c: float | None = Field(default=None, ge=5, le=45, allow_inf_nan=False)
+    relative_humidity_pct: float | None = Field(default=None, ge=0, le=100, allow_inf_nan=False)
 
     @model_validator(mode="after")
     def _any(self) -> "WeatherOverride":
@@ -97,6 +101,8 @@ class WeatherOverride(BaseModel):
 
 
 class ScenarioRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
     ward_id: WardId
     origin_week: DatasetOriginWeek = Field(
         description="Monday of the last observed week; 2016-02-29 … 2025-12-29"

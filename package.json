@@ -5,7 +5,7 @@
   "description": "Abhas — ward-level dengue early warning (FastAPI + LightGBM API, Next.js dashboard)",
   "engines": { "node": ">=22", "npm": ">=10" },
   "scripts": {
-    "setup": "npm install --no-audit --no-fund && node scripts/setup.mjs",
+    "setup": "npm ci --no-audit --no-fund --ignore-scripts && node scripts/setup.mjs",
     "setup:dev": "npm run setup && cd apps/api && uv sync --python 3.12",
     "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node scripts/py.mjs -m app --no-reload",

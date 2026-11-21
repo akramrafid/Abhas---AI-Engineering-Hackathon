@@ -48,28 +48,41 @@ def test_contract_has_not_drifted() -> None:
     assert committed == json.loads(json.dumps(create_app().openapi(), sort_keys=True))
 
 
-def test_cr_1_setup_bypasses_shell_for_absolute_exe_paths() -> None:
-    """CR-1: setup.mjs must use shell only for PATH shims and bypass shell for absolute exe paths."""
+def test_cr_1_setup_zero_shell_and_metachar_safe() -> None:
+    """CR-1 / SEC-1: setup.mjs never invokes a shell and handles spaces & Windows metacharacters safely."""
+    src = SETUP_SCRIPT.read_text(encoding="utf-8")
+    assert "shell: true" not in src
+
     setup_url = SETUP_SCRIPT.as_uri()
     exe_path = str(Path(sys.executable).resolve())
     js = (
         f"import {{ spawnSync }} from 'node:child_process'; "
-        f"import {{ useShell }} from {json.dumps(setup_url)}; "
+        f"import {{ useShell, resolveNpmInvocation }} from {json.dumps(setup_url)}; "
         f"const winShim = useShell('npm', true); "
-        f"const winAbs = useShell('C:\\\\Users\\\\First Last\\\\repo\\\\apps\\\\api\\\\.venv\\\\Scripts\\\\python.exe', true); "
+        f"const winUv = useShell('uv', true); "
+        f"const winAbs = useShell('C:\\\\Users\\\\First Last & Co\\\\repo\\\\apps\\\\api\\\\.venv\\\\Scripts\\\\python.exe', true); "
         f"const posixAbs = useShell('/tmp/dir with space/python', false); "
+        f"const npmInv = resolveNpmInvocation("
+        f"  {{ npm_execpath: 'C:\\\\Program Files\\\\Alice & Bob\\\\npm-cli.js' }}, "
+        f"  true, "
+        f"  'C:\\\\Program Files\\\\Alice & Bob\\\\node.exe'"
+        f"); "
         f"const exe = {json.dumps(exe_path)}; "
         f"const r = spawnSync(exe, ['--version'], {{ shell: useShell(exe), encoding: 'utf8' }}); "
-        f"console.log(JSON.stringify({{ winShim, winAbs, posixAbs, status: r.status, out: (r.stdout || r.stderr || '').trim() }}));"
+        f"console.log(JSON.stringify({{ winShim, winUv, winAbs, posixAbs, npmInv, status: r.status, out: (r.stdout || r.stderr || '').trim() }}));"
     )
     proc = subprocess.run(
         ["node", "--input-type=module", "-e", js], capture_output=True, text=True, check=False
     )
     assert proc.returncode == 0, f"node failed: {proc.stderr}"
     data = json.loads(proc.stdout.strip())
-    assert data["winShim"] is True
+    assert data["winShim"] is False
+    assert data["winUv"] is False
     assert data["winAbs"] is False
     assert data["posixAbs"] is False
+    assert data["npmInv"]["cmd"] == "C:\\Program Files\\Alice & Bob\\node.exe"
+    assert data["npmInv"]["args"][:2] == ["C:\\Program Files\\Alice & Bob\\npm-cli.js", "ci"]
+    assert "--ignore-scripts" in data["npmInv"]["args"]
     assert data["status"] == 0
     assert data["out"].startswith("Python ")
 

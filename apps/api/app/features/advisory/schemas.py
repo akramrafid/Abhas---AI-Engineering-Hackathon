@@ -3,14 +3,18 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.types import Horizon, IsoWeek, Tier, WardId
+from app.core.types import DatasetOriginWeek, Horizon, Tier, WardId
 
 
 class AdvisoryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
     ward_id: WardId
-    origin_week: IsoWeek
+    origin_week: DatasetOriginWeek = Field(
+        description="Monday of the last observed week; 2016-02-29 … 2025-12-29"
+    )
     horizon: Horizon = 3
     language: Literal["en", "bn"] = "en"
 
