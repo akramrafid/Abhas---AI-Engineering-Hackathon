@@ -36,19 +36,16 @@ async function assertZeroLimeInDataView(page: Page) {
 
 async function assertWcagAA(page: Page, contextLabel: string) {
   const scan = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
-  const severe = scan.violations.filter((v) =>
-    ["serious", "critical"].includes(v.impact ?? ""),
-  );
   expect(
-    severe.map((v) => ({
+    scan.violations.map((v) => ({
       id: v.id,
       impact: v.impact,
       help: v.help,
       nodes: v.nodes.map((n) => n.target),
     })),
-    `WCAG 2.2 AA serious/critical violations on ${contextLabel}`,
+    `WCAG 2.2 A/AA violations on ${contextLabel}`,
   ).toEqual([]);
 }
 
@@ -461,7 +458,7 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await assertZeroLimeInDataView(page);
   });
 
-  test("nfr_6: WCAG 2.2 AA axe scan has zero serious or critical violations across all views", async ({
+  test("nfr_6 / test_cr_18_wcag_aa: WCAG 2.2 A/AA axe scan has zero violations of any impact across all views", async ({
     page,
   }) => {
     await page.goto("/?demo=1");
@@ -488,5 +485,11 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await page.goto("/brand");
     await expect(page.getByRole("heading", { name: /Colour Palette/i })).toBeVisible();
     await assertWcagAA(page, "Brand System (/brand)");
+
+    // Also verify 375px mobile viewport has zero WCAG A/AA violations
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await assertWcagAA(page, "Ward Forecast (375px mobile)");
   });
 });
