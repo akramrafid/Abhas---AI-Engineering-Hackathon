@@ -2,19 +2,36 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Mapping, Sequence
-from datetime import date, timedelta
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
+from threading import Barrier, Lock
 
+import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 
+from app.adapters.db.engine import create_db_engine
 from app.adapters.db.factory import get_prediction_cache
+from app.adapters.db.repositories import SqlPredictionCache
+from app.core.config import API_DIR, get_settings
+from app.core.errors import AppError
 from app.features.forecast.schemas import ForecastRequest, ScenarioRequest, WeatherOverride
 from app.features.forecast.service import ForecastService
 from app.main import create_app
 from app.ports.forecast_model import PointForecast
 from app.ports.repositories import Observation, WardRecord
+from app.ports.weather import WeekWeather
 from app.shared.features import FEATURE_COLUMNS
-from app.shared.forecast_engine import ForecastEngine
+from app.shared.forecast_engine import (
+    ForecastEngine,
+    current_week_monday_dhaka,
+    last_completed_week_monday_dhaka,
+    validate_origin_week,
+)
 
 
 class _FakeRepo:
@@ -62,7 +79,7 @@ class _FakeCache:
 
 class _FakeModel:
     version = "fake-model-1.0"
-    feature_names = FEATURE_COLUMNS
+    feature_names: Sequence[str] = FEATURE_COLUMNS
 
     def __init__(self, rain_normals: dict[tuple[str, int], float]) -> None:
         self.rain_normals = rain_normals
@@ -270,3 +287,208 @@ def test_ac_7_scenario_endpoint_120mm_increases_h3_and_never_caches() -> None:
         scen_h3 = next(h for h in body["scenario"] if h["horizon"] == 3)
         assert scen_h3["expected_cases"] > base_h3["expected_cases"]
         assert cache.count() == before
+
+
+def test_ac_7_pinned_demo_baseline_dscc_ward_04_2024_05_27_real_artifact() -> None:
+    """AC-7: Pinned demo baseline (DSCC_Ward_04, 2024-05-27, rainfall_mm=120) increases h=3 without caching."""
+    cache = get_prediction_cache()
+    with TestClient(create_app()) as c:
+        before = cache.count()
+        r = c.post(
+            "/api/v1/scenario",
+            json={
+                "ward_id": "DSCC_Ward_04",
+                "origin_week": "2024-05-27",
+                "horizons": [1, 2, 3, 4],
+                "weather": {"rainfall_mm": 120.0},
+            },
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["model_version"].startswith("abhas-lgbm-")
+        assert body["ward_id"] == "DSCC_Ward_04"
+        assert body["origin_week"] == "2024-05-27"
+        base_h3 = next(h for h in body["baseline"] if h["horizon"] == 3)
+        scen_h3 = next(h for h in body["scenario"] if h["horizon"] == 3)
+        assert scen_h3["expected_cases"] > base_h3["expected_cases"]
+        assert cache.count() == before
+
+
+def test_single_flight_10_concurrent_cold_requests_execute_inference_once() -> None:
+    """Single-flight lock coalesces 10 simultaneous cold-origin requests into 1 inference execution."""
+    wards = [
+        WardRecord("DSCC_Ward_04", "Dhaka South", 48000.0, 0.78, 0.48),
+        WardRecord("DSCC_Ward_07", "Dhaka South", 50000.0, 0.80, 0.45),
+    ]
+    start = date(2025, 6, 2)
+    obs = [
+        Observation(w.ward_id, start + timedelta(weeks=i), 29.0, 33.0, 26.0, 25.0 + i, 80.0, 4)
+        for w in wards
+        for i in range(10)
+    ]
+    origin = start + timedelta(weeks=9)  # 2025-08-04
+
+    class _ThreadSafeCache:
+        def __init__(self) -> None:
+            self._lock = Lock()
+            self._store: dict[str, str] = {}
+
+        def get(self, key: str) -> str | None:
+            with self._lock:
+                return self._store.get(key)
+
+        def put(self, key: str, payload_json: str) -> None:
+            with self._lock:
+                self._store[key] = payload_json
+
+        def count(self) -> int:
+            with self._lock:
+                return len(self._store)
+
+    class _SlowCountingModel(_FakeModel):
+        def __init__(self) -> None:
+            super().__init__(rain_normals={(w.ward_id, origin.isocalendar().week): 60.0 for w in wards})
+            self._count_lock = Lock()
+            self.predict_calls = 0
+
+        def predict(self, rows: Sequence[Mapping[str, float]], horizon: int) -> list[PointForecast]:
+            with self._count_lock:
+                self.predict_calls += 1
+            time.sleep(0.02)
+            return super().predict(rows, horizon)
+
+    repo = _FakeRepo(wards, obs)
+    cache = _ThreadSafeCache()
+    model = _SlowCountingModel()
+    barrier = Barrier(10)
+
+    def _worker(_idx: int):
+        # Mirror per-request FastAPI dependency wiring: each thread creates its own ForecastEngine
+        # sharing the process-wide PredictionCache.
+        eng = ForecastEngine(repo=repo, model=model, cache=cache)
+        barrier.wait(timeout=5.0)
+        return eng.forecast(
+            ward_ids=["DSCC_Ward_04", "DSCC_Ward_07"],
+            origin_week=origin,
+            horizons=[1, 2, 3, 4],
+            source="dataset",
+        )
+
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        results = list(pool.map(_worker, range(10)))
+
+    # Only 1 thread should run the 4 horizons (4 calls total, not 10 x 4 = 40)
+    assert model.predict_calls == 4
+    assert cache.count() == 8  # 2 wards x 4 horizons
+    assert sum(1 for r in results if not r.cached) == 1
+    assert sum(1 for r in results if r.cached) == 9
+    for r in results[1:]:
+        assert r.forecasts == results[0].forecasts
+
+
+def test_l1_lru_front_of_sqlite_predictions_cache_and_scenario_never_caches(tmp_path: Path) -> None:
+    """L1 LRU serves warm hits in front of SQLite predictions_cache; scenarios never write to cache."""
+    db_file = tmp_path / "cache_l1_l2.sqlite"
+    url = f"sqlite:///{db_file.as_posix()}"
+    cfg = Config(str(API_DIR / "alembic.ini"))
+    cfg.attributes["url"] = url
+    command.upgrade(cfg, "head")
+    sql_engine = create_db_engine(url)
+    try:
+        cache = SqlPredictionCache(sql_engine)
+        w = WardRecord("DSCC_Ward_04", "Dhaka South", 48000.0, 0.78, 0.48)
+        start = date(2025, 6, 2)
+        obs = [
+            Observation("DSCC_Ward_04", start + timedelta(weeks=i), 29.0, 33.0, 26.0, 20.0 + i, 80.0, 4)
+            for i in range(10)
+        ]
+        origin = start + timedelta(weeks=9)
+        model = _FakeModel(rain_normals={("DSCC_Ward_04", origin.isocalendar().week): 50.0})
+        eng = ForecastEngine(repo=_FakeRepo([w], obs), model=model, cache=cache)
+
+        b1 = eng.forecast(ward_ids=["DSCC_Ward_04"], origin_week=origin, horizons=[1, 2, 3, 4])
+        assert b1.cached is False
+        assert cache.count() == 4
+        assert len(cache._mem) == 4  # L1 LRU populated in front of SQLite
+
+        # Warm hit comes from L1 LRU (even after clearing L1, SQLite L2 restores and refills L1)
+        b2 = eng.forecast(ward_ids=["DSCC_Ward_04"], origin_week=origin, horizons=[1, 2, 3, 4])
+        assert b2.cached is True
+        assert b2.forecasts == b1.forecasts
+
+        cache.clear_memory()
+        assert len(cache._mem) == 0
+        b3 = eng.forecast(ward_ids=["DSCC_Ward_04"], origin_week=origin, horizons=[1, 2, 3, 4])
+        assert b3.cached is True
+        assert len(cache._mem) == 4  # Backfilled L1 from SQLite L2
+
+        # Scenario NEVER writes to predictions_cache
+        eng.scenario(
+            ward_id="DSCC_Ward_04",
+            origin_week=origin,
+            horizons=[1, 2, 3, 4],
+            weather_override={"rainfall_mm": 120.0},
+        )
+        assert cache.count() == 4
+    finally:
+        sql_engine.dispose()
+
+
+def test_live_mode_origin_week_validation_asia_dhaka(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Live mode validates origin_week against current completed Mon-Sun week in Asia/Dhaka (422 otherwise)."""
+    # Sunday 2026-11-22 19:00 UTC == Monday 2026-11-23 01:00 Asia/Dhaka (UTC+6)
+    utc_sunday_evening = datetime(2026, 11, 22, 19, 0, tzinfo=UTC)
+    assert current_week_monday_dhaka(utc_sunday_evening) == date(2026, 11, 23)
+    assert last_completed_week_monday_dhaka(utc_sunday_evening) == date(2026, 11, 16)
+
+    # Both last completed Mon-Sun week and current Dhaka week pass; any other Monday raises 422 naming origin_week
+    validate_origin_week(date(2026, 11, 16), source="live", strict_live_origin=True, now=utc_sunday_evening)
+    validate_origin_week(date(2026, 11, 23), source="live", strict_live_origin=True, now=utc_sunday_evening)
+    for bad in (date(2025, 8, 4), date(2026, 11, 9), date(2030, 1, 7)):
+        with pytest.raises(AppError) as exc:
+            validate_origin_week(bad, source="live", strict_live_origin=True, now=utc_sunday_evening)
+        assert exc.value.status == 422
+        assert "origin_week" in (exc.value.detail or "")
+
+    # End-to-end HTTP check with WEATHER_MODE=live and mocked WeatherSource (zero external network calls)
+    class _MockLiveWeather:
+        name = "mock-live"
+
+        def weekly(self, city: str, weeks: list[date]) -> list[WeekWeather]:
+            del city
+            return [
+                WeekWeather(
+                    week=wk,
+                    avg_temp_c=28.5,
+                    max_temp_c=32.5,
+                    min_temp_c=25.0,
+                    rainfall_mm=65.0,
+                    relative_humidity_pct=80.0,
+                    source="live",
+                )
+                for wk in weeks
+            ]
+
+    monkeypatch.setenv("WEATHER_MODE", "live")
+    get_settings.cache_clear()
+    monkeypatch.setattr("app.features.forecast.deps.get_weather_source", lambda: _MockLiveWeather())
+    try:
+        valid_origin = last_completed_week_monday_dhaka().isoformat()
+        with TestClient(create_app()) as c:
+            r_bad = c.post(
+                "/api/v1/forecast",
+                json={"ward_ids": ["DSCC_Ward_07"], "origin_week": "2030-01-07", "source": "live"},
+            )
+            assert r_bad.status_code == 422
+            assert r_bad.headers["content-type"].startswith("application/problem+json")
+            assert "origin_week" in r_bad.text
+
+            r_ok = c.post(
+                "/api/v1/forecast",
+                json={"ward_ids": ["DSCC_Ward_07"], "origin_week": valid_origin, "source": "live"},
+            )
+            assert r_ok.status_code == 200
+            assert r_ok.json()["weather_source"] == "live"
+    finally:
+        monkeypatch.delenv("WEATHER_MODE", raising=False)
+        get_settings.cache_clear()

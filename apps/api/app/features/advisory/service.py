@@ -54,10 +54,12 @@ def load_advisory_prompt(language: Literal["en", "bn"], forecast_json: str) -> t
     else:
         body = raw
     sys_part, sep, user_part = body.partition("# User Payload")
+    # Escape angle brackets in JSON string literals so untrusted values cannot break out of <forecast_data>.
+    safe_json = forecast_json.replace("<", "\\u003c").replace(">", "\\u003e")
     sys_tmpl = Template(sys_part.replace("# System Instructions", "").strip())
-    system_msg = sys_tmpl.safe_substitute(language=language, forecast_json=forecast_json)
+    system_msg = sys_tmpl.safe_substitute(language=language, forecast_json=safe_json)
     user_tmpl = Template(user_part.strip() if sep else "<forecast_data>\n$forecast_json\n</forecast_data>")
-    user_msg = user_tmpl.safe_substitute(language=language, forecast_json=forecast_json)
+    user_msg = user_tmpl.safe_substitute(language=language, forecast_json=safe_json)
     return system_msg, user_msg
 
 
@@ -94,6 +96,8 @@ class AdvisoryService:
         self._ops = ops_metrics
 
     def _emit_validation_failure(self, req: AdvisoryRequest, model_name: str, reason: str) -> None:
+        if self._ops is not None:
+            self._ops.record_llm_event(error=True)
         if self._trace_sink is None:
             return
         self._trace_sink.emit(

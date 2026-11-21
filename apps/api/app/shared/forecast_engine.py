@@ -8,11 +8,14 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import threading
 import time
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any, cast
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -36,8 +39,59 @@ from app.shared.tiers import peak_tier
 
 logger = logging.getLogger("abhas.forecast")
 
+DHAKA_TZ = ZoneInfo("Asia/Dhaka")
 FIRST_FORECAST_ORIGIN = DATA_START + timedelta(weeks=MAX_RAIN_LAG)  # 2016-02-29
 LIVE_MAX_ORIGIN = date(2030, 12, 30)
+
+
+class _SingleFlightRegistry:
+    """Reference-counted per-key threading.Lock registry coalescing concurrent cold-origin computes."""
+
+    def __init__(self) -> None:
+        self._guard = threading.Lock()
+        self._locks: dict[tuple[Any, ...], list[Any]] = {}
+
+    @contextmanager
+    def acquire(self, key: tuple[Any, ...]) -> Iterator[None]:
+        with self._guard:
+            entry = self._locks.get(key)
+            if entry is None:
+                entry = [threading.Lock(), 0]
+                self._locks[key] = entry
+            lock: threading.Lock = entry[0]
+            entry[1] += 1
+        lock.acquire()
+        try:
+            yield
+        finally:
+            lock.release()
+            with self._guard:
+                entry[1] -= 1
+                if entry[1] <= 0 and self._locks.get(key) is entry:
+                    del self._locks[key]
+
+
+_SINGLE_FLIGHT = _SingleFlightRegistry()
+
+
+def current_week_monday_dhaka(now: datetime | None = None) -> date:
+    """Return the ISO Monday of the current week in Asia/Dhaka."""
+    ref = now if now is not None else datetime.now(UTC)
+    if ref.tzinfo is None:
+        ref = ref.replace(tzinfo=UTC)
+    today = ref.astimezone(DHAKA_TZ).date()
+    return today - timedelta(days=today.weekday())
+
+
+def last_completed_week_monday_dhaka(now: datetime | None = None) -> date:
+    """Return the ISO Monday of the last completed Mon-Sun week in Asia/Dhaka."""
+    return current_week_monday_dhaka(now) - timedelta(weeks=1)
+
+
+def live_allowed_origin_weeks(now: datetime | None = None) -> tuple[date, date]:
+    """Return (last_completed_monday, current_week_monday) valid in Asia/Dhaka live mode."""
+    curr = current_week_monday_dhaka(now)
+    return (curr - timedelta(weeks=1), curr)
 
 
 @dataclass(frozen=True)
@@ -81,7 +135,13 @@ class EngineScenarioResult:
     scenario: tuple[EngineHorizonForecast, ...]
 
 
-def validate_origin_week(origin_week: date, source: WeatherMode = "dataset") -> None:
+def validate_origin_week(
+    origin_week: date,
+    source: WeatherMode = "dataset",
+    *,
+    strict_live_origin: bool = False,
+    now: datetime | None = None,
+) -> None:
     """Enforce Monday + valid date bounds BEFORE touching DB or PredictionCache (AC-4)."""
     if origin_week.weekday() != 0:
         raise AppError(
@@ -102,7 +162,20 @@ def validate_origin_week(origin_week: date, source: WeatherMode = "dataset") -> 
                 ),
             )
     else:
-        if origin_week < FIRST_FORECAST_ORIGIN or origin_week > LIVE_MAX_ORIGIN:
+        if strict_live_origin:
+            last_completed, curr_monday = live_allowed_origin_weeks(now)
+            if origin_week not in (last_completed, curr_monday):
+                raise AppError(
+                    status=422,
+                    slug="validation-error",
+                    title="origin_week out of range",
+                    detail=(
+                        f"origin_week ({origin_week.isoformat()}) in live mode must be the current "
+                        f"completed Asia/Dhaka Mon-Sun week ({last_completed.isoformat()} or "
+                        f"{curr_monday.isoformat()})."
+                    ),
+                )
+        elif origin_week < FIRST_FORECAST_ORIGIN or origin_week > LIVE_MAX_ORIGIN:
             raise AppError(
                 status=422,
                 slug="validation-error",
@@ -193,6 +266,9 @@ class ForecastEngine:
         weather_source: WeatherSource | None = None,
         ops_metrics: OpsMetrics | None = None,
         db_fault_hook: Callable[[], None] | None = None,
+        *,
+        strict_live_origin: bool = False,
+        now_fn: Callable[[], datetime] | None = None,
     ) -> None:
         self._repo = repo
         self._model = model
@@ -200,6 +276,16 @@ class ForecastEngine:
         self._weather_source = weather_source
         self._ops = ops_metrics
         self._db_fault_hook = db_fault_hook
+        self._strict_live_origin = strict_live_origin
+        self._now_fn = now_fn
+
+    def validate_origin(self, origin_week: date, source: WeatherMode = "dataset") -> None:
+        validate_origin_week(
+            origin_week,
+            source=source,
+            strict_live_origin=self._strict_live_origin,
+            now=self._now_fn() if self._now_fn is not None else None,
+        )
 
     def _rain_normals(self, obs_df: pd.DataFrame) -> Mapping[tuple[str, int], float]:
         normals = getattr(self._model, "rain_normals", None)
@@ -258,6 +344,7 @@ class ForecastEngine:
             effective_source = _combine_weather_source(sources_seen)
             if self._ops is not None:
                 self._ops.record_weather_event(
+                    call=(effective_source == "live"),
                     cache_hit=(effective_source == "cache"),
                     error=(effective_source == "climatology"),
                 )
@@ -392,7 +479,7 @@ class ForecastEngine:
         source: WeatherMode = "dataset",
     ) -> EngineForecastBatch:
         """Compute or retrieve cached multi-ward, multi-horizon forecasts."""
-        validate_origin_week(origin_week, source=source)
+        self.validate_origin(origin_week, source=source)
         sorted_horizons = sorted(int(h) for h in horizons)
         wards = self._resolve_wards(ward_ids)
 
@@ -405,7 +492,7 @@ class ForecastEngine:
                 wards, origin_week, source
             )
 
-        # L1/L2 cache lookup for each (ward_id, horizon)
+        # Fast path (lock-free): L1 LRU + SQLite predictions_cache lookup for each (ward_id, horizon)
         cached_results: dict[tuple[str, int], EngineHorizonForecast] = {}
         missed_wards_by_h: dict[int, list[WardRecord]] = {}
         ward_by_id = {w.ward_id: w for w in wards}
@@ -431,29 +518,54 @@ class ForecastEngine:
 
         per_ward_ms: float | None = None
         if missed_wards_by_h:
-            missed_ward_ids = sorted({w.ward_id for ws in missed_wards_by_h.values() for w in ws})
-            missed_wards = [ward_by_id[wid] for wid in missed_ward_ids]
-            if obs_df is None:
-                obs_df, weather_source_used, weather_hash = self._load_window_dataframe(
-                    missed_wards, origin_week, source
-                )
-            computed, per_ward_ms = self._predict_horizons_for_df(
-                obs_df,
-                missed_wards,
-                origin_week,
-                sorted(missed_wards_by_h.keys()),
-            )
-            for (wid, h), hf in computed.items():
-                cached_results[(wid, h)] = hf
-                key = _forecast_cache_key(wid, origin_week, h, self._model.version, weather_hash)
-                try:
-                    self._cache.put(key, _serialize_horizon(hf))
-                except Exception as exc:  # noqa: BLE001
-                    logger.warning(
-                        "prediction_cache_write_failed: %s",
-                        type(exc).__name__,
-                        extra={"event": "prediction_cache_write_failed"},
+            flight_key = (id(self._cache), origin_week, source, weather_hash)
+            with _SINGLE_FLIGHT.acquire(flight_key):
+                # Re-check cache after acquiring single-flight lock so concurrent followers
+                # reuse the leader's freshly cached result instead of duplicating inference.
+                remaining_by_h: dict[int, list[WardRecord]] = {}
+                for h, ws in missed_wards_by_h.items():
+                    for w in ws:
+                        key = _forecast_cache_key(
+                            w.ward_id, origin_week, h, self._model.version, weather_hash
+                        )
+                        raw = None
+                        try:
+                            raw = self._cache.get(key)
+                        except Exception:  # noqa: BLE001
+                            raw = None
+                        if raw is not None:
+                            try:
+                                cached_results[(w.ward_id, h)] = _deserialize_horizon(raw)
+                                cache_hits += 1
+                                continue
+                            except (ValueError, KeyError, TypeError):
+                                pass
+                        remaining_by_h.setdefault(h, []).append(w)
+
+                if remaining_by_h:
+                    missed_ward_ids = sorted({w.ward_id for ws in remaining_by_h.values() for w in ws})
+                    missed_wards = [ward_by_id[wid] for wid in missed_ward_ids]
+                    if obs_df is None:
+                        obs_df, weather_source_used, weather_hash = self._load_window_dataframe(
+                            missed_wards, origin_week, source
+                        )
+                    computed, per_ward_ms = self._predict_horizons_for_df(
+                        obs_df,
+                        missed_wards,
+                        origin_week,
+                        sorted(remaining_by_h.keys()),
                     )
+                    for (wid, h), hf in computed.items():
+                        cached_results[(wid, h)] = hf
+                        key = _forecast_cache_key(wid, origin_week, h, self._model.version, weather_hash)
+                        try:
+                            self._cache.put(key, _serialize_horizon(hf))
+                        except Exception as exc:  # noqa: BLE001
+                            logger.warning(
+                                "prediction_cache_write_failed: %s",
+                                type(exc).__name__,
+                                extra={"event": "prediction_cache_write_failed"},
+                            )
 
         all_cached = total_pairs > 0 and cache_hits == total_pairs
         if self._ops is not None:

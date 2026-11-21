@@ -30,7 +30,10 @@ class HeatmapService:
         self._db_fault_hook = db_fault_hook
 
     def heatmap(self, *, city: City, origin_week: date, source: WeatherMode = "dataset") -> HeatmapResponse:
-        validate_origin_week(origin_week, source=source)
+        if self._engine is not None:
+            self._engine.validate_origin(origin_week, source=source)
+        else:
+            validate_origin_week(origin_week, source=source)
         if self._db_fault_hook is not None:
             self._db_fault_hook()
         try:

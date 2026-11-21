@@ -159,9 +159,21 @@ class AnthropicLLM:
         max_tokens: int,
         ctx: tuple[str | None, date | None, int | None, str],
     ) -> None:
-        if self._call_log is None:
+        call_log_spend = 0.0
+        has_source = False
+        if self._call_log is not None:
+            has_source = True
+            _calls_today, call_log_spend = self._call_log.today("llm")
+        trace_spend = 0.0
+        spend_reader = getattr(self._trace_sink, "today_spend_usd", None)
+        if callable(spend_reader):
+            has_source = True
+            raw_spend = spend_reader()
+            if isinstance(raw_spend, (int, float)):
+                trace_spend = float(raw_spend)
+        if not has_source:
             return
-        _calls_today, spend_today = self._call_log.today("llm")
+        spend_today = max(call_log_spend, trace_spend)
         est_cost = estimate_cost_usd(self.model, est_in_tokens, max_tokens)
         projected = spend_today + (est_cost if est_cost is not None else 0.003)
         if projected > self._daily_budget_usd:

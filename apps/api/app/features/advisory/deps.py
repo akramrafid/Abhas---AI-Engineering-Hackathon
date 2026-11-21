@@ -27,6 +27,7 @@ def get_advisory_service() -> AdvisoryService:
         weather_source=get_weather_source(),
         ops_metrics=get_ops_registry(),
         db_fault_hook=check_db_fault,
+        strict_live_origin=(settings.weather_mode == "live"),
     )
     return AdvisoryService(
         engine=engine,
