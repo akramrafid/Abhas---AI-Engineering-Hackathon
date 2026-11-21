@@ -27,7 +27,9 @@ def main() -> int:
             return 1
 
     sha = str(meta.get("sha256", ""))[:12]
-    print(f"OK: verified {model.version} ({model_path.name}, sha256={sha}..., {len(model.feature_names)} features)")
+    print(
+        f"OK: verified {model.version} ({model_path.name}, sha256={sha}..., {len(model.feature_names)} features)"
+    )
     return 0
 
 

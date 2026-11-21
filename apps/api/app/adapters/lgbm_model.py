@@ -72,9 +72,7 @@ def verify_artifact_integrity(
 
     actual_sha = compute_file_sha256(model_path).lower()
     if not hmac.compare_digest(actual_sha, expected_sha):
-        raise ModelArtifactError(
-            "Model artifact SHA-256 mismatch; file may be corrupted. Run npm run setup."
-        )
+        raise ModelArtifactError("Model artifact SHA-256 mismatch; file may be corrupted. Run npm run setup.")
     return dict(meta)
 
 
@@ -100,8 +98,18 @@ class LGBMForecastModel:
     def __init__(self, bundle: Mapping[str, Any], metadata: Mapping[str, Any] | None = None) -> None:
         self.version: str = str(bundle.get("model_version") or "abhas-lgbm-1.0.0")
         raw_features = bundle.get("feature_names") or FEATURE_COLUMNS
-        self.feature_names: tuple[str, ...] = tuple(str(c) for c in raw_features)
+        self.feature_names: Sequence[str] = tuple(str(c) for c in raw_features)
         self._feature_index: dict[str, int] = {name: idx for idx, name in enumerate(self.feature_names)}
+        self.metadata: dict[str, Any] = dict(metadata or {})
+        self.train_end_year: int = int(
+            bundle.get("train_end_year")
+            or self.metadata.get("train_end_year")
+            or self.metadata.get("train_max_year")
+            or 2023
+        )
+        self.max_normal_year: int = int(
+            bundle.get("max_normal_year") or self.metadata.get("max_normal_year") or self.train_end_year
+        )
 
         raw_boosters = bundle.get("boosters") or {}
         self._boosters: dict[int, Any] = {int(h): b for h, b in raw_boosters.items()}
@@ -126,9 +134,19 @@ class LGBMForecastModel:
             float(cutoffs_raw[2]),
         )
 
-        self.rain_normals: dict[tuple[str, int], float] = {
-            (str(k[0]), int(k[1])): float(v) for k, v in (bundle.get("rain_normals") or {}).items()
-        }
+        raw_normals = bundle.get("rain_normals") or {}
+        if raw_normals:
+            self.rain_normals: dict[tuple[str, int], float] = {
+                (str(k[0]), int(k[1])): float(v) for k, v in raw_normals.items()
+            }
+        else:
+            meta_normals = self.metadata.get("rain_normals") or {}
+            parsed_normals: dict[tuple[str, int], float] = {}
+            for k, v in meta_normals.items():
+                if isinstance(k, str) and "|" in k:
+                    wid, iw = k.rsplit("|", 1)
+                    parsed_normals[(wid, int(iw))] = float(v)
+            self.rain_normals = parsed_normals
         self.endemic_thresholds: dict[tuple[str, int], float] = {
             (str(k[0]), int(k[1])): float(v) for k, v in (bundle.get("endemic_thresholds") or {}).items()
         }
@@ -140,7 +158,6 @@ class LGBMForecastModel:
             (str(k[0]), int(k[1])): {str(ck): float(cv) for ck, cv in v.items()}
             for k, v in (bundle.get("ward_climatology") or {}).items()
         }
-        self.metadata: dict[str, Any] = dict(metadata or {})
 
     def _rows_to_matrix(self, rows: Sequence[Mapping[str, float]]) -> np.ndarray:
         n_rows = len(rows)

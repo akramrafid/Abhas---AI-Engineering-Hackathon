@@ -188,7 +188,11 @@ def calibrate_negbin_conformal(
             cov_crit = float(np.mean(covered[crit_mask])) if np.any(crit_mask) else cov_all
             cov_high = float(np.mean(covered[high_mask])) if np.any(high_mask) else cov_all
             # Prefer overall coverage close to target AND strong Critical/High coverage
-            score = abs(cov_all - target_coverage) * 2.0 + max(0.0, 0.80 - cov_crit) * 1.5 + max(0.0, 0.80 - cov_high) * 0.5
+            score = (
+                abs(cov_all - target_coverage) * 2.0
+                + max(0.0, 0.80 - cov_crit) * 1.5
+                + max(0.0, 0.80 - cov_high) * 0.5
+            )
             if score < best_score:
                 best_score = score
                 best_cal = cal

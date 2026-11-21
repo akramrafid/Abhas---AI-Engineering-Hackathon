@@ -71,7 +71,9 @@ class OpsMetrics:
             if per_ward_inference_ms is not None and per_ward_inference_ms >= 0.0:
                 self._ward_latencies_ms.append(float(per_ward_inference_ms))
 
-    def record_weather_event(self, *, call: bool = False, cache_hit: bool = False, error: bool = False) -> None:
+    def record_weather_event(
+        self, *, call: bool = False, cache_hit: bool = False, error: bool = False
+    ) -> None:
         with self._lock:
             if call:
                 self._weather_calls_total += 1

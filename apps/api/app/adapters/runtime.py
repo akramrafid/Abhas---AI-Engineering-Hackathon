@@ -9,7 +9,7 @@ from threading import RLock
 from typing import Any
 
 from app.adapters.db.factory import get_call_log, get_engine
-from app.adapters.lgbm_model import LGBMForecastModel, load_model
+from app.adapters.lgbm_model import LGBMForecastModel, load_model, verify_artifact_integrity
 from app.adapters.llm import AnthropicLLM
 from app.core.config import API_DIR, active_faults, get_settings
 from app.core.errors import AppError
@@ -55,6 +55,22 @@ def get_forecast_model() -> LGBMForecastModel:
         get_ops_metrics().record_model_load(model.version)
         logger.info("model_loaded: %s", model.version, extra={"event": "model_loaded"})
         return model
+
+
+def check_model_readiness() -> dict[str, Any]:
+    """Verify artifact SHA-256 and ensure the model is loaded once for /readyz (CR-16).
+
+    Raises ModelArtifactError (HTTP 503) if the artifact is missing, unreadable, or corrupt.
+    """
+    settings = get_settings()
+    meta = verify_artifact_integrity(settings.model_path)
+    model = get_forecast_model()
+    return {
+        "ok": True,
+        "model_version": model.version,
+        "sha256": str(meta.get("sha256", "")),
+        "model_loads": get_ops_metrics().snapshot().model_loads,
+    }
 
 
 def get_memory_trace_sink() -> MemorySink:

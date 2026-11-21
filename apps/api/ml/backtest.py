@@ -105,7 +105,9 @@ def _fit_predict_negbin_glm(tr: pd.DataFrame, te: pd.DataFrame) -> np.ndarray:
     return np.clip(pred, 0.0, 100.0)
 
 
-def _metric_row(model: str, horizon: int, period: str, y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, Any]:
+def _metric_row(
+    model: str, horizon: int, period: str, y_true: np.ndarray, y_pred: np.ndarray
+) -> dict[str, Any]:
     return {
         "model": model,
         "horizon": horizon,
@@ -125,8 +127,7 @@ def run_backtest(output_path: Path = VALIDATION_OUTPUT_PATH) -> dict[str, Any]:
     # Load committed artifact for the final holdout_2024_2025 evaluation so validation.json matches serving 1:1.
     artifact = load_model(settings.model_path)
     case_map = {
-        (str(w), wk): float(c)
-        for w, wk, c in zip(df["ward_id"], df["week"], df["dengue_cases"], strict=True)
+        (str(w), wk): float(c) for w, wk, c in zip(df["ward_id"], df["week"], df["dengue_cases"], strict=True)
     }
 
     # Build a climatology-compatible frame once
@@ -232,10 +233,7 @@ def run_backtest(output_path: Path = VALIDATION_OUTPUT_PATH) -> dict[str, Any]:
 
             # 6) persistence (observed cases at origin week)
             pers_pred = np.array(
-                [
-                    case_map.get((str(w), ow), 0.0)
-                    for w, ow in zip(te["ward_id"], te["week"], strict=True)
-                ],
+                [case_map.get((str(w), ow), 0.0) for w, ow in zip(te["ward_id"], te["week"], strict=True)],
                 dtype=np.float64,
             )
 

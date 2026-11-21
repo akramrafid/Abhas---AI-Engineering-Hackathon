@@ -143,7 +143,10 @@ def render_template_advisory(
         if tier == "Critical":
             actions = [
                 {"action": "জমে থাকা পানি ও ড্রেনে জরুরি লার্ভিসাইড ও ফগিং জোরদার করুন", "when": "এই সপ্তাহে"},
-                {"action": "ওয়ার্ড স্বাস্থ্যকেন্দ্রে স্যালাইন, র‍্যাপিড টেস্ট কিট ও শয্যা প্রস্তুত রাখুন", "when": "লক্ষ্য সপ্তাহের আগে"},
+                {
+                    "action": "ওয়ার্ড স্বাস্থ্যকেন্দ্রে স্যালাইন, র‍্যাপিড টেস্ট কিট ও শয্যা প্রস্তুত রাখুন",
+                    "when": "লক্ষ্য সপ্তাহের আগে",
+                },
                 {"action": "জলাবদ্ধ গলি ও নির্মাণস্থলে ডোর-টু-ডোর সোর্স রিডাকশন অভিযান চালান", "when": "অবিলম্বে"},
             ]
         elif tier == "High":
@@ -176,19 +179,40 @@ def render_template_advisory(
 
         if tier == "Critical":
             actions = [
-                {"action": "Launch emergency larvicide and targeted fogging across stagnant drains", "when": "immediately"},
-                {"action": "Pre-position saline, rapid diagnostic kits, and triage beds at ward clinics", "when": "this week"},
-                {"action": "Run door-to-door breeding-site clearance in water-logged lanes", "when": "before target week"},
+                {
+                    "action": "Launch emergency larvicide and targeted fogging across stagnant drains",
+                    "when": "immediately",
+                },
+                {
+                    "action": "Pre-position saline, rapid diagnostic kits, and triage beds at ward clinics",
+                    "when": "this week",
+                },
+                {
+                    "action": "Run door-to-door breeding-site clearance in water-logged lanes",
+                    "when": "before target week",
+                },
             ]
         elif tier == "High":
             actions = [
-                {"action": "Deploy larvicide teams to stagnant drains and water-logged containers", "when": "this week"},
-                {"action": "Audit ward clinic saline and rapid dengue test kit inventory", "when": "before target week"},
-                {"action": "Issue targeted community clean-up advisories in high-density blocks", "when": "this week"},
+                {
+                    "action": "Deploy larvicide teams to stagnant drains and water-logged containers",
+                    "when": "this week",
+                },
+                {
+                    "action": "Audit ward clinic saline and rapid dengue test kit inventory",
+                    "when": "before target week",
+                },
+                {
+                    "action": "Issue targeted community clean-up advisories in high-density blocks",
+                    "when": "this week",
+                },
             ]
         elif tier == "Medium":
             actions = [
-                {"action": "Inspect and clear blocked stormwater drains and open containers", "when": "this week"},
+                {
+                    "action": "Inspect and clear blocked stormwater drains and open containers",
+                    "when": "this week",
+                },
                 {"action": "Monitor weekly rainfall and hospital admissions closely", "when": "next week"},
             ]
         else:

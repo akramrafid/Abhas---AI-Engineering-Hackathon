@@ -12,7 +12,7 @@ import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
-from typing import cast
+from typing import Any, cast
 
 import pandas as pd
 
@@ -29,6 +29,7 @@ from app.shared.features import (
     VALID_HORIZONS,
     build_serving_features,
     canonical_iso_week,
+    fit_rain_normals,
     observations_to_dataframe,
 )
 from app.shared.tiers import peak_tier
@@ -200,9 +201,12 @@ class ForecastEngine:
         self._ops = ops_metrics
         self._db_fault_hook = db_fault_hook
 
-    def _rain_normals(self) -> Mapping[tuple[str, int], float] | None:
+    def _rain_normals(self, obs_df: pd.DataFrame) -> Mapping[tuple[str, int], float]:
         normals = getattr(self._model, "rain_normals", None)
-        return normals if isinstance(normals, Mapping) else None
+        if isinstance(normals, Mapping) and len(normals) > 0:
+            return normals
+        # Fallback only for minimal test doubles that lack stored artifact normals (CR-5/CR-13).
+        return fit_rain_normals(obs_df)
 
     def _resolve_wards(self, ward_ids: Sequence[str]) -> list[WardRecord]:
         if self._db_fault_hook is not None:
@@ -309,7 +313,7 @@ class ForecastEngine:
     ) -> tuple[dict[tuple[str, int], EngineHorizonForecast], float]:
         """Vectorized batch inference across wards for each requested horizon."""
         ward_ids = [w.ward_id for w in wards]
-        normals = self._rain_normals()
+        normals = self._rain_normals(obs_df)
         out: dict[tuple[str, int], EngineHorizonForecast] = {}
 
         t0 = time.perf_counter()
@@ -332,9 +336,9 @@ class ForecastEngine:
             # Align output order cleanly to ward_ids present in feat_df
             row_by_ward: dict[str, dict[str, float]] = {}
             feat_cols = list(FEATURE_COLUMNS)
-            records = feat_df[feat_cols].to_dict(orient="records")
-            for wid, rec in zip(feat_df["ward_id"].tolist(), records, strict=True):
-                row_by_ward[str(wid)] = {str(k): float(v) for k, v in rec.items()}
+            feat_values = feat_df[feat_cols].to_numpy(dtype=float)
+            for wid, vals in zip(feat_df["ward_id"].tolist(), feat_values, strict=True):
+                row_by_ward[str(wid)] = {col: float(v) for col, v in zip(feat_cols, vals, strict=True)}
 
             ordered_wids = [wid for wid in ward_ids if wid in row_by_ward]
             if len(ordered_wids) != len(ward_ids):
@@ -352,7 +356,7 @@ class ForecastEngine:
 
             # Call model.predict (pass explicit context when adapter supports it)
             if hasattr(self._model, "endemic_thresholds"):
-                pfs = self._model.predict(  # type: ignore[call-arg]
+                pfs = cast(Any, self._model).predict(
                     feature_rows,
                     h,
                     ward_ids=ordered_wids,
@@ -397,7 +401,9 @@ class ForecastEngine:
             weather_source_used: WeatherSourceUsed = "dataset"
             weather_hash = "dataset"
         else:
-            obs_df, weather_source_used, weather_hash = self._load_window_dataframe(wards, origin_week, source)
+            obs_df, weather_source_used, weather_hash = self._load_window_dataframe(
+                wards, origin_week, source
+            )
 
         # L1/L2 cache lookup for each (ward_id, horizon)
         cached_results: dict[tuple[str, int], EngineHorizonForecast] = {}

@@ -21,6 +21,7 @@ from typing import Any
 
 import anthropic
 import httpx
+from anthropic.types import MessageParam
 
 from app.core.config import Settings, active_faults, get_settings
 from app.core.logging import request_id_var
@@ -115,14 +116,16 @@ class AnthropicLLM:
         self._prompt_name = prompt_name
         self._prompt_version = prompt_version
 
-        key_val = api_key if api_key is not None else (
-            cfg.anthropic_api_key.get_secret_value() if cfg.anthropic_api_key else ""
+        key_val = (
+            api_key
+            if api_key is not None
+            else (cfg.anthropic_api_key.get_secret_value() if cfg.anthropic_api_key else "")
         )
         if client is not None:
             self._client = client
             self._owns_client = False
         else:
-            http_timeout = httpx.Timeout(connect=3.0, read=self._timeout_s, write=5.0, pool=5.0)
+            http_timeout = anthropic.Timeout(connect=3.0, read=self._timeout_s, write=5.0, pool=5.0)
             self._client = anthropic.Anthropic(
                 api_key=key_val or "disabled",
                 timeout=http_timeout,
@@ -193,7 +196,7 @@ class AnthropicLLM:
     def _invoke_once(
         self,
         system: str,
-        messages: list[dict[str, str]],
+        messages: list[MessageParam],
         max_tokens: int,
         attempt: int,
         ctx: tuple[str | None, date | None, int | None, str],
@@ -235,7 +238,6 @@ class AnthropicLLM:
             resp = self._client.messages.create(
                 model=self.model,
                 max_tokens=max_tokens,
-                temperature=0.0,
                 system=system,
                 messages=messages,
                 timeout=self._timeout_s,
@@ -296,7 +298,7 @@ class AnthropicLLM:
     def _call_with_retries(
         self,
         system: str,
-        messages: list[dict[str, str]],
+        messages: list[MessageParam],
         max_tokens: int,
         ctx: tuple[str | None, date | None, int | None, str],
         *,
@@ -344,7 +346,7 @@ class AnthropicLLM:
 
         self._check_budget(est_in_tokens, capped_out, ctx)
 
-        messages: list[dict[str, str]] = [{"role": "user", "content": capped_user}]
+        messages: list[MessageParam] = [{"role": "user", "content": capped_user}]
         raw_text, in_tok, out_tok, cost, latency_ms = self._call_with_retries(
             system, messages, capped_out, ctx, attempt_offset=0
         )
@@ -366,7 +368,7 @@ class AnthropicLLM:
 
         # At most 1 JSON repair retry (re-checks budget first)
         self._check_budget(est_in_tokens + out_tok, capped_out, ctx)
-        repair_messages = [
+        repair_messages: list[MessageParam] = [
             {"role": "user", "content": capped_user},
             {"role": "assistant", "content": raw_text[:600]},
             {

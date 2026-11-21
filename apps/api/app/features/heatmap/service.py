@@ -44,7 +44,9 @@ class HeatmapService:
             ) from exc
 
         if not wards:
-            raise AppError(status=404, slug="unknown-city", title="Unknown city", detail=f"No wards in {city}")
+            raise AppError(
+                status=404, slug="unknown-city", title="Unknown city", detail=f"No wards in {city}"
+            )
 
         ward_ids = [w.ward_id for w in wards]
         batch = self._engine.forecast(

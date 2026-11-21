@@ -50,7 +50,10 @@ class OpsService:
 
         if self._llm_enabled:
             est_monthly = round(
-                min(self._llm_daily_budget_usd * 30.0, max(OFFICE_LLM_BASELINE_MONTHLY_USD, llm_spend_today * 30.0)),
+                min(
+                    self._llm_daily_budget_usd * 30.0,
+                    max(OFFICE_LLM_BASELINE_MONTHLY_USD, llm_spend_today * 30.0),
+                ),
                 2,
             )
         else:

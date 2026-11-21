@@ -130,8 +130,7 @@ def build_supervised_frame(
     """Build leak-free features and join target `dengue_cases` at `target_week = week + h`."""
     feats = build_features(df, horizon=horizon, rain_normals=rain_normals, drop_incomplete_lags=True)
     case_map = {
-        (str(w), wk): float(c)
-        for w, wk, c in zip(df["ward_id"], df["week"], df["dengue_cases"], strict=True)
+        (str(w), wk): float(c) for w, wk, c in zip(df["ward_id"], df["week"], df["dengue_cases"], strict=True)
     }
     feats["y"] = [
         case_map.get((str(w), tw), np.nan)
@@ -184,7 +183,9 @@ def _extract_ward_fingerprints(df: pd.DataFrame) -> dict[tuple[float, float, flo
     return fps
 
 
-def _fit_poisson_lgbm(X: np.ndarray, y: np.ndarray, params: dict[str, Any], horizon: int) -> lgb.LGBMRegressor:
+def _fit_poisson_lgbm(
+    X: np.ndarray, y: np.ndarray, params: dict[str, Any], horizon: int
+) -> lgb.LGBMRegressor:
     model = lgb.LGBMRegressor(**params, monotone_constraints=monotone_constraints_for_horizon(horizon))
     model.fit(X, y)
     return model
@@ -310,7 +311,9 @@ def train_and_save(
     actual_tiers_23 = [tier_from_cases(float(y)) for y in y_all_23]
     crit_total_23 = sum(1 for a in actual_tiers_23 if a == "Critical")
     crit_hits_23 = sum(
-        1 for a, p in zip(actual_tiers_23, tiers_23, strict=True) if a == "Critical" and p in ("High", "Critical")
+        1
+        for a, p in zip(actual_tiers_23, tiers_23, strict=True)
+        if a == "Critical" and p in ("High", "Critical")
     )
 
     # --- Phase B: Final production fit strictly on purged years <= 2023 ---
@@ -356,6 +359,8 @@ def train_and_save(
     bundle: dict[str, Any] = {
         "model_version": model_version,
         "feature_names": list(FEATURE_COLUMNS),
+        "train_end_year": DEFAULT_TRAIN_MAX_YEAR,
+        "max_normal_year": DEFAULT_TRAIN_MAX_YEAR,
         "boosters": boosters,
         "calibrations": {h: dataclasses.asdict(calibrations[h]) for h in VALID_HORIZONS},
         "cqr_low_boosters": cqr_low_boosters,
@@ -371,12 +376,17 @@ def train_and_save(
     joblib.dump(bundle, output_path, compress=3)
     sha256 = compute_file_sha256(output_path)
 
+    serialized_normals = {
+        f"{wid}|{iw}": round(float(val), 4) for (wid, iw), val in sorted(normals_23.items())
+    }
     metadata: dict[str, Any] = {
         "model_version": model_version,
         "mode": mode,
         "artifact_file": output_path.name,
         "sha256": sha256,
         "trained_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "train_end_year": DEFAULT_TRAIN_MAX_YEAR,
+        "max_normal_year": DEFAULT_TRAIN_MAX_YEAR,
         "train_max_year": DEFAULT_TRAIN_MAX_YEAR,
         "feature_names": list(FEATURE_COLUMNS),
         "horizons": list(VALID_HORIZONS),
@@ -384,6 +394,7 @@ def train_and_save(
         "monotone_constraints": {str(h): monotone_constraints_for_horizon(h) for h in VALID_HORIZONS},
         "calibrations": {str(h): dataclasses.asdict(calibrations[h]) for h in VALID_HORIZONS},
         "no_weather_mae": no_weather_mae,
+        "rain_normals": serialized_normals,
         "params": params,
         "calibration_2023": {
             "by_horizon": cal_summary,
