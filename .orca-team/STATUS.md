@@ -20,7 +20,7 @@ Next action (LEAD):
 | task_cc6f8c7a168f | DATA | SQLite/Alembic + seed + features.py + Open-Meteo + wards/lags/weather | antigravity / Gemini 4 Neon (XHigh) | akramrafid/data-pipeline | ctx_b3be0c5e846b | 1A | merged (`3312553`, released) |
 | task_72869ad95cf5 | QA | Locked 48-case hold-out eval + retrieval + k6 smoke + test plan | antigravity / Gemini 4 Neon (XHigh) | akramrafid/qa-evals | ctx_7beb2831257a | 1A | merged (`0a73566`, released) |
 | task_d4fb8f89dc74 | UI | UX flow + Abhas dashboard (ward-risk, lags, scenario, heatmap, validation) + Playwright e2e | antigravity / Gemini 4 Neon (XHigh) | akramrafid/ui-dashboard | ctx_679d91731a13 | 1B | running |
-| pending | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | dispatching | 1B | dispatching |
+| task_c92a61243ecf | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | ctx_1dee172a0b2b | 1B | running |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
