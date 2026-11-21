@@ -37,8 +37,8 @@ def _strict_iso_date(value: object) -> object:
 
 Horizon = Annotated[
     int,
-    BeforeValidator(_strict_int),
     Field(ge=1, le=4, description="Weeks ahead of the origin week (1–4)"),
+    BeforeValidator(_strict_int),
 ]
 WeatherMode = Literal["dataset", "live"]
 WeatherSourceUsed = Literal["dataset", "live", "cache", "climatology"]
