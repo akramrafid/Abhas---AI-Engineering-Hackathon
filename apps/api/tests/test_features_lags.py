@@ -375,8 +375,12 @@ def test_cr_13_build_features_warns_when_normals_omitted(
     """CR-13: build_features logs a WARNING when rain_normals is omitted, and stays silent when passed."""
     raw = _synthetic_two_ward_df(n_weeks=12, start=date(2023, 1, 2))
     normals = fit_rain_normals(raw, max_year=2023)
-    # configure_logging() sets propagate=False on the parent 'abhas' logger when FastAPI apps run earlier.
-    monkeypatch.setattr(logging.getLogger("abhas"), "propagate", True)
+    # Earlier tests invoke configure_logging() (propagate=False) and Alembic fileConfig() (disabled=True).
+    feat_logger = logging.getLogger("abhas.features")
+    parent_logger = logging.getLogger("abhas")
+    monkeypatch.setattr(feat_logger, "disabled", False)
+    monkeypatch.setattr(parent_logger, "disabled", False)
+    monkeypatch.setattr(parent_logger, "propagate", True)
 
     with caplog.at_level(logging.WARNING, logger="abhas.features"):
         build_features(raw, horizon=3)
