@@ -5,9 +5,11 @@ from __future__ import annotations
 from collections.abc import Sequence
 from datetime import date, timedelta
 
+import pytest
 from fastapi.testclient import TestClient
 
-from app.features.lags.service import LagsService
+from app.core.errors import AppError
+from app.features.lags.service import LagsService, warm_lags_cache
 from app.main import create_app
 from app.ports.repositories import Observation, WardRecord
 
@@ -16,6 +18,7 @@ class _FakeRepo:
     def __init__(self, wards: Sequence[WardRecord], obs: Sequence[Observation]) -> None:
         self._wards = list(wards)
         self._obs = list(obs)
+        self.all_observations_calls = 0
 
     def wards(self, city: str | None = None) -> Sequence[WardRecord]:
         return [w for w in self._wards if city is None or w.city == city]
@@ -29,9 +32,12 @@ class _FakeRepo:
         return sorted([o for o in self._obs if o.ward_id == ward_id], key=lambda o: o.week)
 
     def all_observations(self, end: date | None = None) -> Sequence[Observation]:
+        self.all_observations_calls += 1
         return sorted(self._obs, key=lambda o: (o.ward_id, o.week))
 
     def date_range(self) -> tuple[date, date]:
+        if not self._obs:
+            return (date(2016, 1, 4), date(2025, 12, 29))
         return (min(o.week for o in self._obs), max(o.week for o in self._obs))
 
 
@@ -99,3 +105,79 @@ def test_ac_1_ward_lags_route() -> None:
         assert r_404.status_code == 404
         assert r_404.headers["content-type"].startswith("application/problem+json")
         assert r_404.json()["type"].endswith("/unknown-ward")
+
+
+def test_cr_19_negative_lag_lookup_cached_and_warm_lags_cache() -> None:
+    """CR-19: Wards with 0 observations hit negative cache (no 31k recompute), and warm_lags_cache pre-warms."""
+    w_ok = WardRecord("DSCC_Ward_07", "Dhaka South", 52000.0, 0.81, 0.42)
+    w_empty = WardRecord("DSCC_Ward_98", "Dhaka South", 40000.0, 0.50, 0.60)
+    start = date(2023, 1, 2)
+    obs = [
+        Observation(
+            ward_id=w_ok.ward_id,
+            week=start + timedelta(weeks=i),
+            avg_temp_c=28.0,
+            max_temp_c=32.0,
+            min_temp_c=24.0,
+            rainfall_mm=20.0 + float((i * 19) % 80),
+            relative_humidity_pct=78.0,
+            dengue_cases=i % 5,
+        )
+        for i in range(20)
+    ]
+
+    # 1. Repeated lookups for a ward existing in `wards` with 0 observations must compute only ONCE
+    repo = _FakeRepo([w_ok, w_empty], obs)
+    svc = LagsService(repo)
+    for _ in range(3):
+        with pytest.raises(AppError) as exc:
+            svc.ward_lags("DSCC_Ward_98")
+        assert exc.value.status == 404
+        assert exc.value.slug == "unknown-ward"
+    assert repo.all_observations_calls == 1
+
+    # Valid ward lookup reuses the same warmed cache
+    res = svc.ward_lags("DSCC_Ward_07")
+    assert res.ward_id == "DSCC_Ward_07"
+    assert repo.all_observations_calls == 1
+
+    # 2. When date_range advances (new observations arrive), negative cache invalidates cleanly
+    new_week = start + timedelta(weeks=20)
+    repo._obs.append(Observation(w_ok.ward_id, new_week, 28.0, 32.0, 24.0, 40.0, 78.0, 3))
+    for i in range(21):
+        repo._obs.append(
+            Observation(
+                w_empty.ward_id,
+                start + timedelta(weeks=i),
+                28.0,
+                32.0,
+                24.0,
+                15.0 + float(i),
+                76.0,
+                i % 4,
+            )
+        )
+    res_now_present = svc.ward_lags("DSCC_Ward_98")
+    assert res_now_present.ward_id == "DSCC_Ward_98"
+    assert repo.all_observations_calls == 2
+
+    # 3. warm_lags_cache(svc) pre-warms both positive and negative lookups
+    repo2 = _FakeRepo([w_ok, w_empty], list(obs))
+    svc2 = LagsService(repo2)
+    assert warm_lags_cache(svc2) == 1
+    assert repo2.all_observations_calls == 1
+    assert svc2.ward_lags("DSCC_Ward_07").ward_id == "DSCC_Ward_07"
+    with pytest.raises(AppError) as exc2:
+        svc2.ward_lags("DSCC_Ward_98")
+    assert exc2.value.status == 404
+    assert repo2.all_observations_calls == 1
+
+    # 4. Warming an empty DB returns 0 without poisoning the cache for subsequent data
+    empty_repo = _FakeRepo([w_ok], [])
+    empty_svc = LagsService(empty_repo)
+    assert warm_lags_cache(empty_svc) == 0
+    empty_repo._obs.extend(obs)
+    assert empty_svc.ward_lags("DSCC_Ward_07").ward_id == "DSCC_Ward_07"
+
+    # 5. Zero-arg warm_lags_cache() warms the singleton against the seeded 60-ward DB
+    assert warm_lags_cache() == 60

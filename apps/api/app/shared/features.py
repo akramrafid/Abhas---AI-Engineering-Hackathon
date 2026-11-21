@@ -12,6 +12,7 @@ Guarantees:
 
 from __future__ import annotations
 
+import logging
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -22,6 +23,8 @@ import numpy as np
 import pandas as pd
 
 from app.ports.repositories import Observation, WardRecord
+
+logger = logging.getLogger("abhas.features")
 
 MAX_RAIN_LAG = 8
 MAX_WEATHER_LAG = 3
@@ -97,13 +100,17 @@ def normalize_observation_columns(df: pd.DataFrame) -> pd.DataFrame:
     normalize `date` -> `week` as `datetime.date`, and assert required weather columns have zero nulls.
     """
     out = df.copy()
+    lower_names = [str(c).strip().lower() for c in out.columns]
+    has_week = "week" in lower_names
     rename_map: dict[str, str] = {}
-    for col in out.columns:
-        low = str(col).strip().lower()
-        if low == "date" and "week" not in {str(c).strip().lower() for c in out.columns}:
-            rename_map[col] = "week"
-        elif low != col:
-            rename_map[col] = low
+    seen_targets: set[str] = set()
+    for col, low in zip(out.columns, lower_names, strict=True):
+        target = "week" if (low == "date" and not has_week) else low
+        if target in seen_targets:
+            raise ValueError(f"Duplicate column after case-insensitive normalization: {target!r}")
+        seen_targets.add(target)
+        if target != col:
+            rename_map[col] = target
     if rename_map:
         out = out.rename(columns=rename_map)
 
@@ -177,14 +184,18 @@ def observations_to_dataframe(
 def fit_rain_normals(
     df: pd.DataFrame,
     max_year: int = DEFAULT_TRAIN_MAX_YEAR,
+    *,
+    max_normal_year: int | None = None,
 ) -> dict[tuple[str, int], float]:
-    """Fit ward × ISO-week rainfall normals strictly on training years (`week.year <= max_year`).
+    """Fit ward × ISO-week rainfall normals strictly on training years (`week.year <= cutoff_year`).
 
     ISO week 53 is folded cleanly into week 52 so normals never suffer from 1-row buckets.
+    Accepts either `max_year` or explicit keyword `max_normal_year` (CR-5).
     """
+    cutoff_year = max_normal_year if max_normal_year is not None else max_year
     norm_df = normalize_observation_columns(df)
     years = [d.year for d in norm_df["week"].tolist()]
-    train_mask = [y <= max_year for y in years]
+    train_mask = [y <= cutoff_year for y in years]
     train_df = norm_df.loc[train_mask].copy()
     if train_df.empty:
         return {}
@@ -223,6 +234,19 @@ def _attach_static_wards(df: pd.DataFrame, wards_df: pd.DataFrame | None) -> pd.
     return merged
 
 
+def _assert_consecutive_weeks(df: pd.DataFrame) -> None:
+    """Reject duplicate or non-consecutive weekly rows per ward before positional lag shifts (CR-7)."""
+    if df.duplicated(subset=["ward_id", "week"]).any():
+        raise ValueError("Duplicate (ward_id, week) rows detected in observation input")
+    if df.empty:
+        return
+    step = pd.to_datetime(df["week"]).groupby(df["ward_id"], sort=False).diff().dropna()
+    if not (step == pd.Timedelta(weeks=1)).all():
+        raise ValueError(
+            "non-consecutive weekly rows per ward; reindex to a full Monday calendar before building lags"
+        )
+
+
 def build_features(
     obs_df: pd.DataFrame,
     wards_df: pd.DataFrame | None = None,
@@ -253,19 +277,24 @@ def build_features(
         df = df.loc[df["week"] <= cutoff].copy()
 
     df = df.sort_values(["ward_id", "week"], kind="mergesort").reset_index(drop=True)
-    if df.duplicated(subset=["ward_id", "week"]).any():
-        raise ValueError("Duplicate (ward_id, week) rows detected in observation input")
+    _assert_consecutive_weeks(df)
 
     if df.empty:
         cols = ["ward_id", "week", *REQUIRED_WEATHER_COLUMNS, *FEATURE_COLUMNS, "horizon", "target_week"]
         return pd.DataFrame(columns=cols)
 
-    # Resolve rain normals (prefer caller's pre-fitted training normals)
+    # Resolve rain normals (prefer caller's pre-fitted training normals; warn on on-the-fly refit per CR-13)
     normals: Mapping[tuple[str, int], float]
     if rain_normals is not None:
         normals = rain_normals
     else:
-        normals = fit_rain_normals(df, max_year=max_normal_year)
+        logger.warning(
+            "rain_normals omitted in build_features; fitting on-the-fly with max_normal_year=%d "
+            "(pass pre-fitted training normals to avoid train/serve skew)",
+            max_normal_year,
+            extra={"event": "rain_normals_refit_on_the_fly", "max_normal_year": max_normal_year},
+        )
+        normals = fit_rain_normals(df, max_normal_year=max_normal_year)
 
     # Fallback per-ward mean from the (already cutoff-filtered) frame if a ward has no <= max_normal_year rows
     ward_fallback_rain: dict[str, float] = {}
@@ -340,15 +369,19 @@ def build_serving_features(
     *,
     origin_week: date,
     horizon: int,
+    rain_normals: Mapping[tuple[str, int], float],
     ward_ids: Sequence[str] | None = None,
-    rain_normals: Mapping[tuple[str, int], float] | None = None,
     weather_override: Mapping[str, float] | None = None,
 ) -> pd.DataFrame:
     """Build feature row(s) for serving or what-if scenario at a specific `origin_week` and `horizon`.
 
+    Requires pre-fitted `rain_normals` from the model artifact (CR-13) to eliminate train/serve skew.
     `weather_override` (e.g. `{"rainfall_mm": 120.0}`) mutates ONLY a copy of the `origin_week`
     row(s) for the selected ward(s), strictly preserving zero future leakage.
     """
+    if rain_normals is None:
+        raise ValueError("rain_normals is required for build_serving_features to prevent train/serve skew")
+
     cutoff = _coerce_date(origin_week)
     df = normalize_observation_columns(obs_df)
     df = df.loc[df["week"] <= cutoff].copy()
@@ -356,12 +389,33 @@ def build_serving_features(
         allowed = set(ward_ids)
         df = df.loc[df["ward_id"].isin(allowed)].copy()
 
+    if df.empty:
+        ward_note = f" for wards {sorted(set(ward_ids))}" if ward_ids is not None else ""
+        raise ValueError(
+            f"No observations available on or before origin_week {cutoff.isoformat()}{ward_note}"
+        )
+
     if weather_override:
-        mask = df["week"] == cutoff
+        normalized_override: dict[str, float] = {}
+        unknown_keys: list[str] = []
         for col, val in weather_override.items():
-            key = col.strip().lower()
-            if key in REQUIRED_WEATHER_COLUMNS:
-                df.loc[mask, key] = float(val)
+            key = str(col).strip().lower()
+            if key not in REQUIRED_WEATHER_COLUMNS:
+                unknown_keys.append(str(col))
+            else:
+                normalized_override[key] = float(val)
+        if unknown_keys:
+            raise ValueError(
+                f"Unknown weather_override key(s) {sorted(unknown_keys)}; "
+                f"allowed keys are {list(REQUIRED_WEATHER_COLUMNS)}"
+            )
+        mask = df["week"] == cutoff
+        if not bool(mask.any()):
+            raise ValueError(
+                f"No observation row matches origin_week {cutoff.isoformat()} for weather_override"
+            )
+        for key, val in normalized_override.items():
+            df.loc[mask, key] = val
 
     feats = build_features(
         df,
@@ -371,7 +425,13 @@ def build_serving_features(
         rain_normals=rain_normals,
         drop_incomplete_lags=False,
     )
-    return feats.loc[feats["week"] == cutoff].reset_index(drop=True)
+    out = feats.loc[feats["week"] == cutoff].reset_index(drop=True)
+    if out.empty:
+        raise ValueError(
+            f"No feature row produced for origin_week {cutoff.isoformat()}; "
+            "ensure origin_week is a Monday present in the observation frame"
+        )
+    return out
 
 
 @dataclass(frozen=True)
@@ -417,6 +477,7 @@ def compute_all_lag_correlations(
     if "dengue_cases" not in df.columns:
         raise ValueError("Observation DataFrame must include 'dengue_cases'")
     df = df.sort_values(["ward_id", "week"], kind="mergesort").reset_index(drop=True)
+    _assert_consecutive_weeks(df)
     df["_iso_week"] = [canonical_iso_week(d) for d in df["week"].tolist()]
 
     # Demean within each (ward_id, iso_week) to remove seasonal cycle

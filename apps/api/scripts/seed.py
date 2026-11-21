@@ -98,6 +98,8 @@ def load_raw_dataset(
             if col_name is None:
                 continue
             normalized = str(col_name).strip().lower()
+            if normalized in col_idx:
+                raise ValueError(f"Duplicate column after case-insensitive normalization: {normalized!r}")
             col_idx[normalized] = idx
 
         missing = [c for c in REQUIRED_COLUMNS if c not in col_idx]

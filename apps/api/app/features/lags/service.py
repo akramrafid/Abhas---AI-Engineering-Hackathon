@@ -27,19 +27,43 @@ class LagsService:
         self._cache_key: tuple[date, date] | None = None
         self._dataset_corrs: list[float] = []
         self._ward_corrs: dict[str, list[float]] = {}
+        self._missing_wards: set[str] = set()
+
+    def _refresh_locked(self, sig: tuple[date, date]) -> int:
+        obs = self._repo.all_observations()
+        if not obs:
+            self._cache_key = None
+            self._dataset_corrs = []
+            self._ward_corrs = {}
+            self._missing_wards = set()
+            return 0
+        obs_df = observations_to_dataframe(obs)
+        dataset_corrs, ward_corrs = compute_all_lag_correlations(obs_df, max_lag=MAX_RAIN_LAG)
+        self._cache_key = sig
+        self._dataset_corrs = dataset_corrs
+        self._ward_corrs = dict(ward_corrs)
+        self._missing_wards = set()
+        return len(self._ward_corrs)
+
+    def warm_cache(self) -> int:
+        """Precompute and cache lag correlations for all wards once (CR-19). Returns warmed ward count."""
+        sig = self._repo.date_range()
+        with self._lock:
+            if self._cache_key != sig:
+                return self._refresh_locked(sig)
+            return len(self._ward_corrs)
 
     def _get_correlations(self, ward_id: str) -> tuple[list[float], list[float]]:
         sig = self._repo.date_range()
         with self._lock:
-            if self._cache_key != sig or ward_id not in self._ward_corrs:
-                obs = self._repo.all_observations()
-                obs_df = observations_to_dataframe(obs)
-                dataset_corrs, ward_corrs = compute_all_lag_correlations(obs_df, max_lag=MAX_RAIN_LAG)
-                self._cache_key = sig
-                self._dataset_corrs = dataset_corrs
-                self._ward_corrs = ward_corrs
+            if self._cache_key != sig:
+                self._refresh_locked(sig)
+            if ward_id in self._missing_wards:
+                raise AppError(404, "unknown-ward", "Unknown ward", f"No observations for ward {ward_id}")
             w_corrs = self._ward_corrs.get(ward_id)
             if w_corrs is None:
+                if self._cache_key is not None:
+                    self._missing_wards.add(ward_id)
                 raise AppError(404, "unknown-ward", "Unknown ward", f"No observations for ward {ward_id}")
             return list(self._dataset_corrs), list(w_corrs)
 
@@ -80,3 +104,12 @@ class LagsService:
             correlations=correlations,
             series=series,
         )
+
+
+def warm_lags_cache(service: LagsService | None = None) -> int:
+    """Warm the lag correlation cache at startup so the first lags request avoids cold-start latency (CR-19)."""
+    if service is None:
+        from .deps import get_lags_service
+
+        service = get_lags_service()
+    return service.warm_cache()
