@@ -32,6 +32,11 @@ OWNED PATHS (only these may be edited):
   - docs/llmops.md
 READ-ONLY CONTEXT: TASK.md, docs/PRD.md (AC-3..AC-5, AC-7, AC-10, AC-13, AC-14, AC-17, NFR-1..NFR-4, NFR-7), docs/architecture.md, docs/system-design.md, docs/adr/0001..0008.md, docs/KICKOFF-PROMPT.md (§4, §5, §7, §8), contracts/openapi.json, .orca-team/PLAN.md, apps/api/app/shared/features.py, apps/api/app/ports/*.py, apps/api/evals/*.py
 CONTRACT:
+  - Eval runner integration (`apps/api/evals/scoring.py` is ALREADY merged on `lead`!):
+    * Export `load_model(model_path: Path) -> LGBMForecastModel` in `app/adapters/lgbm_model.py` returning an object satisfying `ForecastModel` (`version`, `feature_names`, `predict(rows, horizon)`) so `evals/run.py` and `evals/retrieval.py` load your joblib artifact automatically with zero edits to `evals/`!
+    * Write `"no_weather_mae": {"1": ..., "2": ..., "3": ..., "4": ...}` into `apps/api/ml/artifacts/metadata.json` (plus `"sha256"`, `"model_version"`, `"feature_names"`) so `evals/run.py` automatically verifies the AC-5 weather-ablation floor!
+    * Also note: `app/shared/features.py` is already merged on `lead` with `FEATURE_COLUMNS`, `fit_rain_normals(df, max_year=2023)`, `build_features(...)`, and `build_serving_features(...)` — read it first and import it directly!
+    * Note on `app/adapters/db/factory.py`: already merged on `lead` — use `get_observation_repo()`, `get_prediction_cache()`, `get_call_log()`, `get_weather_source()` from `app/adapters/db/factory.py` (never import SQLAlchemy directly inside feature `router.py` or `service.py`!).
   - Model (`apps/api/ml/train.py`, `ml/backtest.py`, `ml/verify_artifact.py`, `ml/artifacts/current.joblib` + `metadata.json`):
     * Import feature generation exclusively from `app/shared/features.py` (ZERO train/serve skew; ALL features strictly `<= origin_week`).
     * Fit train-only normals (`<= 2023`) and store inside the joblib bundle alongside the 4 LightGBM Poisson models (`h = 1, 2, 3, 4`), NegBin dispersion + 2023 conformal scale factors, cost-sensitive tier cut-offs (missed Critical = 5x false alarm), and ward×ISO-week endemic channels (training-years mean + 2 SD, floor 5).

@@ -1,23 +1,26 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
-Phase: 2/3 — Design + Wave 1A Build (4 workers running in parallel) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
-Updated 2026-11-21 16:11 BST (≈ 21.8 h left) · LEAD_BRANCH: `lead` (pushed `0b1687b` to origin) · Run: `run_de147862c969` · Active LEAD: `antigravity / Gemini 4 Neon (XHigh)` (Claude Opus 5.5 limit resets 19:20 BST — hand back on reset).
+Phase: 3 — Build Wave 1B (Phase 2 Design + Contracts Lock 100% GREEN; `main` fast-forwarded) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
+Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`, pushed to origin) · Run: `run_de147862c969` · Active LEAD: `antigravity / Gemini 4 Neon (XHigh)` (Claude Opus 5.5 limit resets 19:20 BST — hand back at 19:15–19:20 BST).
+
+Phase 2 Gates Verified (`0a73566`): `adr` PASS · `contracts` PASS · `resilience` PASS · `slices` PASS · `migrations` PASS · `retrieval` PASS (`recall@15=0.5704`, `n=36`) · `ci` PASS (27/27 pytest, 6/6 smoke).
 
 Next action (LEAD):
-1. Wait for Orca wake on Wave 1A workers (`design-system`, `data-pipeline`, `qa-evals`, `ui-brand`).
-2. As each settles: non-author review → `.orca-team/reviews/merge-<branch>.md` → `node .orca-team/tools/gates.mjs merge <branch>` → push `lead` to GitHub immediately (small, frequent pushes per human instruction).
-3. As soon as `design-system` & `ui-brand` merge → dispatch `ui-dashboard` (`.orca-team/specs/ui-dashboard.md`); as soon as `data-pipeline` merges → dispatch `core-forecast` (`.orca-team/specs/core-forecast.md`).
-4. Once `design-system` + `data-pipeline` + `qa-evals` merge → run `gates.mjs prd adr contracts resilience slices` → fast-forward `main` & push → broadcast `"contracts locked"` to `@all`.
+1. Push `lead` + fast-forward `main` (Phase 2 milestone) to GitHub; broadcast `"contracts locked"` to `@all`.
+2. Release completed Wave 1A workers (`data-pipeline`, `qa-evals`); dispatch Wave 1B **`core-forecast`** (running in parallel with **`ui-dashboard`** = 2 active Antigravity workers).
+3. As `core-forecast` and `ui-dashboard` finish: review, merge via `gates.mjs merge`, wire `lifespan` startup model/DB readiness probe in `app/main.py`, run `gates.mjs all`, push to GitHub, then dispatch Wave 2 (`qa-ship` README/demo/fresh-clone + `reviewer-sec` redteam + cross-family review rounds when Claude resets at 19:20 BST!).
 
 ## Tasks
 | Task id | Role | Title | Agent / model | Branch | Dispatch id | Wave | State |
 |---|---|---|---|---|---|---|---|
 | task_0eb53049fa9f | DESIGN | PRD critique → `.orca-team/reviews/prd-critique.md` | antigravity / Gemini 4 Neon (XHigh) | akramrafid/design-prd-critique-2 | ctx_33e498a5723c | Frame | merged (`211561f`) |
 | task_bdcb7fc98a59 | DESIGN | System design + architecture critique | antigravity / Gemini 4 Neon (XHigh) | akramrafid/design-system | ctx_e12d4424c44c | 1A | merged (`bf7a233`, released) |
-| task_cc6f8c7a168f | DATA | SQLite/Alembic + seed + features.py + Open-Meteo + wards/lags/weather | antigravity / Gemini 4 Neon (XHigh) | akramrafid/data-pipeline | ctx_b3be0c5e846b | 1A | running |
-| task_72869ad95cf5 | QA | Locked 48-case hold-out eval + retrieval + k6 smoke + test plan | antigravity / Gemini 4 Neon (XHigh) | akramrafid/qa-evals | ctx_7beb2831257a | 1A | running (final verification) |
 | task_e68beba5a5d3 | UI-2 | Abhas brand tokens, SVGs, favicons, brand components, /brand | antigravity / Gemini 4 Hydrogen (XHigh) | akramrafid/ui-brand | ctx_0d41c9000339 | 1A | merged (`64ac35a`, released) |
+| task_cc6f8c7a168f | DATA | SQLite/Alembic + seed + features.py + Open-Meteo + wards/lags/weather | antigravity / Gemini 4 Neon (XHigh) | akramrafid/data-pipeline | ctx_b3be0c5e846b | 1A | merged (`3312553`, released) |
+| task_72869ad95cf5 | QA | Locked 48-case hold-out eval + retrieval + k6 smoke + test plan | antigravity / Gemini 4 Neon (XHigh) | akramrafid/qa-evals | ctx_7beb2831257a | 1A | merged (`0a73566`, released) |
+| task_d4fb8f89dc74 | UI | UX flow + Abhas dashboard (ward-risk, lags, scenario, heatmap, validation) + Playwright e2e | antigravity / Gemini 4 Neon (XHigh) | akramrafid/ui-dashboard | ctx_679d91731a13 | 1B | running |
+| pending | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | dispatching | 1B | dispatching |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
@@ -40,14 +43,9 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 ## Decisions (short ADR log)
 - Seats: Claude Code Opus 5.5 (LEAD, reviews, OUTSIDER) + Antigravity Gemini 4 Neon/Hydrogen (all builders); fallback on Claude limit → Neon XHigh.
 - Gate thresholds from `docs/KICKOFF-PROMPT.md` §5 in `.orca-team/gates.json`; `deploy` skipped (localhost demo).
-- ADR-0001: Modular monolith with 8 vertical API slices (`wards`, `lags`, `forecast`, `heatmap`, `validation`, `weather`, `advisory`, `ops`) + ports & adapters.
-- ADR-0002: SQLite (WAL mode) via SQLAlchemy + Alembic (Postgres-ready for Stage 2); localhost two-command run (`npm run setup` + `npm run dev`), no Docker/Neon required.
-- ADR-0003: LightGBM Poisson direct multi-horizon (h=1..4) global model across 60 wards + native `pred_contrib=True` SHAP drivers; single joblib bundle.
-- ADR-0004: Expanding-window chronological CV (2019–2022), 2023 tune/calibration, SHA-256 locked 2024–2025 hold-out; NegBin conformal 80% bands + cost-sensitive tiers + epidemic-channel escalation.
-- ADR-0005: `WEATHER_MODE=dataset` default; `live` uses 1 multi-city Open-Meteo call / 6 h with cache → climatology fallback + mandatory historical bias check.
-- ADR-0006: Deterministic EN/BN advisory template default; optional Claude Haiku 5.5 (`≤ 400` tokens, `$1/day` cap, number validator).
-- ADR-0007: Next.js 16 + Tailwind v4 + Recharts + TanStack Query + `openapi-typescript` + self-hosted `@fontsource` fonts (no Google Fonts).
-- ADR-0008: Request/response JSON + RFC 9457 `problem+json`, no user auth, optional `X-Ops-Token` on `/api/v1/ops` (open read-only on localhost when unset).
+- ADR-0001..0008 accepted (`gates.mjs adr` PASS); DESIGN `arch-critique.md` applied on `lead` (`ff89e58`).
+- Locked 48-case hold-out split (`heldout_sha256: 4ab5539f136b...`): all 22 distinct 2024–2025 Critical target weeks + 10 High + 8 Medium + 8 Low = 48 golden cases, plus global scoring over all 2024–2025 ward-weeks.
+- Open-Meteo ERA5 historical bias check across 2,610 city-weeks recorded in `apps/api/config/city_centroids.json` (`passed=true`).
 
 ## Review rounds
 | Round | Code verdict | Security verdict | Open BLOCKER | Open HIGH |
@@ -58,3 +56,10 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 - `211561f` Merge branch `akramrafid/design-prd-critique-2` into `lead` (15 PRD critique bullets)
 - `c0a05a8` docs(prd): apply DESIGN critique and lock the PRD
 - `0b1687b` feat(skeleton): walking skeleton, OpenAPI contracts, ADRs 0001-0008, PLAN.md, Wave 1A specs
+- `de16e37` chore(lead): log Wave 1A dispatches, add Wave 1B specs and web e2e script
+- `e640538` chore(load): raise RATE_LIMIT_PER_MINUTE for k6 load and schemathesis contract runs
+- `bf7a233` merge: akramrafid/design-system (`resilience` gate PASS)
+- `64ac35a` merge: akramrafid/ui-brand (Abhas tokens, SVGs, shared components, `/brand`)
+- `ff89e58` fix(arch): apply DESIGN arch-critique hardening to core, contracts, setup, and web headers
+- `3312553` merge: akramrafid/data-pipeline (`migrations` + `slices` PASS, ERA5 bias check)
+- `0a73566` merge: akramrafid/qa-evals (`contracts` + `retrieval` PASS, 48-case locked holdout)
