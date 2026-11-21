@@ -3,36 +3,36 @@
   "method": "POST",
   "path_template": "/api/v1/forecast",
   "fingerprint": "6dfe8519",
-  "case_id": "rzbUUQ",
-  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"horizons\": [1, 1, 1], \"origin_week\": \"2025-08-04\", \"source\": \"dataset\", \"ward_ids\": [\"DSCC_Ward_07\"]}' http://127.0.0.1:50709/api/v1/forecast",
+  "case_id": "1T01zH",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"origin_week\": \"2016-01-04\", \"ward_ids\": [\"0\"]}' http://127.0.0.1:54469/api/v1/forecast",
   "sequence": [
     {
       "method": "POST",
-      "url": "http://127.0.0.1:50709/api/v1/forecast",
-      "url_template": "http://127.0.0.1:50709/api/v1/forecast",
+      "url": "http://127.0.0.1:54469/api/v1/forecast",
+      "url_template": "http://127.0.0.1:54469/api/v1/forecast",
       "headers": {
         "User-Agent": "schemathesis/4.33.4",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "*/*",
         "Connection": "keep-alive",
-        "X-Schemathesis-TestCaseId": "rzbUUQ",
+        "X-Schemathesis-TestCaseId": "1T01zH",
         "Content-Type": "application/json",
-        "Content-Length": "103"
+        "Content-Length": "48"
       },
       "response": {
         "status_code": 422,
         "headers": {
-          "date": "Sat, 21 Nov 2026 21:11:45 GMT",
+          "date": "Sat, 21 Nov 2026 21:27:22 GMT",
           "server": "uvicorn",
-          "content-length": "242",
+          "content-length": "288",
           "content-type": "application/problem+json",
-          "x-request-id": "c297d9c1a3604d99",
+          "x-request-id": "c3556d5a4831415f",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "referrer-policy": "no-referrer",
           "vary": "Origin"
         },
-        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/forecast\",\"request_id\":\"c297d9c1a3604d99\",\"errors\":[{\"field\":\"body\",\"message\":\"Value error, horizons must be unique\"}]}"
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/forecast\",\"request_id\":\"c3556d5a4831415f\",\"errors\":[{\"field\":\"body.origin_week\",\"message\":\"Value error, must be between 2016-02-29 and 2025-12-29 in dataset mode\"}]}"
       },
       "link": null,
       "checks": [
@@ -44,38 +44,38 @@
       ],
       "meta": {
         "generation": {
-          "time": 0.0008368999988306314,
+          "time": 0.05540239999390906,
           "mode": "positive"
         },
         "components": {
           "BODY": "positive"
         },
         "phase": {
-          "name": "coverage",
+          "name": "fuzzing",
           "data": {
-            "type": "CoveragePhaseData",
-            "description": "Object with valid 'horizons' value: Near-boundary items array",
+            "type": "FuzzingPhaseData",
+            "description": "Positive test case",
             "location": null,
-            "parameter": "application/json",
-            "parameter_location": "BODY",
-            "scenario": "valid_object"
+            "parameter": null,
+            "parameter_location": null,
+            "mutations": []
           }
         },
-        "pool_draws": [
+        "pool_draws": [],
+        "pool_misses": [],
+        "semantic_draws": [
           {
-            "location": "body",
-            "parameter_name": "ward_ids",
-            "resource_name": "Ward",
-            "resource_field": "id",
-            "source_operation": "POST /api/v1/forecast",
-            "source_status": 200,
-            "source_identity": null,
-            "source_input": false,
-            "source_query": null
+            "path": [
+              "origin_week"
+            ],
+            "type_token": "string",
+            "format_token": "date",
+            "pattern_hash": null,
+            "normalized_name": "originweek",
+            "value": "2016-01-04",
+            "source_operation": "GET /api/v1/wards"
           }
         ],
-        "pool_misses": [],
-        "semantic_draws": [],
         "dictionary_draws": [],
         "constants_draws": [],
         "raw_containers": {}
@@ -88,15 +88,9 @@
       "case_body": {
         "encoding": "json",
         "value": {
-          "horizons": [
-            1,
-            1,
-            1
-          ],
-          "origin_week": "2025-08-04",
-          "source": "dataset",
+          "origin_week": "2016-01-04",
           "ward_ids": [
-            "DSCC_Ward_07"
+            "0"
           ]
         }
       },
@@ -106,5 +100,8 @@
       "operation": "POST /api/v1/forecast"
     }
   ],
-  "aliases": []
+  "aliases": [
+    "rzbUUQ",
+    "4IlDAg"
+  ]
 }

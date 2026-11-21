@@ -3,30 +3,30 @@
   "method": "POST",
   "path_template": "/api/v1/scenario",
   "fingerprint": "9e33b161",
-  "case_id": "5zyOuX",
-  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"horizons\": [1, 2, 3, 4], \"origin_week\": \"2025-08-04\", \"ward_id\": \"DSCC_Ward_07\", \"weather\": {\"avg_temp_c\": 5.0, \"rainfall_mm\": 0.0, \"relative_humidity_pct\": false}}' http://127.0.0.1:50709/api/v1/scenario",
+  "case_id": "joZhoV",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"horizons\": [1, 2, 3, 4], \"origin_week\": \"2025-08-04\", \"ward_id\": \"DSCC_Ward_07\", \"weather\": {\"avg_temp_c\": 5.0, \"rainfall_mm\": 0.0, \"relative_humidity_pct\": false}}' http://127.0.0.1:54405/api/v1/scenario",
   "sequence": [
     {
       "method": "POST",
-      "url": "http://127.0.0.1:50709/api/v1/scenario",
-      "url_template": "http://127.0.0.1:50709/api/v1/scenario",
+      "url": "http://127.0.0.1:54405/api/v1/scenario",
+      "url_template": "http://127.0.0.1:54405/api/v1/scenario",
       "headers": {
         "User-Agent": "schemathesis/4.33.4",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "*/*",
         "Connection": "keep-alive",
-        "X-Schemathesis-TestCaseId": "5zyOuX",
+        "X-Schemathesis-TestCaseId": "joZhoV",
         "Content-Type": "application/json",
         "Content-Length": "166"
       },
       "response": {
         "status_code": 200,
         "headers": {
-          "date": "Sat, 21 Nov 2026 21:11:45 GMT",
+          "date": "Sat, 21 Nov 2026 21:27:00 GMT",
           "server": "uvicorn",
           "content-length": "3874",
           "content-type": "application/json",
-          "x-request-id": "1978921a35304c2e",
+          "x-request-id": "aec0f439bdae48d0",
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "referrer-policy": "no-referrer",
@@ -44,7 +44,7 @@
       ],
       "meta": {
         "generation": {
-          "time": 0.0001644000003580004,
+          "time": 0.00015020000137155876,
           "mode": "negative"
         },
         "components": {
@@ -97,5 +97,7 @@
       "operation": "POST /api/v1/scenario"
     }
   ],
-  "aliases": []
+  "aliases": [
+    "5zyOuX"
+  ]
 }

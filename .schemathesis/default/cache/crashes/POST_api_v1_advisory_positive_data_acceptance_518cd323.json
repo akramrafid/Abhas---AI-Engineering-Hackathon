@@ -1,0 +1,114 @@
+{
+  "operation": "POST /api/v1/advisory",
+  "method": "POST",
+  "path_template": "/api/v1/advisory",
+  "fingerprint": "518cd323",
+  "case_id": "Dy7CAS",
+  "code_sample": "curl -X POST -H 'Content-Type: application/json' -d '{\"origin_week\": \"2016-01-04\", \"ward_id\": \"CCC_Ward_01\"}' http://127.0.0.1:54469/api/v1/advisory",
+  "sequence": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:54469/api/v1/advisory",
+      "url_template": "http://127.0.0.1:54469/api/v1/advisory",
+      "headers": {
+        "User-Agent": "schemathesis/4.33.4",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "*/*",
+        "Connection": "keep-alive",
+        "X-Schemathesis-TestCaseId": "Dy7CAS",
+        "Content-Type": "application/json",
+        "Content-Length": "55"
+      },
+      "response": {
+        "status_code": 422,
+        "headers": {
+          "date": "Sat, 21 Nov 2026 21:27:22 GMT",
+          "server": "uvicorn",
+          "content-length": "288",
+          "content-type": "application/problem+json",
+          "x-request-id": "af5d1aea91e64469",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "referrer-policy": "no-referrer",
+          "vary": "Origin"
+        },
+        "body": "{\"type\":\"https://abhas.dev/problems/validation-error\",\"title\":\"Request validation failed\",\"status\":422,\"instance\":\"/api/v1/advisory\",\"request_id\":\"af5d1aea91e64469\",\"errors\":[{\"field\":\"body.origin_week\",\"message\":\"Value error, must be between 2016-02-29 and 2025-12-29 in dataset mode\"}]}"
+      },
+      "link": null,
+      "checks": [
+        {
+          "name": "positive_data_acceptance",
+          "status": "failure",
+          "message": "Schema-valid request rejected\n\nValid data should have been accepted\nExpected: 2xx, 3xx, 401, 403, 404, 409, 429, 5xx"
+        }
+      ],
+      "meta": {
+        "generation": {
+          "time": 0.022459199994045775,
+          "mode": "positive"
+        },
+        "components": {
+          "BODY": "positive"
+        },
+        "phase": {
+          "name": "fuzzing",
+          "data": {
+            "type": "FuzzingPhaseData",
+            "description": "Positive test case",
+            "location": null,
+            "parameter": null,
+            "parameter_location": null,
+            "mutations": []
+          }
+        },
+        "pool_draws": [
+          {
+            "location": "body",
+            "parameter_name": "ward_id",
+            "resource_name": "Ward",
+            "resource_field": "ward_id",
+            "source_operation": "GET /api/v1/wards",
+            "source_status": 200,
+            "source_identity": null,
+            "source_input": false,
+            "source_query": null
+          }
+        ],
+        "pool_misses": [],
+        "semantic_draws": [
+          {
+            "path": [
+              "origin_week"
+            ],
+            "type_token": "string",
+            "format_token": "date",
+            "pattern_hash": null,
+            "normalized_name": "originweek",
+            "value": "2016-01-04",
+            "source_operation": "GET /api/v1/wards"
+          }
+        ],
+        "dictionary_draws": [],
+        "constants_draws": [],
+        "raw_containers": {}
+      },
+      "path": "/api/v1/advisory",
+      "path_parameters": {},
+      "query": {},
+      "case_headers": {},
+      "cookies": {},
+      "case_body": {
+        "encoding": "json",
+        "value": {
+          "origin_week": "2016-01-04",
+          "ward_id": "CCC_Ward_01"
+        }
+      },
+      "media_type": "application/json",
+      "parent_index": null,
+      "auth_identity": null,
+      "operation": "POST /api/v1/advisory"
+    }
+  ],
+  "aliases": []
+}
