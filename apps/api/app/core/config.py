@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         env_file=(REPO_ROOT / ".env", API_DIR / ".env"), env_file_encoding="utf-8", extra="ignore"
     )
 
-    app_env: Literal["dev", "test", "prod", "production"] = "dev"
+    app_env: Literal["dev", "test", "production"] = "dev"
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     database_url: str = f"sqlite:///{(REPO_ROOT / 'data' / 'abhas.db').as_posix()}"
@@ -40,6 +40,14 @@ class Settings(BaseSettings):
     ops_token: SecretStr | None = None
     rate_limit_per_minute: int = Field(default=120, ge=1)
     fault_inject: str = ""
+
+    @field_validator("app_env", mode="before")
+    @classmethod
+    def _normalize_app_env(cls, value: object) -> object:
+        if isinstance(value, str):
+            cleaned = value.strip().lower()
+            return "production" if cleaned == "prod" else cleaned
+        return value
 
     @field_validator("database_url", mode="after")
     @classmethod

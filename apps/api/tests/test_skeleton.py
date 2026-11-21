@@ -5,8 +5,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
+from sqlalchemy import inspect
 
+from app.adapters.db.factory import ensure_database_ready, reset_factory
+from app.core.config import Settings, active_faults, get_settings
 from app.main import create_app
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -64,3 +69,31 @@ def test_cr_1_setup_bypasses_shell_for_absolute_exe_paths() -> None:
     assert data["posixAbs"] is False
     assert data["status"] == 0
     assert data["out"].startswith("Python ")
+
+
+def test_cr_10_app_env_prod_normalizes_to_production(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """CR-10: APP_ENV=prod must normalize to 'production' so production guards apply."""
+    monkeypatch.setenv("APP_ENV", "prod")
+    cfg = Settings()
+    assert cfg.app_env == "production"
+    assert active_faults(Settings(fault_inject="openmeteo_5xx")) == frozenset()
+
+    monkeypatch.setenv("APP_ENV", "PROD")
+    assert Settings().app_env == "production"
+
+    monkeypatch.setenv("APP_ENV", "staging")
+    with pytest.raises(ValidationError):
+        Settings()
+
+    # Production DB guard: APP_ENV=prod must NOT auto-migrate or auto-seed an empty database.
+    empty_db = tmp_path / "prod_empty.sqlite"
+    monkeypatch.setenv("APP_ENV", "prod")
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{empty_db.as_posix()}")
+    get_settings.cache_clear()
+    reset_factory()
+    try:
+        engine = ensure_database_ready()
+        assert not inspect(engine).has_table("wards")
+    finally:
+        reset_factory()
+        get_settings.cache_clear()
