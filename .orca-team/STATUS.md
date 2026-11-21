@@ -1,17 +1,21 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
-**21:46 BST — Step 0 COMPLETE on `lead` (`10b3ed6`, pushed). Dispatching Wave 2A (WP1 CORE-MODEL, WP4 DATA-FIX, WP3 PLATFORM-SEC) on Antigravity Gemini 4 Neon (XHigh).**
+**02:58 BST — Wave 2A COMPLETE on `lead` (`d318509`, pushed). All 3 Wave 2A branches (`akramrafid/wp4-data-fix`, `akramrafid/wp3-platform-sec`, `akramrafid/wp1-core-model`) merged & pushed; SEC-9/SEC-12/CR-19 deferred hardening applied; `k6` v2.4.0 and `gitleaks` 8.30.1 installed.**
 
-Phase: 3–4 — Build & Harden Wave 2A (Step 0 takeover, cleanup & 4-branch integration 100% GREEN) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
-Updated 2026-11-21 21:46 BST (≈ 16.2 h left) · LEAD_BRANCH: `lead` (`10b3ed6`, pushed to origin; review base tag `review-base-r2` at `f2f2743` pushed) · Active LEAD: Antigravity Gemini 4 Neon (XHigh) (hand-off per `docs/ANTIGRAVITY-PROMPT.md`). Claude Opus is reserved exclusively for human-run r2 code review, UX hallway test, and scored demo dry run.
+Phase: 3–4 — Build & Harden Wave 2B (WP2 `core-serve`, WP5 `qa`, WP6 `ui`, WP7 `ui-2`) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
+Updated 2026-11-22 02:58 BST (≈ 11.0 h left) · LEAD_BRANCH: `lead` (`d318509` + this STATUS update, pushed to origin; review base tag `review-base-r2` at `f2f2743` pushed) · Active LEAD: Antigravity Gemini 4 Neon (XHigh) (hand-off per `docs/ANTIGRAVITY-PROMPT.md`). Claude Opus is reserved exclusively for human-run r2 code review, UX hallway test, and scored demo dry run.
 
-Gates Verified at `10b3ed6`: `adr` PASS · `contracts` PASS · `slices` PASS (8 api, 6 web) · `resilience` PASS · `migrations` PASS · `traces` PASS (5/5) · `ci` PASS (81/81 pytest, ruff, pyright, eslint, tsc, 6/6 smoke) · `e2e` PASS (12/12 Playwright + zero WCAG 2.2 A/AA axe violations against real LightGBM API). `prd` WARN (AC-9, AC-12 awaiting test refs in WP5). `k6` and `gitleaks` not yet installed on PATH.
+Gates Verified at `c5200f4` / `d318509`: `adr` PASS (8 ADRs) · `contracts` PASS (12 paths, zero drift) · `slices` PASS (8 api, 6 web) · `resilience` PASS (4 rows) · `migrations` PASS (up/check/down/up, 6 tables + WAL) · `baseline` PASS (`docs/ai-design.md` + `3f9766e`) · `retrieval` PASS (`recall@15=0.6111` vs climatology `0.5704`, `mrr=0.8875`, `n=36`) · `traces` PASS (5/5) · `ci` PASS (112/112 pytest, ruff check + format 128 files with `"ml/**"=["S607"]`, pyright 0 errors, eslint 0 errors, tsc 0 errors, 6/6 smoke with `warm_lags_cache` warming 60 wards) · `ml.verify_artifact` PASS (`abhas-lgbm-1.1.2`, 954.6 KiB, 27 features) · `npm run eval` PASS (exit 0, 11/11 AC-5 floors PASS, `40/48 = 83.33%`, h2 MAE `0.9912`, h3 MAE `1.0101`, h4 MAE `1.1932`, `cov80=0.8454`, `within_one_tier=0.9596`, `critical_recall=0.9324`) · `npm run redteam` PASS (`30/30 = 100%`, 0 high failures).
+Open gate blockers to resolve in Wave 2B / Prove:
+1. `gates.mjs eval`: compares against pre-WP1 `floors_passed: false` WIP row (`574f78a`, `pass_rate=0.8958`, broken `within_one_tier=0.9338`) → `0.8958 - 0.8333 = 0.0625 > 0.05` (decide whether to filter `gates.mjs:319` to `h.floors_passed !== false` or archive pre-WP1 failed WIP rows).
+2. `gates.mjs redteam` (`gitleaks` 8.30.1): 0 real secrets leaked; flags 4 synthetic test fixtures in git history (`17b3e97` `test_security_hardening.py:232` & `redteam.py:738` `github-pat`; Nov 17 practice-run `d79db59` `test_lead_security.py:15` & `9363295` `r1-security.md:97` `generic-api-key`) — add verified `.gitleaksignore` fingerprints in security hardening follow-up after human review.
+3. Host tools installed: `k6` v2.4.0 (`GrafanaLabs.k6`) and `gitleaks` 8.30.1 (`Gitleaks.Gitleaks`) installed cleanly via `winget --source winget`.
 
-Next action (LEAD) — 21:46 BST:
-1. Dispatch Wave 2A (3 parallel workers, disjoint paths): Slot A `wp1-core-model` (GPU RTX 3060 probe + Optuna tuning + XGBoost challenger + SHAP product test + `docs/ai-design.md` + final hold-out eval) · Slot B `wp4-data-fix` (CR-7, CR-8, CR-12, CR-13, CR-19, CR-5 normals) · Slot C `wp3-platform-sec` (SEC-1..SEC-12, redteam ≥ 25 attacks, `docs/threat-model.md`, CI workflow, Dockerfile/compose).
-2. As WP4 finishes → merge → Slot B takes WP2 (`core-serve` remaining hardening: `HeatmapQuery`, model readiness registration, single-flight lock, `contract` gate).
-3. Then WP5 (QA CR fixes, load, fresh-clone, README/demo/model-card), WP6 (UI §11 polish + CR-17 split), WP7 (UI-2 Hydrogen brand split/outlines), and LEAD root `ARCHITECTURE.md` + `REVIEW-REQUEST.md` for Claude Opus r2.
+Next action (LEAD) — 02:58 BST:
+1. Dispatch Wave 2B: WP2 (`core-serve`: `HeatmapQuery` wiring, single-flight lock, `contract` gate) · WP5 (`qa`: `evals/scoring.py` `rain_normals` CR-5, AC-9/AC-12 tests, `load` gate with k6, `fresh-clone`, README/demo/model-card) · WP6 (`ui`: §11 polish + CR-17 split) · WP7 (`ui-2` Hydrogen brand split/outlines).
+2. Resolve `gates.mjs eval` (`floors_passed` filter) and `.gitleaksignore` for the 4 synthetic test-fixture fingerprints after review.
+3. LEAD root `ARCHITECTURE.md` + `REVIEW-REQUEST.md` for Claude Opus r2 code review, hallway test, and scored demo dry run.
 
 ## Human action items
 1. Provide team members' GitHub usernames; every member commits under their own account during the round (rubric R8).
@@ -36,9 +40,9 @@ Next action (LEAD) — 21:46 BST:
 | task_a4c363fcf219 | CORE | forecast engine, continue from akramrafid/core-forecast (+CR-3 404, CR-16, CR-5/13) | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast-neon2 | ctx_2b6aa6953f40 | 1B | merged (`bbb8a3d`, rebuilt matching artifact + validation.json) |
 | task_bcdcf4b82ada | CORE (LEAD files) | r1 fixes CR-1, CR-3, CR-10, CR-16 | antigravity / Gemini 4 Neon (XHigh) | akramrafid/fix-r1-lead | ctx_acd7416b208f | Prove | merged (`142adfa`) |
 | task_27e15cde0bd0 | UI | r1 fixes CR-2, CR-9, CR-18, side-tab | antigravity / Gemini 4 Neon (XHigh) | akramrafid/fix-r1-ui | ctx_38f252a7903d | Prove | merged (`10b3ed6`, 12/12 e2e + axe clean) |
-| wp1-core-model | CORE-MODEL | GPU probe, Optuna tuning (RTX 3060), XGBoost challenger, SHAP check, `docs/ai-design.md`, hold-out eval | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp1-core-model | swarm | 2A | dispatching |
-| wp4-data-fix | DATA-FIX | r1 CR-7, CR-8, CR-12, CR-13, CR-19, CR-5 normals, live aggregation verification | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp4-data-fix | swarm | 2A | dispatching |
-| wp3-platform-sec | PLATFORM-SEC | SEC-1..SEC-12, redteam ≥ 25 attacks, `docs/threat-model.md`, CI workflow, Docker/setup hardening | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp3-platform-sec | swarm | 2A | dispatching |
+| wp1-core-model | CORE-MODEL | GPU probe, Optuna tuning (RTX 3060), XGBoost challenger, SHAP check, `docs/ai-design.md`, hold-out eval | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp1-core-model | swarm | 2A | merged (`b64ac21`, 112/112 pytest, 11/11 AC-5 floors) |
+| wp4-data-fix | DATA-FIX | r1 CR-7, CR-8, CR-12, CR-13, CR-19, CR-5 normals, live aggregation verification | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp4-data-fix | swarm | 2A | merged (`e474573`, 92/92 pytest) |
+| wp3-platform-sec | PLATFORM-SEC | SEC-1..SEC-12, redteam ≥ 25 attacks, `docs/threat-model.md`, CI workflow, Docker/setup hardening | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp3-platform-sec | swarm | 2A | merged (`129ccd5`, 108/108 pytest, 30/30 redteam) |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
@@ -91,3 +95,10 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 - `142adfa` merge: akramrafid/fix-r1-lead (CR-1, CR-3, CR-10, CR-16; 50/50 pytest)
 - `bbb8a3d` merge: akramrafid/core-forecast-neon2 (LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, real forecast/heatmap/validation/advisory/ops slices, 81/81 pytest)
 - `10b3ed6` merge: akramrafid/fix-r1-ui (CR-2, CR-9, CR-18, side-tab border; 12/12 Playwright E2E + axe clean)
+- `b221f81` docs(reviews): add Wave 2A merge review notes (`wp4-data-fix`, `wp3-platform-sec`, `wp1-core-model`)
+- `e474573` merge: akramrafid/wp4-data-fix (CR-7/8/12/13/19, CR-5 rain normals, Open-Meteo partial-week & payload hardening; 92/92 pytest, `migrations`/`slices` PASS)
+- `129ccd5` merge: akramrafid/wp3-platform-sec (SEC-1..SEC-12, zero `shell: true`, streaming 413 abort, scoped secret redaction, OWASP threat model, 30/30 redteam, CI + Docker; 108/108 pytest)
+- `b70d73b` chore(web): regenerate `apps/web/src/lib/api/schema.d.ts` after WP3 OpenAPI contract updates
+- `b64ac21` merge: akramrafid/wp1-core-model (RTX 3060 CUDA-12 XGBoost challenger vs Optuna-tuned LightGBM `abhas-lgbm-1.1.2`, 2023 conformal & 5× tier calibration, `docs/ai-design.md`, 11/11 AC-5 floors PASS 40/48 = 83.33%, `retrieval` 0.6111; 112/112 pytest; resolved `retrieval.json` conflict taking WP1)
+- `c5200f4` fix(sec): SEC-9 hashed `requirements.txt` (55 pkgs, 286 hashes, 0 train/dev pkgs, `--require-hashes --only-binary=:all:` verified), SEC-12 narrowed `"ml/**"=["S607"]`, CR-19 `warm_lags_cache()` wired in `app/main.py` lifespan, `migrations/env.py` `disable_existing_loggers=False` (112/112 pytest, `ci` + 7 gates PASS)
+- `d318509` chore: record verified post-merge hold-out eval (`40/48 = 83.33%`, `floors_passed=True`) and retrieval (`recall@15=0.6111`, `mrr=0.8875`) outputs on `c5200f4`
