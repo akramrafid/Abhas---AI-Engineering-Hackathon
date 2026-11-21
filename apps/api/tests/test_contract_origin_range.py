@@ -123,3 +123,48 @@ def test_cr_3_heatmap_query_validates_dataset_range_and_allows_live() -> None:
     with pytest.raises(ValidationError) as exc_non_monday:
         HeatmapQuery(city="Dhaka South", origin_week=date(2030, 1, 8), source="live")
     assert any(e["loc"] == ("origin_week",) for e in exc_non_monday.value.errors())
+
+
+@pytest.mark.parametrize("origin_week", ["1900-01-01", "9999-12-27"])
+def test_sec_5_calendar_window_prevents_date_overflow(origin_week: str) -> None:
+    """SEC-5: Pre-2016 and far-future Mondays (e.g. 9999-12-27) return 422 instead of 500 OverflowError."""
+    with TestClient(create_app()) as c:
+        for source in ("dataset", "live"):
+            r_fc = c.post(
+                "/api/v1/forecast",
+                json={"ward_ids": ["DSCC_Ward_07"], "origin_week": origin_week, "source": source},
+            )
+            assert r_fc.status_code == 422
+            assert r_fc.headers["content-type"].startswith("application/problem+json")
+
+        r_sc = c.post(
+            "/api/v1/scenario",
+            json={
+                "ward_id": "DSCC_Ward_07",
+                "origin_week": origin_week,
+                "weather": {"rainfall_mm": 120},
+            },
+        )
+        assert r_sc.status_code == 422
+
+        r_hm = c.get("/api/v1/heatmap", params={"city": "Dhaka South", "origin_week": origin_week})
+        assert r_hm.status_code == 422
+
+        r_adv = c.post(
+            "/api/v1/advisory",
+            json={"ward_id": "DSCC_Ward_07", "origin_week": origin_week, "horizon": 3, "language": "en"},
+        )
+        assert r_adv.status_code == 422
+
+
+@pytest.mark.parametrize("origin_week", ["2016-01-04", "2016-02-22", "2026-01-05", "2030-01-07"])
+def test_sec_5_advisory_enforces_dataset_origin_range(origin_week: str) -> None:
+    """SEC-5: AdvisoryRequest enforces dataset origin_week range [2016-02-29, 2025-12-29]."""
+    with TestClient(create_app()) as c:
+        r = c.post(
+            "/api/v1/advisory",
+            json={"ward_id": "DSCC_Ward_07", "origin_week": origin_week, "horizon": 3, "language": "en"},
+        )
+    assert r.status_code == 422
+    assert r.headers["content-type"].startswith("application/problem+json")
+    assert "body.origin_week" in {e["field"] for e in r.json()["errors"]}

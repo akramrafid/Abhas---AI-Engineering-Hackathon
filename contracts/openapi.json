@@ -25,6 +25,7 @@
         "type": "object"
       },
       "AdvisoryRequest": {
+        "additionalProperties": false,
         "properties": {
           "horizon": {
             "default": 3,
@@ -44,6 +45,7 @@
             "type": "string"
           },
           "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
             "examples": [
               "2025-08-04"
             ],
@@ -419,6 +421,7 @@
         "type": "object"
       },
       "ForecastRequest": {
+        "additionalProperties": false,
         "properties": {
           "horizons": {
             "default": [
@@ -1138,6 +1141,7 @@
         "type": "object"
       },
       "ScenarioRequest": {
+        "additionalProperties": false,
         "properties": {
           "horizons": {
             "default": [
@@ -1467,6 +1471,7 @@
         "type": "object"
       },
       "WeatherOverride": {
+        "additionalProperties": false,
         "description": "What-if weather for the origin week (this week). Omitted fields keep the observed value.",
         "properties": {
           "avg_temp_c": {

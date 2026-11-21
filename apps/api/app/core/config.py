@@ -1,14 +1,37 @@
 """Typed settings. Every value has a safe default so the app runs with zero keys."""
 
+import ipaddress
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlparse
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 API_DIR = Path(__file__).resolve().parents[2]  # apps/api
 REPO_ROOT = API_DIR.parents[1]
+
+_BLOCKED_HOSTS = frozenset({"localhost", "metadata.google.internal", "metadata"})
+_BLOCKED_HOST_SUFFIXES = (".localhost", ".local", ".internal")
+
+
+def _is_non_public_host(hostname: str) -> bool:
+    host = hostname.strip().lower().rstrip(".")
+    if not host or host in _BLOCKED_HOSTS or host.endswith(_BLOCKED_HOST_SUFFIXES):
+        return True
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    )
 
 
 class Settings(BaseSettings):
@@ -27,18 +50,19 @@ class Settings(BaseSettings):
 
     weather_mode: Literal["dataset", "live"] = "dataset"
     open_meteo_base_url: str = "https://api.open-meteo.com/v1/forecast"
-    weather_cache_ttl_hours: float = 6.0
-    weather_connect_timeout_s: float = 5.0
-    weather_read_timeout_s: float = 10.0
+    weather_cache_ttl_hours: float = Field(default=6.0, gt=0, allow_inf_nan=False)
+    weather_connect_timeout_s: float = Field(default=5.0, gt=0, allow_inf_nan=False)
+    weather_read_timeout_s: float = Field(default=10.0, gt=0, allow_inf_nan=False)
 
     anthropic_api_key: SecretStr | None = None
     llm_model: str = "claude-haiku-5-5"
     llm_max_output_tokens: int = Field(default=400, ge=1, le=1000)
-    llm_daily_budget_usd: float = Field(default=1.0, ge=0)
-    llm_timeout_s: float = 20.0
+    llm_daily_budget_usd: float = Field(default=1.0, gt=0, allow_inf_nan=False)
+    llm_timeout_s: float = Field(default=20.0, gt=0, allow_inf_nan=False)
 
     ops_token: SecretStr | None = None
     rate_limit_per_minute: int = Field(default=120, ge=1)
+    trusted_proxies: str = ""
     fault_inject: str = ""
 
     @field_validator("app_env", mode="before")
@@ -47,6 +71,28 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             cleaned = value.strip().lower()
             return "production" if cleaned == "prod" else cleaned
+        return value
+
+    @field_validator("cors_origins", mode="after")
+    @classmethod
+    def _validate_cors_origins(cls, value: str) -> str:
+        for raw in value.split(","):
+            origin = raw.strip()
+            if not origin:
+                continue
+            if origin.lower() in {"*", "null"}:
+                raise ValueError("CORS_ORIGINS must not contain '*' or 'null'")
+            parsed = urlparse(origin)
+            if (
+                parsed.scheme not in {"http", "https"}
+                or not parsed.hostname
+                or parsed.path
+                or parsed.query
+                or parsed.fragment
+                or parsed.username
+                or parsed.password
+            ):
+                raise ValueError(f"Invalid CORS origin {origin!r}: expected bare http:// or https:// origin")
         return value
 
     @field_validator("database_url", mode="after")
@@ -67,9 +113,28 @@ class Settings(BaseSettings):
     def _anchor_repo_path(cls, value: Path) -> Path:
         return value if value.is_absolute() else (REPO_ROOT / value).resolve()
 
+    @model_validator(mode="after")
+    def _validate_external_urls(self) -> "Settings":
+        parsed = urlparse(self.open_meteo_base_url.strip())
+        if not parsed.hostname:
+            raise ValueError("OPEN_METEO_BASE_URL must include a hostname")
+        if self.app_env == "test":
+            if parsed.scheme not in {"http", "https"}:
+                raise ValueError("OPEN_METEO_BASE_URL must use http:// or https:// in test mode")
+            return self
+        if parsed.scheme != "https":
+            raise ValueError("OPEN_METEO_BASE_URL must use https:// outside APP_ENV=test")
+        if _is_non_public_host(parsed.hostname):
+            raise ValueError("OPEN_METEO_BASE_URL must not target loopback, private, or metadata hosts")
+        return self
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def trusted_proxy_set(self) -> frozenset[str]:
+        return frozenset(p.strip() for p in self.trusted_proxies.split(",") if p.strip())
 
     @property
     def llm_enabled(self) -> bool:

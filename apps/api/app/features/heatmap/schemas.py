@@ -2,12 +2,14 @@
 
 from datetime import date
 
-from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from app.core.types import City, IsoWeek, Tier, WardId, WeatherMode, in_dataset_range
 
 
 class HeatmapQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
     city: City
     source: WeatherMode = "dataset"
     origin_week: IsoWeek = Field(
