@@ -1,42 +1,38 @@
-"""STUB router (LEAD skeleton): schema-valid sample data. CORE (core-forecast) replaces the body."""
+"""Heatmap slice HTTP router: GET /api/v1/heatmap — ward × horizon tiers for one city."""
 
-from datetime import timedelta
+from __future__ import annotations
+
+import asyncio
+import hashlib
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query, Request, Response
 
 from app.core.errors import PROBLEM_RESPONSES
 from app.core.types import City, IsoWeek, WeatherMode
 
-from .schemas import HeatmapCell, HeatmapResponse
+from .deps import get_heatmap_service
+from .schemas import HeatmapResponse
+from .service import HeatmapService
 
 router = APIRouter(prefix="/api/v1", tags=["heatmap"], responses=PROBLEM_RESPONSES)
 
 
 @router.get("/heatmap", response_model=HeatmapResponse, summary="Tier per ward × horizon for a city")
-def heatmap(
+async def heatmap(
+    request: Request,
+    response: Response,
     city: Annotated[City, Query()],
     origin_week: Annotated[IsoWeek, Query()],
     source: Annotated[WeatherMode, Query()] = "dataset",
-) -> HeatmapResponse:
-    wid = "DSCC_Ward_07"
-    cells = [
-        HeatmapCell(
-            ward_id=wid,
-            horizon=h,
-            target_week=origin_week + timedelta(weeks=h),
-            tier="Medium",
-            expected_cases=4.0,
-            risk_score=30,
-        )
-        for h in (1, 2, 3, 4)
-    ]
-    return HeatmapResponse(
-        city=city,
-        origin_week=origin_week,
-        source=source,
-        model_version="stub-0",
-        ward_ids=[wid],
-        horizons=[1, 2, 3, 4],
-        cells=cells,
-    )
+    svc: HeatmapService = Depends(get_heatmap_service),
+) -> HeatmapResponse | Response:
+    result = await asyncio.to_thread(svc.heatmap, city=city, origin_week=origin_week, source=source)
+    cache_ctrl = "public, max-age=300" if source == "dataset" else "public, max-age=60"
+    digest = hashlib.sha256(result.model_dump_json().encode("utf-8")).hexdigest()[:16]
+    etag = f'W/"{digest}"'
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = cache_ctrl
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers={"ETag": etag, "Cache-Control": cache_ctrl})
+    return result

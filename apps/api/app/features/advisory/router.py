@@ -1,27 +1,23 @@
-"""STUB router (LEAD skeleton): schema-valid sample data. CORE replaces it (template first, LLM via port)."""
+"""Advisory slice HTTP router: POST /api/v1/advisory — EN/BN template or optional LLM briefing."""
 
-from fastapi import APIRouter
+from __future__ import annotations
+
+import asyncio
+
+from fastapi import APIRouter, Depends
 
 from app.core.errors import PROBLEM_RESPONSES
 
-from .schemas import AdvisoryAction, AdvisoryRequest, AdvisoryResponse
+from .deps import get_advisory_service
+from .schemas import AdvisoryRequest, AdvisoryResponse
+from .service import AdvisoryService
 
 router = APIRouter(prefix="/api/v1", tags=["advisory"], responses=PROBLEM_RESPONSES)
 
 
 @router.post("/advisory", response_model=AdvisoryResponse, summary="Short officer advisory for one ward")
-def advisory(req: AdvisoryRequest) -> AdvisoryResponse:
-    return AdvisoryResponse(
-        ward_id=req.ward_id,
-        origin_week=req.origin_week,
-        horizon=req.horizon,
-        language=req.language,
-        tier="High",
-        headline=f"{req.ward_id}: High risk expected in {req.horizon} weeks",
-        summary="Template advisory (stub).",
-        actions=[AdvisoryAction(action="Larvicide drains and containers", when="this week")],
-        source="template",
-        model=None,
-        cached=False,
-        numbers_validated=True,
-    )
+async def advisory(
+    req: AdvisoryRequest,
+    svc: AdvisoryService = Depends(get_advisory_service),
+) -> AdvisoryResponse:
+    return await asyncio.to_thread(svc.advisory, req)
