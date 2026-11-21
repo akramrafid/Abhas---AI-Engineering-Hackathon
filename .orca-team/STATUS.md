@@ -1,6 +1,8 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
+**21:10 BST — HAND-OFF: all agents stopped (WIP pushed on their branches). The Antigravity LEAD (Gemini 4 Neon XHigh) takes over and follows `docs/ANTIGRAVITY-PROMPT.md` from Step 0. Claude Opus is used only by the human for review (r2), the hallway test and the dry run.**
+
 Phase: 3 — Build Wave 1B (Phase 2 Design + Contracts Lock 100% GREEN; `main` fast-forwarded) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
 Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`, pushed to origin) · Run: `run_de147862c969` · Active LEAD: Claude Opus 5.5 max (resumed 19:21 BST). LEAD does architecture, system design and code review only; builders write code.
 
