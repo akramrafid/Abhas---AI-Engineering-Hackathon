@@ -4,7 +4,7 @@ Satisfies `node .orca-team/tools/gates.mjs prd --strict` requirements.
 """
 
 from pathlib import Path
-import re
+
 from fastapi.testclient import TestClient
 
 from app.main import create_app
