@@ -1,0 +1,1463 @@
+{
+  "model_version": "abhas-lgbm-1.0.0",
+  "generated_at": "2026-11-21T15:41:31+00:00",
+  "split": "Expanding-window chronological folds test 2019\u20132022 (purged); 2023 tunes hyperparameters, NegBin conformal bands & cost-sensitive tier cut-offs; 2024\u20132025 hold-out locked by SHA-256 and scored once.",
+  "metrics": [
+    {
+      "model": "lightgbm",
+      "horizon": 1,
+      "period": "2019",
+      "mae": 1.3392,
+      "rmse": 2.811,
+      "poisson_deviance": 1.1507,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 1,
+      "period": "2019",
+      "mae": 1.5246,
+      "rmse": 3.1012,
+      "poisson_deviance": 1.3955,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 1,
+      "period": "2019",
+      "mae": 1.8171,
+      "rmse": 4.2023,
+      "poisson_deviance": 1.4905,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 1,
+      "period": "2019",
+      "mae": 1.5553,
+      "rmse": 3.2122,
+      "poisson_deviance": 2.3109,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 1,
+      "period": "2019",
+      "mae": 1.8474,
+      "rmse": 3.9229,
+      "poisson_deviance": 6.4641,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 1,
+      "period": "2019",
+      "mae": 1.6904,
+      "rmse": 3.3999,
+      "poisson_deviance": 4.7712,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 2,
+      "period": "2019",
+      "mae": 1.3004,
+      "rmse": 2.655,
+      "poisson_deviance": 1.1601,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 2,
+      "period": "2019",
+      "mae": 1.519,
+      "rmse": 3.0898,
+      "poisson_deviance": 1.3881,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 2,
+      "period": "2019",
+      "mae": 1.8679,
+      "rmse": 4.3812,
+      "poisson_deviance": 1.5338,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 2,
+      "period": "2019",
+      "mae": 1.5553,
+      "rmse": 3.2122,
+      "poisson_deviance": 2.3109,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 2,
+      "period": "2019",
+      "mae": 1.8474,
+      "rmse": 3.9229,
+      "poisson_deviance": 6.4641,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 2,
+      "period": "2019",
+      "mae": 1.8897,
+      "rmse": 3.7374,
+      "poisson_deviance": 7.1558,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 3,
+      "period": "2019",
+      "mae": 1.4763,
+      "rmse": 2.9328,
+      "poisson_deviance": 1.6019,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 3,
+      "period": "2019",
+      "mae": 1.5248,
+      "rmse": 3.1001,
+      "poisson_deviance": 1.3948,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 3,
+      "period": "2019",
+      "mae": 2.1588,
+      "rmse": 6.0271,
+      "poisson_deviance": 2.0506,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 3,
+      "period": "2019",
+      "mae": 1.5553,
+      "rmse": 3.2122,
+      "poisson_deviance": 2.3109,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 3,
+      "period": "2019",
+      "mae": 1.8474,
+      "rmse": 3.9229,
+      "poisson_deviance": 6.4641,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 3,
+      "period": "2019",
+      "mae": 2.2442,
+      "rmse": 4.3821,
+      "poisson_deviance": 9.3131,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 4,
+      "period": "2019",
+      "mae": 1.5491,
+      "rmse": 3.2288,
+      "poisson_deviance": 1.7158,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 4,
+      "period": "2019",
+      "mae": 1.5241,
+      "rmse": 3.098,
+      "poisson_deviance": 1.3962,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 4,
+      "period": "2019",
+      "mae": 1.7713,
+      "rmse": 3.4411,
+      "poisson_deviance": 1.6774,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 4,
+      "period": "2019",
+      "mae": 1.5553,
+      "rmse": 3.2122,
+      "poisson_deviance": 2.3109,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 4,
+      "period": "2019",
+      "mae": 1.8474,
+      "rmse": 3.9229,
+      "poisson_deviance": 6.4641,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 4,
+      "period": "2019",
+      "mae": 2.5949,
+      "rmse": 4.8467,
+      "poisson_deviance": 12.0538,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 1,
+      "period": "2020",
+      "mae": 1.1014,
+      "rmse": 2.1325,
+      "poisson_deviance": 0.9405,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 1,
+      "period": "2020",
+      "mae": 1.2482,
+      "rmse": 2.3665,
+      "poisson_deviance": 1.1053,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 1,
+      "period": "2020",
+      "mae": 1.2423,
+      "rmse": 2.4925,
+      "poisson_deviance": 1.2287,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 1,
+      "period": "2020",
+      "mae": 1.3188,
+      "rmse": 2.5209,
+      "poisson_deviance": 2.0332,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 1,
+      "period": "2020",
+      "mae": 1.959,
+      "rmse": 4.0217,
+      "poisson_deviance": 6.1839,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 1,
+      "period": "2020",
+      "mae": 1.5449,
+      "rmse": 3.0342,
+      "poisson_deviance": 4.3639,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 2,
+      "period": "2020",
+      "mae": 1.0895,
+      "rmse": 2.0835,
+      "poisson_deviance": 0.9632,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 2,
+      "period": "2020",
+      "mae": 1.2476,
+      "rmse": 2.3687,
+      "poisson_deviance": 1.1063,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 2,
+      "period": "2020",
+      "mae": 1.2419,
+      "rmse": 2.5021,
+      "poisson_deviance": 1.2437,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 2,
+      "period": "2020",
+      "mae": 1.3188,
+      "rmse": 2.5209,
+      "poisson_deviance": 2.0332,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 2,
+      "period": "2020",
+      "mae": 1.959,
+      "rmse": 4.0217,
+      "poisson_deviance": 6.1839,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 2,
+      "period": "2020",
+      "mae": 1.7404,
+      "rmse": 3.3984,
+      "poisson_deviance": 6.0612,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 3,
+      "period": "2020",
+      "mae": 1.0066,
+      "rmse": 1.9401,
+      "poisson_deviance": 0.8848,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 3,
+      "period": "2020",
+      "mae": 1.2489,
+      "rmse": 2.3712,
+      "poisson_deviance": 1.1048,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 3,
+      "period": "2020",
+      "mae": 1.2906,
+      "rmse": 2.5419,
+      "poisson_deviance": 1.2904,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 3,
+      "period": "2020",
+      "mae": 1.3188,
+      "rmse": 2.5209,
+      "poisson_deviance": 2.0332,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 3,
+      "period": "2020",
+      "mae": 1.959,
+      "rmse": 4.0217,
+      "poisson_deviance": 6.1839,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 3,
+      "period": "2020",
+      "mae": 1.891,
+      "rmse": 3.6409,
+      "poisson_deviance": 7.9422,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 4,
+      "period": "2020",
+      "mae": 1.1303,
+      "rmse": 2.1333,
+      "poisson_deviance": 0.9894,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 4,
+      "period": "2020",
+      "mae": 1.2485,
+      "rmse": 2.3702,
+      "poisson_deviance": 1.1039,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 4,
+      "period": "2020",
+      "mae": 1.4629,
+      "rmse": 2.9123,
+      "poisson_deviance": 1.6376,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 4,
+      "period": "2020",
+      "mae": 1.3188,
+      "rmse": 2.5209,
+      "poisson_deviance": 2.0332,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 4,
+      "period": "2020",
+      "mae": 1.959,
+      "rmse": 4.0217,
+      "poisson_deviance": 6.1839,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 4,
+      "period": "2020",
+      "mae": 2.2231,
+      "rmse": 4.1554,
+      "poisson_deviance": 10.7745,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 1,
+      "period": "2021",
+      "mae": 0.99,
+      "rmse": 1.8766,
+      "poisson_deviance": 0.8962,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 1,
+      "period": "2021",
+      "mae": 1.3318,
+      "rmse": 2.5257,
+      "poisson_deviance": 1.2787,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 1,
+      "period": "2021",
+      "mae": 1.0403,
+      "rmse": 1.9883,
+      "poisson_deviance": 1.1026,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 1,
+      "period": "2021",
+      "mae": 1.377,
+      "rmse": 2.671,
+      "poisson_deviance": 1.7256,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 1,
+      "period": "2021",
+      "mae": 1.5087,
+      "rmse": 2.9973,
+      "poisson_deviance": 4.7206,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 1,
+      "period": "2021",
+      "mae": 1.4404,
+      "rmse": 2.8212,
+      "poisson_deviance": 5.5588,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 2,
+      "period": "2021",
+      "mae": 0.9978,
+      "rmse": 1.9166,
+      "poisson_deviance": 0.901,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 2,
+      "period": "2021",
+      "mae": 1.3352,
+      "rmse": 2.5351,
+      "poisson_deviance": 1.2806,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 2,
+      "period": "2021",
+      "mae": 1.0388,
+      "rmse": 1.9833,
+      "poisson_deviance": 1.0981,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 2,
+      "period": "2021",
+      "mae": 1.377,
+      "rmse": 2.671,
+      "poisson_deviance": 1.7256,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 2,
+      "period": "2021",
+      "mae": 1.5087,
+      "rmse": 2.9973,
+      "poisson_deviance": 4.7206,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 2,
+      "period": "2021",
+      "mae": 1.6276,
+      "rmse": 3.1768,
+      "poisson_deviance": 7.1546,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 3,
+      "period": "2021",
+      "mae": 0.9816,
+      "rmse": 1.8616,
+      "poisson_deviance": 0.8958,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 3,
+      "period": "2021",
+      "mae": 1.332,
+      "rmse": 2.5238,
+      "poisson_deviance": 1.277,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 3,
+      "period": "2021",
+      "mae": 1.0946,
+      "rmse": 2.0642,
+      "poisson_deviance": 1.1843,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 3,
+      "period": "2021",
+      "mae": 1.377,
+      "rmse": 2.671,
+      "poisson_deviance": 1.7256,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 3,
+      "period": "2021",
+      "mae": 1.5087,
+      "rmse": 2.9973,
+      "poisson_deviance": 4.7206,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 3,
+      "period": "2021",
+      "mae": 1.6929,
+      "rmse": 3.219,
+      "poisson_deviance": 7.1818,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 4,
+      "period": "2021",
+      "mae": 1.2106,
+      "rmse": 2.273,
+      "poisson_deviance": 1.22,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 4,
+      "period": "2021",
+      "mae": 1.3322,
+      "rmse": 2.5235,
+      "poisson_deviance": 1.2789,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 4,
+      "period": "2021",
+      "mae": 1.2989,
+      "rmse": 2.4105,
+      "poisson_deviance": 1.4382,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 4,
+      "period": "2021",
+      "mae": 1.377,
+      "rmse": 2.671,
+      "poisson_deviance": 1.7256,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 4,
+      "period": "2021",
+      "mae": 1.5087,
+      "rmse": 2.9973,
+      "poisson_deviance": 4.7206,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 4,
+      "period": "2021",
+      "mae": 1.8096,
+      "rmse": 3.4319,
+      "poisson_deviance": 9.5116,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 1,
+      "period": "2022",
+      "mae": 1.3596,
+      "rmse": 2.8108,
+      "poisson_deviance": 1.2249,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 1,
+      "period": "2022",
+      "mae": 1.5568,
+      "rmse": 3.2604,
+      "poisson_deviance": 1.8973,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 1,
+      "period": "2022",
+      "mae": 1.426,
+      "rmse": 2.6789,
+      "poisson_deviance": 1.2416,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 1,
+      "period": "2022",
+      "mae": 1.5911,
+      "rmse": 3.3294,
+      "poisson_deviance": 2.1964,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 1,
+      "period": "2022",
+      "mae": 2.0163,
+      "rmse": 4.2004,
+      "poisson_deviance": 10.2793,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 1,
+      "period": "2022",
+      "mae": 1.8404,
+      "rmse": 3.589,
+      "poisson_deviance": 4.9707,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 2,
+      "period": "2022",
+      "mae": 1.3123,
+      "rmse": 2.6187,
+      "poisson_deviance": 1.0931,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 2,
+      "period": "2022",
+      "mae": 1.5585,
+      "rmse": 3.2629,
+      "poisson_deviance": 1.8978,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 2,
+      "period": "2022",
+      "mae": 1.4239,
+      "rmse": 2.6696,
+      "poisson_deviance": 1.2437,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 2,
+      "period": "2022",
+      "mae": 1.5911,
+      "rmse": 3.3294,
+      "poisson_deviance": 2.1964,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 2,
+      "period": "2022",
+      "mae": 2.0163,
+      "rmse": 4.2004,
+      "poisson_deviance": 10.2793,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 2,
+      "period": "2022",
+      "mae": 2.1657,
+      "rmse": 4.1927,
+      "poisson_deviance": 8.5283,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 3,
+      "period": "2022",
+      "mae": 1.4786,
+      "rmse": 3.0712,
+      "poisson_deviance": 1.515,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 3,
+      "period": "2022",
+      "mae": 1.5582,
+      "rmse": 3.2616,
+      "poisson_deviance": 1.8963,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 3,
+      "period": "2022",
+      "mae": 1.4543,
+      "rmse": 2.6585,
+      "poisson_deviance": 1.3234,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 3,
+      "period": "2022",
+      "mae": 1.5911,
+      "rmse": 3.3294,
+      "poisson_deviance": 2.1964,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 3,
+      "period": "2022",
+      "mae": 2.0163,
+      "rmse": 4.2004,
+      "poisson_deviance": 10.2793,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 3,
+      "period": "2022",
+      "mae": 2.4151,
+      "rmse": 4.6238,
+      "poisson_deviance": 14.5437,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 4,
+      "period": "2022",
+      "mae": 1.6694,
+      "rmse": 3.4665,
+      "poisson_deviance": 2.0756,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 4,
+      "period": "2022",
+      "mae": 1.5565,
+      "rmse": 3.2609,
+      "poisson_deviance": 1.8954,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 4,
+      "period": "2022",
+      "mae": 1.5944,
+      "rmse": 2.9915,
+      "poisson_deviance": 1.5971,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 4,
+      "period": "2022",
+      "mae": 1.5911,
+      "rmse": 3.3294,
+      "poisson_deviance": 2.1964,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 4,
+      "period": "2022",
+      "mae": 2.0163,
+      "rmse": 4.2004,
+      "poisson_deviance": 10.2793,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 4,
+      "period": "2022",
+      "mae": 2.7542,
+      "rmse": 5.157,
+      "poisson_deviance": 19.1552,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 1,
+      "period": "tune_2023",
+      "mae": 1.1905,
+      "rmse": 2.4117,
+      "poisson_deviance": 0.9711,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 1,
+      "period": "tune_2023",
+      "mae": 1.5817,
+      "rmse": 3.2377,
+      "poisson_deviance": 1.5026,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 1,
+      "period": "tune_2023",
+      "mae": 1.8836,
+      "rmse": 4.93,
+      "poisson_deviance": 1.589,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 1,
+      "period": "tune_2023",
+      "mae": 1.5946,
+      "rmse": 3.294,
+      "poisson_deviance": 1.9074,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 1,
+      "period": "tune_2023",
+      "mae": 2.1224,
+      "rmse": 4.2004,
+      "poisson_deviance": 4.6724,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 1,
+      "period": "tune_2023",
+      "mae": 1.8596,
+      "rmse": 3.7141,
+      "poisson_deviance": 5.474,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 2,
+      "period": "tune_2023",
+      "mae": 1.2414,
+      "rmse": 2.5331,
+      "poisson_deviance": 1.0242,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 2,
+      "period": "tune_2023",
+      "mae": 1.5827,
+      "rmse": 3.2414,
+      "poisson_deviance": 1.5033,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 2,
+      "period": "tune_2023",
+      "mae": 1.874,
+      "rmse": 5.1241,
+      "poisson_deviance": 1.5846,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 2,
+      "period": "tune_2023",
+      "mae": 1.5946,
+      "rmse": 3.294,
+      "poisson_deviance": 1.9074,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 2,
+      "period": "tune_2023",
+      "mae": 2.1224,
+      "rmse": 4.2004,
+      "poisson_deviance": 4.6724,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 2,
+      "period": "tune_2023",
+      "mae": 2.4285,
+      "rmse": 4.7457,
+      "poisson_deviance": 8.929,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 3,
+      "period": "tune_2023",
+      "mae": 1.2326,
+      "rmse": 2.4761,
+      "poisson_deviance": 1.0373,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 3,
+      "period": "tune_2023",
+      "mae": 1.582,
+      "rmse": 3.2383,
+      "poisson_deviance": 1.5027,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 3,
+      "period": "tune_2023",
+      "mae": 1.8368,
+      "rmse": 4.9063,
+      "poisson_deviance": 1.5335,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 3,
+      "period": "tune_2023",
+      "mae": 1.5946,
+      "rmse": 3.294,
+      "poisson_deviance": 1.9074,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 3,
+      "period": "tune_2023",
+      "mae": 2.1224,
+      "rmse": 4.2004,
+      "poisson_deviance": 4.6724,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 3,
+      "period": "tune_2023",
+      "mae": 2.6942,
+      "rmse": 5.25,
+      "poisson_deviance": 12.336,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 4,
+      "period": "tune_2023",
+      "mae": 1.4277,
+      "rmse": 2.8192,
+      "poisson_deviance": 1.218,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 4,
+      "period": "tune_2023",
+      "mae": 1.5837,
+      "rmse": 3.239,
+      "poisson_deviance": 1.503,
+      "n": 3120
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 4,
+      "period": "tune_2023",
+      "mae": 1.7128,
+      "rmse": 3.6428,
+      "poisson_deviance": 1.5597,
+      "n": 3120
+    },
+    {
+      "model": "climatology",
+      "horizon": 4,
+      "period": "tune_2023",
+      "mae": 1.5946,
+      "rmse": 3.294,
+      "poisson_deviance": 1.9074,
+      "n": 3120
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 4,
+      "period": "tune_2023",
+      "mae": 2.1224,
+      "rmse": 4.2004,
+      "poisson_deviance": 4.6724,
+      "n": 3120
+    },
+    {
+      "model": "persistence",
+      "horizon": 4,
+      "period": "tune_2023",
+      "mae": 2.734,
+      "rmse": 5.2345,
+      "poisson_deviance": 13.2816,
+      "n": 3120
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "mae": 0.9503,
+      "rmse": 1.8415,
+      "poisson_deviance": 0.783,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "mae": 1.2348,
+      "rmse": 2.362,
+      "poisson_deviance": 1.1256,
+      "n": 6300
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "mae": 1.1945,
+      "rmse": 2.4614,
+      "poisson_deviance": 1.1581,
+      "n": 6300
+    },
+    {
+      "model": "climatology",
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "mae": 1.2591,
+      "rmse": 2.4526,
+      "poisson_deviance": 1.3326,
+      "n": 6300
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "mae": 1.6933,
+      "rmse": 3.5826,
+      "poisson_deviance": 4.7689,
+      "n": 6300
+    },
+    {
+      "model": "persistence",
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "mae": 1.4094,
+      "rmse": 2.8322,
+      "poisson_deviance": 4.872,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "mae": 1.0192,
+      "rmse": 2.0482,
+      "poisson_deviance": 0.8448,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "mae": 1.2347,
+      "rmse": 2.361,
+      "poisson_deviance": 1.1257,
+      "n": 6300
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "mae": 1.1804,
+      "rmse": 2.4254,
+      "poisson_deviance": 1.1499,
+      "n": 6300
+    },
+    {
+      "model": "climatology",
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "mae": 1.2591,
+      "rmse": 2.4526,
+      "poisson_deviance": 1.3326,
+      "n": 6300
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "mae": 1.6933,
+      "rmse": 3.5826,
+      "poisson_deviance": 4.7689,
+      "n": 6300
+    },
+    {
+      "model": "persistence",
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "mae": 1.6587,
+      "rmse": 3.2962,
+      "poisson_deviance": 7.6141,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "mae": 1.021,
+      "rmse": 1.9867,
+      "poisson_deviance": 0.8761,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "mae": 1.2353,
+      "rmse": 2.3616,
+      "poisson_deviance": 1.1253,
+      "n": 6300
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "mae": 1.2363,
+      "rmse": 2.4681,
+      "poisson_deviance": 1.2268,
+      "n": 6300
+    },
+    {
+      "model": "climatology",
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "mae": 1.2591,
+      "rmse": 2.4526,
+      "poisson_deviance": 1.3326,
+      "n": 6300
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "mae": 1.6933,
+      "rmse": 3.5826,
+      "poisson_deviance": 4.7689,
+      "n": 6300
+    },
+    {
+      "model": "persistence",
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "mae": 1.8694,
+      "rmse": 3.5796,
+      "poisson_deviance": 9.9031,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm",
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "mae": 1.2094,
+      "rmse": 2.3547,
+      "poisson_deviance": 1.0846,
+      "n": 6300
+    },
+    {
+      "model": "lightgbm_no_weather",
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "mae": 1.2363,
+      "rmse": 2.3644,
+      "poisson_deviance": 1.127,
+      "n": 6300
+    },
+    {
+      "model": "negbin_glm",
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "mae": 1.3929,
+      "rmse": 2.7267,
+      "poisson_deviance": 1.4354,
+      "n": 6300
+    },
+    {
+      "model": "climatology",
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "mae": 1.2591,
+      "rmse": 2.4526,
+      "poisson_deviance": 1.3326,
+      "n": 6300
+    },
+    {
+      "model": "seasonal_naive",
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "mae": 1.6933,
+      "rmse": 3.5826,
+      "poisson_deviance": 4.7689,
+      "n": 6300
+    },
+    {
+      "model": "persistence",
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "mae": 2.0559,
+      "rmse": 3.849,
+      "poisson_deviance": 12.3609,
+      "n": 6300
+    }
+  ],
+  "coverage": [
+    {
+      "horizon": 1,
+      "period": "2019",
+      "coverage_80": 0.8885
+    },
+    {
+      "horizon": 2,
+      "period": "2019",
+      "coverage_80": 0.8468
+    },
+    {
+      "horizon": 3,
+      "period": "2019",
+      "coverage_80": 0.8484
+    },
+    {
+      "horizon": 4,
+      "period": "2019",
+      "coverage_80": 0.8596
+    },
+    {
+      "horizon": 1,
+      "period": "2020",
+      "coverage_80": 0.8119
+    },
+    {
+      "horizon": 2,
+      "period": "2020",
+      "coverage_80": 0.8179
+    },
+    {
+      "horizon": 3,
+      "period": "2020",
+      "coverage_80": 0.8571
+    },
+    {
+      "horizon": 4,
+      "period": "2020",
+      "coverage_80": 0.8353
+    },
+    {
+      "horizon": 1,
+      "period": "2021",
+      "coverage_80": 0.8388
+    },
+    {
+      "horizon": 2,
+      "period": "2021",
+      "coverage_80": 0.8218
+    },
+    {
+      "horizon": 3,
+      "period": "2021",
+      "coverage_80": 0.7881
+    },
+    {
+      "horizon": 4,
+      "period": "2021",
+      "coverage_80": 0.8019
+    },
+    {
+      "horizon": 1,
+      "period": "2022",
+      "coverage_80": 0.8712
+    },
+    {
+      "horizon": 2,
+      "period": "2022",
+      "coverage_80": 0.8622
+    },
+    {
+      "horizon": 3,
+      "period": "2022",
+      "coverage_80": 0.8231
+    },
+    {
+      "horizon": 4,
+      "period": "2022",
+      "coverage_80": 0.826
+    },
+    {
+      "horizon": 1,
+      "period": "tune_2023",
+      "coverage_80": 0.8378
+    },
+    {
+      "horizon": 2,
+      "period": "tune_2023",
+      "coverage_80": 0.8263
+    },
+    {
+      "horizon": 3,
+      "period": "tune_2023",
+      "coverage_80": 0.8654
+    },
+    {
+      "horizon": 4,
+      "period": "tune_2023",
+      "coverage_80": 0.8574
+    },
+    {
+      "horizon": 1,
+      "period": "holdout_2024_2025",
+      "coverage_80": 0.8206
+    },
+    {
+      "horizon": 2,
+      "period": "holdout_2024_2025",
+      "coverage_80": 0.809
+    },
+    {
+      "horizon": 3,
+      "period": "holdout_2024_2025",
+      "coverage_80": 0.8129
+    },
+    {
+      "horizon": 4,
+      "period": "holdout_2024_2025",
+      "coverage_80": 0.8083
+    }
+  ],
+  "confusion": {
+    "labels": [
+      "Low",
+      "Medium",
+      "High",
+      "Critical"
+    ],
+    "matrix": [
+      [
+        17273,
+        519,
+        275,
+        69
+      ],
+      [
+        592,
+        1482,
+        1396,
+        742
+      ],
+      [
+        36,
+        480,
+        815,
+        885
+      ],
+      [
+        0,
+        46,
+        153,
+        437
+      ]
+    ],
+    "within_one_tier": 0.9537,
+    "critical_recall": 0.9277,
+    "macro_f1": 0.5125
+  },
+  "holdout_locked_sha256": "4ab5539f136b5fc7b48986669930be722cf387b9b2772964238e6150639e714b"
+}
