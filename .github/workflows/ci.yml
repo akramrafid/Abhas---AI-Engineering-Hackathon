@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "lead", "akramrafid/**"]
+  pull_request:
+    branches: ["main", "lead"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, Typecheck, Test, Smoke & Red-Team
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: |
+            package-lock.json
+            apps/web/package-lock.json
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install root and web JS dependencies (no install scripts)
+        run: |
+          npm ci --no-audit --no-fund --ignore-scripts
+          npm --prefix apps/web ci --no-audit --no-fund --ignore-scripts
+
+      - name: Install Python dependencies
+        working-directory: apps/api
+        run: uv sync --frozen --python 3.12
+
+      - name: Migrate, seed database, and verify model artifact SHA-256
+        run: |
+          npm run db:migrate
+          npm run seed
+          node scripts/py.mjs -m ml.verify_artifact
+
+      - name: Lint (Ruff + ESLint)
+        run: npm run lint
+
+      - name: Typecheck (Pyright + TypeScript)
+        run: npm run typecheck
+
+      - name: API and web tests
+        run: npm run test
+
+      - name: Architecture slice and resilience gates
+        run: node .orca-team/tools/gates.mjs slices resilience
+
+      - name: Red-team security suite
+        run: npm run redteam
+
+      - name: Golden-path API smoke test
+        run: npm run smoke:local
