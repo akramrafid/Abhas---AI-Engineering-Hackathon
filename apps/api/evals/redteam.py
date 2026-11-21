@@ -152,9 +152,7 @@ class _StubRepo:
     def ward(self, ward_id: str) -> WardRecord | None:
         return self._w if ward_id == self._w.ward_id else None
 
-    def history(
-        self, ward_id: str, start: date | None = None, end: date | None = None
-    ) -> list[Observation]:
+    def history(self, ward_id: str, start: date | None = None, end: date | None = None) -> list[Observation]:
         return [o for o in self._obs if o.ward_id == ward_id]
 
     def all_observations(self, end: date | None = None) -> list[Observation]:
@@ -249,7 +247,11 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
         for val in (-10.0, -0.01, 500.1, 99999.0):
             r = await client.post(
                 "/api/v1/scenario",
-                json={"ward_id": "DSCC_Ward_07", "origin_week": "2025-08-04", "weather": {"rainfall_mm": val}},
+                json={
+                    "ward_id": "DSCC_Ward_07",
+                    "origin_week": "2025-08-04",
+                    "weather": {"rainfall_mm": val},
+                },
             )
             if r.status_code != 422 or not _is_problem_json(r.headers):
                 probs.append(f"rain={val} returned {r.status_code}")
@@ -280,9 +282,7 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
             r1 = await client.post(
                 "/api/v1/forecast", json={"ward_ids": [payload], "origin_week": "2025-08-04"}
             )
-            r2 = await client.post(
-                "/api/v1/advisory", json={"ward_id": payload, "origin_week": "2025-08-04"}
-            )
+            r2 = await client.post("/api/v1/advisory", json={"ward_id": payload, "origin_week": "2025-08-04"})
             if r1.status_code != 422 or r2.status_code != 422:
                 probs.append(f"sqli accepted: fc={r1.status_code} adv={r2.status_code}")
         wards = await client.get("/api/v1/wards")
@@ -293,7 +293,9 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
     async def rt07_path_traversal_ward_id() -> list[str]:
         probs: list[str] = []
         for bad in ("../../.env", "..\\..\\.env", "%2e%2e%2f.env"):
-            r_fc = await client.post("/api/v1/forecast", json={"ward_ids": [bad], "origin_week": "2025-08-04"})
+            r_fc = await client.post(
+                "/api/v1/forecast", json={"ward_ids": [bad], "origin_week": "2025-08-04"}
+            )
             if r_fc.status_code != 422:
                 probs.append(f"forecast traversal {bad!r} status={r_fc.status_code}")
             r_lag = await client.get(f"/api/v1/wards/{bad}/lags")
@@ -389,7 +391,9 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
             )
             if r.status_code != 422 or not _is_problem_json(r.headers):
                 probs.append(f"forecast({src}) 9999-12-27 status={r.status_code}")
-        r_hm = await client.get("/api/v1/heatmap", params={"city": "Dhaka South", "origin_week": "9999-12-27"})
+        r_hm = await client.get(
+            "/api/v1/heatmap", params={"city": "Dhaka South", "origin_week": "9999-12-27"}
+        )
         if r_hm.status_code != 422:
             probs.append(f"heatmap 9999-12-27 status={r_hm.status_code}")
         r_adv = await client.post(
@@ -423,7 +427,9 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
             "/api/v1/advisory", json={"ward_id": "DSCC_Ward_07", "origin_week": "2025-08-05"}
         )
         if r_fc.status_code != 422 or r_sc.status_code != 422 or r_adv.status_code != 422:
-            probs.append(f"non-Monday statuses: fc={r_fc.status_code} sc={r_sc.status_code} adv={r_adv.status_code}")
+            probs.append(
+                f"non-Monday statuses: fc={r_fc.status_code} sc={r_sc.status_code} adv={r_adv.status_code}"
+            )
         return probs
 
     async def rt16_csv_formula_injection_defense() -> list[str]:
@@ -435,7 +441,7 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
             "@SUM(1+1)",
             "\t=1+1",
             "\r=1+1",
-            "  =HYPERLINK(\"http://evil.example\")",
+            '  =HYPERLINK("http://evil.example")',
         ]
         for v in vectors:
             safe = sanitize_csv_cell(v)
@@ -516,7 +522,9 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
             )
             svc = AdvisoryService(engine=engine, cache=cache, llm=bad_llm)
             res = svc.advisory(
-                AdvisoryRequest(ward_id="DSCC_Ward_07", origin_week=date(2025, 8, 4), horizon=3, language=lang)
+                AdvisoryRequest(
+                    ward_id="DSCC_Ward_07", origin_week=date(2025, 8, 4), horizon=3, language=lang
+                )
             )
             if res.source != "template" or not res.numbers_validated or bad_num in res.model_dump_json():
                 probs.append(f"hallucinated number {bad_num} ({lang}) not rejected")
@@ -672,7 +680,9 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
         probs: list[str] = []
         r405 = await client.delete("/api/v1/wards")
         if r405.status_code != 405 or not _is_problem_json(r405.headers):
-            probs.append(f"DELETE /api/v1/wards returned {r405.status_code} ({r405.headers.get('content-type')})")
+            probs.append(
+                f"DELETE /api/v1/wards returned {r405.status_code} ({r405.headers.get('content-type')})"
+            )
         r404 = await client.get("/api/v1/does-not-exist")
         if r404.status_code != 404 or not _is_problem_json(r404.headers):
             probs.append(f"404 returned {r404.status_code} ({r404.headers.get('content-type')})")
@@ -820,36 +830,190 @@ def build_attacks(client: httpx.AsyncClient, app: FastAPI) -> list[AttackSpec]:
         return probs
 
     return [
-        AttackSpec("RT-01", "LLM06", "high", "Oversized Content-Length body (>64 KB)", rt01_oversized_content_length),
-        AttackSpec("RT-02", "LLM06", "high", "Chunked streaming 2 MB body abort (<=2 chunks)", rt02_chunked_streaming_2mb),
-        AttackSpec("RT-03", "A08:2025", "high", "NaN and +/-Infinity weather JSON tokens", rt03_nan_infinity_weather),
-        AttackSpec("RT-04", "A08:2025", "high", "Negative and extreme (>500 mm) rainfall", rt04_negative_and_extreme_rain),
-        AttackSpec("RT-05", "A08:2025", "medium", "Out-of-range temp/humidity and empty override", rt05_temp_humidity_and_empty_override),
-        AttackSpec("RT-06", "A05:2025", "high", "SQL injection in ward_id across routes", rt06_sql_injection_ward_id),
+        AttackSpec(
+            "RT-01", "LLM06", "high", "Oversized Content-Length body (>64 KB)", rt01_oversized_content_length
+        ),
+        AttackSpec(
+            "RT-02",
+            "LLM06",
+            "high",
+            "Chunked streaming 2 MB body abort (<=2 chunks)",
+            rt02_chunked_streaming_2mb,
+        ),
+        AttackSpec(
+            "RT-03", "A08:2025", "high", "NaN and +/-Infinity weather JSON tokens", rt03_nan_infinity_weather
+        ),
+        AttackSpec(
+            "RT-04",
+            "A08:2025",
+            "high",
+            "Negative and extreme (>500 mm) rainfall",
+            rt04_negative_and_extreme_rain,
+        ),
+        AttackSpec(
+            "RT-05",
+            "A08:2025",
+            "medium",
+            "Out-of-range temp/humidity and empty override",
+            rt05_temp_humidity_and_empty_override,
+        ),
+        AttackSpec(
+            "RT-06", "A05:2025", "high", "SQL injection in ward_id across routes", rt06_sql_injection_ward_id
+        ),
         AttackSpec("RT-07", "A05:2025", "high", "Path traversal in ward_id", rt07_path_traversal_ward_id),
-        AttackSpec("RT-08", "A05:2025", "high", "CRLF and null-byte injection in ward_id", rt08_crlf_and_null_in_ward_id),
-        AttackSpec("RT-09", "LLM06", "high", "Invalid, huge, empty, and duplicate horizons", rt09_invalid_horizons),
-        AttackSpec("RT-10", "LLM06", "high", "Excess (>60) and duplicate ward_ids", rt10_excess_and_duplicate_wards),
-        AttackSpec("RT-11", "A08:2025", "medium", "Unknown extra JSON fields rejected (extra=forbid)", rt11_unknown_extra_json_fields),
-        AttackSpec("RT-12", "A08:2025", "medium", "Simple-CSRF Content-Type smuggling rejected", rt12_csrf_simple_content_type_rejected),
-        AttackSpec("RT-13", "A10:2025", "high", "Calendar overflow origin_week=9999-12-27", rt13_calendar_overflow_9999),
-        AttackSpec("RT-14", "A10:2025", "medium", "Pre-2016 and out-of-range dataset origin_week", rt14_pre_2016_and_out_of_range_origin),
-        AttackSpec("RT-15", "A10:2025", "medium", "Non-Monday origin_week rejected across routes", rt15_non_monday_origin),
-        AttackSpec("RT-16", "LLM10", "high", "CSV formula injection neutralization", rt16_csv_formula_injection_defense),
-        AttackSpec("RT-17", "LLM01", "high", "Direct prompt injection at ward_id boundary (EN/BN/base64/leet)", rt17_direct_prompt_injection_ward_boundary),
-        AttackSpec("RT-18", "LLM01", "high", "Indirect prompt injection & canary isolation in advisory prompt", rt18_indirect_prompt_injection_and_canary),
-        AttackSpec("RT-19", "LLM07", "high", "Hallucinated ASCII/Bangla numbers rejected by grounding validator", rt19_llm_hallucinated_numbers_ascii_and_bangla),
-        AttackSpec("RT-20", "LLM06", "high", "Rate-limit burst (429 + Retry-After) & prefix bypass blocked", rt20_rate_limit_burst_and_prefix_bypass),
-        AttackSpec("RT-21", "A09:2025", "high", "ANSI/CRLF/oversized X-Request-ID header injection sanitized", rt21_request_id_ansi_crlf_injection),
-        AttackSpec("RT-22", "A01:2025", "high", "/api/v1/ops fail-closed (remote, XFF, prod, brute-force)", rt22_ops_fail_closed_remote_proxied_prod_bruteforce),
-        AttackSpec("RT-23", "A10:2025", "high", "Non-ASCII X-Ops-Token and whitespace OPS_TOKEN return 401", rt23_ops_non_ascii_and_whitespace_token),
-        AttackSpec("RT-24", "A01:2025", "high", "CORS rejects untrusted Origin on GET and preflight OPTIONS", rt24_cors_untrusted_origin),
-        AttackSpec("RT-25", "A10:2025", "medium", "Method tampering 405, 404 problem+json, and 500 header/body hygiene", rt25_method_tampering_404_405_and_500_hygiene),
-        AttackSpec("RT-26", "A02:2025", "medium", "Security headers, no-store, and production docs disabled", rt26_security_headers_and_prod_docs_disabled),
-        AttackSpec("RT-27", "LLM02", "high", "Log secret redaction in JsonFormatter (msg & traceback)", rt27_log_secret_redaction),
-        AttackSpec("RT-28", "LLM04", "high", "Tampered model artifact SHA-256 rejected before pickle load", rt28_tampered_model_artifact_rejected),
-        AttackSpec("RT-29", "LLM10", "high", "Advisory output XSS/markdown-image exfiltration hygiene", rt29_advisory_output_xss_and_md_exfil_hygiene),
-        AttackSpec("RT-30", "A02:2025", "high", "Config SSRF, wildcard CORS, timeout bounds & FAULT_INJECT guard", rt30_config_ssrf_and_fault_guard),
+        AttackSpec(
+            "RT-08",
+            "A05:2025",
+            "high",
+            "CRLF and null-byte injection in ward_id",
+            rt08_crlf_and_null_in_ward_id,
+        ),
+        AttackSpec(
+            "RT-09", "LLM06", "high", "Invalid, huge, empty, and duplicate horizons", rt09_invalid_horizons
+        ),
+        AttackSpec(
+            "RT-10", "LLM06", "high", "Excess (>60) and duplicate ward_ids", rt10_excess_and_duplicate_wards
+        ),
+        AttackSpec(
+            "RT-11",
+            "A08:2025",
+            "medium",
+            "Unknown extra JSON fields rejected (extra=forbid)",
+            rt11_unknown_extra_json_fields,
+        ),
+        AttackSpec(
+            "RT-12",
+            "A08:2025",
+            "medium",
+            "Simple-CSRF Content-Type smuggling rejected",
+            rt12_csrf_simple_content_type_rejected,
+        ),
+        AttackSpec(
+            "RT-13",
+            "A10:2025",
+            "high",
+            "Calendar overflow origin_week=9999-12-27",
+            rt13_calendar_overflow_9999,
+        ),
+        AttackSpec(
+            "RT-14",
+            "A10:2025",
+            "medium",
+            "Pre-2016 and out-of-range dataset origin_week",
+            rt14_pre_2016_and_out_of_range_origin,
+        ),
+        AttackSpec(
+            "RT-15",
+            "A10:2025",
+            "medium",
+            "Non-Monday origin_week rejected across routes",
+            rt15_non_monday_origin,
+        ),
+        AttackSpec(
+            "RT-16",
+            "LLM10",
+            "high",
+            "CSV formula injection neutralization",
+            rt16_csv_formula_injection_defense,
+        ),
+        AttackSpec(
+            "RT-17",
+            "LLM01",
+            "high",
+            "Direct prompt injection at ward_id boundary (EN/BN/base64/leet)",
+            rt17_direct_prompt_injection_ward_boundary,
+        ),
+        AttackSpec(
+            "RT-18",
+            "LLM01",
+            "high",
+            "Indirect prompt injection & canary isolation in advisory prompt",
+            rt18_indirect_prompt_injection_and_canary,
+        ),
+        AttackSpec(
+            "RT-19",
+            "LLM07",
+            "high",
+            "Hallucinated ASCII/Bangla numbers rejected by grounding validator",
+            rt19_llm_hallucinated_numbers_ascii_and_bangla,
+        ),
+        AttackSpec(
+            "RT-20",
+            "LLM06",
+            "high",
+            "Rate-limit burst (429 + Retry-After) & prefix bypass blocked",
+            rt20_rate_limit_burst_and_prefix_bypass,
+        ),
+        AttackSpec(
+            "RT-21",
+            "A09:2025",
+            "high",
+            "ANSI/CRLF/oversized X-Request-ID header injection sanitized",
+            rt21_request_id_ansi_crlf_injection,
+        ),
+        AttackSpec(
+            "RT-22",
+            "A01:2025",
+            "high",
+            "/api/v1/ops fail-closed (remote, XFF, prod, brute-force)",
+            rt22_ops_fail_closed_remote_proxied_prod_bruteforce,
+        ),
+        AttackSpec(
+            "RT-23",
+            "A10:2025",
+            "high",
+            "Non-ASCII X-Ops-Token and whitespace OPS_TOKEN return 401",
+            rt23_ops_non_ascii_and_whitespace_token,
+        ),
+        AttackSpec(
+            "RT-24",
+            "A01:2025",
+            "high",
+            "CORS rejects untrusted Origin on GET and preflight OPTIONS",
+            rt24_cors_untrusted_origin,
+        ),
+        AttackSpec(
+            "RT-25",
+            "A10:2025",
+            "medium",
+            "Method tampering 405, 404 problem+json, and 500 header/body hygiene",
+            rt25_method_tampering_404_405_and_500_hygiene,
+        ),
+        AttackSpec(
+            "RT-26",
+            "A02:2025",
+            "medium",
+            "Security headers, no-store, and production docs disabled",
+            rt26_security_headers_and_prod_docs_disabled,
+        ),
+        AttackSpec(
+            "RT-27",
+            "LLM02",
+            "high",
+            "Log secret redaction in JsonFormatter (msg & traceback)",
+            rt27_log_secret_redaction,
+        ),
+        AttackSpec(
+            "RT-28",
+            "LLM04",
+            "high",
+            "Tampered model artifact SHA-256 rejected before pickle load",
+            rt28_tampered_model_artifact_rejected,
+        ),
+        AttackSpec(
+            "RT-29",
+            "LLM10",
+            "high",
+            "Advisory output XSS/markdown-image exfiltration hygiene",
+            rt29_advisory_output_xss_and_md_exfil_hygiene,
+        ),
+        AttackSpec(
+            "RT-30",
+            "A02:2025",
+            "high",
+            "Config SSRF, wildcard CORS, timeout bounds & FAULT_INJECT guard",
+            rt30_config_ssrf_and_fault_guard,
+        ),
     ]
 
 
@@ -860,7 +1024,9 @@ async def run_suite(only: set[str] | None = None) -> dict[str, Any]:
         app = create_app()
         async with app.router.lifespan_context(app):
             transport = httpx.ASGITransport(app=app)
-            async with httpx.AsyncClient(transport=transport, base_url="http://127.0.0.1:8000", timeout=30.0) as client:
+            async with httpx.AsyncClient(
+                transport=transport, base_url="http://127.0.0.1:8000", timeout=30.0
+            ) as client:
                 attacks = build_attacks(client, app)
                 if only:
                     attacks = [a for a in attacks if a.id in only]

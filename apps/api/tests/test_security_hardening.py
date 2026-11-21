@@ -90,20 +90,33 @@ def test_sec_1_and_sec_9_setup_zero_shell_and_ignore_scripts() -> None:
 
     setup_url = SETUP_SCRIPT.as_uri()
     js = (
-        f"import {{ useShell, resolveNpmInvocation, checkMacLibomp }} from {json.dumps(setup_url)}; "
+        f"import net from 'node:net'; "
+        f"import {{ useShell, resolveNpmInvocation, checkMacLibomp, formatLightgbmRuntimeHint, formatPortInUseHint, checkPortAvailable }} from {json.dumps(setup_url)}; "
         "const viaNpm = resolveNpmInvocation({ npm_execpath: 'C:\\\\Program Files\\\\node\\\\npm-cli.js' }, true, 'C:\\\\Program Files\\\\node\\\\node.exe'); "
         "const winFallback = resolveNpmInvocation({ ComSpec: 'C:\\\\Windows\\\\System32\\\\cmd.exe' }, true, 'node'); "
         "const posixFallback = resolveNpmInvocation({}, false, 'node'); "
         "const brewCalls = []; "
         "const macAuto = checkMacLibomp({ platform: 'darwin', env: {}, exists: () => false, hasCmd: (c) => c === 'brew', runCmd: (c, a) => { brewCalls.push([c, a]); } }); "
         "const macSkip = checkMacLibomp({ platform: 'darwin', env: { ABHAS_SKIP_BREW: '1' }, exists: () => false, hasCmd: () => true, runCmd: () => { throw new Error('should not run'); } }); "
+        "const winLgbHint = formatLightgbmRuntimeHint('WinError 126', 'win32'); "
+        "const macLgbHint = formatLightgbmRuntimeHint('libomp.dylib', 'darwin'); "
+        "const apiPortHint = formatPortInUseHint('API', 'API_PORT', 8000); "
+        "const webPortHint = formatPortInUseHint('Web', 'WEB_PORT', 3000); "
+        "const busySrv = net.createServer(); "
+        "await new Promise((res) => busySrv.listen(0, '127.0.0.1', res)); "
+        "const busyPort = busySrv.address().port; "
+        "const busyCheck = await checkPortAvailable(busyPort); "
+        "await new Promise((res) => busySrv.close(res)); "
         "console.log(JSON.stringify({ "
         "  shNpm: useShell('npm', true), "
         "  shMeta: useShell('C:\\\\Users\\\\Alice & Bob\\\\abhas\\\\python.exe', true), "
-        "  viaNpm, winFallback, posixFallback, macAuto, macSkip, brewCalls "
+        "  viaNpm, winFallback, posixFallback, macAuto, macSkip, brewCalls, "
+        "  winLgbHint, macLgbHint, apiPortHint, webPortHint, busyCheck "
         "}));"
     )
-    proc = subprocess.run(["node", "--input-type=module", "-e", js], capture_output=True, text=True, check=False)
+    proc = subprocess.run(
+        ["node", "--input-type=module", "-e", js], capture_output=True, text=True, check=False
+    )
     assert proc.returncode == 0, proc.stderr
     data = json.loads(proc.stdout.strip())
     assert data["shNpm"] is False
@@ -117,6 +130,11 @@ def test_sec_1_and_sec_9_setup_zero_shell_and_ignore_scripts() -> None:
     assert data["brewCalls"] == [["brew", ["install", "libomp"]]]
     assert data["macSkip"]["installed"] is False
     assert "brew install libomp" in data["macSkip"]["hint"]
+    assert "Visual C++" in data["winLgbHint"]
+    assert "brew install libomp" in data["macLgbHint"]
+    assert "API_PORT" in data["apiPortHint"]
+    assert "WEB_PORT" in data["webPortHint"]
+    assert data["busyCheck"]["available"] is False
 
 
 def test_sec_2_and_sec_6_ops_loopback_prod_xff_and_non_ascii(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -284,7 +302,9 @@ def test_sec_4_log_redaction_and_request_id_sanitization_and_correlation() -> No
     finally:
         http_logger.removeHandler(handler)
 
-    assert any(entry.get("request_id") == "trace-ok-42" and entry.get("route") == "/healthz" for entry in captured)
+    assert any(
+        entry.get("request_id") == "trace-ok-42" and entry.get("route") == "/healthz" for entry in captured
+    )
     assert request_id_var.get() == "-"
 
 
@@ -453,7 +473,13 @@ def test_sec_8_rate_limit_exact_exempt_trusted_proxies_and_lru(monkeypatch: pyte
 
 def test_sec_10_settings_validation() -> None:
     """SEC-10: Settings rejects wildcard/null CORS, SSRF Open-Meteo URLs, and non-positive timeouts."""
-    for bad_cors in ("*", "null", "http://localhost:3000,*", "ftp://example.com", "http://localhost:3000/path"):
+    for bad_cors in (
+        "*",
+        "null",
+        "http://localhost:3000,*",
+        "ftp://example.com",
+        "http://localhost:3000/path",
+    ):
         with pytest.raises(ValidationError):
             Settings(cors_origins=bad_cors)
 
@@ -517,7 +543,9 @@ def test_sec_12_forbid_extra_fields_and_non_finite_floats() -> None:
             '{"ward_id":"DSCC_Ward_07","origin_week":"2025-08-04","weather":{"avg_temp_c":Infinity}}',
             '{"ward_id":"DSCC_Ward_07","origin_week":"2025-08-04","weather":{"relative_humidity_pct":-Infinity}}',
         ):
-            r_nf = c.post("/api/v1/scenario", content=raw.encode(), headers={"Content-Type": "application/json"})
+            r_nf = c.post(
+                "/api/v1/scenario", content=raw.encode(), headers={"Content-Type": "application/json"}
+            )
             assert r_nf.status_code == 422
             assert r_nf.headers["content-type"].startswith("application/problem+json")
 

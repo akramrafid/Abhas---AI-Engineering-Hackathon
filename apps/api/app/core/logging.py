@@ -15,7 +15,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
 
 _SAFE_RID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
-_PG_DSN_RE = re.compile(r"(?i)(postgres(?:ql)?://[^:/\s]+:)[^@\s]+(@)")
+_PG_DSN_RE = re.compile(r"(postgres(?:ql)?://[^:/\s]+:)[^@\s]+(@)", re.IGNORECASE)
 _SECRET_RE = re.compile(
     r"sk-ant-[A-Za-z0-9_-]{12,}"
     r"|sk-[A-Za-z0-9_-]{20,}"
@@ -23,7 +23,7 @@ _SECRET_RE = re.compile(
     r"|ghp_[A-Za-z0-9]{36}"
     r"|xox[abprs]-[A-Za-z0-9-]+"
     r"|AKIA[0-9A-Z]{16}"
-    r"|(?i)(?:authorization\s*[:=]\s*(?:bearer\s+)?|bearer\s+|x-ops-token['\":=\s]+|password\s*=\s*)[^\s'\",;]+"
+    r"|(?i:(?:authorization\s*[:=]\s*(?:bearer\s+)?|bearer\s+|x-ops-token['\":=\s]+|password\s*=\s*)[^\s'\",;]+)"
 )
 
 
