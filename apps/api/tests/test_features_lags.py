@@ -279,3 +279,53 @@ def test_ac_3_features_ignore_rows_after_origin() -> None:
             weather_override={"rainfall_mm": 120.0},
         )
         pd.testing.assert_frame_equal(base_sc, mutated_sc)
+
+
+def test_cr_12_serving_features_empty_cutoff_and_unknown_override_raise() -> None:
+    """CR-12: build_serving_features rejects empty cutoff/ward filter, missing origin row, and unknown overrides."""
+    raw = _synthetic_two_ward_df(n_weeks=12, start=date(2023, 1, 2))
+    normals = fit_rain_normals(raw, max_year=2023)
+
+    # 1. Filtered frame after origin_week cutoff is empty (before first available week)
+    with pytest.raises(ValueError, match="No observations|empty|origin_week"):
+        build_serving_features(raw, origin_week=date(2022, 12, 26), horizon=3, rain_normals=normals)
+
+    # 2. Filtered frame after ward_ids filter is empty
+    with pytest.raises(ValueError, match="No observations|empty|ward"):
+        build_serving_features(
+            raw,
+            origin_week=date(2023, 3, 6),
+            horizon=3,
+            ward_ids=["XYZ_Ward_99"],
+            rain_normals=normals,
+        )
+
+    # 3. Rows exist <= origin_week, but no row equals origin_week (non-Monday or beyond data end)
+    with pytest.raises(ValueError, match="origin_week"):
+        build_serving_features(raw, origin_week=date(2023, 3, 7), horizon=3, rain_normals=normals)
+    with pytest.raises(ValueError, match="origin_week"):
+        build_serving_features(raw, origin_week=date(2023, 6, 5), horizon=3, rain_normals=normals)
+
+    # 4. Unknown weather_override key raises ValueError naming the key
+    with pytest.raises(ValueError, match="wind_speed"):
+        build_serving_features(
+            raw,
+            origin_week=date(2023, 3, 6),
+            horizon=3,
+            ward_ids=["DSCC_Ward_01"],
+            rain_normals=normals,
+            weather_override={"rainfall_mm": 120.0, "wind_speed": 15.0},
+        )
+
+    # 5. Allowed override keys (case-insensitive avg_temp_C) succeed
+    ok = build_serving_features(
+        raw,
+        origin_week=date(2023, 3, 6),
+        horizon=3,
+        ward_ids=["DSCC_Ward_01"],
+        rain_normals=normals,
+        weather_override={"avg_temp_C": 31.5, "relative_humidity_pct": 85.0},
+    )
+    assert len(ok) == 1
+    assert float(ok.loc[0, "temp_lag_0"]) == pytest.approx(31.5)
+    assert float(ok.loc[0, "humidity_lag_0"]) == pytest.approx(85.0)

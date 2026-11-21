@@ -368,12 +368,33 @@ def build_serving_features(
         allowed = set(ward_ids)
         df = df.loc[df["ward_id"].isin(allowed)].copy()
 
+    if df.empty:
+        ward_note = f" for wards {sorted(set(ward_ids))}" if ward_ids is not None else ""
+        raise ValueError(
+            f"No observations available on or before origin_week {cutoff.isoformat()}{ward_note}"
+        )
+
     if weather_override:
-        mask = df["week"] == cutoff
+        normalized_override: dict[str, float] = {}
+        unknown_keys: list[str] = []
         for col, val in weather_override.items():
-            key = col.strip().lower()
-            if key in REQUIRED_WEATHER_COLUMNS:
-                df.loc[mask, key] = float(val)
+            key = str(col).strip().lower()
+            if key not in REQUIRED_WEATHER_COLUMNS:
+                unknown_keys.append(str(col))
+            else:
+                normalized_override[key] = float(val)
+        if unknown_keys:
+            raise ValueError(
+                f"Unknown weather_override key(s) {sorted(unknown_keys)}; "
+                f"allowed keys are {list(REQUIRED_WEATHER_COLUMNS)}"
+            )
+        mask = df["week"] == cutoff
+        if not bool(mask.any()):
+            raise ValueError(
+                f"No observation row matches origin_week {cutoff.isoformat()} for weather_override"
+            )
+        for key, val in normalized_override.items():
+            df.loc[mask, key] = val
 
     feats = build_features(
         df,
@@ -383,7 +404,13 @@ def build_serving_features(
         rain_normals=rain_normals,
         drop_incomplete_lags=False,
     )
-    return feats.loc[feats["week"] == cutoff].reset_index(drop=True)
+    out = feats.loc[feats["week"] == cutoff].reset_index(drop=True)
+    if out.empty:
+        raise ValueError(
+            f"No feature row produced for origin_week {cutoff.isoformat()}; "
+            "ensure origin_week is a Monday present in the observation frame"
+        )
+    return out
 
 
 @dataclass(frozen=True)
