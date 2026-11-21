@@ -33,16 +33,16 @@ this table mirrors it.
 
 | Seat · worker | Roles it fills | Load these skills | Primary: agent · model · effort | Out of quota → (in order) |
 |---|---|---|---|---|
-| **LEAD** | 1 PRD · 3 architecture · 8 integration; contracts, `gates.json`, merges, pushes, ARCHITECTURE.md | `swarm-lead`, `credentials-gate`, `product-requirements`, `solution-architecture`, `tech-lead-integration` | claude · `opus` · max | agy · Gemini 4 Neon · max |
-| **DESIGN** | 4 system design · PRD and architecture critiques (read-only) | `system-design` | agy · Gemini 4 Neon · max | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
+| **LEAD** | 1 PRD · 3 architecture · 8 integration; contracts, `gates.json`, merges, pushes, ARCHITECTURE.md | `swarm-lead`, `credentials-gate`, `product-requirements`, `solution-architecture`, `tech-lead-integration` | claude · `opus` · max | agy · Gemini 4 Neon (XHigh) |
+| **DESIGN** | 4 system design · PRD and architecture critiques (read-only) | `system-design` | agy · Gemini 4 Neon (XHigh) | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
 | **CORE** · `core-forecast` | 5 AI engineer · 9 backend · 15 LLMOps | `ai-engineering` / `backend-engineering` / `llmops-observability` (+ `claude-api` for the advisory) | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
 | **DATA** · `data-pipeline` | 6 data · 7 database | `data-engineering` / `database-engineering` | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
 | **UI** · `ui-dashboard` | 2 UX · 10 frontend | `ux-flow-design` / `frontend-engineering` + `frontend-design`, `vercel-react-best-practices`, `web-design-guidelines`, `webapp-testing` | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
 | **UI-2** · `ui-brand` | brand kit, `/brand` page | `frontend-engineering` + `frontend-design`, `web-design-guidelines` | agy · Gemini 4 Hydrogen · xhigh | agy · Gemini 4 Neon · xhigh → claude · `opus` · max |
 | **QA** · `qa-*` | 11 evals · 12 SQA · 14 deploy prep · 16 demo & docs | `eval-engineering` / `sqa-testing` / `vercel-deploy` / `demo-docs` (+ `webapp-testing`, `property-based-testing`) | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max |
-| **REVIEWER-CODE** | every merge and review round (all builder code is Gemini-written) | `code-review`, `production-standards`, `find-bugs`, `web-design-guidelines`, `webapp-testing` | claude · `opus` · max | LEAD reviews the merge itself (not the author) |
+| **REVIEWER-CODE** | every merge and review round (all builder code is Gemini-written) | `code-review`, `production-standards`, `find-bugs`, `web-design-guidelines`, `webapp-testing` | claude · `opus` · max | LEAD reviews the merge itself; Claude out → agy · Gemini 4 Neon (XHigh) |
 | **REVIEWER-SEC** | 13 red team + security review | `ai-red-team`, `security-review`, `differential-review`, `semgrep`, `supply-chain-risk-auditor` | claude · `opus` · max; agy · Gemini 4 Neon · xhigh for LEAD-written contracts and core | agy · Gemini 4 Neon · xhigh |
-| **OUTSIDER** | UX hallway test, scored demo dry run (read-only) | `webapp-testing` | claude · `opus` · max, fresh session with no project context | none — must be Claude (UI and docs are Gemini-written) |
+| **OUTSIDER** | UX hallway test, scored demo dry run (read-only) | `webapp-testing` | claude · `opus` · max, fresh session with no project context | agy · Gemini 4 Neon (XHigh) (same family: log it) |
 
 Only Claude Code (Opus 5.5) and Antigravity (Gemini 4 Neon, Gemini 4 Hydrogen) are used; no OpenCode,
 Sonnet, Kimi or Muse. Every builder also loads `production-standards` and `verification-before-completion`;
@@ -55,12 +55,13 @@ replaces UI-2 · Prove = CORE + UI + QA (fix tasks).
 ### Model names for `worker-start` (verify once: `/model` in agy and Claude)
 ```
 --agent claude       --model opus    --effort max      # Claude Opus 5.5
---agent antigravity  --model "Gemini 4 Neon"      --effort max | xhigh
---agent antigravity  --model "Gemini 4 Hydrogen"  --effort xhigh
+--agent antigravity  --model "Gemini 4 Neon (XHigh)"        # effort is part of the model id; Neon has no max
+--agent antigravity  --model "Gemini 4 Hydrogen (XHigh)"
 ```
 A name or effort is rejected → start without it, log it in STATUS.md "Model switches", fix model-routing.md.
 
 ### Quota pools
+**Human rule: any Claude limit hit → Gemini 4 Neon (XHigh)** (LEAD and every Opus seat).
 Claude Code (Opus) · Antigravity Gemini (Neon, Hydrogen — may share one quota). **Out of quota → Gemini 4 Neon
 xhigh**; if Neon is out too → Gemini 4 Hydrogen xhigh → Claude Opus 5.5 (only when the Claude slot is free).
 LEAD logs every `LIMIT HIT`, keeps Neon max (DESIGN) tasks short, batches reviews per wave when Opus runs low,

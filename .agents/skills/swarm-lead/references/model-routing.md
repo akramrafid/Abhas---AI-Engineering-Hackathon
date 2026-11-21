@@ -11,18 +11,20 @@ Opus is kept for LEAD and for checking Gemini-written work.
 ## Seats
 | Seat | Roles | Primary: agent · model · effort | When its limit runs out (in order) |
 |---|---|---|---|
-| LEAD | 1 requirements · 3 architecture · 8 integration | claude · Opus 5.5 (`opus`) · max | agy · Gemini 4 Neon · max |
-| DESIGN | 4 system design · critiques of PRD and architecture | agy · Gemini 4 Neon · max | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max (Claude slot free) |
+| LEAD | 1 requirements · 3 architecture · 8 integration | claude · Opus 5.5 (`opus`) · max | agy · Gemini 4 Neon (XHigh) |
+| DESIGN | 4 system design · critiques of PRD and architecture | agy · Gemini 4 Neon (XHigh) | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max (Claude slot free) |
 | UI (`ui-dashboard`) | 2 UX · 10 frontend | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max (Claude slot free) |
 | UI-2 (`ui-brand`) | brand kit, `/brand` page | agy · Gemini 4 Hydrogen · xhigh | agy · Gemini 4 Neon · xhigh → claude · `opus` · max (Claude slot free) |
 | CORE (`core-forecast`) | 5 AI engineering · 9 backend · 15 LLMOps | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max (Claude slot free) |
 | DATA (`data-pipeline`) | 6 data · 7 database | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max (Claude slot free) |
 | QA (`qa-*`) | 11 evals · 12 SQA · 14 deploy prep · 16 demo & docs | agy · Gemini 4 Neon · xhigh | agy · Gemini 4 Hydrogen · xhigh → claude · `opus` · max (Claude slot free) |
-| REVIEWER-CODE | code review of all code (all builder code is Gemini-written) | claude · `opus` · max | LEAD reviews the merge itself (LEAD is not the author) |
-| REVIEWER-SEC | 13 red team · security review | claude · `opus` · max; agy · Gemini 4 Neon · xhigh for LEAD-written contracts and core | agy · Gemini 4 Neon · xhigh |
-| OUTSIDER | hallway test (UX) · scored dry run (docs) | claude · `opus` · max, fresh session with no project context | none — must be Claude (UI and docs are Gemini-written) |
+| REVIEWER-CODE | code review of all code (all builder code is Gemini-written) | claude · `opus` · max | LEAD reviews the merge itself; if Claude is out → agy · Gemini 4 Neon (XHigh) |
+| REVIEWER-SEC | 13 red team · security review | claude · `opus` · max; agy · Gemini 4 Neon · xhigh for LEAD-written contracts and core | agy · Gemini 4 Neon (XHigh) |
+| OUTSIDER | hallway test (UX) · scored dry run (docs) | claude · `opus` · max, fresh session with no project context | agy · Gemini 4 Neon (XHigh) (same family as the author: LEAD logs it) |
 
 ## Rules
+0. **Human rule (2026-11-21): any Claude limit hit → Gemini 4 Neon (XHigh).** This covers LEAD and every Opus
+   seat. When it puts a checker in the author's family, LEAD logs it in STATUS.md "Model switches".
 1. **Out of quota → Gemini 4 Neon xhigh**; if Neon is out too → Gemini 4 Hydrogen xhigh → Claude Opus 5.5
    (only when the Claude slot is free).
 2. **Checker ≠ author family.** Families: Anthropic (Opus) · Google (Neon, Hydrogen). All review of
@@ -37,8 +39,8 @@ Opus is kept for LEAD and for checking Gemini-written work.
 ## Exact names for `worker-start`
 ```
 --agent claude       --model opus    --effort max      # Claude Opus 5.5
---agent antigravity  --model "Gemini 4 Neon"      --effort max | xhigh
---agent antigravity  --model "Gemini 4 Hydrogen"  --effort xhigh
+--agent antigravity  --model "Gemini 4 Neon (XHigh)"        # effort is part of the model id; Neon has no max
+--agent antigravity  --model "Gemini 4 Hydrogen (XHigh)"
 ```
 Names must match what each tool shows (`/model` in agy and Claude). If a name or effort level is rejected:
 start without it, note it in STATUS.md "Model switches", and fix this file.
