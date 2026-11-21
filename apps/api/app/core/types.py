@@ -1,9 +1,10 @@
 """Shared contract types used by every slice's schemas.py (LEAD owns this file)."""
 
-from datetime import date, timedelta
+import re
+from datetime import date, datetime, timedelta
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, Field, StringConstraints
+from pydantic import AfterValidator, BeforeValidator, Field, StringConstraints
 
 CITIES: tuple[str, ...] = ("Dhaka North", "Dhaka South", "Chattogram", "Gazipur", "Narayanganj")
 City = Literal["Dhaka North", "Dhaka South", "Chattogram", "Gazipur", "Narayanganj"]
@@ -17,7 +18,28 @@ TIERS: tuple[str, ...] = ("Low", "Medium", "High", "Critical")
 Tier = Literal["Low", "Medium", "High", "Critical"]
 TIER_BN: dict[str, str] = {"Low": "নিম্ন", "Medium": "মাঝারি", "High": "উচ্চ", "Critical": "সংকটপূর্ণ"}
 
-Horizon = Annotated[int, Field(ge=1, le=4, description="Weeks ahead of the origin week (1–4)")]
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _strict_int(value: object) -> object:
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("must be an integer")
+    return value
+
+
+def _strict_iso_date(value: object) -> object:
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return value
+    if isinstance(value, str) and _ISO_DATE_RE.fullmatch(value):
+        return value
+    raise ValueError("must be an ISO date in YYYY-MM-DD format")
+
+
+Horizon = Annotated[
+    int,
+    BeforeValidator(_strict_int),
+    Field(ge=1, le=4, description="Weeks ahead of the origin week (1–4)"),
+]
 WeatherMode = Literal["dataset", "live"]
 WeatherSourceUsed = Literal["dataset", "live", "cache", "climatology"]
 
@@ -41,5 +63,6 @@ def in_dataset_range(d: date) -> date:
     return d
 
 
-IsoWeek = Annotated[date, AfterValidator(_monday), Field(examples=["2025-08-04"])]
+IsoDate = Annotated[date, BeforeValidator(_strict_iso_date)]
+IsoWeek = Annotated[IsoDate, AfterValidator(_monday), Field(examples=["2025-08-04"])]
 DatasetOriginWeek = Annotated[IsoWeek, AfterValidator(in_dataset_range)]

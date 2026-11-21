@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import hashlib
-from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
 
 from app.core.errors import PROBLEM_RESPONSES
-from app.core.types import WARD_ID_PATTERN, City
+from app.core.types import WARD_ID_PATTERN, City, IsoDate
 
 from .deps import get_wards_service
 from .schemas import WardHistory, WardList
@@ -49,8 +48,8 @@ def ward_history(
     request: Request,
     response: Response,
     ward_id: Annotated[str, Path(pattern=WARD_ID_PATTERN)],
-    start: Annotated[date | None, Query()] = None,
-    end: Annotated[date | None, Query()] = None,
+    start: Annotated[IsoDate | None, Query()] = None,
+    end: Annotated[IsoDate | None, Query()] = None,
     svc: WardsService = Depends(get_wards_service),
 ) -> WardHistory | Response:
     result = svc.ward_history(ward_id=ward_id, start=start, end=end)

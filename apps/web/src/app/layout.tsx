@@ -17,6 +17,15 @@ export const metadata: Metadata = {
   title: "Abhas (আভাস) — Ward-Level Dengue Early Warning",
   description:
     "Rain today. Risk in three weeks. Act now. Multi-week rainfall lag forecasting for Bangladesh urban wards.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

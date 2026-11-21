@@ -93,6 +93,15 @@ class WeatherOverride(BaseModel):
     avg_temp_c: float | None = Field(default=None, ge=5, le=45, allow_inf_nan=False)
     relative_humidity_pct: float | None = Field(default=None, ge=0, le=100, allow_inf_nan=False)
 
+    @field_validator("rainfall_mm", "avg_temp_c", "relative_humidity_pct", mode="before")
+    @classmethod
+    def _reject_non_numeric(cls, value: object) -> object:
+        if value is None:
+            return None
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("must be a JSON number")
+        return value
+
     @model_validator(mode="after")
     def _any(self) -> "WeatherOverride":
         if self.rainfall_mm is None and self.avg_temp_c is None and self.relative_humidity_pct is None:

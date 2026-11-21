@@ -168,3 +168,28 @@ def test_sec_5_advisory_enforces_dataset_origin_range(origin_week: str) -> None:
     assert r.status_code == 422
     assert r.headers["content-type"].startswith("application/problem+json")
     assert "body.origin_week" in {e["field"] for e in r.json()["errors"]}
+
+
+def test_st201_strict_types_reject_booleans_and_epoch_dates() -> None:
+    """Strict input validation rejects JSON booleans as numbers/horizons and integer strings as ISO dates."""
+    with TestClient(create_app()) as c:
+        r_bool_weather = c.post(
+            "/api/v1/scenario",
+            json={
+                "ward_id": "DSCC_Ward_07",
+                "origin_week": "2025-08-04",
+                "weather": {"rainfall_mm": False},
+            },
+        )
+        assert r_bool_weather.status_code == 422
+        assert r_bool_weather.headers["content-type"].startswith("application/problem+json")
+
+        r_bool_horizon = c.post(
+            "/api/v1/forecast",
+            json={"ward_ids": ["DSCC_Ward_07"], "origin_week": "2025-08-04", "horizons": [True]},
+        )
+        assert r_bool_horizon.status_code == 422
+
+        r_epoch_start = c.get("/api/v1/wards/DSCC_Ward_07/history", params={"start": "0"})
+        assert r_epoch_start.status_code == 422
+        assert r_epoch_start.headers["content-type"].startswith("application/problem+json")
