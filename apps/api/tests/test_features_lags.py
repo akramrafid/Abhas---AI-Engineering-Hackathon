@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import date, timedelta
 
 import numpy as np
@@ -183,12 +184,20 @@ def test_serving_features_weather_override_is_isolated() -> None:
     raw = _synthetic_two_ward_df(n_weeks=15)
     raw_copy = raw.copy(deep=True)
     origin = date(2023, 3, 27)
-    base = build_serving_features(raw, origin_week=origin, horizon=3, ward_ids=["DSCC_Ward_01"])
+    normals = fit_rain_normals(raw, max_year=2023)
+    base = build_serving_features(
+        raw,
+        origin_week=origin,
+        horizon=3,
+        ward_ids=["DSCC_Ward_01"],
+        rain_normals=normals,
+    )
     over = build_serving_features(
         raw,
         origin_week=origin,
         horizon=3,
         ward_ids=["DSCC_Ward_01"],
+        rain_normals=normals,
         weather_override={"rainfall_mm": 120.0},
     )
     assert len(base) == 1 and len(over) == 1
@@ -329,3 +338,73 @@ def test_cr_12_serving_features_empty_cutoff_and_unknown_override_raise() -> Non
     assert len(ok) == 1
     assert float(ok.loc[0, "temp_lag_0"]) == pytest.approx(31.5)
     assert float(ok.loc[0, "humidity_lag_0"]) == pytest.approx(85.0)
+
+
+def test_cr_13_build_serving_features_requires_rain_normals() -> None:
+    """CR-13: build_serving_features requires pre-fitted rain_normals to prevent train/serve skew."""
+    raw = _synthetic_two_ward_df(n_weeks=12, start=date(2023, 1, 2))
+    origin = date(2023, 3, 6)
+
+    with pytest.raises(TypeError):
+        build_serving_features(raw, origin_week=origin, horizon=3, ward_ids=["DSCC_Ward_01"])  # type: ignore[call-arg]
+
+    with pytest.raises(ValueError, match="rain_normals"):
+        build_serving_features(
+            raw,
+            origin_week=origin,
+            horizon=3,
+            ward_ids=["DSCC_Ward_01"],
+            rain_normals=None,  # type: ignore[arg-type]
+        )
+
+
+def test_cr_13_build_features_warns_when_normals_omitted(caplog: pytest.LogCaptureFixture) -> None:
+    """CR-13: build_features logs a WARNING when rain_normals is omitted, and stays silent when passed."""
+    raw = _synthetic_two_ward_df(n_weeks=12, start=date(2023, 1, 2))
+    normals = fit_rain_normals(raw, max_year=2023)
+
+    with caplog.at_level(logging.WARNING, logger="abhas.features"):
+        build_features(raw, horizon=3)
+    assert any(
+        rec.levelno == logging.WARNING and "rain_normals" in rec.getMessage() for rec in caplog.records
+    )
+
+    caplog.clear()
+    with caplog.at_level(logging.WARNING, logger="abhas.features"):
+        build_features(raw, horizon=3, rain_normals=normals)
+    assert caplog.records == []
+
+
+def test_cr_5_normals_max_year() -> None:
+    """CR-5: fit_rain_normals and build_features honor explicit max_normal_year (e.g. 2018 dev cutoff)."""
+    # Build contiguous weekly series spanning 2018..2019 (104 weeks) with distinct rainfall per year
+    start = date(2018, 1, 1)
+    rows = []
+    for i in range(104):
+        wk = start + timedelta(weeks=i)
+        rows.append(
+            {
+                "ward_id": "DSCC_Ward_01",
+                "week": wk,
+                "population_density_sqkm": 50000.0,
+                "water_logging_risk_index": 0.80,
+                "sanitation_score": 0.40,
+                "avg_temp_c": 26.0,
+                "rainfall_mm": 20.0 if wk.year <= 2018 else 220.0,
+                "relative_humidity_pct": 75.0,
+            }
+        )
+    df = pd.DataFrame(rows)
+
+    normals_2018 = fit_rain_normals(df, max_normal_year=2018)
+    normals_2018_legacy = fit_rain_normals(df, max_year=2018)
+    assert normals_2018 == normals_2018_legacy
+    assert all(v == pytest.approx(20.0) for v in normals_2018.values())
+
+    feats_2018 = build_features(df, horizon=3, max_normal_year=2018)
+    feats_2019 = build_features(df, horizon=3, max_normal_year=2019)
+    row_2019_with_2018_normals = feats_2018.loc[feats_2018["week"] == date(2019, 7, 1)].iloc[0]
+    row_2019_with_2019_normals = feats_2019.loc[feats_2019["week"] == date(2019, 7, 1)].iloc[0]
+    # 2019 rain (220) - 2018-only normal (20) = +200.0; whereas <=2019 normal averages (20+220)/2=120 -> +100.0
+    assert float(row_2019_with_2018_normals["rain_anomaly"]) == pytest.approx(200.0)
+    assert float(row_2019_with_2019_normals["rain_anomaly"]) == pytest.approx(100.0)

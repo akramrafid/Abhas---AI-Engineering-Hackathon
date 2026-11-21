@@ -142,6 +142,7 @@ class OpenMeteoWeatherSource:
         breaker_threshold: int = 3,
         breaker_cooldown_s: float = 300.0,
         centroids_path: Path | None = None,
+        max_normal_year: int = DEFAULT_TRAIN_MAX_YEAR,
     ) -> None:
         settings = get_settings()
         self._repo = repo
@@ -155,6 +156,7 @@ class OpenMeteoWeatherSource:
         self._retry_base_s = retry_base_s
         self._breaker_threshold = breaker_threshold
         self._breaker_cooldown_s = breaker_cooldown_s
+        self._max_normal_year = int(max_normal_year)
 
         cfg = load_city_centroids(centroids_path)
         self._provider: str = str(cfg.get("provider", "Open-Meteo (CC BY 4.0)"))
@@ -198,7 +200,7 @@ class OpenMeteoWeatherSource:
         buckets: dict[int, list[tuple[float, float, float, float, float]]] = defaultdict(list)
         for ward in wards:
             for obs in self._repo.history(ward.ward_id):
-                if obs.week.year <= DEFAULT_TRAIN_MAX_YEAR:
+                if obs.week.year <= self._max_normal_year:
                     iso_w = canonical_iso_week(obs.week)
                     buckets[iso_w].append(
                         (

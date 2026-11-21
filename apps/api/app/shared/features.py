@@ -12,6 +12,7 @@ Guarantees:
 
 from __future__ import annotations
 
+import logging
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -22,6 +23,8 @@ import numpy as np
 import pandas as pd
 
 from app.ports.repositories import Observation, WardRecord
+
+logger = logging.getLogger("abhas.features")
 
 MAX_RAIN_LAG = 8
 MAX_WEATHER_LAG = 3
@@ -177,14 +180,18 @@ def observations_to_dataframe(
 def fit_rain_normals(
     df: pd.DataFrame,
     max_year: int = DEFAULT_TRAIN_MAX_YEAR,
+    *,
+    max_normal_year: int | None = None,
 ) -> dict[tuple[str, int], float]:
-    """Fit ward × ISO-week rainfall normals strictly on training years (`week.year <= max_year`).
+    """Fit ward × ISO-week rainfall normals strictly on training years (`week.year <= cutoff_year`).
 
     ISO week 53 is folded cleanly into week 52 so normals never suffer from 1-row buckets.
+    Accepts either `max_year` or explicit keyword `max_normal_year` (CR-5).
     """
+    cutoff_year = max_normal_year if max_normal_year is not None else max_year
     norm_df = normalize_observation_columns(df)
     years = [d.year for d in norm_df["week"].tolist()]
-    train_mask = [y <= max_year for y in years]
+    train_mask = [y <= cutoff_year for y in years]
     train_df = norm_df.loc[train_mask].copy()
     if train_df.empty:
         return {}
@@ -272,12 +279,18 @@ def build_features(
         cols = ["ward_id", "week", *REQUIRED_WEATHER_COLUMNS, *FEATURE_COLUMNS, "horizon", "target_week"]
         return pd.DataFrame(columns=cols)
 
-    # Resolve rain normals (prefer caller's pre-fitted training normals)
+    # Resolve rain normals (prefer caller's pre-fitted training normals; warn on on-the-fly refit per CR-13)
     normals: Mapping[tuple[str, int], float]
     if rain_normals is not None:
         normals = rain_normals
     else:
-        normals = fit_rain_normals(df, max_year=max_normal_year)
+        logger.warning(
+            "rain_normals omitted in build_features; fitting on-the-fly with max_normal_year=%d "
+            "(pass pre-fitted training normals to avoid train/serve skew)",
+            max_normal_year,
+            extra={"event": "rain_normals_refit_on_the_fly", "max_normal_year": max_normal_year},
+        )
+        normals = fit_rain_normals(df, max_normal_year=max_normal_year)
 
     # Fallback per-ward mean from the (already cutoff-filtered) frame if a ward has no <= max_normal_year rows
     ward_fallback_rain: dict[str, float] = {}
@@ -352,15 +365,19 @@ def build_serving_features(
     *,
     origin_week: date,
     horizon: int,
+    rain_normals: Mapping[tuple[str, int], float],
     ward_ids: Sequence[str] | None = None,
-    rain_normals: Mapping[tuple[str, int], float] | None = None,
     weather_override: Mapping[str, float] | None = None,
 ) -> pd.DataFrame:
     """Build feature row(s) for serving or what-if scenario at a specific `origin_week` and `horizon`.
 
+    Requires pre-fitted `rain_normals` from the model artifact (CR-13) to eliminate train/serve skew.
     `weather_override` (e.g. `{"rainfall_mm": 120.0}`) mutates ONLY a copy of the `origin_week`
     row(s) for the selected ward(s), strictly preserving zero future leakage.
     """
+    if rain_normals is None:
+        raise ValueError("rain_normals is required for build_serving_features to prevent train/serve skew")
+
     cutoff = _coerce_date(origin_week)
     df = normalize_observation_columns(obs_df)
     df = df.loc[df["week"] <= cutoff].copy()
