@@ -5,8 +5,8 @@
   "versioned_artifact_file": "abhas-lgbm-1.1.0.joblib",
   "artifact_size_bytes": 977451,
   "sha256": "57b1124376baded5764b28c8f3055b0ebc712a593fad7292b90fae47cc6034ad",
-  "trained_at": "2026-11-21T20:03:09+00:00",
-  "train_seconds": 339.61,
+  "trained_at": "2026-11-21T20:12:21+00:00",
+  "train_seconds": 318.84,
   "train_end_year": 2023,
   "max_normal_year": 2023,
   "train_max_year": 2023,
@@ -20,7 +20,7 @@
     "pandas": "3.1.1",
     "joblib": "1.6.0",
     "optuna": "5.1.0",
-    "xgboost": "3.4.1"
+    "xgboost": "3.0.5"
   },
   "device": {
     "requested": "auto",
@@ -33,12 +33,12 @@
   "gpu_driver": "576.52",
   "gpu_proof": {
     "samples": 959,
-    "peak_utilization_gpu_pct": 0.0,
-    "mean_utilization_gpu_pct": 0.0,
-    "peak_memory_used_mib": 3.0,
-    "peak_temperature_c": 42.0,
-    "peak_power_draw_w": 9.16,
-    "xgboost_confirmed_device": "cpu"
+    "peak_utilization_gpu_pct": 60.0,
+    "mean_utilization_gpu_pct": 39.45,
+    "peak_memory_used_mib": 171.0,
+    "peak_temperature_c": 64.0,
+    "peak_power_draw_w": 58.45,
+    "xgboost_confirmed_device": "cuda:0"
   },
   "feature_names": [
     "rainfall_lag_0",
@@ -335,14 +335,14 @@
     },
     "xgboost_by_horizon": {
       "1": {
-        "n_estimators": 425,
-        "learning_rate": 0.05065402261363369,
-        "max_depth": 4,
-        "min_child_weight": 2.855671460589556,
-        "subsample": 0.6824373122499838,
-        "colsample_bytree": 0.8376109923565989,
-        "reg_alpha": 0.011664736817637144,
-        "reg_lambda": 0.22363878657930628,
+        "n_estimators": 400,
+        "learning_rate": 0.053475117656895554,
+        "max_depth": 3,
+        "min_child_weight": 16.367800321904028,
+        "subsample": 0.7727119979200677,
+        "colsample_bytree": 0.6295280042018114,
+        "reg_alpha": 0.005549145071377375,
+        "reg_lambda": 1.9507332017752141,
         "max_bin": 256,
         "objective": "count:poisson",
         "tree_method": "hist",
@@ -351,14 +351,14 @@
         "verbosity": 0
       },
       "2": {
-        "n_estimators": 450,
-        "learning_rate": 0.03730419576628351,
-        "max_depth": 7,
-        "min_child_weight": 14.849895702120044,
-        "subsample": 0.7193203463393617,
-        "colsample_bytree": 0.6228781772299463,
-        "reg_alpha": 5.511399262252312,
-        "reg_lambda": 0.021389355636182855,
+        "n_estimators": 250,
+        "learning_rate": 0.05565873660344832,
+        "max_depth": 4,
+        "min_child_weight": 1.190056371044121,
+        "subsample": 0.8403377458054413,
+        "colsample_bytree": 0.8943596928962594,
+        "reg_alpha": 0.032279213970939545,
+        "reg_lambda": 2.506840146656814,
         "max_bin": 63,
         "objective": "count:poisson",
         "tree_method": "hist",
@@ -367,14 +367,14 @@
         "verbosity": 0
       },
       "3": {
-        "n_estimators": 300,
-        "learning_rate": 0.043324527947782916,
-        "max_depth": 5,
-        "min_child_weight": 2.083577592071017,
-        "subsample": 0.6547572309807387,
-        "colsample_bytree": 0.6017714237171529,
-        "reg_alpha": 0.061356438092120796,
-        "reg_lambda": 0.08074850276509939,
+        "n_estimators": 275,
+        "learning_rate": 0.0653271266905143,
+        "max_depth": 3,
+        "min_child_weight": 6.311288134094167,
+        "subsample": 0.774391444564495,
+        "colsample_bytree": 0.6372123733063992,
+        "reg_alpha": 0.0013914479076797988,
+        "reg_lambda": 2.501927819393329,
         "max_bin": 256,
         "objective": "count:poisson",
         "tree_method": "hist",
@@ -405,44 +405,44 @@
       "h1": {
         "n_trials_completed": 35,
         "best_mean_poisson_deviance": 0.93105,
-        "elapsed_s": 30.86
+        "elapsed_s": 32.4
       },
       "h2": {
         "n_trials_completed": 35,
         "best_mean_poisson_deviance": 0.9347,
-        "elapsed_s": 33.68
+        "elapsed_s": 36.52
       },
       "h3": {
         "n_trials_completed": 35,
         "best_mean_poisson_deviance": 1.10776,
-        "elapsed_s": 37.65
+        "elapsed_s": 31.96
       },
       "h4": {
         "n_trials_completed": 35,
         "best_mean_poisson_deviance": 1.37495,
-        "elapsed_s": 42.04
+        "elapsed_s": 37.46
       }
     },
     "xgboost": {
       "h1": {
-        "n_trials_completed": 12,
-        "best_mean_poisson_deviance": 0.92123,
-        "elapsed_s": 37.03
+        "n_trials_completed": 15,
+        "best_mean_poisson_deviance": 0.92761,
+        "elapsed_s": 37.12
       },
       "h2": {
-        "n_trials_completed": 9,
-        "best_mean_poisson_deviance": 0.95318,
-        "elapsed_s": 35.97
+        "n_trials_completed": 15,
+        "best_mean_poisson_deviance": 0.956,
+        "elapsed_s": 35.37
       },
       "h3": {
-        "n_trials_completed": 9,
-        "best_mean_poisson_deviance": 1.09809,
-        "elapsed_s": 38.86
+        "n_trials_completed": 13,
+        "best_mean_poisson_deviance": 1.10193,
+        "elapsed_s": 35.7
       },
       "h4": {
-        "n_trials_completed": 6,
-        "best_mean_poisson_deviance": 1.41169,
-        "elapsed_s": 35.52
+        "n_trials_completed": 8,
+        "best_mean_poisson_deviance": 1.44028,
+        "elapsed_s": 35.49
       }
     }
   },
@@ -583,134 +583,134 @@
       }
     },
     "xgboost": {
-      "overall_mean_mae": 1.2025,
+      "overall_mean_mae": 1.205,
       "by_horizon": {
         "h1": {
-          "mean_mae": 1.1292,
-          "mean_rmse": 2.2364,
-          "mean_poisson_deviance": 0.9212,
+          "mean_mae": 1.129,
+          "mean_rmse": 2.2402,
+          "mean_poisson_deviance": 0.9276,
           "folds": [
             {
               "period": "2019",
-              "mae": 1.2363,
-              "rmse": 2.5412,
-              "poisson_deviance": 0.9818
+              "mae": 1.2462,
+              "rmse": 2.5565,
+              "poisson_deviance": 0.9856
             },
             {
               "period": "2020",
-              "mae": 1.0743,
-              "rmse": 2.0797,
-              "poisson_deviance": 0.9
+              "mae": 1.0613,
+              "rmse": 2.0635,
+              "poisson_deviance": 0.8893
             },
             {
               "period": "2021",
-              "mae": 0.9705,
-              "rmse": 1.8629,
-              "poisson_deviance": 0.8591
+              "mae": 0.9535,
+              "rmse": 1.8109,
+              "poisson_deviance": 0.8411
             },
             {
               "period": "2022",
-              "mae": 1.2359,
-              "rmse": 2.4618,
-              "poisson_deviance": 0.944
+              "mae": 1.2549,
+              "rmse": 2.5298,
+              "poisson_deviance": 0.9945
             }
           ]
         },
         "h2": {
-          "mean_mae": 1.1257,
-          "mean_rmse": 2.2327,
-          "mean_poisson_deviance": 0.9532,
+          "mean_mae": 1.128,
+          "mean_rmse": 2.2208,
+          "mean_poisson_deviance": 0.956,
           "folds": [
             {
               "period": "2019",
-              "mae": 1.2207,
-              "rmse": 2.5041,
-              "poisson_deviance": 1.0156
+              "mae": 1.2545,
+              "rmse": 2.5584,
+              "poisson_deviance": 1.0588
             },
             {
               "period": "2020",
-              "mae": 1.073,
-              "rmse": 2.0671,
-              "poisson_deviance": 0.9475
+              "mae": 1.0629,
+              "rmse": 2.0462,
+              "poisson_deviance": 0.9244
             },
             {
               "period": "2021",
-              "mae": 0.9712,
-              "rmse": 1.8893,
-              "poisson_deviance": 0.8796
+              "mae": 0.9722,
+              "rmse": 1.865,
+              "poisson_deviance": 0.868
             },
             {
               "period": "2022",
-              "mae": 1.238,
-              "rmse": 2.4701,
-              "poisson_deviance": 0.9701
+              "mae": 1.2226,
+              "rmse": 2.4138,
+              "poisson_deviance": 0.9728
             }
           ]
         },
         "h3": {
-          "mean_mae": 1.1976,
-          "mean_rmse": 2.3752,
-          "mean_poisson_deviance": 1.0981,
+          "mean_mae": 1.1934,
+          "mean_rmse": 2.3673,
+          "mean_poisson_deviance": 1.1019,
           "folds": [
             {
               "period": "2019",
-              "mae": 1.3983,
-              "rmse": 2.8097,
-              "poisson_deviance": 1.3085
+              "mae": 1.3757,
+              "rmse": 2.7747,
+              "poisson_deviance": 1.3091
             },
             {
               "period": "2020",
-              "mae": 1.0034,
-              "rmse": 1.9469,
-              "poisson_deviance": 0.8602
+              "mae": 0.987,
+              "rmse": 1.9182,
+              "poisson_deviance": 0.8436
             },
             {
               "period": "2021",
-              "mae": 0.9755,
-              "rmse": 1.8514,
-              "poisson_deviance": 0.8886
+              "mae": 1.0016,
+              "rmse": 1.8805,
+              "poisson_deviance": 0.9154
             },
             {
               "period": "2022",
-              "mae": 1.413,
-              "rmse": 2.8929,
-              "poisson_deviance": 1.335
+              "mae": 1.4094,
+              "rmse": 2.8957,
+              "poisson_deviance": 1.3396
             }
           ]
         },
         "h4": {
-          "mean_mae": 1.3575,
-          "mean_rmse": 2.7093,
-          "mean_poisson_deviance": 1.4117,
+          "mean_mae": 1.3695,
+          "mean_rmse": 2.7459,
+          "mean_poisson_deviance": 1.4403,
           "folds": [
             {
               "period": "2019",
-              "mae": 1.527,
-              "rmse": 3.1849,
-              "poisson_deviance": 1.6622
+              "mae": 1.5701,
+              "rmse": 3.2901,
+              "poisson_deviance": 1.7412
             },
             {
               "period": "2020",
-              "mae": 1.1372,
-              "rmse": 2.1799,
-              "poisson_deviance": 0.9912
+              "mae": 1.1326,
+              "rmse": 2.1815,
+              "poisson_deviance": 0.9839
             },
             {
               "period": "2021",
-              "mae": 1.1781,
-              "rmse": 2.2137,
-              "poisson_deviance": 1.2003
+              "mae": 1.1675,
+              "rmse": 2.1917,
+              "poisson_deviance": 1.1761
             },
             {
               "period": "2022",
-              "mae": 1.5877,
-              "rmse": 3.2586,
-              "poisson_deviance": 1.7931
+              "mae": 1.6076,
+              "rmse": 3.3203,
+              "poisson_deviance": 1.8599
             }
           ]
         }
       },
-      "mae_improvement_over_lgbm_pct": 0.07,
+      "mae_improvement_over_lgbm_pct": -0.14,
       "beats_lgbm_by_3pct": false
     }
   },
