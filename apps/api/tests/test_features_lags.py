@@ -239,3 +239,43 @@ def test_cr_7_non_consecutive_weeks_raises() -> None:
 
     with pytest.raises(ValueError, match="non-consecutive|Non-consecutive"):
         compute_lag_correlations(gapped, ward_id="DSCC_Ward_01", max_lag=8)
+
+
+def test_ac_3_features_ignore_rows_after_origin() -> None:
+    """CR-8 / AC-3: Mutating weather and cases after origin_week leaves serving features bit-for-bit identical."""
+    raw = _synthetic_two_ward_df(n_weeks=25, start=date(2023, 1, 2))
+    origin = date(2023, 1, 2) + timedelta(weeks=15)
+    normals = fit_rain_normals(raw, max_year=2023)
+
+    future = raw.copy()
+    after_mask = pd.to_datetime(future["date"]).dt.date > origin
+    assert bool(after_mask.any())
+    future.loc[after_mask, "rainfall_mm"] = 99999.0
+    future.loc[after_mask, "avg_temp_C"] = 99.0
+    future.loc[after_mask, "max_temp_c"] = 120.0
+    future.loc[after_mask, "min_temp_c"] = -15.0
+    future.loc[after_mask, "relative_humidity_pct"] = 99.9
+    future.loc[after_mask, "dengue_cases"] = 9999
+
+    for horizon in (1, 2, 3, 4):
+        base = build_serving_features(raw, origin_week=origin, horizon=horizon, rain_normals=normals)
+        mutated = build_serving_features(future, origin_week=origin, horizon=horizon, rain_normals=normals)
+        pd.testing.assert_frame_equal(base, mutated)
+
+        base_sc = build_serving_features(
+            raw,
+            origin_week=origin,
+            horizon=horizon,
+            ward_ids=["DSCC_Ward_01"],
+            rain_normals=normals,
+            weather_override={"rainfall_mm": 120.0},
+        )
+        mutated_sc = build_serving_features(
+            future,
+            origin_week=origin,
+            horizon=horizon,
+            ward_ids=["DSCC_Ward_01"],
+            rain_normals=normals,
+            weather_override={"rainfall_mm": 120.0},
+        )
+        pd.testing.assert_frame_equal(base_sc, mutated_sc)
