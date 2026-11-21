@@ -43,12 +43,12 @@ export function HorizonTable({
         >
           <thead>
             <tr className="border-b border-mist bg-paper text-xs font-semibold text-slate">
-              <th scope="col" className="px-4 py-2.5">Horizon</th>
-              <th scope="col" className="px-4 py-2.5">Target week</th>
-              <th scope="col" className="px-4 py-2.5 text-right">Expected</th>
-              <th scope="col" className="px-4 py-2.5 text-right">80% band</th>
-              <th scope="col" className="px-4 py-2.5 text-right">Score</th>
-              <th scope="col" className="px-4 py-2.5">Tier</th>
+              <th scope="col" className="px-2.5 py-2.5">Horizon</th>
+              <th scope="col" className="px-2.5 py-2.5">Target week</th>
+              <th scope="col" className="px-2.5 py-2.5 text-right">Expected</th>
+              <th scope="col" className="px-2.5 py-2.5 text-right">80% band</th>
+              <th scope="col" className="px-2.5 py-2.5 text-right">Score</th>
+              <th scope="col" className="px-2.5 py-2.5">Tier</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-mist">
@@ -64,7 +64,7 @@ export function HorizonTable({
                     active ? "bg-paper" : "bg-white hover:bg-paper/60",
                   )}
                 >
-                  <td className="px-4 py-3 font-mono text-xs font-semibold text-navy tnum">
+                  <td className="whitespace-nowrap px-2.5 py-2.5 font-mono text-xs font-semibold text-navy tnum">
                     <button
                       type="button"
                       aria-pressed={active}
@@ -74,19 +74,19 @@ export function HorizonTable({
                       +{h.horizon}w
                     </button>
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-ink tnum">
+                  <td className="whitespace-nowrap px-2.5 py-2.5 font-mono text-xs text-ink tnum">
                     {h.target_week}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-sm font-semibold text-ink tnum">
+                  <td className="whitespace-nowrap px-2.5 py-2.5 text-right font-mono text-sm font-semibold text-ink tnum">
                     {h.expected_cases.toFixed(1)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-xs text-slate tnum">
+                  <td className="whitespace-nowrap px-2.5 py-2.5 text-right font-mono text-xs text-slate tnum">
                     {h.p10.toFixed(1)}–{h.p90.toFixed(1)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-xs text-ink tnum">
+                  <td className="whitespace-nowrap px-2.5 py-2.5 text-right font-mono text-xs text-ink tnum">
                     {h.risk_score}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap px-2.5 py-2.5">
                     <RiskTierBadge tier={h.tier} size="sm" lang={lang} />
                   </td>
                 </tr>

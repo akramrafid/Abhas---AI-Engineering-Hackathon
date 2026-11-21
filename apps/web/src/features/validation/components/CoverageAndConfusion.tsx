@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { clsx } from "clsx";
 import {
   Card,
@@ -19,21 +20,72 @@ export function CoverageAndConfusion({
   coverage,
   confusion,
 }: CoverageAndConfusionProps) {
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("holdout_2024_2025");
+
+  const periods = useMemo(() => {
+    const set = new Set<string>();
+    for (const row of coverage) set.add(row.period);
+    return Array.from(set);
+  }, [coverage]);
+
+  const effectivePeriod = useMemo(() => {
+    if (selectedPeriod === "ALL") return "ALL";
+    if (periods.includes(selectedPeriod)) return selectedPeriod;
+    return periods[periods.length - 1] ?? "ALL";
+  }, [periods, selectedPeriod]);
+
+  const visibleCoverage = useMemo(() => {
+    if (effectivePeriod === "ALL") return coverage;
+    return coverage.filter((r) => r.period === effectivePeriod);
+  }, [coverage, effectivePeriod]);
+
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_1.35fr]">
+    <div className="grid gap-5 lg:grid-cols-[1fr_1.35fr] lg:items-start">
       <Card data-testid="validation-coverage">
-        <CardHeader>
-          <CardTitle>80% prediction band coverage</CardTitle>
+        <CardHeader className="gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle>80% prediction band coverage</CardTitle>
+            {periods.length > 1 ? (
+              <div className="flex items-center gap-1" role="group" aria-label="Coverage period">
+                <button
+                  type="button"
+                  aria-pressed={effectivePeriod === "holdout_2024_2025"}
+                  onClick={() => setSelectedPeriod("holdout_2024_2025")}
+                  className={clsx(
+                    "min-h-7 cursor-pointer rounded-sm border px-2 font-mono text-[11px]",
+                    effectivePeriod === "holdout_2024_2025"
+                      ? "border-royal bg-royal font-semibold text-white"
+                      : "border-mist bg-white text-navy hover:bg-paper",
+                  )}
+                >
+                  Hold-out
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={effectivePeriod === "ALL"}
+                  onClick={() => setSelectedPeriod("ALL")}
+                  className={clsx(
+                    "min-h-7 cursor-pointer rounded-sm border px-2 font-mono text-[11px]",
+                    effectivePeriod === "ALL"
+                      ? "border-royal bg-royal font-semibold text-white"
+                      : "border-mist bg-white text-navy hover:bg-paper",
+                  )}
+                >
+                  All ({coverage.length})
+                </button>
+              </div>
+            ) : null}
+          </div>
           <CardDescription>
             Share of actual weekly counts falling inside [P10, P90]. Calibration target window: 75%–90%.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {coverage.length === 0 ? (
+          {visibleCoverage.length === 0 ? (
             <p className="text-sm text-slate">No coverage rows available.</p>
           ) : (
             <div className="space-y-3">
-              {coverage.map((row, idx) => {
+              {visibleCoverage.map((row, idx) => {
                 const pct = row.coverage_80 * 100;
                 const inTarget = row.coverage_80 >= 0.75 && row.coverage_80 <= 0.9;
                 return (
@@ -56,9 +108,8 @@ export function CoverageAndConfusion({
                       className="relative mt-2 h-2.5 w-full overflow-hidden rounded-sm border border-mist bg-white"
                       aria-hidden="true"
                     >
-                      {/* Shaded 75%–90% calibration target zone */}
                       <div
-                        className="absolute inset-y-0 bg-forecast-band border-x border-royal/40"
+                        className="absolute inset-y-0 border-x border-royal/40 bg-forecast-band"
                         style={{ left: "75%", width: "15%" }}
                       />
                       <div

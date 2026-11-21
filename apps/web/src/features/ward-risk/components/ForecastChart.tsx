@@ -107,10 +107,11 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
       aria-label="Expected weekly dengue cases with 80 percent prediction band"
     >
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 8 }}>
+        <ComposedChart data={data} margin={{ top: 10, right: 32, left: 4, bottom: 8 }}>
           <CartesianGrid stroke="var(--color-mist)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="label"
+            padding={{ left: 16, right: 16 }}
             tick={{ fill: "var(--color-slate)", fontSize: 12, fontFamily: "var(--font-mono)" }}
             axisLine={{ stroke: "var(--color-mist)" }}
             tickLine={false}

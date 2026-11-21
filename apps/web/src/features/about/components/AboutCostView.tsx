@@ -43,15 +43,15 @@ export function AboutCostView({ lang = "en" }: AboutCostViewProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 text-sm">
+            <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-md border border-mist bg-paper p-3.5">
                 <dt className="text-xs font-semibold text-slate">Prediction requests</dt>
                 <dd className="mt-1 font-mono text-base font-bold text-navy tnum">
                   {ops.predictions.requests} total ({ops.predictions.cache_hits} cached)
                 </dd>
-                <p className="mt-0.5 text-xs text-slate">
+                <dd className="mt-0.5 text-xs text-slate">
                   Hit rate {(ops.predictions.cache_hit_rate * 100).toFixed(1)}%
-                </p>
+                </dd>
               </div>
 
               <div className="rounded-md border border-mist bg-paper p-3.5">
@@ -59,9 +59,9 @@ export function AboutCostView({ lang = "en" }: AboutCostViewProps) {
                 <dd className="mt-1 font-mono text-base font-bold text-navy tnum">
                   {ops.predictions.p50_ms.toFixed(1)} ms / {ops.predictions.p95_ms.toFixed(1)} ms
                 </dd>
-                <p className="mt-0.5 text-xs text-slate">
+                <dd className="mt-0.5 text-xs text-slate">
                   CPU serving via joblib (target &lt; 50 ms p95)
-                </p>
+                </dd>
               </div>
 
               <div className="rounded-md border border-mist bg-paper p-3.5">
@@ -69,10 +69,10 @@ export function AboutCostView({ lang = "en" }: AboutCostViewProps) {
                 <dd className="mt-1 font-mono text-base font-bold text-navy tnum">
                   {ops.llm.enabled ? "Enabled (Claude Haiku)" : "Template mode ($0.00)"}
                 </dd>
-                <p className="mt-0.5 font-mono text-xs text-slate tnum">
+                <dd className="mt-0.5 font-mono text-xs text-slate tnum">
                   Calls today: {ops.llm.calls_today} · Spend ${ops.llm.spend_usd_today.toFixed(4)} / $
                   {ops.llm.budget_usd_per_day.toFixed(2)} cap
-                </p>
+                </dd>
               </div>
 
               <div className="rounded-md border border-mist bg-paper p-3.5">
@@ -80,9 +80,9 @@ export function AboutCostView({ lang = "en" }: AboutCostViewProps) {
                 <dd className="mt-1 font-mono text-base font-bold text-navy tnum">
                   ${ops.est_monthly_cost_usd.toFixed(2)} / month
                 </dd>
-                <p className="mt-0.5 text-xs text-slate">
+                <dd className="mt-0.5 text-xs text-slate">
                   Zero keys required; Open-Meteo non-commercial tier is free
-                </p>
+                </dd>
               </div>
             </dl>
           </CardContent>

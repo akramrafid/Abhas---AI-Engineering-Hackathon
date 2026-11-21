@@ -161,7 +161,7 @@ export function ScenarioComparisonView({
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
                 data={chartData}
-                margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
+                margin={{ top: 10, right: 32, left: 4, bottom: 8 }}
               >
                 <CartesianGrid
                   stroke="var(--color-mist)"
@@ -170,6 +170,7 @@ export function ScenarioComparisonView({
                 />
                 <XAxis
                   dataKey="label"
+                  padding={{ left: 16, right: 16 }}
                   tick={{
                     fill: "var(--color-slate)",
                     fontSize: 12,

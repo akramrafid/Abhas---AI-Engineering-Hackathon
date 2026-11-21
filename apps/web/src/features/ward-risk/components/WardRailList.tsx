@@ -65,29 +65,29 @@ export function WardRailList({
                 aria-current={isSelected ? "true" : undefined}
                 onClick={() => onSelectWard(wf.ward_id)}
                 className={clsx(
-                  "flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-3 text-left",
+                  "flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-left",
                   isSelected
                     ? "bg-paper ring-1 ring-inset ring-royal/30"
                     : "bg-white hover:bg-paper/60",
                 )}
               >
                 <div className="min-w-0">
-                  <p className="flex items-center gap-2 font-mono text-sm font-semibold text-navy tnum">
+                  <p className="flex items-center gap-1.5 font-mono text-xs font-semibold text-navy tnum">
                     {isSelected ? (
                       <span
                         aria-hidden="true"
                         className="h-1.5 w-1.5 shrink-0 rounded-full bg-royal"
                       />
                     ) : null}
-                    <span className="truncate">{wf.ward_id}</span>
+                    <span className="whitespace-nowrap">{wf.ward_id}</span>
                   </p>
                   {wfPeak ? (
-                    <p className="font-mono text-xs text-slate tnum">
-                      Peak {wfPeak.expected_cases.toFixed(1)} {copy.casesUnit} (+{wfPeak.horizon}w)
+                    <p className="font-mono text-[11px] text-slate tnum">
+                      {wfPeak.expected_cases.toFixed(1)} {copy.casesUnit} (+{wfPeak.horizon}w)
                     </p>
                   ) : null}
                 </div>
-                <RiskTierBadge tier={wf.peak_tier} size="sm" lang={lang} />
+                <RiskTierBadge tier={wf.peak_tier} size="sm" lang={lang} className="shrink-0" />
               </button>
             </li>
           );

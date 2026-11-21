@@ -194,7 +194,7 @@ export function WardForecastView({
         lang={lang}
       />
 
-      <div className="no-print grid gap-5 lg:grid-cols-[300px_1fr] lg:items-start">
+      <div className="no-print grid gap-5 lg:grid-cols-[296px_1fr] lg:items-start">
         <WardRailList
           city={city}
           sortedForecasts={sortedForecasts}
@@ -251,7 +251,7 @@ export function WardForecastView({
             </CardContent>
           </Card>
 
-          <div className="grid gap-5 xl:grid-cols-[1.3fr_1fr]">
+          <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
             <HorizonTable
               horizons={selectedForecast.horizons}
               activeHorizon={activeDriverHorizon?.horizon ?? null}
