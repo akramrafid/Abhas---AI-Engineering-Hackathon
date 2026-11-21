@@ -2,7 +2,7 @@
 
 ## Now
 Phase: 3 — Build Wave 1B (Phase 2 Design + Contracts Lock 100% GREEN; `main` fast-forwarded) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
-Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`, pushed to origin) · Run: `run_de147862c969` · Active LEAD: `antigravity / Gemini 4 Neon (XHigh)` (Claude Opus 5.5 limit resets 19:20 BST — hand back at 19:15–19:20 BST).
+Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`, pushed to origin) · Run: `run_de147862c969` · Active LEAD: Claude Opus 5.5 max (resumed 19:21 BST). LEAD does architecture, system design and code review only; builders write code.
 
 Phase 2 Gates Verified (`0a73566`): `adr` PASS · `contracts` PASS · `resilience` PASS · `slices` PASS · `migrations` PASS · `retrieval` PASS (`recall@15=0.5704`, `n=36`) · `ci` PASS (27/27 pytest, 6/6 smoke).
 
@@ -32,6 +32,7 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 | 16:05 | DESIGN | "Gemini 4 Neon" + `--effort max` → "Gemini 4 Neon (XHigh)" | Antigravity model ids carry the effort; Neon has no max tier; "Gemini 4 Neon" alone is an unknown id |
 | 16:20 | all Claude seats | rule set by human | Any Claude limit hit → Gemini 4 Neon (XHigh), including LEAD; when the limit resets → back to Claude Opus 5.5 max |
 | 16:00 | LEAD | Claude Opus 5.5 max → Gemini 4 Neon (XHigh) | Claude hit 5-hour usage limit (resets 19:20 BST); hand back to Claude Opus 5.5 max after reset |
+| 19:21 | LEAD | Gemini 4 Neon (XHigh) → Claude Opus 5.5 max | Claude limit reset; Opus LEAD resumed from STATUS.md. Note: merges 16:21–16:55 were approved by the Neon LEAD (same family as the Gemini authors) → cross-family Opus review round r1 dispatched |
 
 ## Assumptions
 - Ward geometry is absent: maps are schematic and labelled.
