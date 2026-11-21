@@ -53,6 +53,7 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 - Wave 1 bands use negative binomial around Poisson mean (conformalized on 2023, P90 clamped `≥ expected_cases`).
 
 ## Decisions (short ADR log)
+- Human rule (20:52): small commits (one finding / one step each). LEAD pushes every worker branch to GitHub on each worker event and pushes `lead` after every green merge; workers never push.
 - Seats: Claude Code Opus 5.5 (LEAD, reviews, OUTSIDER) + Antigravity Gemini 4 Neon/Hydrogen (all builders); fallback on Claude limit → Neon XHigh.
 - Gate thresholds from `docs/KICKOFF-PROMPT.md` §5 in `.orca-team/gates.json`; `deploy` skipped (localhost demo).
 - ADR-0001..0008 accepted (`gates.mjs adr` PASS); DESIGN `arch-critique.md` applied on `lead` (`ff89e58`).
