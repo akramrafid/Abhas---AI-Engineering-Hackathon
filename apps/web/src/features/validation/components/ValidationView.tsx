@@ -23,6 +23,7 @@ import {
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
+import { StubDataBanner } from "@/components/ui/StubDataBanner";
 import { useOpsQuery, useValidationQuery } from "../hooks";
 
 type MetricField = "mae" | "rmse" | "poisson_deviance";
@@ -152,6 +153,8 @@ export function ValidationView() {
 
   return (
     <div data-testid="validation-panel" className="space-y-5">
+      <StubDataBanner modelVersion={data.model_version} />
+
       {/* Split & Hold-out Lock Header */}
       <Card data-testid="validation-split-summary">
         <CardHeader>

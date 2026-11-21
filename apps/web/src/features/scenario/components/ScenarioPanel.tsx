@@ -31,6 +31,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import { SliderField } from "@/components/ui/Slider";
+import { StubDataBanner } from "@/components/ui/StubDataBanner";
 import { useScenarioRunner } from "../hooks";
 
 export interface ScenarioPanelProps {
@@ -476,6 +477,7 @@ export function ScenarioPanel({
       {/* Success State: Side-by-Side Comparison */}
       {!isLoading && !error && data && baselineH3 && scenarioH3 && baselinePeakTier && scenarioPeakTier ? (
         <div data-testid="scenario-comparison" aria-live="polite" className="space-y-5">
+          <StubDataBanner modelVersion={data.model_version} />
           <div className="grid gap-4 md:grid-cols-2">
             <Card data-testid="scenario-baseline-card">
               <CardHeader className="flex-row items-center justify-between gap-2 bg-paper">

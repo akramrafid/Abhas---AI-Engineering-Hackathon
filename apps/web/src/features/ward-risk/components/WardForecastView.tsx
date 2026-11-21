@@ -23,6 +23,7 @@ import {
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
+import { StubDataBanner } from "@/components/ui/StubDataBanner";
 import { useCityForecastQuery } from "../hooks";
 import { DriversList } from "./DriversList";
 import { ForecastChart } from "./ForecastChart";
@@ -217,7 +218,9 @@ export function WardForecastView({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[310px_1fr] lg:items-start">
+    <div className="space-y-4">
+      <StubDataBanner modelVersion={response.model_version} />
+      <div className="grid gap-5 lg:grid-cols-[310px_1fr] lg:items-start">
       {/* Left rail: City Ward Priority List */}
       <Card className="overflow-hidden">
         <CardHeader className="bg-paper py-3.5">
@@ -513,6 +516,7 @@ export function WardForecastView({
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

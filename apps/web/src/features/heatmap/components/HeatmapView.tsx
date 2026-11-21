@@ -14,6 +14,7 @@ import {
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
+import { StubDataBanner } from "@/components/ui/StubDataBanner";
 import { useHeatmapQuery } from "../hooks";
 
 export interface HeatmapViewProps {
@@ -132,6 +133,8 @@ export function HeatmapView({
 
   return (
     <div data-testid="heatmap-panel" className="space-y-5">
+      <StubDataBanner modelVersion={data.model_version} />
+
       {/* Summary Strip */}
       <Card>
         <CardHeader className="sm:flex-row sm:items-center sm:justify-between">

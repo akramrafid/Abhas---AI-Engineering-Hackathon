@@ -369,6 +369,66 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("validation-ops-model-loads")).toHaveText("1");
   });
 
+  test("test_cr_9_stub_data_banner: shows sample-data banner for stub model_version and hides it for real models", async ({
+    page,
+  }) => {
+    let forcedVersion = "stub-0";
+
+    const overrideModelVersion = async (route: Parameters<Parameters<Page["route"]>[1]>[0]) => {
+      const response = await route.fetch();
+      const json = (await response.json()) as Record<string, unknown>;
+      json.model_version = forcedVersion;
+      await route.fulfill({ response, json });
+    };
+
+    await page.route("**/api/v1/forecast", overrideModelVersion);
+    await page.route("**/api/v1/heatmap*", overrideModelVersion);
+    await page.route("**/api/v1/validation", overrideModelVersion);
+
+    // 1. Stub model_version -> visible banner on forecast, heatmap, and validation views (zero Lime)
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toContainText(
+      "Sample data — model not loaded",
+    );
+    await assertZeroLimeInDataView(page);
+
+    await page.getByTestId("tab-heatmap").click();
+    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toContainText(
+      "Sample data — model not loaded",
+    );
+    await assertZeroLimeInDataView(page);
+
+    await page.getByTestId("tab-validation").click();
+    await expect(page.getByTestId("validation-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toContainText(
+      "Sample data — model not loaded",
+    );
+    await assertZeroLimeInDataView(page);
+
+    // 2. Non-stub model_version -> banner hidden on all three views
+    forcedVersion = "lgbm-v1.0.0";
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
+
+    await page.getByTestId("tab-heatmap").click();
+    await expect(page.getByTestId("heatmap-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
+
+    await page.getByTestId("tab-validation").click();
+    await expect(page.getByTestId("validation-panel")).toBeVisible();
+    await expect(page.getByTestId("stub-data-banner")).toHaveCount(0);
+
+    await page.unroute("**/api/v1/forecast", overrideModelVersion);
+    await page.unroute("**/api/v1/heatmap*", overrideModelVersion);
+    await page.unroute("**/api/v1/validation", overrideModelVersion);
+  });
+
   test("ac_16: /brand renders tokens, risk scale & logo, and zero Lime appears inside [data-view='data']", async ({
     page,
   }) => {
