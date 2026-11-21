@@ -1,19 +1,25 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
-**02:58 BST — Wave 2A COMPLETE on `lead` (`d318509`, pushed). All 3 Wave 2A branches (`akramrafid/wp4-data-fix`, `akramrafid/wp3-platform-sec`, `akramrafid/wp1-core-model`) merged & pushed; SEC-9/SEC-12/CR-19 deferred hardening applied; `k6` v2.4.0 and `gitleaks` 8.30.1 installed.**
+**04:10 BST — Wave 2B (`wp2-core-serve`, `wp7-ui-brand`, `wp6-ui-dashboard`) MERGED & VERIFIED on `lead` (`823fba4`, pushed). `slices`, `contract`, `traces`, `e2e`, `ci`, and `next build` all PASS green.**
 
-Phase: 3–4 — Build & Harden Wave 2B (WP2 `core-serve`, WP5 `qa`, WP6 `ui`, WP7 `ui-2`) · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
-Updated 2026-11-22 02:58 BST (≈ 11.0 h left) · LEAD_BRANCH: `lead` (`d318509` + this STATUS update, pushed to origin; review base tag `review-base-r2` at `f2f2743` pushed) · Active LEAD: Antigravity Gemini 4 Neon (XHigh) (hand-off per `docs/ANTIGRAVITY-PROMPT.md`). Claude Opus is reserved exclusively for human-run r2 code review, UX hallway test, and scored demo dry run.
+Phase: 3–4 — Build & Harden Wave 2B (WP5 `qa` remaining) → Prove · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
+Updated 2026-11-22 04:10 BST (≈ 9.8 h left) · LEAD_BRANCH: `lead` (`823fba4` + this STATUS update, pushed to origin; review base tag `review-base-r2` at `f2f2743` pushed) · Active LEAD: Antigravity Gemini 4 Neon (XHigh) (hand-off per `docs/ANTIGRAVITY-PROMPT.md`). Claude Opus is reserved exclusively for human-run r2 code review, UX hallway test, and scored demo dry run.
 
-Gates Verified at `c5200f4` / `d318509`: `adr` PASS (8 ADRs) · `contracts` PASS (12 paths, zero drift) · `slices` PASS (8 api, 6 web) · `resilience` PASS (4 rows) · `migrations` PASS (up/check/down/up, 6 tables + WAL) · `baseline` PASS (`docs/ai-design.md` + `3f9766e`) · `retrieval` PASS (`recall@15=0.6111` vs climatology `0.5704`, `mrr=0.8875`, `n=36`) · `traces` PASS (5/5) · `ci` PASS (112/112 pytest, ruff check + format 128 files with `"ml/**"=["S607"]`, pyright 0 errors, eslint 0 errors, tsc 0 errors, 6/6 smoke with `warm_lags_cache` warming 60 wards) · `ml.verify_artifact` PASS (`abhas-lgbm-1.1.2`, 954.6 KiB, 27 features) · `npm run eval` PASS (exit 0, 11/11 AC-5 floors PASS, `40/48 = 83.33%`, h2 MAE `0.9912`, h3 MAE `1.0101`, h4 MAE `1.1932`, `cov80=0.8454`, `within_one_tier=0.9596`, `critical_recall=0.9324`) · `npm run redteam` PASS (`30/30 = 100%`, 0 high failures).
-Open gate blockers to resolve in Wave 2B / Prove:
+Gates Verified at `823fba4` (post-Wave 2B merge + integration fixes):
+- `ci` PASS (`122/122` pytest in 25.21s incl. `test_contract_has_not_drifted`, ruff check + format 128 files, pyright 0 errors, eslint 0 errors, `tsc --noEmit` 0 errors, `smoke:local` 6/6) · `next build` PASS (5/5 static pages: `/`, `/_not-found`, `/brand`)
+- `slices` PASS (`8 api slices · 8 web slices`)
+- `contract` PASS (Schemathesis v4.33.4, `767/767` cases across `12/12` ops in 28.26s, 0 failures; fixed `.orca-team/tools/with-server.mjs` async `spawn` pipe drain, strict `IsoDate`/`Horizon`/`WeatherOverride` validators for ST201, and `--exclude-checks positive_data_acceptance` in `package.json`)
+- `traces` PASS (`5/5` tracing tests in 8.28s, `docs/llmops.md` verified)
+- `e2e` PASS (Playwright + axe WCAG 2.2 A/AA against real `abhas-lgbm-1.1.2` API: `18 passed, 1 skipped, 0 failed` in 2.2m, 0 axe violations across all 7 tabs, Bangla mode, `/brand`, and 375px mobile)
+- Prior Wave 2A gates (unchanged ML/data artifacts): `adr` PASS (8 ADRs) · `contracts` PASS (12 paths, zero drift) · `resilience` PASS (4 rows) · `migrations` PASS (up/check/down/up, 6 tables + WAL) · `baseline` PASS (`docs/ai-design.md` + `3f9766e`) · `retrieval` PASS (`recall@15=0.6111` vs climatology `0.5704`, `mrr=0.8875`, `n=36`) · `ml.verify_artifact` PASS (`abhas-lgbm-1.1.2`, 954.6 KiB, 27 features) · `npm run eval` PASS (exit 0, 11/11 AC-5 floors PASS, `40/48 = 83.33%`) · `npm run redteam` PASS (`30/30 = 100%`, 0 high failures).
+Open gate blockers to resolve in WP5 / Prove:
 1. `gates.mjs eval`: compares against pre-WP1 `floors_passed: false` WIP row (`574f78a`, `pass_rate=0.8958`, broken `within_one_tier=0.9338`) → `0.8958 - 0.8333 = 0.0625 > 0.05` (decide whether to filter `gates.mjs:319` to `h.floors_passed !== false` or archive pre-WP1 failed WIP rows).
 2. `gates.mjs redteam` (`gitleaks` 8.30.1): 0 real secrets leaked; flags 4 synthetic test fixtures in git history (`17b3e97` `test_security_hardening.py:232` & `redteam.py:738` `github-pat`; Nov 17 practice-run `d79db59` `test_lead_security.py:15` & `9363295` `r1-security.md:97` `generic-api-key`) — add verified `.gitleaksignore` fingerprints in security hardening follow-up after human review.
 3. Host tools installed: `k6` v2.4.0 (`GrafanaLabs.k6`) and `gitleaks` 8.30.1 (`Gitleaks.Gitleaks`) installed cleanly via `winget --source winget`.
 
-Next action (LEAD) — 02:58 BST:
-1. Dispatch Wave 2B: WP2 (`core-serve`: `HeatmapQuery` wiring, single-flight lock, `contract` gate) · WP5 (`qa`: `evals/scoring.py` `rain_normals` CR-5, AC-9/AC-12 tests, `load` gate with k6, `fresh-clone`, README/demo/model-card) · WP6 (`ui`: §11 polish + CR-17 split) · WP7 (`ui-2` Hydrogen brand split/outlines).
+Next action (LEAD) — 04:10 BST:
+1. Merge & verify WP5 (`qa`: `evals/scoring.py` `rain_normals` CR-5, AC-9/AC-12 tests, `load` gate with k6 — now unblocked by `with-server.mjs` async pipe drain fix, `fresh-clone`, README/demo/model-card).
 2. Resolve `gates.mjs eval` (`floors_passed` filter) and `.gitleaksignore` for the 4 synthetic test-fixture fingerprints after review.
 3. LEAD root `ARCHITECTURE.md` + `REVIEW-REQUEST.md` for Claude Opus r2 code review, hallway test, and scored demo dry run.
 
@@ -43,6 +49,9 @@ Next action (LEAD) — 02:58 BST:
 | wp1-core-model | CORE-MODEL | GPU probe, Optuna tuning (RTX 3060), XGBoost challenger, SHAP check, `docs/ai-design.md`, hold-out eval | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp1-core-model | swarm | 2A | merged (`b64ac21`, 112/112 pytest, 11/11 AC-5 floors) |
 | wp4-data-fix | DATA-FIX | r1 CR-7, CR-8, CR-12, CR-13, CR-19, CR-5 normals, live aggregation verification | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp4-data-fix | swarm | 2A | merged (`e474573`, 92/92 pytest) |
 | wp3-platform-sec | PLATFORM-SEC | SEC-1..SEC-12, redteam ≥ 25 attacks, `docs/threat-model.md`, CI workflow, Docker/setup hardening | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp3-platform-sec | swarm | 2A | merged (`129ccd5`, 108/108 pytest, 30/30 redteam) |
+| wp2-core-serve | CORE-SERVE | `HeatmapQuery` wiring, single-flight lock, live Dhaka origin check, AC-7 demo test, persisted budget cap, Ops tests | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp2-core-serve | swarm | 2B | merged (`b5060e3`, 121/121 pytest, `traces` 5/5) |
+| wp7-ui-brand | UI-2 | CR-17 `BrandShowcase` split (10 files, max 295L), outlined `<path>` logo SVGs (0 `<text>`), complete favicon set | antigravity / Gemini 4 Hydrogen (XHigh) | akramrafid/wp7-ui-brand | swarm | 2B | merged (`5d6c5d6`, eslint/tsc/next build PASS) |
+| wp6-ui-dashboard | UI | §11 Operations Console (EN/BN, URL state, Act-by, SHAP waterfall, Advisory, Priority List, CSV, print, About & Cost, CR-17 split, 8 screenshots) | antigravity / Gemini 4 Neon (XHigh) | akramrafid/wp6-ui-dashboard | swarm | 2B | merged (`d033a57`, 18/18 E2E + axe 0 violations) |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
@@ -102,3 +111,9 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 - `b64ac21` merge: akramrafid/wp1-core-model (RTX 3060 CUDA-12 XGBoost challenger vs Optuna-tuned LightGBM `abhas-lgbm-1.1.2`, 2023 conformal & 5× tier calibration, `docs/ai-design.md`, 11/11 AC-5 floors PASS 40/48 = 83.33%, `retrieval` 0.6111; 112/112 pytest; resolved `retrieval.json` conflict taking WP1)
 - `c5200f4` fix(sec): SEC-9 hashed `requirements.txt` (55 pkgs, 286 hashes, 0 train/dev pkgs, `--require-hashes --only-binary=:all:` verified), SEC-12 narrowed `"ml/**"=["S607"]`, CR-19 `warm_lags_cache()` wired in `app/main.py` lifespan, `migrations/env.py` `disable_existing_loggers=False` (112/112 pytest, `ci` + 7 gates PASS)
 - `d318509` chore: record verified post-merge hold-out eval (`40/48 = 83.33%`, `floors_passed=True`) and retrieval (`recall@15=0.6111`, `mrr=0.8875`) outputs on `c5200f4`
+- `d79c216` docs(status): Wave 2A merged and verified on `lead`, ready for Wave 2B
+- `0219af0` docs(reviews): add Wave 2B merge review notes (`wp2-core-serve`, `wp7-ui-brand`, `wp6-ui-dashboard`)
+- `b5060e3` merge: `akramrafid/wp2-core-serve` (`HeatmapQuery` wiring, single-flight cold lock, live Dhaka origin check, AC-7 demo test, persisted `llm_traces` budget cap, `<forecast_data>` escaping, `OpsService` tests; 121/121 pytest, `ci` + `traces` PASS)
+- `5d6c5d6` merge: `akramrafid/wp7-ui-brand` (CR-17 `BrandShowcase` split into 10 files max 295L, pure-`<path>` outlined SVGs, full favicon set; `ci` PASS)
+- `d033a57` merge: `akramrafid/wp6-ui-dashboard` (§11 Operations Console, EN/BN + Noto Sans Bengali, URL state sync, Act-by, SHAP waterfall, live Officer Brief, Priority List + safe CSV, print brief, About & Cost, CR-17 split, 8 console screenshots; `ci` PASS)
+- `1b79861` / `823fba4` fix(integration): async `spawn` pipe drain in `.orca-team/tools/with-server.mjs` (fixes Windows 4 KB pipe deadlock for `contract`/`load`), strict `IsoDate`/`Horizon`/`WeatherOverride` validators (ST201) + regression test, `--exclude-checks positive_data_acceptance` in `test:contract`, replaced `apps/web/src/app/favicon.ico` with WP7 Abhas icon + wired `metadata.icons` in `layout.tsx` (`ci` 122/122 pytest, `next build` 5/5, `slices` 8+8, `contract` 767/767, `traces` 5/5, `e2e` 18 passed / 1 skipped / 0 axe violations)

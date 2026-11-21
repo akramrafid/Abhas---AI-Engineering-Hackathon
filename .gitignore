@@ -23,6 +23,7 @@ coverage/
 htmlcov/
 playwright-report/
 test-results/
+.schemathesis/
 
 # local data stores (embedded Qdrant, SQLite, uploads)
 .qdrant/
