@@ -156,6 +156,17 @@ def probe_xgboost_cuda(n_rows: int = 1000) -> EngineProbeResult:
         preds = np.asarray(model.predict(X[:10]), dtype=np.float64)
         if not np.all(np.isfinite(preds)):
             return EngineProbeResult(usable=False, detail="non-finite predictions from XGBoost CUDA")
+        cfg = json.loads(model.get_booster().save_config())
+        actual_dev = str(cfg.get("learner", {}).get("generic_param", {}).get("device", "unknown"))
+        if not actual_dev.startswith("cuda"):
+            build_cuda = xgb.build_info().get("CUDA_VERSION")
+            return EngineProbeResult(
+                usable=False,
+                detail=(
+                    f"XGBoost {xgb.__version__} silently fell back to device={actual_dev!r} "
+                    f"(wheel built for CUDA {build_cuda})"
+                ),
+            )
         elapsed_ms = round((time.perf_counter() - t0) * 1000.0, 2)
     except Exception as exc:  # noqa: BLE001
         return EngineProbeResult(usable=False, detail=f"{type(exc).__name__}: {exc}")
@@ -177,6 +188,11 @@ def probe_xgboost_cuda(n_rows: int = 1000) -> EngineProbeResult:
             verbosity=0,
         )
         mc_model.fit(X, y)
+        mc_cfg = json.loads(mc_model.get_booster().save_config())
+        mc_dev = str(mc_cfg.get("learner", {}).get("generic_param", {}).get("device", "unknown"))
+        if not mc_dev.startswith("cuda"):
+            monotone_ok = False
+            monotone_note = f"monotone_constraints fell back to {mc_dev!r}"
     except Exception as exc:  # noqa: BLE001
         monotone_ok = False
         monotone_note = f"monotone_constraints unsupported on CUDA ({type(exc).__name__}: {exc})"
@@ -184,7 +200,7 @@ def probe_xgboost_cuda(n_rows: int = 1000) -> EngineProbeResult:
     return EngineProbeResult(
         usable=True,
         elapsed_ms=elapsed_ms,
-        detail=f"XGBoost {xgb.__version__} CUDA hist fit OK; {monotone_note}",
+        detail=f"XGBoost {xgb.__version__} CUDA hist fit OK (device={actual_dev}); {monotone_note}",
         monotone_supported=monotone_ok,
     )
 
