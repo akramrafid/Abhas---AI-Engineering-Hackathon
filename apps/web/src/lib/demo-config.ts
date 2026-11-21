@@ -23,6 +23,14 @@ export const DEMO_CONFIG = {
   originWeek: "2024-08-05",
   window: "2-4w" as HorizonWindow,
   scenarioRainfallMm: 120,
+  // AC-7 baseline (CR-2): non-Critical Dhaka South ward-week with < 20 mm rain
+  // (2024-08-05 had 216.38 mm in DSCC_Ward_04). Verified via GET /api/v1/wards/DSCC_Ward_04/history:
+  // pre-monsoon Monday 2024-05-27 had 10.33 mm observed rainfall and 0 dengue cases
+  // (h+1..+4 actuals: 2, 1, 4, 4 — all non-Critical), so 120 mm models a realistic surge.
+  scenarioBaseline: {
+    wardId: "DSCC_Ward_04",
+    originWeek: "2024-05-27",
+  },
 } as const;
 
 export const DEFAULT_FIRST_FORECAST_ORIGIN = "2016-02-29";

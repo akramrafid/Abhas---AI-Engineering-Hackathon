@@ -38,6 +38,7 @@ export interface ScenarioPanelProps {
   originWeek: string;
   unknownWardId: string | null;
   onResetUnknownWard: () => void;
+  isDemoBaseline?: boolean;
 }
 
 const TIER_RANK: Record<RiskTier, number> = {
@@ -130,6 +131,7 @@ export function ScenarioPanel({
   originWeek,
   unknownWardId,
   onResetUnknownWard,
+  isDemoBaseline = false,
 }: ScenarioPanelProps) {
   const [rainInput, setRainInput] = useState<string>("");
   const [tempInput, setTempInput] = useState<string>("");
@@ -252,11 +254,21 @@ export function ScenarioPanel({
       {/* Scenario Controls */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            What-if weather scenario —{" "}
-            <span className="font-mono tnum">{wardId}</span> · Origin{" "}
-            <span className="font-mono tnum">{originWeek}</span>
-          </CardTitle>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <CardTitle>
+              What-if weather scenario —{" "}
+              <span className="font-mono tnum">{wardId}</span> · Origin{" "}
+              <span className="font-mono tnum">{originWeek}</span>
+            </CardTitle>
+            {isDemoBaseline ? (
+              <span
+                data-testid="scenario-demo-baseline-note"
+                className="inline-flex items-center rounded-sm border border-mist bg-paper px-2.5 py-0.5 font-mono text-xs font-medium text-navy tnum"
+              >
+                Demo dry-week baseline (10.3 mm observed)
+              </span>
+            ) : null}
+          </div>
           <CardDescription>
             Override this week&apos;s rainfall (0–500 mm) to test how heavy monsoon rain shifts expected cases and risk tier 2–4 weeks ahead.
           </CardDescription>

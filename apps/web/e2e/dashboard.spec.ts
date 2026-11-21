@@ -156,7 +156,26 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("scenario-validation-error")).toBeVisible();
 
     // Valid 120 mm preset runs POST /api/v1/scenario and updates side-by-side cards
+    const ac7ScenarioResponse = page.waitForResponse(
+      (res) => res.url().includes("/api/v1/scenario") && res.request().method() === "POST",
+    );
     await page.getByTestId("scenario-preset-120").click();
+    const ac7Res = await ac7ScenarioResponse;
+    expect(ac7Res.ok()).toBe(true);
+    const ac7Json = (await ac7Res.json()) as {
+      ward_id: string;
+      origin_week: string;
+      baseline: Array<{ horizon: number; expected_cases: number }>;
+      scenario: Array<{ horizon: number; expected_cases: number }>;
+    };
+    expect(ac7Json.ward_id).toBe(DEMO_CONFIG.scenarioBaseline.wardId);
+    expect(ac7Json.origin_week).toBe(DEMO_CONFIG.scenarioBaseline.originWeek);
+    const apiBaseH3 = ac7Json.baseline.find((h) => h.horizon === 3);
+    const apiScenH3 = ac7Json.scenario.find((h) => h.horizon === 3);
+    expect(apiBaseH3).toBeDefined();
+    expect(apiScenH3).toBeDefined();
+    expect(apiScenH3!.expected_cases).toBeGreaterThan(apiBaseH3!.expected_cases);
+
     await expect(page.getByTestId("scenario-comparison")).toBeVisible();
     await expect(page.getByTestId("scenario-baseline-card")).toBeVisible();
     await expect(page.getByTestId("scenario-result-card")).toBeVisible();
@@ -201,6 +220,73 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("scenario-error-banner")).toContainText("e2e-422-rid");
     await expect(page.getByTestId("scenario-comparison")).toHaveCount(0);
     await page.unroute("**/api/v1/scenario");
+  });
+
+  test("test_cr_2_demo_scenario_baseline: demo mode uses a dry (<20 mm) non-Critical baseline and 120 mm raises h=3 cases", async ({
+    page,
+    request,
+  }) => {
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8011";
+
+    await page.goto("/?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await page.getByTestId("tab-scenario").click();
+    await expect(page.getByTestId("scenario-panel")).toBeVisible();
+    await expect(page.getByTestId("scenario-demo-baseline-note")).toBeVisible();
+    await expect(page.getByTestId("scenario-panel")).toContainText(
+      DEMO_CONFIG.scenarioBaseline.wardId,
+    );
+    await expect(page.getByTestId("scenario-panel")).toContainText(
+      DEMO_CONFIG.scenarioBaseline.originWeek,
+    );
+
+    const scenarioRequestPromise = page.waitForRequest(
+      (req) => req.url().includes("/api/v1/scenario") && req.method() === "POST",
+    );
+    const scenarioResponsePromise = page.waitForResponse(
+      (res) => res.url().includes("/api/v1/scenario") && res.request().method() === "POST",
+    );
+
+    await page.getByTestId("scenario-preset-120").click();
+
+    const [scenarioReq, scenarioRes] = await Promise.all([
+      scenarioRequestPromise,
+      scenarioResponsePromise,
+    ]);
+    const sentBody = scenarioReq.postDataJSON() as {
+      ward_id: string;
+      origin_week: string;
+      weather: { rainfall_mm?: number };
+    };
+    expect(sentBody.ward_id).toBe(DEMO_CONFIG.scenarioBaseline.wardId);
+    expect(sentBody.origin_week).toBe(DEMO_CONFIG.scenarioBaseline.originWeek);
+    expect(sentBody.weather.rainfall_mm).toBe(120);
+
+    // Verify observed rainfall and non-Critical cases from the real API history
+    const histRes = await request.get(
+      `${apiBase}/api/v1/wards/${encodeURIComponent(sentBody.ward_id)}/history?start=${sentBody.origin_week}&end=${sentBody.origin_week}`,
+    );
+    expect(histRes.ok()).toBe(true);
+    const histJson = (await histRes.json()) as {
+      weeks: Array<{ week: string; rainfall_mm: number; dengue_cases: number }>;
+    };
+    expect(histJson.weeks).toHaveLength(1);
+    const observed = histJson.weeks[0];
+    expect(observed.rainfall_mm).toBeLessThan(20);
+    expect(observed.dengue_cases).toBeLessThan(14);
+
+    // Verify API response h=3 expected_cases strictly increases under 120 mm override
+    const payload = (await scenarioRes.json()) as {
+      baseline: Array<{ horizon: number; expected_cases: number }>;
+      scenario: Array<{ horizon: number; expected_cases: number }>;
+    };
+    const baseH3 = payload.baseline.find((h) => h.horizon === 3);
+    const scenH3 = payload.scenario.find((h) => h.horizon === 3);
+    expect(baseH3).toBeDefined();
+    expect(scenH3).toBeDefined();
+    expect(scenH3!.expected_cases).toBeGreaterThan(baseH3!.expected_cases);
+
+    await expect(page.getByTestId("scenario-comparison")).toBeVisible();
   });
 
   test("ac_8: API 503 clears stale tier and recovers on Retry; unknown ward URL shows Ward not found", async ({
