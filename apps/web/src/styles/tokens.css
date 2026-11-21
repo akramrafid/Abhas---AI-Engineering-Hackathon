@@ -1,0 +1,38 @@
+/* Placeholder generated from docs/brand/tokens.json; UI-2 (ui-brand) replaces this with the full token sheet. */
+:root {
+  --color-ink: #0B0F14;
+  --color-navy: #0B1A5C;
+  --color-royal: #2F5BFF;
+  --color-lime: #D4F53C;
+  --color-white: #FFFFFF;
+  --color-slate: #4B5578;
+  --color-mist: #DDE3F3;
+  --color-paper: #F4F6FD;
+  --color-risk-low: #BFE3CC;
+  --color-risk-low-on: #16202B;
+  --color-risk-medium: #F0B429;
+  --color-risk-medium-on: #16202B;
+  --color-risk-high: #C2410C;
+  --color-risk-high-on: #FFFFFF;
+  --color-risk-critical: #7F1D1D;
+  --color-risk-critical-on: #FFFFFF;
+  --color-risk-low-border: #9FCBB0;
+  --color-forecast-band: rgba(47, 91, 255, 0.15);
+}
+
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-navy: var(--color-navy);
+  --color-royal: var(--color-royal);
+  --color-lime: var(--color-lime);
+  --color-slate: var(--color-slate);
+  --color-mist: var(--color-mist);
+  --color-paper: var(--color-paper);
+  --color-risk-low: var(--color-risk-low);
+  --color-risk-medium: var(--color-risk-medium);
+  --color-risk-high: var(--color-risk-high);
+  --color-risk-critical: var(--color-risk-critical);
+  --font-sans: "Manrope", "Noto Sans Bengali", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-bangla: "Noto Sans Bengali", sans-serif;
+}

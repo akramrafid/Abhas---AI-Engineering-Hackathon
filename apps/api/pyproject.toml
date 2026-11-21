@@ -1,0 +1,57 @@
+[project]
+name = "abhas-api"
+version = "0.1.0"
+description = "Abhas — ward-level dengue early warning API (FastAPI + LightGBM)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9,<3",
+  "pydantic-settings>=2.6",
+  "sqlalchemy>=2.0.36",
+  "alembic>=1.14",
+  "pandas>=2.2",
+  "numpy>=2.1",
+  "openpyxl>=3.1",
+  "lightgbm>=4.5",
+  "scikit-learn>=1.5",
+  "scipy>=1.14",
+  "statsmodels>=0.14",
+  "joblib>=1.4",
+  "httpx>=0.28",
+  "anthropic>=0.40",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "ruff>=0.8",
+  "pyright>=1.1.390",
+]
+
+[tool.vercel]
+entrypoint = "app.main:app"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101", "B008", "E501"]  # ruff format owns line length
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S"]
+"evals/**" = ["S"]
+"ml/**" = ["S"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["tracing: checks that every LLM/weather call is traced", "slow: long-running"]
+
+[tool.pyright]
+include = ["app"]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+reportMissingTypeStubs = false
