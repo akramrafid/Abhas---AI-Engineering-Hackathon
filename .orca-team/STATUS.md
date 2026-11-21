@@ -6,7 +6,8 @@ Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`
 
 Phase 2 Gates Verified (`0a73566`): `adr` PASS · `contracts` PASS · `resilience` PASS · `slices` PASS · `migrations` PASS · `retrieval` PASS (`recall@15=0.5704`, `n=36`) · `ci` PASS (27/27 pytest, 6/6 smoke).
 
-Next action (LEAD) — 19:35 BST:
+Next action (LEAD) — 20:50 BST: Wave 2 dispatched (4 Antigravity workers = cap). Queue: `fix-r1-data` when a slot frees; `fix-r1-qa` after CORE merges. Every Neon branch → Opus review → `gates.mjs merge`.
+Earlier (19:35):
 **Human rule (19:33): all code is written by Antigravity Gemini 4 Neon (XHigh); Claude Opus only reviews. Wait for Antigravity rather than coding on Opus.** One-shot wake scheduled 20:48 BST. Dispatch on Neon (Antigravity cap 4), in this order: (1) CORE from `.orca-team/specs/core-forecast-neon2.md` + tell it to implement CR-3 unknown-ward 404, CR-16 model readiness, CR-5/13 normals + train_end_year in artifact metadata; (2) `fix-r1-lead.md` (CR-1 BLOCKER, CR-3, CR-10, CR-16); (3) `fix-r1-ui.md` (CR-2, CR-9, CR-18, side-tab); (4) send "continue" to REVIEWER-SEC ctx_dfe7c933572c. When a slot frees: `fix-r1-data.md`; after CORE merges: `fix-r1-qa.md`. Every Neon branch is reviewed by Opus before `gates.mjs merge`.
 0. Antigravity (Neon + Hydrogen) quota out until ~20:45 BST. Then: send "continue" to ctx_dfe7c933572c (sec review); dispatch UI fix tasks from r1. When CORE reports: Opus-review is not possible (same family) → Neon review of CORE; re-dispatch r1 code review (task_b76712188034) on Opus.
 1. Push `lead` + fast-forward `main` (Phase 2 milestone) to GitHub; broadcast `"contracts locked"` to `@all`.
@@ -25,7 +26,10 @@ Next action (LEAD) — 19:35 BST:
 | task_c92a61243ecf | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | ctx_1dee172a0b2b | 1B | stopped (quota) — WIP `9d9b4ca` |
 | task_1edc9e2e9c71 | CORE | same, continue from `akramrafid/core-forecast` | claude / opus max | core-forecast-opus | ctx_e83dc4e01e44 | 1B | stopped — human rule: code only on Neon |
 | task_b76712188034 | REVIEWER-CODE | r1 cross-family review of c0a05a8...lead | claude / opus max | reviewer-code-r1b | ctx_56fff24cd545 | Prove | done — FIX-BLOCKERS (B1 H2 M8 L8), report merged |
-| task_1fbad5b953e2 | REVIEWER-SEC | r1 security of LEAD-written code | antigravity / Gemini 4 Neon (XHigh) | reviewer-sec-lead-r1 | ctx_dfe7c933572c | Prove | idle at quota — send "continue" after ~20:45 |
+| task_1fbad5b953e2 | REVIEWER-SEC | r1 security of LEAD-written code | antigravity / Gemini 4 Neon (XHigh) | reviewer-sec-lead-r1 | ctx_dfe7c933572c | Prove | resumed 20:47 |
+| task_a4c363fcf219 | CORE | forecast engine, continue from akramrafid/core-forecast (+CR-3 404, CR-16, CR-5/13) | antigravity / Gemini 4 Neon (XHigh) | core-forecast-neon2 | ctx_2b6aa6953f40 | 1B | running |
+| task_bcdcf4b82ada | CORE (LEAD files) | r1 fixes CR-1, CR-3, CR-10, CR-16 | antigravity / Gemini 4 Neon (XHigh) | fix-r1-lead | ctx_acd7416b208f | Prove | running |
+| task_27e15cde0bd0 | UI | r1 fixes CR-2, CR-9, CR-18, side-tab | antigravity / Gemini 4 Neon (XHigh) | fix-r1-ui | ctx_38f252a7903d | Prove | running |
 
 ## Credentials
 See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub usernames (required, not secret),
@@ -38,6 +42,7 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 | 16:20 | all Claude seats | rule set by human | Any Claude limit hit → Gemini 4 Neon (XHigh), including LEAD; when the limit resets → back to Claude Opus 5.5 max |
 | 16:00 | LEAD | Claude Opus 5.5 max → Gemini 4 Neon (XHigh) | Claude hit 5-hour usage limit (resets 19:20 BST); hand back to Claude Opus 5.5 max after reset |
 | 19:28 | CORE, REVIEWER-SEC | Gemini 4 Neon (XHigh) → (CORE) Claude Opus 5.5 max | Antigravity quota exhausted for Neon and Hydrogen, resets ~20:45 BST; CORE is the critical path, so the one Opus worker slot goes to CORE and the r1 code review waits. CORE (Opus-written) then needs a Neon review |
+| 20:45 | CORE, fixes, REVIEWER-SEC | waiting → Gemini 4 Neon (XHigh) | Antigravity quota reset; human rule: Neon writes all code, Opus reviews |
 | 19:21 | LEAD | Gemini 4 Neon (XHigh) → Claude Opus 5.5 max | Claude limit reset; Opus LEAD resumed from STATUS.md. Note: merges 16:21–16:55 were approved by the Neon LEAD (same family as the Gemini authors) → cross-family Opus review round r1 dispatched |
 
 ## Assumptions
