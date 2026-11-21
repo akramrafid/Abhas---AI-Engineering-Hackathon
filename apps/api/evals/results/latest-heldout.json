@@ -1,6 +1,6 @@
 {
-  "ts": "2026-11-21T20:31:11+00:00",
-  "commit": "ee77593",
+  "ts": "2026-11-21T20:35:17+00:00",
+  "commit": "bc8db76",
   "split": "heldout",
   "tag": "",
   "n": 48,
@@ -16,8 +16,8 @@
   "split_counts": {
     "heldout": 48
   },
-  "p50_ms": 0.599,
-  "p95_ms": 1.481,
+  "p50_ms": 0.544,
+  "p95_ms": 0.896,
   "by_tier": {
     "Low": {
       "n": 8,
@@ -231,8 +231,8 @@
           ]
         ]
       },
-      "p50_ward_ms": 0.229,
-      "p95_ward_ms": 0.591
+      "p50_ward_ms": 0.234,
+      "p95_ward_ms": 0.605
     }
   },
   "cases": [
@@ -254,7 +254,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.618,
+      "ms": 2.553,
       "ac_refs": [
         "AC-5"
       ]
@@ -277,7 +277,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.481,
+      "ms": 1.327,
       "ac_refs": [
         "AC-5"
       ]
@@ -300,7 +300,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 2.074,
+      "ms": 0.84,
       "ac_refs": [
         "AC-5"
       ]
@@ -323,7 +323,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.613,
+      "ms": 0.744,
       "ac_refs": [
         "AC-5"
       ]
@@ -346,7 +346,7 @@
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.599,
+      "ms": 0.596,
       "ac_refs": [
         "AC-5"
       ]
@@ -369,7 +369,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.849,
+      "ms": 0.749,
       "ac_refs": [
         "AC-5"
       ]
@@ -392,7 +392,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 1.115,
+      "ms": 0.38,
       "ac_refs": [
         "AC-5"
       ]
@@ -415,7 +415,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.628,
+      "ms": 0.559,
       "ac_refs": [
         "AC-5"
       ]
@@ -438,7 +438,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.593,
+      "ms": 0.549,
       "ac_refs": [
         "AC-5"
       ]
@@ -461,7 +461,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.755,
+      "ms": 0.727,
       "ac_refs": [
         "AC-5"
       ]
@@ -484,7 +484,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.833,
+      "ms": 0.363,
       "ac_refs": [
         "AC-5"
       ]
@@ -507,7 +507,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.621,
+      "ms": 0.543,
       "ac_refs": [
         "AC-5"
       ]
@@ -530,7 +530,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.733,
+      "ms": 0.724,
       "ac_refs": [
         "AC-5"
       ]
@@ -553,7 +553,7 @@
       "within_one_tier": false,
       "in_80_band": true,
       "pass": false,
-      "ms": 0.745,
+      "ms": 0.718,
       "ac_refs": [
         "AC-5"
       ]
@@ -576,7 +576,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.602,
+      "ms": 0.359,
       "ac_refs": [
         "AC-5"
       ]
@@ -599,7 +599,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.588,
+      "ms": 0.545,
       "ac_refs": [
         "AC-5"
       ]
@@ -622,7 +622,7 @@
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.537,
+      "ms": 0.37,
       "ac_refs": [
         "AC-5"
       ]
@@ -645,7 +645,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.731,
+      "ms": 0.721,
       "ac_refs": [
         "AC-5"
       ]
@@ -668,7 +668,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.557,
+      "ms": 0.543,
       "ac_refs": [
         "AC-5"
       ]
@@ -691,7 +691,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.403,
+      "ms": 0.355,
       "ac_refs": [
         "AC-5"
       ]
@@ -714,7 +714,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.551,
+      "ms": 0.544,
       "ac_refs": [
         "AC-5"
       ]
@@ -737,7 +737,7 @@
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.551,
+      "ms": 0.542,
       "ac_refs": [
         "AC-5"
       ]
@@ -760,7 +760,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.727,
+      "ms": 0.734,
       "ac_refs": [
         "AC-5"
       ]
@@ -783,7 +783,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.734,
+      "ms": 0.759,
       "ac_refs": [
         "AC-5"
       ]
@@ -806,7 +806,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.378,
+      "ms": 0.354,
       "ac_refs": [
         "AC-5"
       ]
@@ -829,7 +829,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.745,
+      "ms": 0.896,
       "ac_refs": [
         "AC-5"
       ]
@@ -852,7 +852,7 @@
       "within_one_tier": false,
       "in_80_band": true,
       "pass": false,
-      "ms": 0.372,
+      "ms": 0.351,
       "ac_refs": [
         "AC-5"
       ]
@@ -875,7 +875,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.734,
+      "ms": 0.773,
       "ac_refs": [
         "AC-5"
       ]
@@ -898,7 +898,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.394,
+      "ms": 0.352,
       "ac_refs": [
         "AC-5"
       ]
@@ -921,7 +921,7 @@
       "within_one_tier": true,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.593,
+      "ms": 0.537,
       "ac_refs": [
         "AC-5"
       ]
@@ -944,7 +944,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.563,
+      "ms": 0.544,
       "ac_refs": [
         "AC-5"
       ]
@@ -967,7 +967,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.727,
+      "ms": 0.742,
       "ac_refs": [
         "AC-5"
       ]
@@ -990,7 +990,7 @@
       "within_one_tier": false,
       "in_80_band": false,
       "pass": false,
-      "ms": 0.364,
+      "ms": 0.35,
       "ac_refs": [
         "AC-5"
       ]
@@ -1013,7 +1013,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.371,
+      "ms": 0.38,
       "ac_refs": [
         "AC-5"
       ]
@@ -1036,7 +1036,7 @@
       "within_one_tier": false,
       "in_80_band": true,
       "pass": false,
-      "ms": 0.552,
+      "ms": 0.554,
       "ac_refs": [
         "AC-5"
       ]
@@ -1059,7 +1059,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.723,
+      "ms": 0.721,
       "ac_refs": [
         "AC-5"
       ]
@@ -1082,7 +1082,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.788,
+      "ms": 0.734,
       "ac_refs": [
         "AC-5"
       ]
@@ -1105,7 +1105,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.545,
+      "ms": 0.539,
       "ac_refs": [
         "AC-5"
       ]
@@ -1151,7 +1151,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.541,
+      "ms": 0.531,
       "ac_refs": [
         "AC-5"
       ]
@@ -1197,7 +1197,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.889,
+      "ms": 0.725,
       "ac_refs": [
         "AC-5"
       ]
@@ -1220,7 +1220,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.768,
+      "ms": 0.718,
       "ac_refs": [
         "AC-5"
       ]
@@ -1243,7 +1243,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.541,
+      "ms": 0.532,
       "ac_refs": [
         "AC-5"
       ]
@@ -1266,7 +1266,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.359,
+      "ms": 0.401,
       "ac_refs": [
         "AC-5"
       ]
@@ -1289,7 +1289,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.544,
+      "ms": 0.533,
       "ac_refs": [
         "AC-5"
       ]
@@ -1312,7 +1312,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.569,
+      "ms": 0.54,
       "ac_refs": [
         "AC-5"
       ]
@@ -1335,7 +1335,7 @@
       "within_one_tier": true,
       "in_80_band": true,
       "pass": true,
-      "ms": 0.789,
+      "ms": 0.718,
       "ac_refs": [
         "AC-5"
       ]
