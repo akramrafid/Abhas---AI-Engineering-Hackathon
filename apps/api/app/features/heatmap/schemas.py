@@ -2,9 +2,24 @@
 
 from datetime import date
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
-from app.core.types import City, Tier, WardId, WeatherMode
+from app.core.types import City, IsoWeek, Tier, WardId, WeatherMode, in_dataset_range
+
+
+class HeatmapQuery(BaseModel):
+    city: City
+    source: WeatherMode = "dataset"
+    origin_week: IsoWeek = Field(
+        description="Monday of the last observed week; 2016-02-29 … 2025-12-29 in dataset mode"
+    )
+
+    @field_validator("origin_week")
+    @classmethod
+    def _origin_week_range(cls, value: date, info: ValidationInfo) -> date:
+        if info.data.get("source", "dataset") == "dataset":
+            return in_dataset_range(value)
+        return value
 
 
 class HeatmapCell(BaseModel):
