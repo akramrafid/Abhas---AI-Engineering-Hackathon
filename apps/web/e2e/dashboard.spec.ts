@@ -492,4 +492,41 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await assertWcagAA(page, "Ward Forecast (375px mobile)");
   });
+
+  test("test_design_hook_ward_list_no_side_tab_border: selected ward row uses subtle brand highlight without thick one-side accent border", async ({
+    page,
+  }) => {
+    await page.goto("/?demo=1");
+    const list = page.getByTestId("ward-priority-list");
+    await expect(list).toBeVisible();
+
+    const selectedRow = list.locator('button[aria-current="true"]');
+    await expect(selectedRow).toHaveCount(1);
+
+    const styles = await selectedRow.evaluate((el) => {
+      const cs = window.getComputedStyle(el);
+      return {
+        borderLeftWidth: parseFloat(cs.borderLeftWidth),
+        borderRightWidth: parseFloat(cs.borderRightWidth),
+        borderTopWidth: parseFloat(cs.borderTopWidth),
+        borderBottomWidth: parseFloat(cs.borderBottomWidth),
+        backgroundColor: cs.backgroundColor,
+      };
+    });
+
+    // No thick one-side accent ("side-tab") border
+    expect(styles.borderLeftWidth).toBeLessThanOrEqual(1);
+    expect(styles.borderRightWidth).toBeLessThanOrEqual(1);
+    expect(styles.borderTopWidth).toBeLessThanOrEqual(1);
+    expect(styles.borderBottomWidth).toBeLessThanOrEqual(1);
+
+    // Selected row remains visually distinct from unselected rows (Paper vs White ground)
+    const unselectedRow = list.locator("button:not([aria-current])").first();
+    if ((await unselectedRow.count()) > 0) {
+      const unselectedBg = await unselectedRow.evaluate(
+        (el) => window.getComputedStyle(el).backgroundColor,
+      );
+      expect(styles.backgroundColor).not.toBe(unselectedBg);
+    }
+  });
 });
