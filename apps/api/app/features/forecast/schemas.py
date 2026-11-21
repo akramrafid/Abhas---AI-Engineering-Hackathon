@@ -3,9 +3,19 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
-from app.core.types import City, Horizon, IsoWeek, Tier, WardId, WeatherMode, WeatherSourceUsed
+from app.core.types import (
+    City,
+    DatasetOriginWeek,
+    Horizon,
+    IsoWeek,
+    Tier,
+    WardId,
+    WeatherMode,
+    WeatherSourceUsed,
+    in_dataset_range,
+)
 
 DriverKey = Literal[
     "rain_2_4w", "recent_rain", "heat", "humidity", "water_logging", "crowding", "sanitation", "season"
@@ -40,11 +50,18 @@ class WardForecast(BaseModel):
 
 class ForecastRequest(BaseModel):
     ward_ids: list[WardId] = Field(min_length=1, max_length=60)
+    source: WeatherMode = "dataset"
     origin_week: IsoWeek = Field(
         description="Monday of the last observed week; 2016-02-29 … 2025-12-29 in dataset mode"
     )
     horizons: list[Horizon] = Field(default=[1, 2, 3, 4], min_length=1, max_length=4)
-    source: WeatherMode = "dataset"
+
+    @field_validator("origin_week")
+    @classmethod
+    def _origin_week_range(cls, value: date, info: ValidationInfo) -> date:
+        if info.data.get("source", "dataset") == "dataset":
+            return in_dataset_range(value)
+        return value
 
     @model_validator(mode="after")
     def _unique(self) -> "ForecastRequest":
@@ -81,7 +98,9 @@ class WeatherOverride(BaseModel):
 
 class ScenarioRequest(BaseModel):
     ward_id: WardId
-    origin_week: IsoWeek
+    origin_week: DatasetOriginWeek = Field(
+        description="Monday of the last observed week; 2016-02-29 … 2025-12-29"
+    )
     horizons: list[Horizon] = Field(default=[1, 2, 3, 4], min_length=1, max_length=4)
     weather: WeatherOverride
 

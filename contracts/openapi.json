@@ -1158,6 +1158,7 @@
             "type": "array"
           },
           "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
             "examples": [
               "2025-08-04"
             ],
