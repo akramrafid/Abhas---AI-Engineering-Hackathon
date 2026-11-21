@@ -100,13 +100,17 @@ def normalize_observation_columns(df: pd.DataFrame) -> pd.DataFrame:
     normalize `date` -> `week` as `datetime.date`, and assert required weather columns have zero nulls.
     """
     out = df.copy()
+    lower_names = [str(c).strip().lower() for c in out.columns]
+    has_week = "week" in lower_names
     rename_map: dict[str, str] = {}
-    for col in out.columns:
-        low = str(col).strip().lower()
-        if low == "date" and "week" not in {str(c).strip().lower() for c in out.columns}:
-            rename_map[col] = "week"
-        elif low != col:
-            rename_map[col] = low
+    seen_targets: set[str] = set()
+    for col, low in zip(out.columns, lower_names, strict=True):
+        target = "week" if (low == "date" and not has_week) else low
+        if target in seen_targets:
+            raise ValueError(f"Duplicate column after case-insensitive normalization: {target!r}")
+        seen_targets.add(target)
+        if target != col:
+            rename_map[col] = target
     if rename_map:
         out = out.rename(columns=rename_map)
 

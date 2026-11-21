@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import logging
 from datetime import date, timedelta
+from pathlib import Path
 
 import numpy as np
+import openpyxl
 import pandas as pd
 import pytest
 
@@ -15,11 +17,13 @@ from app.shared.features import (
     MAX_RAIN_LAG,
     build_features,
     build_serving_features,
+    canonical_iso_week,
     compute_lag_correlations,
     fit_rain_normals,
     iso_week_cyclical,
     normalize_observation_columns,
 )
+from scripts.seed import load_raw_dataset
 
 
 def _synthetic_two_ward_df(n_weeks: int = 20, start: date = date(2023, 1, 2)) -> pd.DataFrame:
@@ -408,3 +412,128 @@ def test_cr_5_normals_max_year() -> None:
     # 2019 rain (220) - 2018-only normal (20) = +200.0; whereas <=2019 normal averages (20+220)/2=120 -> +100.0
     assert float(row_2019_with_2018_normals["rain_anomaly"]) == pytest.approx(200.0)
     assert float(row_2019_with_2019_normals["rain_anomaly"]) == pytest.approx(100.0)
+
+
+def test_corner_iso_week_53_folds_into_52_for_seasonality_and_normals() -> None:
+    """Corner case (§9): ISO week 53 (2020-12-28) folds cleanly into week 52 for seasonality and normals."""
+    w52 = date(2020, 12, 21)
+    w53 = date(2020, 12, 28)
+    assert w52.isocalendar().week == 52
+    assert w53.isocalendar().week == 53
+    assert canonical_iso_week(w53) == 52
+    assert iso_week_cyclical(w53) == iso_week_cyclical(w52)
+
+    # 10 consecutive Mondays ending 2021-01-11, containing both W52 (2020-12-21) and W53 (2020-12-28)
+    start = date(2020, 11, 9)
+    rows = []
+    for i in range(10):
+        wk = start + timedelta(weeks=i)
+        rain = 20.0 if wk == w52 else (40.0 if wk == w53 else 10.0)
+        rows.append(
+            {
+                "ward_id": "DSCC_Ward_07",
+                "week": wk,
+                "population_density_sqkm": 50000.0,
+                "water_logging_risk_index": 0.80,
+                "sanitation_score": 0.40,
+                "avg_temp_c": 22.0,
+                "rainfall_mm": rain,
+                "relative_humidity_pct": 65.0,
+            }
+        )
+    df = pd.DataFrame(rows)
+
+    normals = fit_rain_normals(df, max_year=2023)
+    assert ("DSCC_Ward_07", 53) not in normals
+    # Both W52 (20.0) and W53 (40.0) fold into week 52 -> average = 30.0
+    assert normals[("DSCC_Ward_07", 52)] == pytest.approx(30.0)
+
+    # Origin 2020-12-07 with horizon=3 targets 2020-12-28 (ISO W53) -> same trig as target 2020-12-21 (W52)
+    feats = build_features(df, horizon=3, rain_normals=normals)
+    row_target_w52 = feats.loc[feats["target_week"] == w52].iloc[0]
+    row_target_w53 = feats.loc[feats["target_week"] == w53].iloc[0]
+    assert float(row_target_w53["iso_week_sin"]) == pytest.approx(float(row_target_w52["iso_week_sin"]))
+    assert float(row_target_w53["iso_week_cos"]) == pytest.approx(float(row_target_w52["iso_week_cos"]))
+
+    # Origin 2020-12-28 computes rain_anomaly against the folded week-52 normal (40.0 - 30.0 = 10.0)
+    row_origin_w53 = feats.loc[feats["week"] == w53].iloc[0]
+    assert float(row_origin_w53["rain_anomaly"]) == pytest.approx(10.0)
+
+
+def test_corner_case_insensitive_temp_column_ingest_and_features(tmp_path: Path) -> None:
+    """Corner case (§9): Both avg_temp_C (rubric) and avg_temp_c (dataset) map cleanly at ingest and features."""
+    sheet = "bangladesh_dengue_large_dataset"
+    base_rows = [
+        (
+            date(2023, 1, 2) + timedelta(weeks=i),
+            "Dhaka South",
+            "DSCC_Ward_01",
+            50000.0,
+            0.80,
+            0.40,
+            26.5 + 0.1 * i,
+            30.5 + 0.1 * i,
+            22.5 + 0.1 * i,
+            15.0 + float(i),
+            74.0,
+            2 + i,
+        )
+        for i in range(10)
+    ]
+
+    def _write_xlsx(path: Path, headers: list[str]) -> None:
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        assert ws is not None
+        ws.title = sheet
+        ws.append(headers)
+        for r in base_rows:
+            ws.append(list(r))
+        wb.save(path)
+        wb.close()
+
+    headers_upper = [
+        "date",
+        "city",
+        "ward_id",
+        "population_density_sqkm",
+        "water_logging_risk_index",
+        "sanitation_score",
+        "avg_temp_C",
+        "max_temp_C",
+        "min_temp_C",
+        "Rainfall_MM",
+        "Relative_Humidity_Pct",
+        "dengue_cases",
+    ]
+    headers_lower = [h.lower() for h in headers_upper]
+
+    xlsx_upper = tmp_path / "upper.xlsx"
+    xlsx_lower = tmp_path / "lower.xlsx"
+    _write_xlsx(xlsx_upper, headers_upper)
+    _write_xlsx(xlsx_lower, headers_lower)
+
+    wards_u, obs_u = load_raw_dataset(xlsx_upper, sheet, verify_sha256=False)
+    wards_l, obs_l = load_raw_dataset(xlsx_lower, sheet, verify_sha256=False)
+    assert wards_u == wards_l
+    assert obs_u == obs_l
+    assert obs_u[0]["avg_temp_c"] == pytest.approx(26.5)
+
+    # Same invariance in normalize_observation_columns + build_features
+    df_upper = _synthetic_two_ward_df(n_weeks=12)
+    df_lower = df_upper.rename(columns={"avg_temp_C": "avg_temp_c"})
+    normals = fit_rain_normals(df_lower, max_year=2023)
+    feats_upper = build_features(df_upper, horizon=3, rain_normals=normals)
+    feats_lower = build_features(df_lower, horizon=3, rain_normals=normals)
+    pd.testing.assert_frame_equal(feats_upper, feats_lower)
+
+    # Colliding duplicate columns after case-folding raise ValueError in both ingest and features
+    dup_df = df_lower.copy()
+    dup_df["avg_temp_C"] = dup_df["avg_temp_c"]
+    with pytest.raises(ValueError, match="Duplicate column"):
+        normalize_observation_columns(dup_df)
+
+    xlsx_dup = tmp_path / "dup.xlsx"
+    _write_xlsx(xlsx_dup, [*headers_lower, "avg_temp_C"])
+    with pytest.raises(ValueError, match="Duplicate column"):
+        load_raw_dataset(xlsx_dup, sheet, verify_sha256=False)

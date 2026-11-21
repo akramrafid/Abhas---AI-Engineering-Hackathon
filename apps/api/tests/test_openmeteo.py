@@ -14,7 +14,7 @@ from alembic.config import Config
 from app.adapters.db.engine import create_db_engine
 from app.adapters.db.models import ObservationRow, WardRow
 from app.adapters.db.repositories import SqlCallLog, SqlObservationRepository, SqlWeatherCache
-from app.adapters.openmeteo import OpenMeteoWeatherSource, aggregate_daily_to_iso_weeks
+from app.adapters.openmeteo import OpenMeteoWeatherSource, aggregate_daily_to_iso_weeks, load_city_centroids
 from app.core.config import API_DIR
 from app.core.types import CITIES
 
@@ -284,6 +284,143 @@ def test_dataset_mode_never_calls_openmeteo(tmp_path: Path) -> None:
         assert observed[0].source == "dataset"
         assert observed[0].rainfall_mm == pytest.approx(88.0)
         assert observed[1].source == "climatology"
+        client.close()
+    finally:
+        engine.dispose()
+
+
+def test_corner_openmeteo_live_aggregation_dhaka_partial_week_units_and_bias(tmp_path: Path) -> None:
+    """Corner case (§9): Mon-Sun Asia/Dhaka aggregation, partial current week completed by forecast days,
+    incomplete boundary weeks excluded, dataset units pinned, and versioned city_centroids.json bias applied."""
+    cfg = load_city_centroids()
+    assert cfg["version"] == "1.1.0"
+    assert cfg["timezone"] == "Asia/Dhaka"
+    assert cfg["bias_check"]["passed"] is True
+
+    # Simulate Wed 2025-08-06 in Asia/Dhaka:
+    # - Leading partial week: Fri 2025-07-25 .. Sun 2025-07-27 (3 days -> must be excluded)
+    # - Full past week: Mon 2025-07-28 .. Sun 2025-08-03 (7 days -> included)
+    # - Current partial week: Mon 2025-08-04 .. Wed 2025-08-06 (past) + Thu 2025-08-07 .. Sun 2025-08-10 (forecast) = 7 days
+    # - Full forecast week: Mon 2025-08-11 .. Sun 2025-08-17 (7 days -> included)
+    # - Trailing partial forecast week: Mon 2025-08-18 .. Thu 2025-08-21 (4 days -> must be excluded)
+    start_day = date(2025, 7, 25)
+    all_days = [start_day + timedelta(days=i) for i in range(3 + 7 + 7 + 7 + 4)]
+    daily_times = [d.isoformat() for d in all_days]
+
+    # Distinct rain per week: partial_lead=50/day, past_wk=5/day (35), current_wk=Mon-Wed 10 + Thu-Sun 20 (110),
+    # forecast_wk=15/day (105), partial_tail=40/day
+    rain_by_day: list[float] = []
+    temp_by_day: list[float] = []
+    rh_by_day: list[float] = []
+    for d in all_days:
+        if d < date(2025, 7, 28):
+            rain_by_day.append(50.0)
+            temp_by_day.append(27.0)
+            rh_by_day.append(78.0)
+        elif d < date(2025, 8, 4):
+            rain_by_day.append(5.0)
+            temp_by_day.append(28.0)
+            rh_by_day.append(80.0)
+        elif d <= date(2025, 8, 6):  # past portion of current week
+            rain_by_day.append(10.0)
+            temp_by_day.append(29.0)
+            rh_by_day.append(82.0)
+        elif d <= date(2025, 8, 10):  # forecast portion completing current week
+            rain_by_day.append(20.0)
+            temp_by_day.append(30.0)
+            rh_by_day.append(86.0)
+        elif d <= date(2025, 8, 17):
+            rain_by_day.append(15.0)
+            temp_by_day.append(28.5)
+            rh_by_day.append(84.0)
+        else:
+            rain_by_day.append(40.0)
+            temp_by_day.append(29.5)
+            rh_by_day.append(85.0)
+
+    sample_daily = {
+        "time": daily_times,
+        "temperature_2m_mean": temp_by_day,
+        "temperature_2m_max": [t + 3.0 for t in temp_by_day],
+        "temperature_2m_min": [t - 3.0 for t in temp_by_day],
+        "precipitation_sum": rain_by_day,
+        "relative_humidity_2m_mean": rh_by_day,
+    }
+    raw_weekly = aggregate_daily_to_iso_weeks(sample_daily)
+    # Only the 3 complete Mon-Sun weeks exist; partial boundary weeks are dropped
+    assert list(raw_weekly.keys()) == [date(2025, 7, 28), date(2025, 8, 4), date(2025, 8, 11)]
+    # Current partial week combines 3 past days (3*10=30) + 4 forecast days (4*20=80) = 110.0 mm
+    cur = raw_weekly[date(2025, 8, 4)]
+    assert cur["rainfall_mm"] == pytest.approx(110.0)
+    assert cur["avg_temp_c"] == pytest.approx(round((3 * 29.0 + 4 * 30.0) / 7.0, 2))
+    assert cur["relative_humidity_pct"] == pytest.approx(round((3 * 82.0 + 4 * 86.0) / 7.0, 2))
+    assert cur["max_temp_c"] == pytest.approx(33.0)
+    assert cur["min_temp_c"] == pytest.approx(26.0)
+
+    # Verify fallback max/min when tmax/tmin absent does NOT double-apply temp_offset_c
+    no_minmax = {
+        "time": [f"2025-08-{d:02d}" for d in range(4, 11)],
+        "temperature_2m_mean": [28.0] * 7,
+        "precipitation_sum": [10.0] * 7,
+        "relative_humidity_2m_mean": [80.0] * 7,
+    }
+    biased_no_mm = aggregate_daily_to_iso_weeks(
+        no_minmax,
+        bias_correction={"temp_offset_c": 1.5, "rain_scale": 1.0, "humidity_offset_pct": 0.0},
+    )[date(2025, 8, 4)]
+    assert biased_no_mm["avg_temp_c"] == pytest.approx(29.5)
+    assert biased_no_mm["max_temp_c"] == pytest.approx(32.5)
+    assert biased_no_mm["min_temp_c"] == pytest.approx(26.5)
+
+    # End-to-end OpenMeteoWeatherSource check: Asia/Dhaka + celsius + mm params + versioned 5-city bias
+    engine = _migrated_test_db(tmp_path)
+    try:
+        repo = SqlObservationRepository(engine)
+        wcache = SqlWeatherCache(engine)
+        call_log = SqlCallLog(engine)
+        seen_params: dict[str, str] = {}
+        payload_5 = [
+            {"latitude": c["latitude"], "longitude": c["longitude"], "daily": sample_daily}
+            for c in cfg["cities"]
+        ]
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            seen_params.update(dict(request.url.params))
+            return httpx.Response(200, json=payload_5)
+
+        client = httpx.Client(
+            transport=httpx.MockTransport(handler),
+            timeout=httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=5.0),
+        )
+        src = OpenMeteoWeatherSource(
+            repo=repo,
+            weather_cache=wcache,
+            call_log=call_log,
+            mode="live",
+            app_env="test",
+            client=client,
+            clock=lambda: datetime(2025, 8, 5, 21, 0, tzinfo=UTC),  # 2025-08-06 03:00 Asia/Dhaka
+            retry_base_s=0.0,
+        )
+
+        # Query completed current week for Chattogram & Dhaka South and verify versioned bias corrections
+        expected_raw_temp = (3 * 29.0 + 4 * 30.0) / 7.0
+        expected_raw_rh = (3 * 82.0 + 4 * 86.0) / 7.0
+        for city_cfg in cfg["cities"]:
+            city_name = city_cfg["city"]
+            bc = city_cfg["bias_correction"]
+            wk_row = src.weekly(city_name, [date(2025, 8, 4)])[0]
+            assert wk_row.rainfall_mm == pytest.approx(round(110.0 * bc["rain_scale"], 2))
+            assert wk_row.avg_temp_c == pytest.approx(round(expected_raw_temp + bc["temp_offset_c"], 2))
+            assert wk_row.relative_humidity_pct == pytest.approx(
+                round(expected_raw_rh + bc["humidity_offset_pct"], 2)
+            )
+
+        assert seen_params["timezone"] == "Asia/Dhaka"
+        assert seen_params["temperature_unit"] == "celsius"
+        assert seen_params["precipitation_unit"] == "mm"
+        assert seen_params["past_days"] == "92"
+        assert seen_params["forecast_days"] == "16"
         client.close()
     finally:
         engine.dispose()

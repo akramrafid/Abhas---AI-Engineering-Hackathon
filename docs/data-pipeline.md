@@ -67,13 +67,16 @@ Invoked via `npm run seed` and automatically during `npm run setup`:
 ### Leakage & Edge-Case Guarantees (Proven by `tests/test_features_lags.py`)
 
 - **Zero cross-ward contamination (`AC-2`):** Rows are sorted by `(ward_id, week)` and all shifts run inside `groupby("ward_id", sort=False)`. Unit tests shuffle two wards with disjoint rainfall magnitudes (`1000+` vs `1..20`) and assert zero contamination and exact `NaN` counts (`60 × k` NaNs for `rainfall_lag_k` across the 60 real wards).
-- **Zero future leakage (`week <= origin_week`):** `build_features(..., origin_week=t)` filters `df[df["week"] <= t]` *before* any lag, rolling window, or normal calculation. Adversarial tests mutate all rows `> origin_week` to extreme values and verify bit-for-bit identical output.
-- **Train-only normals (`<= 2023`):** `fit_rain_normals` filters strictly to `week.year <= max_year` (`2023`), ensuring 2024–2025 hold-out rainfall never influences training or serving anomalies.
-- **ISO week 53:** `canonical_iso_week()` maps week 53 (e.g. `2020-12-28`) cleanly into week 52 so seasonal trig features remain smooth and normal lookups never hit single-observation buckets or produce `NaN`.
+- **Strict consecutive-week enforcement (`CR-7`):** Both `build_features` and `compute_all_lag_correlations` reject duplicate `(ward_id, week)` pairs and any non-consecutive weekly gap (`diff() != 7 days` per ward) with `ValueError` before any positional `.shift(k)` runs, preventing silent lag misalignment.
+- **Zero future leakage (`AC-3` / `CR-8`):** `build_features(..., origin_week=t)` and `build_serving_features` filter `df[df["week"] <= t]` *before* any lag, rolling window, or normal calculation. `test_ac_3_features_ignore_rows_after_origin` mutates weather and `dengue_cases` after `origin_week` to extreme values and asserts bit-for-bit identical serving features across all horizons `h = 1..4` and scenario overrides.
+- **Strict serving boundary validation (`CR-12`):** `build_serving_features` raises `ValueError` whenever the post-cutoff/ward-filtered frame is empty, when no observation matches `origin_week`, or when `weather_override` contains unknown keys outside `("avg_temp_c", "rainfall_mm", "relative_humidity_pct")` (matched case-insensitively).
+- **Train-only normals & anti-skew enforcement (`CR-5` / `CR-13`):** `fit_rain_normals` and `build_features` accept explicit `max_normal_year` (default `2023`) so backtests and dev splits never leak future years into `rain_anomaly`. `build_serving_features` requires pre-fitted `rain_normals` from the model artifact, and `build_features` emits a structured `WARNING` whenever `rain_normals` is omitted and fit on the fly.
+- **Case-insensitive column mapping (`avg_temp_C` / `avg_temp_c`):** Both `scripts/seed.py::load_raw_dataset` and `features.py::normalize_observation_columns` normalize headers case-insensitively and reject colliding duplicate columns with `ValueError`.
+- **ISO week 53:** `canonical_iso_week()` maps week 53 (e.g. `2020-12-28`) cleanly into week 52 for both seasonal trig encoding and rain normal lookup, preventing 1-row buckets or `NaN` anomalies.
 
 ## 4. Deseasonalized Lag Correlation Verification (`AC-1`)
 
-`compute_lag_correlations(obs_df, ward_id, max_lag=8)` removes each ward's ISO-week seasonal mean from both rainfall and dengue cases, shifts demeaned rainfall by `k = 0..8` weeks per ward, and computes Pearson correlation for both the selected ward and the pooled 60-ward dataset:
+`compute_lag_correlations(obs_df, ward_id, max_lag=8)` removes each ward's ISO-week seasonal mean from both rainfall and dengue cases, shifts demeaned rainfall by `k = 0..8` weeks per ward, and computes Pearson correlation for both the selected ward and the pooled 60-ward dataset. In `app/features/lags/service.py`, `LagsService` caches both positive ward correlations and negative lookups (wards present in `wards` with zero observations) keyed by repository `date_range()`, and exposes `warm_lags_cache()` for startup pre-warming (`CR-19`):
 
 | Lag (`k` weeks) | Pooled 60-Ward `r` | `DSCC_Ward_07` `r` | Interpretation |
 |---:|---:|---:|---|
@@ -93,7 +96,7 @@ Across all 60 wards individually, **55/60 peak at lag 3** and **5/60 peak at lag
 
 Implemented in `apps/api/app/adapters/openmeteo.py` with versioned coordinates in `apps/api/config/city_centroids.json`:
 
-- **Single multi-location request:** One `GET` to Open-Meteo passes all 5 city centroids comma-separated with `past_days=92&forecast_days=16&timezone=Asia/Dhaka`, aggregating daily values into ISO weeks (Mon–Sun: sum of `precipitation_sum`, mean of `temperature_2m_mean` and `relative_humidity_2m_mean`, max/min temperatures).
+- **Single multi-location request:** One `GET` to Open-Meteo passes all 5 city centroids comma-separated with `past_days=92&forecast_days=16&timezone=Asia/Dhaka&temperature_unit=celsius&precipitation_unit=mm`, aggregating daily values into complete 7-day Mon–Sun ISO weeks in `Asia/Dhaka` (sum of `precipitation_sum`, mean of `temperature_2m_mean` and `relative_humidity_2m_mean`, max/min temperatures). The current partial week is completed cleanly by combining past observed days with forecast days for the remainder of the week, while incomplete leading/trailing boundary weeks (`< 7` days) are skipped so partial rain sums are never stored as weekly totals.
 - **6-hour cache TTL:** All 5 cities are persisted into `weather_cache` with `expires_at = fetched_at + 6h`. Across an entire 6-hour window, requests for any combination of the 5 cities make **at most 1 HTTP call** (≤ 4 weather calls/day per office).
 - **Resilience controls:**
   - Explicit `httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=5.0)` on a shared `httpx.Client`.

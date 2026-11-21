@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import secrets
 import time
@@ -43,12 +44,26 @@ def load_city_centroids(path: Path | None = None) -> dict[str, Any]:
     return json.loads(target.read_text(encoding="utf-8"))
 
 
+def _finite_float(val: Any) -> float | None:
+    if val is None:
+        return None
+    f = float(val)
+    return f if math.isfinite(f) else None
+
+
 def aggregate_daily_to_iso_weeks(
     daily: Mapping[str, Sequence[Any]],
     *,
     bias_correction: Mapping[str, float] | None = None,
+    require_full_week: bool = True,
 ) -> dict[date, dict[str, float]]:
-    """Aggregate Open-Meteo daily arrays into ISO weeks (Monday start, Asia/Dhaka) in dataset units."""
+    """Aggregate Open-Meteo daily arrays into ISO weeks (Monday start, Asia/Dhaka) in dataset units.
+
+    When `require_full_week` is True (default), only complete 7-day Mon–Sun weeks are returned:
+    the current partial week is completed cleanly from Open-Meteo forecast days (Mon..today past +
+    tomorrow..Sun forecast = 7 distinct dates), while incomplete leading/trailing boundary weeks
+    are skipped so partial rainfall sums are never stored as weekly totals.
+    """
     times = daily.get("time") or []
     t_mean = daily.get("temperature_2m_mean") or []
     t_max = daily.get("temperature_2m_max") or []
@@ -56,24 +71,37 @@ def aggregate_daily_to_iso_weeks(
     precip = daily.get("precipitation_sum") or []
     rh = daily.get("relative_humidity_2m_mean") or []
 
-    buckets: dict[date, dict[str, list[float]]] = defaultdict(
-        lambda: {"tavg": [], "tmax": [], "tmin": [], "rain": [], "rh": []}
+    buckets: dict[date, dict[str, Any]] = defaultdict(
+        lambda: {"days": set(), "tavg": [], "tmax": [], "tmin": [], "rain": [], "rh": []}
     )
 
     for idx, day_str in enumerate(times):
         d = date.fromisoformat(str(day_str)[:10])
         monday = d - timedelta(days=d.weekday())
         b = buckets[monday]
-        if idx < len(t_mean) and t_mean[idx] is not None:
-            b["tavg"].append(float(t_mean[idx]))
-        if idx < len(t_max) and t_max[idx] is not None:
-            b["tmax"].append(float(t_max[idx]))
-        if idx < len(t_min) and t_min[idx] is not None:
-            b["tmin"].append(float(t_min[idx]))
-        if idx < len(precip) and precip[idx] is not None:
-            b["rain"].append(max(0.0, float(precip[idx])))
-        if idx < len(rh) and rh[idx] is not None:
-            b["rh"].append(min(100.0, max(0.0, float(rh[idx]))))
+        if d in b["days"]:
+            continue
+        b["days"].add(d)
+        if idx < len(t_mean):
+            v = _finite_float(t_mean[idx])
+            if v is not None:
+                b["tavg"].append(v)
+        if idx < len(t_max):
+            v = _finite_float(t_max[idx])
+            if v is not None:
+                b["tmax"].append(v)
+        if idx < len(t_min):
+            v = _finite_float(t_min[idx])
+            if v is not None:
+                b["tmin"].append(v)
+        if idx < len(precip):
+            v = _finite_float(precip[idx])
+            if v is not None:
+                b["rain"].append(max(0.0, v))
+        if idx < len(rh):
+            v = _finite_float(rh[idx])
+            if v is not None:
+                b["rh"].append(min(100.0, max(0.0, v)))
 
     corr = bias_correction or {}
     temp_offset = float(corr.get("temp_offset_c", 0.0))
@@ -84,9 +112,12 @@ def aggregate_daily_to_iso_weeks(
     for monday, b in sorted(buckets.items()):
         if not b["tavg"] and not b["rain"]:
             continue
-        avg_t = (sum(b["tavg"]) / len(b["tavg"]) if b["tavg"] else 27.0) + temp_offset
-        max_t = (max(b["tmax"]) if b["tmax"] else avg_t + 3.0) + temp_offset
-        min_t = (min(b["tmin"]) if b["tmin"] else avg_t - 3.0) + temp_offset
+        if require_full_week and len(b["days"]) < 7:
+            continue
+        raw_avg_t = sum(b["tavg"]) / len(b["tavg"]) if b["tavg"] else 27.0
+        avg_t = raw_avg_t + temp_offset
+        max_t = (max(b["tmax"]) if b["tmax"] else raw_avg_t + 3.0) + temp_offset
+        min_t = (min(b["tmin"]) if b["tmin"] else raw_avg_t - 3.0) + temp_offset
         rain_sum = max(0.0, sum(b["rain"]) * rain_scale)
         rh_avg = min(100.0, max(0.0, (sum(b["rh"]) / len(b["rh"]) if b["rh"] else 75.0) + rh_offset))
         weekly[monday] = {
@@ -159,6 +190,8 @@ class OpenMeteoWeatherSource:
         self._max_normal_year = int(max_normal_year)
 
         cfg = load_city_centroids(centroids_path)
+        self._centroids_version: str = str(cfg.get("version", "1.0.0"))
+        self._timezone: str = str(cfg.get("timezone", "Asia/Dhaka"))
         self._provider: str = str(cfg.get("provider", "Open-Meteo (CC BY 4.0)"))
         self._attribution: str = str(cfg.get("attribution", "Weather data by Open-Meteo.com (CC BY 4.0)"))
         bias_cfg = cfg.get("bias_check") or {}
@@ -367,7 +400,9 @@ class OpenMeteoWeatherSource:
                     "relative_humidity_2m_mean",
                 ]
             ),
-            "timezone": "Asia/Dhaka",
+            "timezone": self._timezone,
+            "temperature_unit": "celsius",
+            "precipitation_unit": "mm",
             "past_days": "92",
             "forecast_days": "16",
         }
