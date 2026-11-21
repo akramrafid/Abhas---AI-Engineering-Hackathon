@@ -34,7 +34,7 @@ See `.orca-team/CREDENTIALS.md`. Asked once at 15:45 BST. Open: team GitHub user
 | Time | Role | From → To | Reason |
 |---|---|---|---|
 | 16:05 | DESIGN | "Gemini 4 Neon" + `--effort max` → "Gemini 4 Neon (XHigh)" | Antigravity model ids carry the effort; Neon has no max tier; "Gemini 4 Neon" alone is an unknown id |
-| 16:20 | all Claude seats | rule set by human | Any Claude limit hit → Gemini 4 Neon (XHigh), including LEAD |
+| 16:20 | all Claude seats | rule set by human | Any Claude limit hit → Gemini 4 Neon (XHigh), including LEAD; when the limit resets → back to Claude Opus 5.5 max |
 
 ## Assumptions
 - Ward geometry is absent: maps are schematic and labelled.

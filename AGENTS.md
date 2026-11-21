@@ -61,7 +61,8 @@ replaces UI-2 · Prove = CORE + UI + QA (fix tasks).
 A name or effort is rejected → start without it, log it in STATUS.md "Model switches", fix model-routing.md.
 
 ### Quota pools
-**Human rule: any Claude limit hit → Gemini 4 Neon (XHigh)** (LEAD and every Opus seat).
+**Human rule: any Claude limit hit → Gemini 4 Neon (XHigh)** (LEAD and every Opus seat); **when the limit resets,
+switch back to Claude Opus 5.5 max** for LEAD and every Opus seat (see model-routing.md rule 0).
 Claude Code (Opus) · Antigravity Gemini (Neon, Hydrogen — may share one quota). **Out of quota → Gemini 4 Neon
 xhigh**; if Neon is out too → Gemini 4 Hydrogen xhigh → Claude Opus 5.5 (only when the Claude slot is free).
 LEAD logs every `LIMIT HIT`, keeps Neon max (DESIGN) tasks short, batches reviews per wave when Opus runs low,

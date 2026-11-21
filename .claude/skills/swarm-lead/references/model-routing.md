@@ -25,6 +25,10 @@ Opus is kept for LEAD and for checking Gemini-written work.
 ## Rules
 0. **Human rule (2026-11-21): any Claude limit hit → Gemini 4 Neon (XHigh).** This covers LEAD and every Opus
    seat. When it puts a checker in the author's family, LEAD logs it in STATUS.md "Model switches".
+   **When the Claude limit resets, switch back to Claude Opus 5.5 (max):** every new Claude-seat dispatch uses
+   `--agent claude --model opus --effort max` again, and a Neon LEAD hands back — the human reopens Claude Code
+   (`/model opus`, `/effort max`) in the lead folder and types `ROLE: LEAD. Load swarm-lead. Resume from
+   .orca-team/STATUS.md.` Log both switches in STATUS.md "Model switches".
 1. **Out of quota → Gemini 4 Neon xhigh**; if Neon is out too → Gemini 4 Hydrogen xhigh → Claude Opus 5.5
    (only when the Claude slot is free).
 2. **Checker ≠ author family.** Families: Anthropic (Opus) · Google (Neon, Hydrogen). All review of
