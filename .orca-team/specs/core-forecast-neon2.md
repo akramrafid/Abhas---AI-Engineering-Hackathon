@@ -1,0 +1,71 @@
+CONTINUATION on antigravity / Gemini 4 Neon (XHigh) after a quota stop.
+FIRST: run `git merge akramrafid/core-forecast` — it holds your previous unreviewed WIP (commit 9d9b4ca: ml/train.py, ml/backtest.py, ml/verify_artifact.py, adapters lgbm_model/llm/fake_llm/runtime, feature routers). Re-read it, test it, finish it.
+PRIORITY ORDER (feature freeze 08:00 BST): (1) trained artifact committed + POST /forecast and /scenario real end-to-end + npm run ci green; (2) heatmap + validation real; (3) baseline.json + docs/ai-design.md; (4) ops counters + traces; (5) advisory template (LLM path last).
+Commit small and often on your branch so work survives another quota stop. Claude Opus reviews your branch before merge.
+
+ROLE: CORE · roles 5, 9 & 15 AI + Backend + LLMOps engineer · hat build
+LEAD_BRANCH: lead
+TASK: core-forecast — LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib artifact, forecast/heatmap/validation/advisory/ops slices, traces          WAVE: 1B      FEATURE: forecast, heatmap, validation, advisory, ops
+MODEL: antigravity · Gemini 4 Neon (XHigh)
+SKILLS: production-standards, verification-before-completion, ai-engineering, backend-engineering, llmops-observability
+GOAL: Train and serialize the Abhas LightGBM Poisson direct multi-horizon (h=1..4) forecaster using `app/shared/features.py`, wire real `forecast` (+ `scenario`), `heatmap`, `validation`, `advisory`, and `ops` API slices with in-process caching and `asyncio.to_thread` inference, record baseline + backtest artifacts, and pass `baseline`, `eval`, `retrieval`, `contract`, `traces`, and `slices` gates.
+OWNED PATHS (only these may be edited):
+  - apps/api/ml/**
+  - apps/api/app/shared/tiers.py
+  - apps/api/app/shared/drivers.py
+  - apps/api/app/shared/forecast_engine.py
+  - apps/api/app/adapters/lgbm_model.py
+  - apps/api/app/adapters/llm.py
+  - apps/api/app/adapters/fake_llm.py
+  - apps/api/app/adapters/runtime.py
+  - apps/api/app/observability/**
+  - apps/api/app/features/advisory/prompts/**
+  - apps/api/app/features/forecast/** (EXCEPT schemas.py)
+  - apps/api/app/features/heatmap/** (EXCEPT schemas.py)
+  - apps/api/app/features/validation/** (EXCEPT schemas.py)
+  - apps/api/app/features/advisory/** (EXCEPT schemas.py)
+  - apps/api/app/features/ops/** (EXCEPT schemas.py)
+  - apps/api/tests/features/forecast/**
+  - apps/api/tests/features/heatmap/**
+  - apps/api/tests/features/validation/**
+  - apps/api/tests/features/advisory/**
+  - apps/api/tests/features/ops/**
+  - apps/api/tests/test_model.py
+  - apps/api/tests/test_faults.py
+  - apps/api/tests/test_tracing.py
+  - docs/ai-design.md
+  - docs/llmops.md
+READ-ONLY CONTEXT: TASK.md, docs/PRD.md (AC-3..AC-5, AC-7, AC-10, AC-13, AC-14, AC-17, NFR-1..NFR-4, NFR-7), docs/architecture.md, docs/system-design.md, docs/adr/0001..0008.md, docs/KICKOFF-PROMPT.md (§4, §5, §7, §8), contracts/openapi.json, .orca-team/PLAN.md, apps/api/app/shared/features.py, apps/api/app/ports/*.py, apps/api/evals/*.py
+CONTRACT:
+  - Eval runner integration (`apps/api/evals/scoring.py` is ALREADY merged on `lead`!):
+    * Export `load_model(model_path: Path) -> LGBMForecastModel` in `app/adapters/lgbm_model.py` returning an object satisfying `ForecastModel` (`version`, `feature_names`, `predict(rows, horizon)`) so `evals/run.py` and `evals/retrieval.py` load your joblib artifact automatically with zero edits to `evals/`!
+    * Write `"no_weather_mae": {"1": ..., "2": ..., "3": ..., "4": ...}` into `apps/api/ml/artifacts/metadata.json` (plus `"sha256"`, `"model_version"`, `"feature_names"`) so `evals/run.py` automatically verifies the AC-5 weather-ablation floor!
+    * Also note: `app/shared/features.py` is already merged on `lead` with `FEATURE_COLUMNS`, `fit_rain_normals(df, max_year=2023)`, `build_features(...)`, and `build_serving_features(...)` — read it first and import it directly!
+    * Note on `app/adapters/db/factory.py`: already merged on `lead` — use `get_observation_repo()`, `get_prediction_cache()`, `get_call_log()`, `get_weather_source()` from `app/adapters/db/factory.py` (never import SQLAlchemy directly inside feature `router.py` or `service.py`!).
+  - Model (`apps/api/ml/train.py`, `ml/backtest.py`, `ml/verify_artifact.py`, `ml/artifacts/current.joblib` + `metadata.json`):
+    * Import feature generation exclusively from `app/shared/features.py` (ZERO train/serve skew; ALL features strictly `<= origin_week`).
+    * Fit train-only normals (`<= 2023`) and store inside the joblib bundle alongside the 4 LightGBM Poisson models (`h = 1, 2, 3, 4`), NegBin dispersion + 2023 conformal scale factors, cost-sensitive tier cut-offs (missed Critical = 5x false alarm), and ward×ISO-week endemic channels (training-years mean + 2 SD, floor 5).
+    * Apply monotone-increasing (`+1`) constraints on origin-relative rainfall features (`rainfall_lag_0`, `rain_sum_0_3`, `rain_anomaly`, and `rainfall_lag_1..3` as appropriate) for horizons `h = 2..4` (see `.orca-team/reviews/arch-critique.md` `[AC-7-ML-RISK]`) and pin `n_jobs=1` on serving LightGBM boosters (to prevent OpenMP thread contention under 20 VUs) so `AC-7` (setting `rainfall_mm=120` on a `<20 mm` non-Critical week) strictly increases `h=3` `expected_cases` across all 60 wards.
+    * `FAULT_INJECT`: read active fault tokens via `app.core.config.active_faults()` (strictly active when `APP_ENV=test`; ignored otherwise).
+    * `p10 <= expected_cases <= p90` invariant: `p10 = max(0, min(p10, expected_cases))` and `p90 = max(p90, expected_cases)`. If NegBin conformal coverage on 2023 misses `[0.75, 0.90]`, fall back to quantile LightGBM + CQR per ADR-0004.
+    * Native SHAP (`pred_contrib=True` in log space) converted to multiplicative % effects (`(exp(contrib) - 1) * 100`) grouped into the 8 `DriverKey` buckets in `app/shared/drivers.py`, top 4 by absolute effect.
+    * Backtest expanding-window folds (2019, 2020, 2021, 2022), tune on 2023, evaluate locked 2024–2025 hold-out ONCE (never tune on hold-out!) comparing `lightgbm`, `lightgbm_no_weather`, `negbin_glm` (statsmodels), `climatology`, `seasonal_naive`, and `persistence`. Write `apps/api/evals/results/validation.json` (served by `GET /api/v1/validation`).
+    * Record `apps/api/evals/results/baseline.json` BEFORE final tuning (`npm run eval:baseline`), then run `npm run eval` and `npm run eval:retrieval` so all floors in `AC-5` and `NFR-4` pass!
+  - Runtime & Slices:
+    * `app/adapters/lgbm_model.py`: loads `current.joblib` ONCE (`model_loads = 1`), verifies SHA-256 against `metadata.json`, runs predictions off the async event loop (`asyncio.to_thread` in routers) with `< 50 ms` p95 per ward (`NFR-1`).
+    * `app/shared/forecast_engine.py`: shared pure-Python forecast/scenario/heatmap scoring helpers (NO FastAPI/SQLAlchemy/httpx imports — `gates.mjs slices` enforces this!).
+    * `features/forecast`, `features/heatmap`, `features/validation`, `features/advisory`, `features/ops`: clean `service.py` (framework-free) + `router.py` (no direct ORM/SDK imports).
+    * `POST /api/v1/forecast` & `POST /api/v1/scenario`: return 404 problem+json (`/unknown-ward`) for unknown ward, 422 for non-Monday / out-of-range `origin_week` (`2016-02-29..2025-12-29`), and never write to `predictions_cache` on invalid requests (`AC-4`).
+    * `POST /api/v1/advisory`: prompt file in `apps/api/app/features/advisory/prompts/advisory_v1.md` (checked by `gates.mjs baseline`!), deterministic EN/BN template default (`fake_llm.py`), optional Claude Haiku 5.5 (`llm.py`) with timeout (`settings.llm_timeout_s`), max 400 tokens, $1/day budget check, cache by `(ward, week, horizon, model_version, language)`, and numeric validator normalizing ASCII + Bangla digits (`AC-17`).
+    * `GET /api/v1/ops`: open read-only on localhost when `OPS_TOKEN` is unset; requires `X-Ops-Token` (401/403 problem+json) when set; reports `model_loads = 1`, in-process + DB cache hit rate, weather & LLM counts/spend, and `est_monthly_cost_usd` (`AC-10`).
+    * `FAULT_INJECT` support in `APP_ENV=test` + `@pytest.mark.faults` (`test_faults.py`) and `@pytest.mark.tracing` (`test_tracing.py`).
+  - Docs:
+    * `docs/ai-design.md` with exact headings: `## Model choice`, `## Pipeline`, `## Prompts`, `## Structured outputs`, `## Baseline`.
+    * `docs/llmops.md` with exact headings: `## SLOs`, `## Budget`, `## Fallback chain`, `## Runbook`.
+ACCEPTANCE CRITERIA (name tests after AC ids):
+  AC-3, AC-4, AC-5, AC-7 (API), AC-10, AC-13 (API), AC-14 (API), AC-17, NFR-1, NFR-3, NFR-4, NFR-7.
+GATE TO PASS: node .orca-team/tools/gates.mjs baseline eval retrieval traces slices && npm run ci
+ENV VARS NEEDED: none (runs offline; ANTHROPIC_API_KEY optional -> template fallback)
+DEV PORT: 8002
+OUT OF SCOPE: Do not edit `app/main.py`, `app/core/`, `app/ports/`, any `schemas.py`, `app/shared/features.py`, `migrations/`, `apps/api/evals/datasets/`, or `apps/web/**`.
+DONE WHEN: Artifact committed, `baseline`, `eval`, `retrieval`, `traces`, `slices`, and `npm run ci` are green, committed on your branch, and `worker_done` is sent.

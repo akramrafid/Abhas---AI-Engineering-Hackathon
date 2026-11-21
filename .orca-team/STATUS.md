@@ -6,7 +6,8 @@ Updated 2026-11-21 16:36 BST (≈ 21.4 h left) · LEAD_BRANCH: `lead` (`0a73566`
 
 Phase 2 Gates Verified (`0a73566`): `adr` PASS · `contracts` PASS · `resilience` PASS · `slices` PASS · `migrations` PASS · `retrieval` PASS (`recall@15=0.5704`, `n=36`) · `ci` PASS (27/27 pytest, 6/6 smoke).
 
-Next action (LEAD) — 19:30 BST:
+Next action (LEAD) — 19:35 BST:
+**Human rule (19:33): all code is written by Antigravity Gemini 4 Neon (XHigh); Claude Opus only reviews. Wait for Antigravity rather than coding on Opus.** One-shot wake scheduled 20:48 BST: restart CORE from `.orca-team/specs/core-forecast-neon2.md` on Neon.
 0. Antigravity (Neon + Hydrogen) quota out until ~20:45 BST. Then: send "continue" to ctx_dfe7c933572c (sec review); dispatch UI fix tasks from r1. When CORE reports: Opus-review is not possible (same family) → Neon review of CORE; re-dispatch r1 code review (task_b76712188034) on Opus.
 1. Push `lead` + fast-forward `main` (Phase 2 milestone) to GitHub; broadcast `"contracts locked"` to `@all`.
 2. Release completed Wave 1A workers (`data-pipeline`, `qa-evals`); dispatch Wave 1B **`core-forecast`** (running in parallel with **`ui-dashboard`** = 2 active Antigravity workers).
@@ -22,8 +23,8 @@ Next action (LEAD) — 19:30 BST:
 | task_72869ad95cf5 | QA | Locked 48-case hold-out eval + retrieval + k6 smoke + test plan | antigravity / Gemini 4 Neon (XHigh) | akramrafid/qa-evals | ctx_7beb2831257a | 1A | merged (`0a73566`, released) |
 | task_d4fb8f89dc74 | UI | UX flow + Abhas dashboard (ward-risk, lags, scenario, heatmap, validation) + Playwright e2e | antigravity / Gemini 4 Neon (XHigh) | akramrafid/ui-dashboard | ctx_679d91731a13 | 1B | merged (released) |
 | task_c92a61243ecf | CORE | LightGBM Poisson h=1..4, NegBin bands, SHAP drivers, joblib, forecast/heatmap/validation/advisory/ops, traces | antigravity / Gemini 4 Neon (XHigh) | akramrafid/core-forecast | ctx_1dee172a0b2b | 1B | stopped (quota) — WIP `9d9b4ca` |
-| task_1edc9e2e9c71 | CORE | same, continue from `akramrafid/core-forecast` | claude / opus max | core-forecast-opus | ctx_e83dc4e01e44 | 1B | running |
-| task_b76712188034 | REVIEWER-CODE | r1 cross-family review of c0a05a8...lead | claude / opus max | — | (stopped ctx_320c8e21dfba) | Prove | paused — re-dispatch when CORE frees the Claude slot |
+| task_1edc9e2e9c71 | CORE | same, continue from `akramrafid/core-forecast` | claude / opus max | core-forecast-opus | ctx_e83dc4e01e44 | 1B | stopped — human rule: code only on Neon |
+| task_b76712188034 | REVIEWER-CODE | r1 cross-family review of c0a05a8...lead | claude / opus max | reviewer-code-r1b | ctx_56fff24cd545 | Prove | running |
 | task_1fbad5b953e2 | REVIEWER-SEC | r1 security of LEAD-written code | antigravity / Gemini 4 Neon (XHigh) | reviewer-sec-lead-r1 | ctx_dfe7c933572c | Prove | idle at quota — send "continue" after ~20:45 |
 
 ## Credentials
