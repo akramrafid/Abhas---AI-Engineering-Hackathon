@@ -438,23 +438,7 @@ Cosmetic UI earns no points; clarity, evidence and interaction do.
 9. **Runs anywhere in under three minutes with zero keys,** tested on a Windows path with spaces and without uv.
 10. **Production discipline:** vertical slices, contract tests, red-team suite, CI on GitHub, ADRs, model card.
 
-## 13. Timeline (BST; deadline Sat 22 Nov 14:00)
-| By | Milestone |
-|---|---|
-| 21:45 Fri | Step 0 done: cleanup, four branches merged, `lead` and tag `review-base-r2` pushed |
-| 22:00 | WP1, WP2, WP4 running (WP6 too if quota allows) |
-| 00:30 Sat | **M1 thin slice on the real model:** forecast + scenario + tier + band + drivers in the browser; `main` fast-forwarded |
-| 03:00 | **M2** all MUST and SHOULD merged; hold-out scored once; validation tab on real results |
-| 05:00 | **M3** security, red team, load, fresh-clone green; README, ARCHITECTURE.md, demo.md drafted |
-| 06:30 | **M4 review hand-off:** `node .orca-team/tools/gates.mjs all` → `.orca-team/GATES.md`; `REVIEW-REQUEST.md` written; everything pushed; tell the human "ready for Opus review" |
-| 06:30–08:00 | Human runs the Opus review (r2), hallway test and dry run here; you apply fixes as they arrive |
-| 08:00 | **Feature freeze** — fixes only |
-| 11:30 | Human records the uncut ≤ 3:00 video from `docs/demo.md` |
-| 13:00 | Submitted (human). 13:00–14:00 buffer only |
-If you are behind at 03:00, cut in this order: advisory LLM path → priority-list actions → tile map → live mode
-UI polish. Never cut: a MUST, a gate floor, the README run section, ARCHITECTURE.md, disclosure.
-
-## 14. Hand-off to Claude Opus (prepare at M4)
+## 13. Hand-off to Claude Opus (prepare when everything in §15 is true except the gates that need Opus)
 Write `.orca-team/reviews/REVIEW-REQUEST.md`, short enough to review with a small token budget:
 - range `review-base-r2...lead`, branch heads merged, and a table of areas → files → author model;
 - the gate table from `GATES.md` and the exact commands that reproduce it;
@@ -466,14 +450,14 @@ an empty "Tester:" line, and the scored-dry-run brief for `docs/dry-run.md` (rea
 Opus writes its reports to `.orca-team/reviews/r2-code.md` (and the tester lines); you route every finding by
 owned path as fix tasks with `production-hardening` and re-run the gates.
 
-## 15. Human action items (put these in STATUS.md and repeat them at each milestone)
+## 14. Human action items (put these in STATUS.md and repeat them after every merge round)
 1. Team members' GitHub usernames; every member commits under their own account during the round (rubric R8).
 2. Delete the practice-run lines from `.env` listed in Step 0.3 (agents may not open `.env`).
 3. Optional `ANTHROPIC_API_KEY` for the advisory (skip → template).
-4. Bring `REVIEW-REQUEST.md` to Claude Opus at M4; run the hallway test and the dry run there.
-5. Record the video at 11:30 and submit by 13:00. Approve or refuse any public deploy (default: none).
+4. Bring `REVIEW-REQUEST.md` to Claude Opus when it is ready; run the hallway test and the dry run there.
+5. Record the uncut ≤ 3:00 video from `docs/demo.md` and submit before the TASK.md deadline. Approve or refuse any public deploy (default: none).
 
-## 16. Definition of done (all must be true before 08:00)
+## 15. Definition of done (all must be true before feature freeze)
 - [ ] `npm run setup` then `npm run dev` works from a fresh clone in ≤ 180 s on Windows (path with a space, no uv)
       and with uv; zero keys; README states the two commands and the measured times.
 - [ ] `node .orca-team/tools/gates.mjs all` green except gates that need Opus (`ux` tester, `dryrun`, `reviews`,
@@ -486,4 +470,4 @@ owned path as fix tasks with `production-hardening` and re-run the gates.
       with rejected options, GPU training and CPU serving, cost controls with measured numbers, link to
       `docs/architecture.md`.
 - [ ] README disclosure complete; model card honest; `docs/demo.md` ready with pinned inputs.
-- [ ] STATUS.md current; `lead` pushed; `main` fast-forwarded at each green milestone; no open BLOCKER or HIGH.
+- [ ] STATUS.md current; `lead` pushed; `main` fast-forwarded after each green phase; no open BLOCKER or HIGH.
