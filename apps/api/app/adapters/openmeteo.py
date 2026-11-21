@@ -112,7 +112,7 @@ def aggregate_daily_to_iso_weeks(
     for monday, b in sorted(buckets.items()):
         if not b["tavg"] and not b["rain"]:
             continue
-        if require_full_week and len(b["days"]) < 7:
+        if require_full_week and (len(b["days"]) < 7 or len(b["rain"]) < 7 or len(b["tavg"]) < 7):
             continue
         raw_avg_t = sum(b["tavg"]) / len(b["tavg"]) if b["tavg"] else 27.0
         avg_t = raw_avg_t + temp_offset
@@ -380,6 +380,18 @@ class OpenMeteoWeatherSource:
             resp = httpx.Response(503, request=req, text="Injected fault: openmeteo_5xx")
             raise httpx.HTTPStatusError("Injected fault: openmeteo_5xx", request=req, response=resp)
 
+    def _record_fetch_failure(self, now: datetime, latency_ms: float, detail: str) -> None:
+        self._consecutive_failures += 1
+        if self._consecutive_failures >= self._breaker_threshold:
+            self._circuit_open_until = now + timedelta(seconds=self._breaker_cooldown_s)
+        if self._call_log is not None:
+            self._call_log.record("weather", ok=False, latency_ms=latency_ms, detail=detail)
+        logger.error(
+            "openmeteo_fetch_failed: %s",
+            detail,
+            extra={"duration_ms": latency_ms, "event": "openmeteo_fetch_failed"},
+        )
+
     def _fetch_all_cities_live(self, now: datetime) -> bool:
         """Execute ONE multi-location Open-Meteo GET for all 5 cities and cache results."""
         if self._circuit_open_until is not None and now < self._circuit_open_until:
@@ -446,38 +458,35 @@ class OpenMeteoWeatherSource:
 
         latency_ms = round((time.perf_counter() - t0) * 1000.0, 2)
         if payload is None:
-            self._consecutive_failures += 1
-            if self._consecutive_failures >= self._breaker_threshold:
-                self._circuit_open_until = now + timedelta(seconds=self._breaker_cooldown_s)
-            if self._call_log is not None:
-                self._call_log.record("weather", ok=False, latency_ms=latency_ms, detail=last_err)
-            logger.error(
-                "openmeteo_fetch_failed: %s",
-                last_err,
-                extra={"duration_ms": latency_ms, "event": "openmeteo_fetch_failed"},
-            )
+            self._record_fetch_failure(now, latency_ms, last_err)
             return False
 
         items = payload if isinstance(payload, list) else [payload]
         if len(items) != len(self._centroids):
-            self._consecutive_failures += 1
-            if self._call_log is not None:
-                self._call_log.record(
-                    "weather",
-                    ok=False,
-                    latency_ms=latency_ms,
-                    detail=f"Unexpected location count: {len(items)}",
-                )
+            self._record_fetch_failure(now, latency_ms, f"Unexpected location count: {len(items)}")
             return False
 
         expires_at = now + timedelta(hours=self._ttl_hours)
         entries: list[WeatherCacheEntry] = []
-        for city_cfg, loc_payload in zip(self._centroids, items, strict=True):
-            city_name = str(city_cfg["city"])
-            weekly = aggregate_daily_to_iso_weeks(
-                loc_payload.get("daily", {}),
-                bias_correction=city_cfg.get("bias_correction"),
-            )
+        parsed_by_city: list[tuple[str, dict[date, dict[str, float]]]] = []
+        try:
+            for city_cfg, loc_payload in zip(self._centroids, items, strict=True):
+                if not isinstance(loc_payload, Mapping):
+                    raise TypeError("Location payload is not a JSON object")
+                daily_raw = loc_payload.get("daily")
+                if not isinstance(daily_raw, Mapping):
+                    raise TypeError("Missing or malformed 'daily' mapping")
+                city_name = str(city_cfg["city"])
+                weekly = aggregate_daily_to_iso_weeks(
+                    daily_raw,
+                    bias_correction=city_cfg.get("bias_correction"),
+                )
+                parsed_by_city.append((city_name, weekly))
+        except (TypeError, ValueError, KeyError, AttributeError) as exc:
+            self._record_fetch_failure(now, latency_ms, f"MalformedPayload({type(exc).__name__})")
+            return False
+
+        for city_name, weekly in parsed_by_city:
             for monday, vals in weekly.items():
                 entry = WeatherCacheEntry(
                     city=city_name,
@@ -492,7 +501,13 @@ class OpenMeteoWeatherSource:
                     expires_at=expires_at,
                 )
                 entries.append(entry)
-                self._mem_cache[city_name][monday] = entry
+
+        if not entries:
+            self._record_fetch_failure(now, latency_ms, "MalformedPayload(NoCompleteWeeks)")
+            return False
+
+        for entry in entries:
+            self._mem_cache[entry.city][entry.week] = entry
 
         if self._weather_cache is not None:
             self._weather_cache.upsert_entries(entries)
@@ -531,7 +546,7 @@ class OpenMeteoWeatherSource:
         for wk in weeks:
             entry = cached_map.get(wk)
             if entry is not None:
-                source: WeatherSourceUsed = "live" if fetched_now else "cache"
+                source: WeatherSourceUsed = "live" if (fetched_now and entry.fetched_at >= now) else "cache"
                 out.append(
                     WeekWeather(
                         week=wk,

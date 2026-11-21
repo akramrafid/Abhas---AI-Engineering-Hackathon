@@ -240,7 +240,7 @@ def test_build_features_with_separate_wards_df() -> None:
 
 
 def test_cr_7_non_consecutive_weeks_raises() -> None:
-    """CR-7: Dropped week for any ward raises ValueError before positional lag shifts."""
+    """CR-7 / §9: Dropped or duplicate ward-weeks raise ValueError before positional lag shifts."""
     raw = _synthetic_two_ward_df(n_weeks=15)
     drop_week = date(2023, 1, 2) + timedelta(weeks=5)
     gapped = raw.loc[
@@ -252,6 +252,13 @@ def test_cr_7_non_consecutive_weeks_raises() -> None:
 
     with pytest.raises(ValueError, match="non-consecutive|Non-consecutive"):
         compute_lag_correlations(gapped, ward_id="DSCC_Ward_01", max_lag=8)
+
+    duplicated = pd.concat([raw, raw.iloc[[0]]], ignore_index=True)
+    with pytest.raises(ValueError, match="Duplicate"):
+        build_features(duplicated, horizon=3)
+
+    with pytest.raises(ValueError, match="Duplicate"):
+        compute_lag_correlations(duplicated, ward_id="DSCC_Ward_01", max_lag=8)
 
 
 def test_ac_3_features_ignore_rows_after_origin() -> None:
@@ -362,10 +369,14 @@ def test_cr_13_build_serving_features_requires_rain_normals() -> None:
         )
 
 
-def test_cr_13_build_features_warns_when_normals_omitted(caplog: pytest.LogCaptureFixture) -> None:
+def test_cr_13_build_features_warns_when_normals_omitted(
+    caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """CR-13: build_features logs a WARNING when rain_normals is omitted, and stays silent when passed."""
     raw = _synthetic_two_ward_df(n_weeks=12, start=date(2023, 1, 2))
     normals = fit_rain_normals(raw, max_year=2023)
+    # configure_logging() sets propagate=False on the parent 'abhas' logger when FastAPI apps run earlier.
+    monkeypatch.setattr(logging.getLogger("abhas"), "propagate", True)
 
     with caplog.at_level(logging.WARNING, logger="abhas.features"):
         build_features(raw, horizon=3)

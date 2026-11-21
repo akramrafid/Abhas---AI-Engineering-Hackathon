@@ -424,3 +424,70 @@ def test_corner_openmeteo_live_aggregation_dhaka_partial_week_units_and_bias(tmp
         client.close()
     finally:
         engine.dispose()
+
+
+def test_openmeteo_malformed_payloads_fall_back_and_trip_breaker(tmp_path: Path) -> None:
+    """Corner case (§9): Malformed Open-Meteo payloads never crash, fall back to cache/climatology, and trip breaker."""
+    # Incomplete week with null rainfall day is excluded when require_full_week=True
+    null_rain_week = {
+        "time": [f"2025-08-{d:02d}" for d in range(4, 11)],
+        "temperature_2m_mean": [28.0] * 7,
+        "precipitation_sum": [10.0, 5.0, None, 10.0, 10.0, 10.0, 10.0],
+        "relative_humidity_2m_mean": [80.0] * 7,
+    }
+    assert aggregate_daily_to_iso_weeks(null_rain_week) == {}
+
+    engine = _migrated_test_db(tmp_path)
+    try:
+        repo = SqlObservationRepository(engine)
+        wcache = SqlWeatherCache(engine)
+        call_log = SqlCallLog(engine)
+        target_week = date(2025, 8, 4)
+
+        responses = [
+            httpx.Response(200, text="<html>upstream proxy error</html>"),
+            httpx.Response(200, json={"error": True, "reason": "bad query"}),
+            httpx.Response(200, json=[{"daily": None} for _ in CITIES]),
+            httpx.Response(200, json=[{"daily": {"time": ["not-a-date"]}} for _ in CITIES]),
+            httpx.Response(200, json=[{"daily": {}} for _ in CITIES]),
+        ]
+        calls = 0
+
+        def handler(_req: httpx.Request) -> httpx.Response:
+            nonlocal calls
+            resp = responses[calls]
+            calls += 1
+            return resp
+
+        now_box = [datetime(2025, 8, 10, 6, 0, tzinfo=UTC)]
+        client = httpx.Client(
+            transport=httpx.MockTransport(handler),
+            timeout=httpx.Timeout(connect=5.0, read=10.0, write=5.0, pool=5.0),
+        )
+        src = OpenMeteoWeatherSource(
+            repo=repo,
+            weather_cache=wcache,
+            call_log=call_log,
+            mode="live",
+            app_env="test",
+            client=client,
+            clock=lambda: now_box[0],
+            retry_base_s=0.0,
+            breaker_threshold=5,
+            breaker_cooldown_s=300.0,
+        )
+
+        # Each malformed response falls back cleanly to climatology (no uncaught exception)
+        for expected_calls in range(1, 6):
+            res = src.weekly("Dhaka South", [target_week])
+            assert len(res) == 1
+            assert res[0].source == "climatology"
+            assert calls == expected_calls
+
+        # 6th call skips HTTP because the 5th malformed response tripped the circuit breaker
+        res_open = src.weekly("Dhaka South", [target_week])
+        assert res_open[0].source == "climatology"
+        assert calls == 5
+        client.close()
+    finally:
+        engine.dispose()
