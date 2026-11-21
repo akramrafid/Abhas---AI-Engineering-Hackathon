@@ -270,6 +270,36 @@ class LGBMForecastModel:
             )
         return results
 
+    def predict_shap_decomposition(
+        self,
+        rows: Sequence[Mapping[str, float]],
+        horizon: int,
+    ) -> list[tuple[float, float, dict[str, float]]]:
+        """Return `(expected_cases, base_log_margin, feature_contributions)` per row.
+
+        Exposes the TreeSHAP base value (`raw_contribs[:, -1]`) without altering `PointForecast`'s
+        contract so tests can assert the multiplicative SHAP product invariant directly.
+        """
+        if horizon not in VALID_HORIZONS:
+            raise ValueError(f"horizon must be in {VALID_HORIZONS}, got {horizon}")
+        if not rows:
+            return []
+        X = self._rows_to_matrix(rows)
+        booster = self._boosters[horizon]
+        raw_contribs = np.asarray(booster.predict(X, pred_contrib=True, num_threads=1), dtype=np.float64)
+        if raw_contribs.ndim == 1:
+            raw_contribs = raw_contribs.reshape(1, -1)
+        raw_margin = np.sum(raw_contribs, axis=1)
+        expected_arr = np.maximum(0.0, np.exp(np.clip(raw_margin, -20.0, 10.0)))
+        fnames = self.feature_names
+        n_feats = len(fnames)
+        out: list[tuple[float, float, dict[str, float]]] = []
+        for idx in range(len(rows)):
+            base_margin = float(raw_contribs[idx, n_feats])
+            contribs = {fnames[j]: float(raw_contribs[idx, j]) for j in range(n_feats)}
+            out.append((float(expected_arr[idx]), base_margin, contribs))
+        return out
+
 
 def load_model(model_path: Path) -> LGBMForecastModel:
     """Load and SHA-256-verify the committed LightGBM joblib artifact (used by API and evals)."""

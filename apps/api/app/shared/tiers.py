@@ -30,8 +30,8 @@ class HorizonCalibration:
     use_cqr: bool = False
     cqr_q: float = 0.0
     use_sigma_conformal: bool = False
-    z_low: float = 0.75
-    z_high: float = 2.15
+    z_low: float = 1.05
+    z_high: float = 2.30
 
 
 def tier_from_cases(
@@ -156,13 +156,15 @@ def calibrate_negbin_conformal(
     y_cal: np.ndarray,
     mu_cal: np.ndarray,
     *,
-    target_coverage: float = 0.83,
+    target_coverage: float = 0.855,
 ) -> HorizonCalibration:
     """Fit NegBin dispersion and asymmetric locally-weighted conformal factors strictly on 2023.
 
     Uses the NegBin scale `sigma_nb = sqrt(mu + mu^2 / r)` so the 80% band reflects right-skewed
-    overdispersion across both off-season zeros and monsoon outbreak surges, targeting ~83% overall
-    coverage (center of [0.75, 0.90]) and >= 80% coverage on Medium/High/Critical weeks.
+    overdispersion across both off-season zeros and monsoon outbreak surges. Because ~58% of weeks
+    are off-season zeros (where `0 in [0, p90]` naturally yields >90% coverage), targeting ~85.5%
+    global coverage (comfortably inside [0.75, 0.90]) ensures active Medium/High/Critical weeks
+    also receive balanced >=82% coverage instead of pinching `p10` too high.
     """
     yt = np.asarray(y_cal, dtype=float)
     mu = np.maximum(np.asarray(mu_cal, dtype=float), 0.0)
@@ -171,17 +173,20 @@ def calibrate_negbin_conformal(
     crit_mask = yt >= DEFAULT_TIER_CUTOFFS[2]
     high_mask = (yt >= DEFAULT_TIER_CUTOFFS[1]) & (~crit_mask)
     med_mask = (yt >= DEFAULT_TIER_CUTOFFS[0]) & (yt < DEFAULT_TIER_CUTOFFS[1])
+    low_mask = yt < DEFAULT_TIER_CUTOFFS[0]
 
     best_cal = HorizonCalibration(
         nb_r=round(nb_r, 4),
         use_sigma_conformal=True,
-        z_low=0.72,
-        z_high=2.20,
+        z_low=0.80,
+        z_high=2.80,
     )
     best_score = float("inf")
+    fallback_cal = best_cal
+    fallback_dist = float("inf")
 
-    for z_lo in (0.55, 0.60, 0.65, 0.70, 0.75, 0.80):
-        for z_hi in (1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6):
+    for z_lo in (0.75, 0.80, 0.85, 0.90, 0.95, 1.05):
+        for z_hi in (2.2, 2.4, 2.6, 2.8, 3.0):
             cal = HorizonCalibration(
                 nb_r=round(nb_r, 4),
                 use_sigma_conformal=True,
@@ -191,22 +196,32 @@ def calibrate_negbin_conformal(
             p10, p90, _ = compute_bands_and_risk_vectorized(mu, cal)
             covered = (yt >= p10) & (yt <= p90)
             cov_all = float(np.mean(covered))
-            if not (0.78 <= cov_all <= 0.855):
+            dist = abs(cov_all - target_coverage)
+            if 0.77 <= cov_all <= 0.89 and dist < fallback_dist:
+                fallback_dist = dist
+                fallback_cal = cal
+            # Keep safe margin inside [0.75, 0.90] so hold-out stays squarely calibrated
+            if not (0.81 <= cov_all <= 0.870):
                 continue
             cov_crit = float(np.mean(covered[crit_mask])) if np.any(crit_mask) else cov_all
             cov_high = float(np.mean(covered[high_mask])) if np.any(high_mask) else cov_all
             cov_med = float(np.mean(covered[med_mask])) if np.any(med_mask) else cov_all
+            cov_low = float(np.mean(covered[low_mask])) if np.any(low_mask) else cov_all
+
+            # Right-skewed NegBin count distribution + asymmetric outbreak risk: protect upper
+            # surge tails (Critical & High) while keeping overall coverage squarely near 85.5%.
             score = (
-                abs(cov_all - target_coverage) * 2.5
-                + max(0.0, 0.85 - cov_crit) * 2.5
-                + max(0.0, 0.85 - cov_high) * 1.5
-                + max(0.0, 0.78 - cov_med) * 1.5
+                abs(cov_all - target_coverage) * 1.5
+                + max(0.0, 0.94 - cov_crit) * 4.0
+                + max(0.0, 0.92 - cov_high) * 2.5
+                + max(0.0, 0.80 - cov_med) * 2.5
+                + max(0.0, 0.80 - cov_low) * 1.0
             )
             if score < best_score:
                 best_score = score
                 best_cal = cal
 
-    return best_cal
+    return best_cal if best_score < float("inf") else fallback_cal
 
 
 def select_cost_sensitive_cutoffs(
@@ -219,8 +234,9 @@ def select_cost_sensitive_cutoffs(
 ) -> tuple[float, float, float]:
     """Select tier cut-offs on 2023 minimizing asymmetric cost (missed Critical = 5x false alarm).
 
-    Searches cut-offs that account for P90 epidemic-threshold escalation so `within_one_tier >= 0.965`
-    and `critical_recall >= 0.90` hold cleanly on 2023 without over-escalating Low/Medium weeks.
+    Searches cut-offs that account for P90 epidemic-threshold escalation so `within_one_tier >= 0.96`
+    and `critical_recall >= 0.90` hold cleanly on 2023 without over-escalating Low weeks or
+    under-predicting High weeks as Low.
     """
     yt = np.asarray(y_cal, dtype=float)
     mu = np.asarray(mu_cal, dtype=float)
@@ -230,10 +246,15 @@ def select_cost_sensitive_cutoffs(
 
     best_cutoffs = DEFAULT_TIER_CUTOFFS
     best_loss = float("inf")
+    soft_cutoffs = DEFAULT_TIER_CUTOFFS
+    soft_loss = float("inf")
 
-    for med in (3.0, 3.5, 4.0):
-        for high in (7.0, 7.5, 8.0):
-            for crit in (11.5, 12.0, 13.0, 14.0):
+    # Under the endemic-channel escalation rule (P90 > mean + 2 SD -> +1 tier) and 5x missed-Critical
+    # cost (ADR-0004), search escalation-aware base cut-offs requiring within_one >= 0.97 on 2023
+    # (providing a 2 pp generalization margin above the 0.95 floor) and critical_recall >= 0.92.
+    for med in (3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5):
+        for high in (7.0, 7.5, 8.0, 8.5, 9.0, 9.5):
+            for crit in (11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0):
                 if not (med < high < crit):
                     continue
                 base_idx = np.where(mu < med, 0, np.where(mu < high, 1, np.where(mu < crit, 2, 3)))
@@ -241,23 +262,40 @@ def select_cost_sensitive_cutoffs(
 
                 within_one = float(np.mean(np.abs(actual_idx - pred_idx) <= 1))
                 crit_mask = actual_idx == 3
+                high_mask = actual_idx == 2
                 crit_rec = float(np.mean(pred_idx[crit_mask] >= 2)) if np.any(crit_mask) else 1.0
-                if within_one < 0.965 or crit_rec < 0.90:
-                    continue
+                high_within_one = (
+                    float(np.mean(np.abs(actual_idx[high_mask] - pred_idx[high_mask]) <= 1))
+                    if np.any(high_mask)
+                    else 1.0
+                )
 
                 under_crit = np.sum((actual_idx == 3) & (pred_idx < 2)) * (missed_critical_weight * 2.0)
                 soft_under_crit = np.sum((actual_idx == 3) & (pred_idx == 2)) * missed_critical_weight
                 other_under = np.sum((actual_idx < 3) & (pred_idx < actual_idx)) * 1.5
-                two_tier_err = np.sum(np.abs(actual_idx - pred_idx) >= 2) * 5.0
+                two_tier_err = np.sum(np.abs(actual_idx - pred_idx) >= 2) * 6.0
                 false_alarm = np.sum(pred_idx > actual_idx) * 1.0
                 loss = float(under_crit + soft_under_crit + other_under + two_tier_err + false_alarm) / max(
                     len(yt), 1
                 )
+
+                penalty = (
+                    max(0.0, 0.97 - within_one) * 50.0
+                    + max(0.0, 0.92 - crit_rec) * 50.0
+                    + max(0.0, 0.92 - high_within_one) * 20.0
+                )
+                if loss + penalty < soft_loss:
+                    soft_loss = loss + penalty
+                    soft_cutoffs = (float(med), float(high), float(crit))
+
+                if within_one < 0.97 or crit_rec < 0.92 or high_within_one < 0.92:
+                    continue
+
                 if loss < best_loss:
                     best_loss = loss
                     best_cutoffs = (float(med), float(high), float(crit))
 
-    return best_cutoffs
+    return best_cutoffs if best_loss < float("inf") else soft_cutoffs
 
 
 def build_endemic_thresholds(

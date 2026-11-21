@@ -1,12 +1,45 @@
 {
-  "model_version": "abhas-lgbm-1.0.0",
+  "model_version": "abhas-lgbm-1.1.2",
   "mode": "tuned",
   "artifact_file": "current.joblib",
-  "sha256": "9ef96dc8f6f01868de0b8682edc77caa7a9847abb1ae43ed65b168e8b942d5de",
-  "trained_at": "2026-11-21T15:39:15+00:00",
+  "versioned_artifact_file": "abhas-lgbm-1.1.2.joblib",
+  "artifact_size_bytes": 977463,
+  "sha256": "093bd000e5353609fbb4e4d2d2a2397fc247b18c812af0e5c2abc2f08154a32e",
+  "trained_at": "2026-11-21T20:28:32+00:00",
+  "train_seconds": 37.71,
   "train_end_year": 2023,
   "max_normal_year": 2023,
   "train_max_year": 2023,
+  "library_versions": {
+    "python": "3.12.16",
+    "lightgbm": "4.7.0",
+    "scikit_learn": "1.9.1",
+    "scipy": "1.18.1",
+    "statsmodels": "0.15.0",
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "joblib": "1.6.0",
+    "optuna": "5.1.0",
+    "xgboost": "3.0.5"
+  },
+  "device": {
+    "requested": "auto",
+    "lgbm_effective": "cpu",
+    "lgbm_fallback_reason": "LightGBMError: GPU Tree Learner was not enabled in this build.\nPlease recompile with CMake option -DUSE_GPU=1",
+    "xgb_effective": "cuda"
+  },
+  "gpu_name": "NVIDIA GeForce RTX 3060",
+  "gpu_memory": "12288 MiB",
+  "gpu_driver": "576.52",
+  "gpu_proof": {
+    "samples": 142,
+    "peak_utilization_gpu_pct": 50.0,
+    "mean_utilization_gpu_pct": 19.57,
+    "peak_memory_used_mib": 139.0,
+    "peak_temperature_c": 55.0,
+    "peak_power_draw_w": 54.87,
+    "xgboost_confirmed_device": "cuda:0"
+  },
   "feature_names": [
     "rainfall_lag_0",
     "rainfall_lag_1",
@@ -43,9 +76,9 @@
     4
   ],
   "tier_cutoffs": [
-    4.0,
-    8.0,
-    11.5
+    4.5,
+    9.0,
+    11.0
   ],
   "monotone_constraints": {
     "1": [
@@ -167,7 +200,7 @@
   },
   "calibrations": {
     "1": {
-      "nb_r": 9.9073,
+      "nb_r": 14.3574,
       "conformal_scale": 1.0,
       "conformal_add": 0.0,
       "q_low": 0.1,
@@ -175,35 +208,11 @@
       "use_cqr": false,
       "cqr_q": 0.0,
       "use_sigma_conformal": true,
-      "z_low": 0.7,
-      "z_high": 2.4
+      "z_low": 0.8,
+      "z_high": 3.0
     },
     "2": {
-      "nb_r": 7.0007,
-      "conformal_scale": 1.0,
-      "conformal_add": 0.0,
-      "q_low": 0.1,
-      "q_high": 0.9,
-      "use_cqr": false,
-      "cqr_q": 0.0,
-      "use_sigma_conformal": true,
-      "z_low": 0.65,
-      "z_high": 2.2
-    },
-    "3": {
-      "nb_r": 7.862,
-      "conformal_scale": 1.0,
-      "conformal_add": 0.0,
-      "q_low": 0.1,
-      "q_high": 0.9,
-      "use_cqr": false,
-      "cqr_q": 0.0,
-      "use_sigma_conformal": true,
-      "z_low": 0.7,
-      "z_high": 2.6
-    },
-    "4": {
-      "nb_r": 5.8553,
+      "nb_r": 9.7228,
       "conformal_scale": 1.0,
       "conformal_add": 0.0,
       "q_low": 0.1,
@@ -212,14 +221,536 @@
       "cqr_q": 0.0,
       "use_sigma_conformal": true,
       "z_low": 0.75,
-      "z_high": 2.6
+      "z_high": 3.0
+    },
+    "3": {
+      "nb_r": 8.6471,
+      "conformal_scale": 1.0,
+      "conformal_add": 0.0,
+      "q_low": 0.1,
+      "q_high": 0.9,
+      "use_cqr": false,
+      "cqr_q": 0.0,
+      "use_sigma_conformal": true,
+      "z_low": 0.75,
+      "z_high": 3.0
+    },
+    "4": {
+      "nb_r": 5.3168,
+      "conformal_scale": 1.0,
+      "conformal_add": 0.0,
+      "q_low": 0.1,
+      "q_high": 0.9,
+      "use_cqr": false,
+      "cqr_q": 0.0,
+      "use_sigma_conformal": true,
+      "z_low": 0.8,
+      "z_high": 3.0
     }
   },
   "no_weather_mae": {
-    "1": 1.2348,
-    "2": 1.2347,
-    "3": 1.2353,
-    "4": 1.2363
+    "1": 1.2347,
+    "2": 1.2415,
+    "3": 1.2392,
+    "4": 1.2479
+  },
+  "best_params": {
+    "lightgbm_by_horizon": {
+      "1": {
+        "objective": "poisson",
+        "n_estimators": 450,
+        "learning_rate": 0.04064756934182916,
+        "num_leaves": 37,
+        "max_depth": 3,
+        "min_child_samples": 38,
+        "subsample": 0.6772411838878714,
+        "subsample_freq": 1,
+        "colsample_bytree": 0.6417530300164186,
+        "reg_alpha": 0.0022340387206649325,
+        "reg_lambda": 0.0100745735435705,
+        "max_bin": 63,
+        "random_state": 42,
+        "deterministic": true,
+        "force_row_wise": true,
+        "n_jobs": 1,
+        "verbose": -1
+      },
+      "2": {
+        "objective": "poisson",
+        "n_estimators": 350,
+        "learning_rate": 0.040929422958363104,
+        "num_leaves": 62,
+        "max_depth": 4,
+        "min_child_samples": 104,
+        "subsample": 0.8863998284512682,
+        "subsample_freq": 1,
+        "colsample_bytree": 0.5592010269537692,
+        "reg_alpha": 0.021344969419139773,
+        "reg_lambda": 5.85009131564253,
+        "max_bin": 255,
+        "random_state": 42,
+        "deterministic": true,
+        "force_row_wise": true,
+        "n_jobs": 1,
+        "verbose": -1
+      },
+      "3": {
+        "objective": "poisson",
+        "n_estimators": 500,
+        "learning_rate": 0.03133855579703927,
+        "num_leaves": 50,
+        "max_depth": 4,
+        "min_child_samples": 33,
+        "subsample": 0.8005534627805638,
+        "subsample_freq": 1,
+        "colsample_bytree": 0.5666798196284957,
+        "reg_alpha": 0.044294506478595494,
+        "reg_lambda": 0.15028823756344772,
+        "max_bin": 255,
+        "random_state": 42,
+        "deterministic": true,
+        "force_row_wise": true,
+        "n_jobs": 1,
+        "verbose": -1
+      },
+      "4": {
+        "objective": "poisson",
+        "n_estimators": 400,
+        "learning_rate": 0.029219954123881165,
+        "num_leaves": 38,
+        "max_depth": 3,
+        "min_child_samples": 89,
+        "subsample": 0.6734371198574398,
+        "subsample_freq": 1,
+        "colsample_bytree": 0.6307683604391209,
+        "reg_alpha": 4.995144928833898,
+        "reg_lambda": 0.6313781827847376,
+        "max_bin": 255,
+        "random_state": 42,
+        "deterministic": true,
+        "force_row_wise": true,
+        "n_jobs": 1,
+        "verbose": -1
+      }
+    },
+    "xgboost_by_horizon": {
+      "1": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
+        "n_estimators": 400,
+        "learning_rate": 0.053475117656895554,
+        "max_depth": 3,
+        "min_child_weight": 16.367800321904028,
+        "subsample": 0.7727119979200677,
+        "colsample_bytree": 0.6295280042018114,
+        "reg_alpha": 0.005549145071377375,
+        "reg_lambda": 1.9507332017752141,
+        "max_bin": 256,
+        "random_state": 42,
+        "n_jobs": 1,
+        "verbosity": 0
+      },
+      "2": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
+        "n_estimators": 250,
+        "learning_rate": 0.05565873660344832,
+        "max_depth": 4,
+        "min_child_weight": 1.190056371044121,
+        "subsample": 0.8403377458054413,
+        "colsample_bytree": 0.8943596928962594,
+        "reg_alpha": 0.032279213970939545,
+        "reg_lambda": 2.506840146656814,
+        "max_bin": 63,
+        "random_state": 42,
+        "n_jobs": 1,
+        "verbosity": 0
+      },
+      "3": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
+        "n_estimators": 275,
+        "learning_rate": 0.0653271266905143,
+        "max_depth": 3,
+        "min_child_weight": 6.311288134094167,
+        "subsample": 0.774391444564495,
+        "colsample_bytree": 0.6372123733063992,
+        "reg_alpha": 0.0013914479076797988,
+        "reg_lambda": 2.501927819393329,
+        "max_bin": 256,
+        "random_state": 42,
+        "n_jobs": 1,
+        "verbosity": 0
+      },
+      "4": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
+        "n_estimators": 375,
+        "learning_rate": 0.045181037066226205,
+        "max_depth": 6,
+        "min_child_weight": 4.450792967973335,
+        "subsample": 0.9495878244726961,
+        "colsample_bytree": 0.6181107872066249,
+        "reg_alpha": 1.490577191005621,
+        "reg_lambda": 0.355828466903296,
+        "max_bin": 256,
+        "random_state": 42,
+        "n_jobs": 1,
+        "verbosity": 0
+      }
+    }
+  },
+  "optuna_stats": {
+    "lightgbm": {
+      "h1": {
+        "n_trials_completed": 35,
+        "best_mean_poisson_deviance": 0.93105,
+        "elapsed_s": 32.4
+      },
+      "h2": {
+        "n_trials_completed": 35,
+        "best_mean_poisson_deviance": 0.9347,
+        "elapsed_s": 36.52
+      },
+      "h3": {
+        "n_trials_completed": 35,
+        "best_mean_poisson_deviance": 1.10776,
+        "elapsed_s": 31.96
+      },
+      "h4": {
+        "n_trials_completed": 35,
+        "best_mean_poisson_deviance": 1.37495,
+        "elapsed_s": 37.46
+      }
+    },
+    "xgboost": {
+      "h1": {
+        "n_trials_completed": 15,
+        "best_mean_poisson_deviance": 0.92761,
+        "elapsed_s": 37.12
+      },
+      "h2": {
+        "n_trials_completed": 15,
+        "best_mean_poisson_deviance": 0.956,
+        "elapsed_s": 35.37
+      },
+      "h3": {
+        "n_trials_completed": 13,
+        "best_mean_poisson_deviance": 1.10193,
+        "elapsed_s": 35.7
+      },
+      "h4": {
+        "n_trials_completed": 8,
+        "best_mean_poisson_deviance": 1.44028,
+        "elapsed_s": 35.49
+      }
+    }
+  },
+  "fold_metrics": {
+    "folds": [
+      "2019",
+      "2020",
+      "2021",
+      "2022"
+    ],
+    "lightgbm": {
+      "overall_mean_mae": 1.2033,
+      "by_horizon": {
+        "h1": {
+          "mean_mae": 1.1291,
+          "mean_rmse": 2.2354,
+          "mean_poisson_deviance": 0.9311,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.2397,
+              "rmse": 2.5318,
+              "poisson_deviance": 0.9809
+            },
+            {
+              "period": "2020",
+              "mae": 1.0558,
+              "rmse": 2.0321,
+              "poisson_deviance": 0.8871
+            },
+            {
+              "period": "2021",
+              "mae": 0.9599,
+              "rmse": 1.8219,
+              "poisson_deviance": 0.8476
+            },
+            {
+              "period": "2022",
+              "mae": 1.2609,
+              "rmse": 2.5558,
+              "poisson_deviance": 1.0087
+            }
+          ]
+        },
+        "h2": {
+          "mean_mae": 1.1191,
+          "mean_rmse": 2.2033,
+          "mean_poisson_deviance": 0.9347,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.2307,
+              "rmse": 2.5136,
+              "poisson_deviance": 1.0219
+            },
+            {
+              "period": "2020",
+              "mae": 1.0591,
+              "rmse": 2.0343,
+              "poisson_deviance": 0.9268
+            },
+            {
+              "period": "2021",
+              "mae": 0.9677,
+              "rmse": 1.8538,
+              "poisson_deviance": 0.8651
+            },
+            {
+              "period": "2022",
+              "mae": 1.2191,
+              "rmse": 2.4114,
+              "poisson_deviance": 0.925
+            }
+          ]
+        },
+        "h3": {
+          "mean_mae": 1.1971,
+          "mean_rmse": 2.3822,
+          "mean_poisson_deviance": 1.1078,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.4047,
+              "rmse": 2.8297,
+              "poisson_deviance": 1.3553
+            },
+            {
+              "period": "2020",
+              "mae": 0.983,
+              "rmse": 1.9159,
+              "poisson_deviance": 0.8391
+            },
+            {
+              "period": "2021",
+              "mae": 0.993,
+              "rmse": 1.8789,
+              "poisson_deviance": 0.9055
+            },
+            {
+              "period": "2022",
+              "mae": 1.4076,
+              "rmse": 2.9043,
+              "poisson_deviance": 1.3312
+            }
+          ]
+        },
+        "h4": {
+          "mean_mae": 1.3679,
+          "mean_rmse": 2.693,
+          "mean_poisson_deviance": 1.3749,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.5438,
+              "rmse": 3.1698,
+              "poisson_deviance": 1.609
+            },
+            {
+              "period": "2020",
+              "mae": 1.1738,
+              "rmse": 2.226,
+              "poisson_deviance": 1.0203
+            },
+            {
+              "period": "2021",
+              "mae": 1.1876,
+              "rmse": 2.1516,
+              "poisson_deviance": 1.1343
+            },
+            {
+              "period": "2022",
+              "mae": 1.5666,
+              "rmse": 3.2248,
+              "poisson_deviance": 1.7362
+            }
+          ]
+        }
+      }
+    },
+    "xgboost": {
+      "overall_mean_mae": 1.205,
+      "by_horizon": {
+        "h1": {
+          "mean_mae": 1.129,
+          "mean_rmse": 2.2402,
+          "mean_poisson_deviance": 0.9276,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.2462,
+              "rmse": 2.5565,
+              "poisson_deviance": 0.9856
+            },
+            {
+              "period": "2020",
+              "mae": 1.0613,
+              "rmse": 2.0635,
+              "poisson_deviance": 0.8893
+            },
+            {
+              "period": "2021",
+              "mae": 0.9535,
+              "rmse": 1.8109,
+              "poisson_deviance": 0.8411
+            },
+            {
+              "period": "2022",
+              "mae": 1.2549,
+              "rmse": 2.5298,
+              "poisson_deviance": 0.9945
+            }
+          ]
+        },
+        "h2": {
+          "mean_mae": 1.128,
+          "mean_rmse": 2.2208,
+          "mean_poisson_deviance": 0.956,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.2545,
+              "rmse": 2.5584,
+              "poisson_deviance": 1.0588
+            },
+            {
+              "period": "2020",
+              "mae": 1.0629,
+              "rmse": 2.0462,
+              "poisson_deviance": 0.9244
+            },
+            {
+              "period": "2021",
+              "mae": 0.9722,
+              "rmse": 1.865,
+              "poisson_deviance": 0.868
+            },
+            {
+              "period": "2022",
+              "mae": 1.2226,
+              "rmse": 2.4138,
+              "poisson_deviance": 0.9728
+            }
+          ]
+        },
+        "h3": {
+          "mean_mae": 1.1934,
+          "mean_rmse": 2.3673,
+          "mean_poisson_deviance": 1.1019,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.3757,
+              "rmse": 2.7747,
+              "poisson_deviance": 1.3091
+            },
+            {
+              "period": "2020",
+              "mae": 0.987,
+              "rmse": 1.9182,
+              "poisson_deviance": 0.8436
+            },
+            {
+              "period": "2021",
+              "mae": 1.0016,
+              "rmse": 1.8805,
+              "poisson_deviance": 0.9154
+            },
+            {
+              "period": "2022",
+              "mae": 1.4094,
+              "rmse": 2.8957,
+              "poisson_deviance": 1.3396
+            }
+          ]
+        },
+        "h4": {
+          "mean_mae": 1.3695,
+          "mean_rmse": 2.7459,
+          "mean_poisson_deviance": 1.4403,
+          "folds": [
+            {
+              "period": "2019",
+              "mae": 1.5701,
+              "rmse": 3.2901,
+              "poisson_deviance": 1.7412
+            },
+            {
+              "period": "2020",
+              "mae": 1.1326,
+              "rmse": 2.1815,
+              "poisson_deviance": 0.9839
+            },
+            {
+              "period": "2021",
+              "mae": 1.1675,
+              "rmse": 2.1917,
+              "poisson_deviance": 1.1761
+            },
+            {
+              "period": "2022",
+              "mae": 1.6076,
+              "rmse": 3.3203,
+              "poisson_deviance": 1.8599
+            }
+          ]
+        }
+      },
+      "mae_improvement_over_lgbm_pct": -0.14,
+      "beats_lgbm_by_3pct": false
+    }
+  },
+  "calibration_2023": {
+    "by_horizon": {
+      "h1": {
+        "mae_2023": 1.1266,
+        "coverage_80_2023": 0.8683,
+        "nb_r": 14.3574,
+        "z_low": 0.8,
+        "z_high": 3.0,
+        "use_cqr": false
+      },
+      "h2": {
+        "mae_2023": 1.1658,
+        "coverage_80_2023": 0.8638,
+        "nb_r": 9.7228,
+        "z_low": 0.75,
+        "z_high": 3.0,
+        "use_cqr": false
+      },
+      "h3": {
+        "mae_2023": 1.2053,
+        "coverage_80_2023": 0.8619,
+        "nb_r": 8.6471,
+        "z_low": 0.75,
+        "z_high": 3.0,
+        "use_cqr": false
+      },
+      "h4": {
+        "mae_2023": 1.4567,
+        "coverage_80_2023": 0.8631,
+        "nb_r": 5.3168,
+        "z_low": 0.8,
+        "z_high": 3.0,
+        "use_cqr": false
+      }
+    },
+    "within_one_tier_2023": 0.9728,
+    "critical_recall_2023": 0.9727
   },
   "rain_normals": {
     "CCC_Ward_01|1": 3.69,
@@ -3342,57 +3873,5 @@
     "NCC_Ward_05|50": 3.4663,
     "NCC_Ward_05|51": 2.77,
     "NCC_Ward_05|52": 0.8589
-  },
-  "params": {
-    "objective": "poisson",
-    "n_estimators": 250,
-    "learning_rate": 0.04,
-    "num_leaves": 31,
-    "min_child_samples": 25,
-    "subsample": 0.8,
-    "subsample_freq": 1,
-    "colsample_bytree": 0.85,
-    "reg_alpha": 0.5,
-    "reg_lambda": 2.0,
-    "random_state": 42,
-    "n_jobs": 1,
-    "verbose": -1
-  },
-  "calibration_2023": {
-    "by_horizon": {
-      "h1": {
-        "mae_2023": 1.1905,
-        "coverage_80_2023": 0.8378,
-        "nb_r": 9.9073,
-        "conformal_scale": 1.0,
-        "z_low": 0.7,
-        "z_high": 2.4
-      },
-      "h2": {
-        "mae_2023": 1.2414,
-        "coverage_80_2023": 0.8247,
-        "nb_r": 7.0007,
-        "conformal_scale": 1.0,
-        "z_low": 0.65,
-        "z_high": 2.2
-      },
-      "h3": {
-        "mae_2023": 1.2326,
-        "coverage_80_2023": 0.8481,
-        "nb_r": 7.862,
-        "conformal_scale": 1.0,
-        "z_low": 0.7,
-        "z_high": 2.6
-      },
-      "h4": {
-        "mae_2023": 1.4277,
-        "coverage_80_2023": 0.8356,
-        "nb_r": 5.8553,
-        "conformal_scale": 1.0,
-        "z_low": 0.75,
-        "z_high": 2.6
-      }
-    },
-    "critical_recall_2023": 0.9548
   }
 }

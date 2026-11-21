@@ -36,6 +36,10 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
+train = [
+    { name = "optuna" },
+    { name = "xgboost" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -62,6 +66,10 @@ dev = [
     { name = "pyright", specifier = ">=1.1.390" },
     { name = "pytest", specifier = ">=8.3" },
     { name = "ruff", specifier = ">=0.8" },
+]
+train = [
+    { name = "optuna", specifier = ">=4.0" },
+    { name = "xgboost", specifier = ">=2.1,<3.1" },
 ]
 
 [[package]]
@@ -162,6 +170,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44", size = 27697, upload-time = "2022-10-25T02:36:22.414Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6", size = 25335, upload-time = "2022-10-25T02:36:20.889Z" },
+]
+
+[[package]]
+name = "colorlog"
+version = "6.12.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8c/55/ba79756cb90c8d69d599d57785398ac87bba7b19c80e87f4e8a562197c93/colorlog-6.12.0.tar.gz", hash = "sha256:2a7924c1dadf18b22a0eb8b06d1c7b01d5341707ec1641eb6fcc4fde0c3e8e5f", size = 18151, upload-time = "2026-07-23T13:40:40.71Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d4/19/0b6647bf5e331521e55d2b63bfbdc210bd9cd605189273f03614a05f702d/colorlog-6.12.0-py3-none-any.whl", hash = "sha256:30d392604e9110045a2c2aeefc27d7a017abbab63f3a8aee594eac0801df784e", size = 12239, upload-time = "2026-07-23T13:40:39.562Z" },
 ]
 
 [[package]]
@@ -471,6 +491,15 @@ wheels = [
 ]
 
 [[package]]
+name = "nvidia-nccl-cu12"
+version = "2.32.6"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/9a/a0feb54202bb453601bfda53c1659e89ac6b39829c12010b12b11d915835/nvidia_nccl_cu12-2.32.6-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:7a458829e9d3168d7be2247f819991ffc12e65f1a05ba269f4f635b9451076bb", size = 336392478, upload-time = "2026-11-11T04:22:49.917Z" },
+    { url = "https://files.pythonhosted.org/packages/95/9f/ba87c8199a53ea3058640607c242174c8537e9e64d7a17991f332cd1c391/nvidia_nccl_cu12-2.32.6-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:2a6e6d5ddfc08970eca872be3dfa2650b24fa10a2043974465a9cae9c64ed6d8", size = 336541086, upload-time = "2026-11-11T04:23:24.184Z" },
+]
+
+[[package]]
 name = "openpyxl"
 version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
@@ -492,6 +521,24 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/14/cf3a6b6448849656e1e5f4e2101f3988dc6789724050096aba1bc5ccf592/opentelemetry_api-1.45.2.tar.gz", hash = "sha256:d7b0008e21e5fd61cbe7a7f34ca3b6905a78ab677d9bc395e299359c75cda6b4", size = 73277, upload-time = "2026-10-29T17:29:37.888Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/2d/610db864d7513158cebb8f36cc88e67e73bd6c7aa1905ef18d89e1281c81/opentelemetry_api-1.45.2-py3-none-any.whl", hash = "sha256:2cbd737377e710ee740d261c94e93fa0f08e6d037c18f17513cc0a2d94479a34", size = 60335, upload-time = "2026-10-29T17:29:06.955Z" },
+]
+
+[[package]]
+name = "optuna"
+version = "5.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alembic" },
+    { name = "colorlog" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "sqlalchemy" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/80/f5/f1fd6532a5453131cf441837106185188184795819424dee183f1e268abc/optuna-5.1.0.tar.gz", hash = "sha256:6a4eed79680fdb4f0a70e9a9a59530ae8e9e976db1362e4660de1fdd89434e67", size = 512428, upload-time = "2026-11-16T05:08:55.679Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/4d/2f5ceae39b004f14d84f6f6f9dec2d17f194074c10ccc82a64bb6162a64e/optuna-5.1.0-py3-none-any.whl", hash = "sha256:aba6a73d32e4ccf58c00ea70a60bf5bcece6b34defb024474dddd0962dc070b1", size = 442816, upload-time = "2026-11-16T05:08:54.264Z" },
 ]
 
 [[package]]
@@ -827,6 +874,18 @@ wheels = [
 ]
 
 [[package]]
+name = "tqdm"
+version = "4.70.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0d/ea/b2a5bd54b28a324dae8211928b2d730b6547500342c7e6c6dea08bd0a485/tqdm-4.70.1.tar.gz", hash = "sha256:cefd0eca11b2a37a3aee776544d4f4ae913f02688135b5556b8788dfa474afc4", size = 171846, upload-time = "2026-09-11T07:25:16.601Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/03/921a3d3c75785aca9ebfbfcabfbc3a1be12e2ab5265deb026d55a5a3f83e/tqdm-4.70.1-py3-none-any.whl", hash = "sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73", size = 80199, upload-time = "2026-09-11T07:25:14.599Z" },
+]
+
+[[package]]
 name = "truststore"
 version = "0.10.5"
 source = { registry = "https://pypi.org/simple" }
@@ -980,4 +1039,24 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/7d/0a/ab645f8b4c594cac2db49bbc805bff97a9d3f2944061b865f67e0351b6c8/wrapt-2.5.2-cp312-cp312-win_amd64.whl", hash = "sha256:36021ef761856bdbc10d5f3da9a95af93ef60d6acf9c72c8f849937ba2b902aa", size = 106220, upload-time = "2026-10-29T23:04:58.081Z" },
     { url = "https://files.pythonhosted.org/packages/37/1e/232868b68b925ab29ca5acbec4ad54ee42a853fcd8f596bf7e0e0e3850f1/wrapt-2.5.2-cp312-cp312-win_arm64.whl", hash = "sha256:81bdf0bd141d9b1706a0751b2ee068c7afe6be4042712d427b32b3072d5c40b9", size = 103377, upload-time = "2026-10-29T23:04:59.366Z" },
     { url = "https://files.pythonhosted.org/packages/77/8b/1ea57b936b70f98e8e7620a352578096d778dbee95b262f73c066d210ffb/wrapt-2.5.2-py3-none-any.whl", hash = "sha256:61eb54e9540ea522c2c4752a57549a83d3c67e6704ed708403d28e067aaf90f0", size = 82025, upload-time = "2026-10-29T23:06:38.56Z" },
+]
+
+[[package]]
+name = "xgboost"
+version = "3.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "nvidia-nccl-cu12", marker = "platform_machine != 'aarch64' and sys_platform == 'linux'" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7d/c0/561b88dabe82f45555dd2b68abd5d79f787d3e383436a6a54453d5deeb3f/xgboost-3.0.5.tar.gz", hash = "sha256:1a57a0d64a06b596992b664fe17dd1f9782138c6e35ad8fb6355e19a359fa50f", size = 1159729, upload-time = "2025-09-05T09:18:59.3Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ea/df/bf2416bfc138b1d2fa261ecb7f612ca00545aae126aeb1dc314df3291d73/xgboost-3.0.5-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:f974028c7a0c3ae51ef87e2900405436ddafff46452f6f334f5cc295e921429b", size = 2249197, upload-time = "2025-09-05T09:19:35.726Z" },
+    { url = "https://files.pythonhosted.org/packages/28/c0/2c3e8a141180171aae913825bf5a200f37d1f7c598268cd8b6a219fb0eab/xgboost-3.0.5-py3-none-macosx_12_0_arm64.whl", hash = "sha256:40c324c329bf74f44571cdafb7aa7435366309d76ec14b3e16874862aeb14351", size = 2025998, upload-time = "2025-09-05T09:19:59.21Z" },
+    { url = "https://files.pythonhosted.org/packages/66/68/e0e8285282ba81858d74d699cfee9e562a2a3cc7975f0fbd068b83aac559/xgboost-3.0.5-py3-none-manylinux2014_aarch64.whl", hash = "sha256:c580c82500ad566d927581381550561300492c0bc9c143b2e5be208d16f093d1", size = 4841604, upload-time = "2025-09-05T09:25:51.836Z" },
+    { url = "https://files.pythonhosted.org/packages/69/32/eb7e862179194c6440eab63f834a3de064d6340a8b873b5520ac035891db/xgboost-3.0.5-py3-none-manylinux2014_x86_64.whl", hash = "sha256:d7f57a04629b52bae91a80e6721b9cdd009b605827a9eca67953675292b4487e", size = 4906211, upload-time = "2025-09-05T09:26:40.229Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/d5/6c60111482f41fd680eb0e81e016498bea313cc00a6a4a41b38c8b45bd5c/xgboost-3.0.5-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:d0fe44aaca76e9c4598d3be98ae94661aa53e4c4ceb161dc7183258f0e6fc138", size = 4602832, upload-time = "2025-09-05T09:27:29.547Z" },
+    { url = "https://files.pythonhosted.org/packages/64/ad/61a86228e981b15361ff963e84648b1a29ab43debd95f7c2b3ef9d94dca1/xgboost-3.0.5-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:a03210a3e54c9e543f480db9636fee57247cfcd1ae850b353aeac59eea5ca350", size = 94872848, upload-time = "2025-09-05T09:40:26.786Z" },
+    { url = "https://files.pythonhosted.org/packages/00/5a/f43bad68b31269a72bdd66102732ea4473e98f421ee9f71379e35dcb56f5/xgboost-3.0.5-py3-none-win_amd64.whl", hash = "sha256:660774249d28a729ba8d22dd3d2c048c56e58f65a683b25ef3252e3383fe956f", size = 56826727, upload-time = "2025-09-05T09:23:55.462Z" },
 ]
