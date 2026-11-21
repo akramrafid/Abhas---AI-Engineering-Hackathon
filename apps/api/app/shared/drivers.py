@@ -40,8 +40,10 @@ ALL_DRIVER_KEYS: tuple[DriverKey, ...] = (
     "season",
 )
 
-# Clamp log-space sum to prevent numerical overflow in exp() while preserving ordering.
-_MAX_LOG_CONTRIB = 6.0
+# Align log-space bounds with lgbm_model.py raw_margin clip [-20.0, 10.0] to prevent overflow
+# without distorting strong negative off-season seasonal effects.
+_MIN_LOG_CONTRIB = -20.0
+_MAX_LOG_CONTRIB = 10.0
 
 
 @dataclass(frozen=True)
@@ -83,19 +85,44 @@ def feature_to_driver_key(feature_name: str, horizon: int) -> DriverKey:
     return "season"
 
 
-def contributions_to_drivers(
+def group_driver_log_sums(
+    contributions: Mapping[str, float],
+    horizon: int,
+) -> dict[DriverKey, float]:
+    """Sum per-feature log-space SHAP contributions across all 8 canonical driver buckets."""
+    bucket_sums: dict[DriverKey, float] = {k: 0.0 for k in ALL_DRIVER_KEYS}
+    for feat, val in contributions.items():
+        if not math.isfinite(val):
+            continue
+        key = feature_to_driver_key(feat, horizon)
+        bucket_sums[key] += float(val)
+    return bucket_sums
+
+
+def group_driver_multipliers(
+    contributions: Mapping[str, float],
+    horizon: int,
+) -> dict[DriverKey, float]:
+    """Convert all 8 grouped log-space SHAP buckets into exact multiplicative factors `exp(s_b)`."""
+    log_sums = group_driver_log_sums(contributions, horizon)
+    return {
+        key: math.exp(max(_MIN_LOG_CONTRIB, min(_MAX_LOG_CONTRIB, log_sum)))
+        for key, log_sum in log_sums.items()
+    }
+
+
+def contributions_to_drivers_with_other(
     contributions: Mapping[str, float],
     horizon: int,
     *,
     top_k: int = 4,
-) -> list[DriverContribution]:
-    """Convert per-feature log-space SHAP values into top-K multiplicative percentage drivers.
+) -> tuple[list[DriverContribution], float]:
+    """Return `(top_k_drivers, other_multiplier)` where top-K plus `other` preserve the full product.
 
-    Under Poisson log-link, summing log-space SHAP values within a bucket `b` yields an exact
-    multiplicative factor `exp(s_b)`, expressed as `(exp(s_b) - 1) * 100` percent.
+    Under Poisson log-link, `exp(base_margin) * prod(exp(s_top)) * other_multiplier == expected_cases`.
     """
     if not contributions or top_k <= 0:
-        return []
+        return [], 1.0
 
     bucket_sums: dict[DriverKey, float] = {}
     for feat, val in contributions.items():
@@ -106,7 +133,7 @@ def contributions_to_drivers(
 
     candidates: list[DriverContribution] = []
     for key, log_sum in bucket_sums.items():
-        clamped = max(-_MAX_LOG_CONTRIB, min(_MAX_LOG_CONTRIB, log_sum))
+        clamped = max(_MIN_LOG_CONTRIB, min(_MAX_LOG_CONTRIB, log_sum))
         pct = round((math.exp(clamped) - 1.0) * 100.0, 1)
         if pct == -0.0:
             pct = 0.0
@@ -123,4 +150,23 @@ def contributions_to_drivers(
     non_trivial = [c for c in candidates if abs(c.effect_pct) >= 0.1]
     pool = non_trivial if non_trivial else candidates
     pool.sort(key=lambda c: (-abs(c.effect_pct), c.key))
-    return pool[:top_k]
+    selected = pool[:top_k]
+    selected_keys = {d.key for d in selected}
+    other_log_sum = sum(v for k, v in bucket_sums.items() if k not in selected_keys)
+    other_mult = math.exp(max(_MIN_LOG_CONTRIB, min(_MAX_LOG_CONTRIB, other_log_sum)))
+    return selected, other_mult
+
+
+def contributions_to_drivers(
+    contributions: Mapping[str, float],
+    horizon: int,
+    *,
+    top_k: int = 4,
+) -> list[DriverContribution]:
+    """Convert per-feature log-space SHAP values into top-K multiplicative percentage drivers.
+
+    Under Poisson log-link, summing log-space SHAP values within a bucket `b` yields an exact
+    multiplicative factor `exp(s_b)`, expressed as `(exp(s_b) - 1) * 100` percent.
+    """
+    selected, _ = contributions_to_drivers_with_other(contributions, horizon, top_k=top_k)
+    return selected
