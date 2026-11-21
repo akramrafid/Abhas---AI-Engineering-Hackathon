@@ -1,10 +1,18 @@
 import type { City } from "@/lib/api/client";
+import { formatUtcIso, parseIsoUtc } from "@/lib/dates";
 
-export type HorizonWindow = "1-4w" | "2-4w";
+export type HorizonWindow = "1w" | "2-4w" | "1-4w";
+
+export const VALID_WINDOWS: readonly HorizonWindow[] = ["1w", "2-4w", "1-4w"] as const;
+
+export function isHorizonWindow(value: string | null): value is HorizonWindow {
+  return value !== null && (VALID_WINDOWS as readonly string[]).includes(value);
+}
 
 export const WINDOW_HORIZONS: Record<HorizonWindow, readonly number[]> = {
-  "1-4w": [1, 2, 3, 4],
+  "1w": [1],
   "2-4w": [2, 3, 4],
+  "1-4w": [1, 2, 3, 4],
 };
 
 /**
