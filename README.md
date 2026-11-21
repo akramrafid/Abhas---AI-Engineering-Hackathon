@@ -28,7 +28,18 @@ npm run setup
 npm run dev
 ```
 
-Open your browser to **`http://localhost:3000/?demo=1`** to launch the pre-loaded operations console for Dhaka South Ward 4 at the peak monsoon week.
+Open **`http://localhost:3000`** for the landing page: the rain clock map steps one monsoon week (5 Aug 2024) through the model's +1 to +4 week forecasts for all 60 wards. **`http://localhost:3000/dashboard?demo=1`** opens the pre-loaded operations console for Dhaka South Ward 4 at the peak monsoon week (old `/?demo=1` links redirect there).
+
+### Sign-in (optional, Clerk)
+With no Clerk keys the app runs with sign-in off and the dashboard open, so the zero-key setup above always works.
+To require sign-in, add Clerk development keys to `apps/web/.env.local` (never committed):
+```bash
+cd apps/web
+npx -y clerk@latest auth login          # once, in your own terminal
+npx -y clerk@latest link --app <your Clerk application id>
+npx -y clerk@latest env pull            # writes NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY
+```
+Restart `npm run dev`: `/dashboard` now asks for sign-in at `/sign-in` (create an account at `/sign-up`).
 
 ### Measured Setup & Startup Times
 Tested and verified from a fresh clone:
@@ -115,6 +126,9 @@ In strict compliance with hackathon disclosure guidelines:
 ### External APIs & Data Sources
 - **Open-Meteo Forecast & Historical Archive API:** Free, non-commercial weather forecast and ERA5 historical reanalysis data. Attributed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 - **Hackathon Organizers' Dengue Dataset:** Historical weekly dengue case counts and rainfall metrics for 60 Bangladesh wards (2016–2025).
+- **OpenStreetMap raster tiles** (`tile.openstreetmap.org`): basemap for the ward risk maps, © OpenStreetMap contributors (ODbL), used under the OSM tile usage policy (attribution, light interactive use). Rendered with **MapLibre GL JS** (BSD-3). Ward positions on the map are approximate because the dataset has no ward geometry.
+- **Clerk** (optional): sign-in and account management when Clerk keys are configured; not contacted when they are absent.
+- **Magic UI** `number-ticker` pattern adapted (rewritten without the `motion` dependency) for the landing page's validation figure.
 - **Self-Hosted Open Fonts:** Manrope, IBM Plex Mono, and Noto Sans Bengali distributed under the **SIL Open Font License (OFL)** via `@fontsource` npm packages (zero third-party font network calls).
 
 ---
