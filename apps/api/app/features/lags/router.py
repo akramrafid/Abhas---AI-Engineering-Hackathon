@@ -1,39 +1,37 @@
-"""STUB router (LEAD skeleton): schema-valid sample data. DATA (data-pipeline) replaces the body."""
+"""Lags slice HTTP router: GET /api/v1/wards/{ward_id}/lags."""
 
-from datetime import timedelta
+from __future__ import annotations
+
+import hashlib
 from typing import Annotated
 
-from fastapi import APIRouter, Path, Query
+from fastapi import APIRouter, Depends, Path, Query, Request, Response
 
-from app.core.errors import PROBLEM_RESPONSES, AppError
-from app.core.types import DATA_END, WARD_ID_PATTERN
+from app.core.errors import PROBLEM_RESPONSES
+from app.core.types import WARD_ID_PATTERN
 
-from .schemas import LagCorrelation, LagPoint, LagResponse
+from .deps import get_lags_service
+from .schemas import LagResponse
+from .service import LagsService
 
 router = APIRouter(prefix="/api/v1/wards", tags=["lags"], responses=PROBLEM_RESPONSES)
 
-_STUB_CORR = [0.03, 0.07, 0.23, 0.47, 0.33, 0.05, 0.0, -0.01, 0.0]
+CACHE_CONTROL_LAGS = "public, max-age=300"
 
 
 @router.get("/{ward_id}/lags", response_model=LagResponse, summary="Rainfall lag 0–8 evidence for one ward")
 def ward_lags(
+    request: Request,
+    response: Response,
     ward_id: Annotated[str, Path(pattern=WARD_ID_PATTERN)],
     weeks: Annotated[int, Query(ge=26, le=522)] = 156,
-) -> LagResponse:
-    if ward_id != "DSCC_Ward_07":
-        raise AppError(404, "unknown-ward", "Unknown ward", f"No ward with id {ward_id}")
-    n = min(weeks, 12)
-    return LagResponse(
-        ward_id=ward_id,
-        city="Dhaka South",
-        max_lag=8,
-        peak_lag_ward=3,
-        peak_lag_dataset=3,
-        correlations=[
-            LagCorrelation(lag_weeks=k, ward_corr=c, dataset_corr=c) for k, c in enumerate(_STUB_CORR)
-        ],
-        series=[
-            LagPoint(week=DATA_END - timedelta(weeks=n - 1 - i), rainfall_mm=50.0 + i, dengue_cases=i)
-            for i in range(n)
-        ],
-    )
+    svc: LagsService = Depends(get_lags_service),
+) -> LagResponse | Response:
+    result = svc.ward_lags(ward_id=ward_id, weeks=weeks)
+    digest = hashlib.sha256(result.model_dump_json().encode("utf-8")).hexdigest()[:16]
+    etag = f'W/"{digest}"'
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = CACHE_CONTROL_LAGS
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers={"ETag": etag, "Cache-Control": CACHE_CONTROL_LAGS})
+    return result

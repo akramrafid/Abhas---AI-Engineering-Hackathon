@@ -1,22 +1,33 @@
-"""STUB router (LEAD skeleton): schema-valid sample data. DATA (data-pipeline) replaces the body."""
+"""Weather slice HTTP router: GET /api/v1/weather/status."""
 
-from fastapi import APIRouter
+from __future__ import annotations
+
+import hashlib
+
+from fastapi import APIRouter, Depends, Request, Response
 
 from app.core.errors import PROBLEM_RESPONSES
 
-from .schemas import CityWeatherStatus, WeatherStatus
+from .deps import get_weather_service
+from .schemas import WeatherStatus
+from .service import WeatherService
 
 router = APIRouter(prefix="/api/v1/weather", tags=["weather"], responses=PROBLEM_RESPONSES)
 
+CACHE_CONTROL_WEATHER = "public, max-age=60"
+
 
 @router.get("/status", response_model=WeatherStatus, summary="Weather source, cache age and call count")
-def weather_status() -> WeatherStatus:
-    return WeatherStatus(
-        mode="dataset",
-        provider="Open-Meteo",
-        attribution="Weather data by Open-Meteo.com (CC BY 4.0)",
-        ttl_hours=6.0,
-        calls_today=0,
-        bias_check_passed=None,
-        cities=[CityWeatherStatus(city="Dhaka South", latitude=23.72, longitude=90.41, source="dataset")],
-    )
+def weather_status(
+    request: Request,
+    response: Response,
+    svc: WeatherService = Depends(get_weather_service),
+) -> WeatherStatus | Response:
+    result = svc.status()
+    digest = hashlib.sha256(result.model_dump_json().encode("utf-8")).hexdigest()[:16]
+    etag = f'W/"{digest}"'
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = CACHE_CONTROL_WEATHER
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers={"ETag": etag, "Cache-Control": CACHE_CONTROL_WEATHER})
+    return result
