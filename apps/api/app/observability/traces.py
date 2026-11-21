@@ -9,8 +9,10 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, date, datetime
 from threading import RLock
 from typing import Any, Protocol
+from zoneinfo import ZoneInfo
 
 logger = logging.getLogger("abhas.llm.trace")
+DHAKA_TZ = ZoneInfo("Asia/Dhaka")
 
 
 @dataclass(frozen=True)
@@ -113,6 +115,29 @@ class SqlLlmTraceSink:
                 extra={"event": "llm_trace_write_failed"},
             )
 
+    def today_spend_usd(self) -> float:
+        """Sum persisted llm_traces.cost_usd since 00:00 Asia/Dhaka for restart-safe budget capping."""
+        try:
+            from sqlalchemy import func, select
+
+            from app.adapters.db.models import LlmTraceRow
+
+            dhaka_midnight = datetime.now(DHAKA_TZ).replace(hour=0, minute=0, second=0, microsecond=0)
+            utc_cutoff = dhaka_midnight.astimezone(UTC)
+            cutoff = utc_cutoff.replace(tzinfo=None) if self._engine.dialect.name == "sqlite" else utc_cutoff
+            t = LlmTraceRow.__table__
+            stmt = select(func.coalesce(func.sum(t.c.cost_usd), 0.0)).where(t.c.created_at >= cutoff)
+            with self._engine.connect() as conn:
+                val = conn.execute(stmt).scalar_one()
+            return max(0.0, float(val or 0.0))
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "llm_trace_spend_read_failed: %s",
+                type(exc).__name__,
+                extra={"event": "llm_trace_spend_read_failed"},
+            )
+            return 0.0
+
 
 class FanOutSink:
     """Broadcast every trace record to multiple sinks; sink errors are isolated and logged."""
@@ -130,6 +155,24 @@ class FanOutSink:
                     type(exc).__name__,
                     extra={"event": "trace_sink_error"},
                 )
+
+    def today_spend_usd(self) -> float:
+        """Return maximum persisted daily spend across child sinks supporting spend reads."""
+        best = 0.0
+        for sink in self.sinks:
+            reader = getattr(sink, "today_spend_usd", None)
+            if callable(reader):
+                try:
+                    raw = reader()
+                    if isinstance(raw, (int, float)):
+                        best = max(best, float(raw))
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning(
+                        "trace_sink_spend_error: %s",
+                        type(exc).__name__,
+                        extra={"event": "trace_sink_spend_error"},
+                    )
+        return best
 
 
 def record_to_dict(rec: LLMCallRecord) -> dict[str, Any]:
