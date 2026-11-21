@@ -1,0 +1,83 @@
+{
+  "version": "1.1.0",
+  "updated_at": "2026-11-21",
+  "timezone": "Asia/Dhaka",
+  "provider": "Open-Meteo (CC BY 4.0)",
+  "attribution": "Weather data by Open-Meteo.com (CC BY 4.0)",
+  "notes": "All wards within a city share one Open-Meteo grid point in live mode (ADR-0005); static ward vulnerability factors carry hyper-local differentiation.",
+  "bias_check": {
+    "status": "verified",
+    "passed": true,
+    "checked_at": "2026-11-21",
+    "range": "2016-01-04..2025-12-29",
+    "n_city_weeks": 2610,
+    "pooled_pearson_r": {
+      "avg_temp_c": 0.7862,
+      "rainfall_mm": 0.4261,
+      "relative_humidity_pct": 0.5192
+    },
+    "notes": "Verified against Open-Meteo ERA5 Historical Archive via scripts/check_openmeteo_bias.py. Units match (deg C, mm/week, %). Per-city bias corrections align ERA5 archive means with the dataset climate distribution."
+  },
+  "cities": [
+    {
+      "city": "Dhaka North",
+      "ward_prefix": "DNCC",
+      "latitude": 23.8103,
+      "longitude": 90.4125,
+      "source": "Dhaka North City Corporation central centroid (Gulshan/Banani/Uttara corridor, OpenStreetMap / BBS GeoCode 3026)",
+      "bias_correction": {
+        "temp_offset_c": 1.38,
+        "rain_scale": 1.011,
+        "humidity_offset_pct": -5.86
+      }
+    },
+    {
+      "city": "Dhaka South",
+      "ward_prefix": "DSCC",
+      "latitude": 23.7231,
+      "longitude": 90.4086,
+      "source": "Dhaka South City Corporation central centroid (Nagar Bhaban / Motijheel / Old Dhaka, OpenStreetMap / BBS GeoCode 3026)",
+      "bias_correction": {
+        "temp_offset_c": 1.42,
+        "rain_scale": 1.016,
+        "humidity_offset_pct": -6.99
+      }
+    },
+    {
+      "city": "Chattogram",
+      "ward_prefix": "CCC",
+      "latitude": 22.3569,
+      "longitude": 91.7832,
+      "source": "Chattogram City Corporation central centroid (Agrabad/GEC/Panchlaish, OpenStreetMap / BBS GeoCode 2015)",
+      "bias_correction": {
+        "temp_offset_c": 1.55,
+        "rain_scale": 0.797,
+        "humidity_offset_pct": -9.82
+      }
+    },
+    {
+      "city": "Gazipur",
+      "ward_prefix": "GCC",
+      "latitude": 23.9999,
+      "longitude": 90.4203,
+      "source": "Gazipur City Corporation central centroid (Joydebpur/Tongi urban belt, OpenStreetMap / BBS GeoCode 3033)",
+      "bias_correction": {
+        "temp_offset_c": 1.72,
+        "rain_scale": 0.96,
+        "humidity_offset_pct": -6.91
+      }
+    },
+    {
+      "city": "Narayanganj",
+      "ward_prefix": "NCC",
+      "latitude": 23.6238,
+      "longitude": 90.5000,
+      "source": "Narayanganj City Corporation central centroid (Chashara/Shitalakshya basin, OpenStreetMap / BBS GeoCode 3067)",
+      "bias_correction": {
+        "temp_offset_c": 1.44,
+        "rain_scale": 0.959,
+        "humidity_offset_pct": -7.46
+      }
+    }
+  ]
+}
