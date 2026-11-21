@@ -1,6 +1,6 @@
 {
-  "model_version": "abhas-lgbm-1.1.0",
-  "generated_at": "2026-11-21T20:16:08+00:00",
+  "model_version": "abhas-lgbm-1.1.1",
+  "generated_at": "2026-11-21T20:24:49+00:00",
   "split": "Expanding-window chronological folds test 2019\u20132022 (purged); 2023 calibrates NegBin conformal bands, endemic channel & cost-sensitive tier cut-offs; 2024\u20132025 hold-out locked by SHA-256 and scored once.",
   "metrics": [
     {
@@ -1530,12 +1530,12 @@
     {
       "horizon": 1,
       "period": "2019",
-      "coverage_80": 0.9109
+      "coverage_80": 0.9029
     },
     {
       "horizon": 2,
       "period": "2019",
-      "coverage_80": 0.8904
+      "coverage_80": 0.8987
     },
     {
       "horizon": 3,
@@ -1555,37 +1555,37 @@
     {
       "horizon": 2,
       "period": "2020",
-      "coverage_80": 0.8304
+      "coverage_80": 0.8872
     },
     {
       "horizon": 3,
       "period": "2020",
-      "coverage_80": 0.8644
+      "coverage_80": 0.8817
     },
     {
       "horizon": 4,
       "period": "2020",
-      "coverage_80": 0.8529
+      "coverage_80": 0.8801
     },
     {
       "horizon": 1,
       "period": "2021",
-      "coverage_80": 0.8337
+      "coverage_80": 0.8353
     },
     {
       "horizon": 2,
       "period": "2021",
-      "coverage_80": 0.8458
+      "coverage_80": 0.85
     },
     {
       "horizon": 3,
       "period": "2021",
-      "coverage_80": 0.8346
+      "coverage_80": 0.8397
     },
     {
       "horizon": 4,
       "period": "2021",
-      "coverage_80": 0.8266
+      "coverage_80": 0.8272
     },
     {
       "horizon": 1,
@@ -1595,57 +1595,57 @@
     {
       "horizon": 2,
       "period": "2022",
-      "coverage_80": 0.9163
+      "coverage_80": 0.9045
     },
     {
       "horizon": 3,
       "period": "2022",
-      "coverage_80": 0.8667
+      "coverage_80": 0.8721
     },
     {
       "horizon": 4,
       "period": "2022",
-      "coverage_80": 0.8849
+      "coverage_80": 0.8888
     },
     {
       "horizon": 1,
       "period": "tune_2023",
-      "coverage_80": 0.842
+      "coverage_80": 0.867
     },
     {
       "horizon": 2,
       "period": "tune_2023",
-      "coverage_80": 0.8378
+      "coverage_80": 0.858
     },
     {
       "horizon": 3,
       "period": "tune_2023",
-      "coverage_80": 0.8606
+      "coverage_80": 0.8837
     },
     {
       "horizon": 4,
       "period": "tune_2023",
-      "coverage_80": 0.8853
+      "coverage_80": 0.8885
     },
     {
       "horizon": 1,
       "period": "holdout_2024_2025",
-      "coverage_80": 0.8727
+      "coverage_80": 0.8592
     },
     {
       "horizon": 2,
       "period": "holdout_2024_2025",
-      "coverage_80": 0.8451
+      "coverage_80": 0.8516
     },
     {
       "horizon": 3,
       "period": "holdout_2024_2025",
-      "coverage_80": 0.8654
+      "coverage_80": 0.8316
     },
     {
       "horizon": 4,
       "period": "holdout_2024_2025",
-      "coverage_80": 0.857
+      "coverage_80": 0.8394
     }
   ],
   "confusion": {
@@ -1657,33 +1657,33 @@
     ],
     "matrix": [
       [
-        17275,
-        524,
-        284,
-        53
+        17059,
+        558,
+        443,
+        76
       ],
       [
-        567,
-        1620,
-        1446,
-        579
+        400,
+        1163,
+        1819,
+        830
       ],
       [
-        43,
-        573,
-        812,
-        788
+        18,
+        309,
+        864,
+        1025
       ],
       [
-        3,
-        48,
-        153,
-        432
+        0,
+        26,
+        117,
+        493
       ]
     ],
-    "within_one_tier": 0.9599,
-    "critical_recall": 0.9198,
-    "macro_f1": 0.5254
+    "within_one_tier": 0.9447,
+    "critical_recall": 0.9591,
+    "macro_f1": 0.492
   },
   "lag_correlation_evidence": {
     "max_lag": 8,

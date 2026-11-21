@@ -70,7 +70,7 @@ CURRENT_ARTIFACT_PATH = ARTIFACTS_DIR / "current.joblib"
 METADATA_PATH = ARTIFACTS_DIR / "metadata.json"
 BEST_PARAMS_PATH = ARTIFACTS_DIR / "best_params.json"
 
-PRODUCTION_MODEL_VERSION = "abhas-lgbm-1.1.1"
+PRODUCTION_MODEL_VERSION = "abhas-lgbm-1.1.2"
 BASELINE_MODEL_VERSION = "abhas-lgbm-baseline-0.1.0"
 
 CV_FOLDS: tuple[tuple[str, int, int], ...] = (

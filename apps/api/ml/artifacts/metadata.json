@@ -1,12 +1,12 @@
 {
-  "model_version": "abhas-lgbm-1.1.0",
+  "model_version": "abhas-lgbm-1.1.1",
   "mode": "tuned",
   "artifact_file": "current.joblib",
-  "versioned_artifact_file": "abhas-lgbm-1.1.0.joblib",
-  "artifact_size_bytes": 977451,
-  "sha256": "57b1124376baded5764b28c8f3055b0ebc712a593fad7292b90fae47cc6034ad",
-  "trained_at": "2026-11-21T20:12:21+00:00",
-  "train_seconds": 318.84,
+  "versioned_artifact_file": "abhas-lgbm-1.1.1.joblib",
+  "artifact_size_bytes": 977457,
+  "sha256": "6a9657698f00f65db76e92dbaf17eba399a05ce23e16e3db36d9565aa70034fb",
+  "trained_at": "2026-11-21T20:22:33+00:00",
+  "train_seconds": 38.84,
   "train_end_year": 2023,
   "max_normal_year": 2023,
   "train_max_year": 2023,
@@ -32,12 +32,12 @@
   "gpu_memory": "12288 MiB",
   "gpu_driver": "576.52",
   "gpu_proof": {
-    "samples": 959,
-    "peak_utilization_gpu_pct": 60.0,
-    "mean_utilization_gpu_pct": 39.45,
-    "peak_memory_used_mib": 171.0,
-    "peak_temperature_c": 64.0,
-    "peak_power_draw_w": 58.45,
+    "samples": 142,
+    "peak_utilization_gpu_pct": 50.0,
+    "mean_utilization_gpu_pct": 24.63,
+    "peak_memory_used_mib": 139.0,
+    "peak_temperature_c": 53.0,
+    "peak_power_draw_w": 54.18,
     "xgboost_confirmed_device": "cuda:0"
   },
   "feature_names": [
@@ -76,8 +76,8 @@
     4
   ],
   "tier_cutoffs": [
-    4.0,
-    8.5,
+    3.5,
+    8.0,
     11.0
   ],
   "monotone_constraints": {
@@ -208,8 +208,8 @@
       "use_cqr": false,
       "cqr_q": 0.0,
       "use_sigma_conformal": true,
-      "z_low": 0.85,
-      "z_high": 2.3
+      "z_low": 0.8,
+      "z_high": 3.0
     },
     "2": {
       "nb_r": 9.7228,
@@ -221,7 +221,7 @@
       "cqr_q": 0.0,
       "use_sigma_conformal": true,
       "z_low": 0.75,
-      "z_high": 2.5
+      "z_high": 3.0
     },
     "3": {
       "nb_r": 8.6471,
@@ -232,8 +232,8 @@
       "use_cqr": false,
       "cqr_q": 0.0,
       "use_sigma_conformal": true,
-      "z_low": 0.85,
-      "z_high": 2.2
+      "z_low": 0.75,
+      "z_high": 3.0
     },
     "4": {
       "nb_r": 5.3168,
@@ -244,8 +244,8 @@
       "use_cqr": false,
       "cqr_q": 0.0,
       "use_sigma_conformal": true,
-      "z_low": 0.85,
-      "z_high": 2.6
+      "z_low": 0.8,
+      "z_high": 3.0
     }
   },
   "no_weather_mae": {
@@ -257,18 +257,18 @@
   "best_params": {
     "lightgbm_by_horizon": {
       "1": {
+        "objective": "poisson",
         "n_estimators": 450,
         "learning_rate": 0.04064756934182916,
         "num_leaves": 37,
         "max_depth": 3,
         "min_child_samples": 38,
         "subsample": 0.6772411838878714,
+        "subsample_freq": 1,
         "colsample_bytree": 0.6417530300164186,
         "reg_alpha": 0.0022340387206649325,
         "reg_lambda": 0.0100745735435705,
         "max_bin": 63,
-        "objective": "poisson",
-        "subsample_freq": 1,
         "random_state": 42,
         "deterministic": true,
         "force_row_wise": true,
@@ -276,18 +276,18 @@
         "verbose": -1
       },
       "2": {
+        "objective": "poisson",
         "n_estimators": 350,
         "learning_rate": 0.040929422958363104,
         "num_leaves": 62,
         "max_depth": 4,
         "min_child_samples": 104,
         "subsample": 0.8863998284512682,
+        "subsample_freq": 1,
         "colsample_bytree": 0.5592010269537692,
         "reg_alpha": 0.021344969419139773,
         "reg_lambda": 5.85009131564253,
         "max_bin": 255,
-        "objective": "poisson",
-        "subsample_freq": 1,
         "random_state": 42,
         "deterministic": true,
         "force_row_wise": true,
@@ -295,18 +295,18 @@
         "verbose": -1
       },
       "3": {
+        "objective": "poisson",
         "n_estimators": 500,
         "learning_rate": 0.03133855579703927,
         "num_leaves": 50,
         "max_depth": 4,
         "min_child_samples": 33,
         "subsample": 0.8005534627805638,
+        "subsample_freq": 1,
         "colsample_bytree": 0.5666798196284957,
         "reg_alpha": 0.044294506478595494,
         "reg_lambda": 0.15028823756344772,
         "max_bin": 255,
-        "objective": "poisson",
-        "subsample_freq": 1,
         "random_state": 42,
         "deterministic": true,
         "force_row_wise": true,
@@ -314,18 +314,18 @@
         "verbose": -1
       },
       "4": {
+        "objective": "poisson",
         "n_estimators": 400,
         "learning_rate": 0.029219954123881165,
         "num_leaves": 38,
         "max_depth": 3,
         "min_child_samples": 89,
         "subsample": 0.6734371198574398,
+        "subsample_freq": 1,
         "colsample_bytree": 0.6307683604391209,
         "reg_alpha": 4.995144928833898,
         "reg_lambda": 0.6313781827847376,
         "max_bin": 255,
-        "objective": "poisson",
-        "subsample_freq": 1,
         "random_state": 42,
         "deterministic": true,
         "force_row_wise": true,
@@ -335,6 +335,8 @@
     },
     "xgboost_by_horizon": {
       "1": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
         "n_estimators": 400,
         "learning_rate": 0.053475117656895554,
         "max_depth": 3,
@@ -344,13 +346,13 @@
         "reg_alpha": 0.005549145071377375,
         "reg_lambda": 1.9507332017752141,
         "max_bin": 256,
-        "objective": "count:poisson",
-        "tree_method": "hist",
         "random_state": 42,
         "n_jobs": 1,
         "verbosity": 0
       },
       "2": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
         "n_estimators": 250,
         "learning_rate": 0.05565873660344832,
         "max_depth": 4,
@@ -360,13 +362,13 @@
         "reg_alpha": 0.032279213970939545,
         "reg_lambda": 2.506840146656814,
         "max_bin": 63,
-        "objective": "count:poisson",
-        "tree_method": "hist",
         "random_state": 42,
         "n_jobs": 1,
         "verbosity": 0
       },
       "3": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
         "n_estimators": 275,
         "learning_rate": 0.0653271266905143,
         "max_depth": 3,
@@ -376,13 +378,13 @@
         "reg_alpha": 0.0013914479076797988,
         "reg_lambda": 2.501927819393329,
         "max_bin": 256,
-        "objective": "count:poisson",
-        "tree_method": "hist",
         "random_state": 42,
         "n_jobs": 1,
         "verbosity": 0
       },
       "4": {
+        "objective": "count:poisson",
+        "tree_method": "hist",
         "n_estimators": 375,
         "learning_rate": 0.045181037066226205,
         "max_depth": 6,
@@ -392,8 +394,6 @@
         "reg_alpha": 1.490577191005621,
         "reg_lambda": 0.355828466903296,
         "max_bin": 256,
-        "objective": "count:poisson",
-        "tree_method": "hist",
         "random_state": 42,
         "n_jobs": 1,
         "verbosity": 0
@@ -718,39 +718,39 @@
     "by_horizon": {
       "h1": {
         "mae_2023": 1.1266,
-        "coverage_80_2023": 0.8737,
+        "coverage_80_2023": 0.8683,
         "nb_r": 14.3574,
-        "z_low": 0.85,
-        "z_high": 2.3,
+        "z_low": 0.8,
+        "z_high": 3.0,
         "use_cqr": false
       },
       "h2": {
         "mae_2023": 1.1658,
-        "coverage_80_2023": 0.8574,
+        "coverage_80_2023": 0.8638,
         "nb_r": 9.7228,
         "z_low": 0.75,
-        "z_high": 2.5,
+        "z_high": 3.0,
         "use_cqr": false
       },
       "h3": {
         "mae_2023": 1.2053,
-        "coverage_80_2023": 0.875,
+        "coverage_80_2023": 0.8619,
         "nb_r": 8.6471,
-        "z_low": 0.85,
-        "z_high": 2.2,
+        "z_low": 0.75,
+        "z_high": 3.0,
         "use_cqr": false
       },
       "h4": {
         "mae_2023": 1.4567,
-        "coverage_80_2023": 0.8724,
+        "coverage_80_2023": 0.8631,
         "nb_r": 5.3168,
-        "z_low": 0.85,
-        "z_high": 2.6,
+        "z_low": 0.8,
+        "z_high": 3.0,
         "use_cqr": false
       }
     },
-    "within_one_tier_2023": 0.9726,
-    "critical_recall_2023": 0.9674
+    "within_one_tier_2023": 0.9617,
+    "critical_recall_2023": 0.9884
   },
   "rain_normals": {
     "CCC_Ward_01|1": 3.69,

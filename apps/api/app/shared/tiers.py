@@ -249,10 +249,11 @@ def select_cost_sensitive_cutoffs(
     soft_cutoffs = DEFAULT_TIER_CUTOFFS
     soft_loss = float("inf")
 
-    # Under asymmetric 5x missed-Critical cost (ADR-0004), predicted High/Critical cut-offs
-    # never exceed the fixed actual High (8) / Critical (14) boundaries.
-    for med in (2.5, 2.75, 3.0, 3.25, 3.5):
-        for high in (6.5, 7.0, 7.5, 8.0):
+    # Under the endemic-channel escalation rule (P90 > mean + 2 SD -> +1 tier) and 5x missed-Critical
+    # cost (ADR-0004), search escalation-aware base cut-offs requiring within_one >= 0.97 on 2023
+    # (providing a 2 pp generalization margin above the 0.95 floor) and critical_recall >= 0.92.
+    for med in (3.0, 3.25, 3.5, 3.75, 4.0, 4.25, 4.5):
+        for high in (7.0, 7.5, 8.0, 8.5, 9.0, 9.5):
             for crit in (11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0):
                 if not (med < high < crit):
                     continue
@@ -279,15 +280,15 @@ def select_cost_sensitive_cutoffs(
                 )
 
                 penalty = (
-                    max(0.0, 0.96 - within_one) * 50.0
-                    + max(0.0, 0.90 - crit_rec) * 50.0
-                    + max(0.0, 0.90 - high_within_one) * 20.0
+                    max(0.0, 0.97 - within_one) * 50.0
+                    + max(0.0, 0.92 - crit_rec) * 50.0
+                    + max(0.0, 0.92 - high_within_one) * 20.0
                 )
                 if loss + penalty < soft_loss:
                     soft_loss = loss + penalty
                     soft_cutoffs = (float(med), float(high), float(crit))
 
-                if within_one < 0.96 or crit_rec < 0.90 or high_within_one < 0.90:
+                if within_one < 0.97 or crit_rec < 0.92 or high_within_one < 0.92:
                     continue
 
                 if loss < best_loss:

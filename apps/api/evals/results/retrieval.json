@@ -4,8 +4,8 @@
   "mrr": 0.8875,
   "n_queries": 36,
   "climatology_recall_at_k": 0.5704,
-  "model_version": "abhas-lgbm-1.1.0",
+  "model_version": "abhas-lgbm-1.1.1",
   "beats_or_matches_climatology": true,
-  "commit": "f1eaee6",
-  "ts": "2026-11-21T20:17:03+00:00"
+  "commit": "4b6041a",
+  "ts": "2026-11-21T20:25:24+00:00"
 }
