@@ -7,9 +7,12 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
+from app.core.config import get_settings
 from app.core.errors import AppError
 from app.features.heatmap.service import HeatmapService
 from app.main import create_app
+from app.ports.weather import WeekWeather
+from app.shared.forecast_engine import last_completed_week_monday_dhaka
 
 
 class _EmptyRepo:
@@ -84,3 +87,49 @@ def test_cr_3_heatmap_unknown_city_and_out_of_range_origin() -> None:
         svc.heatmap(city="Dhaka South", origin_week=date(2025, 8, 4))
     assert exc.value.status == 404
     assert exc.value.slug == "unknown-city"
+
+
+def test_heatmap_live_mode_enforces_asia_dhaka_completed_week(monkeypatch: pytest.MonkeyPatch) -> None:
+    """In WEATHER_MODE=live, GET /api/v1/heatmap?source=live rejects non-current Mondays with 422."""
+
+    class _MockLiveWeather:
+        name = "mock-live"
+
+        def weekly(self, city: str, weeks: list[date]) -> list[WeekWeather]:
+            del city
+            return [
+                WeekWeather(
+                    week=wk,
+                    avg_temp_c=28.0,
+                    max_temp_c=32.0,
+                    min_temp_c=24.5,
+                    rainfall_mm=55.0,
+                    relative_humidity_pct=78.0,
+                    source="live",
+                )
+                for wk in weeks
+            ]
+
+    monkeypatch.setenv("WEATHER_MODE", "live")
+    get_settings.cache_clear()
+    monkeypatch.setattr("app.features.heatmap.deps.get_weather_source", lambda: _MockLiveWeather())
+    try:
+        valid_origin = last_completed_week_monday_dhaka().isoformat()
+        with TestClient(create_app()) as c:
+            r_bad = c.get(
+                "/api/v1/heatmap",
+                params={"city": "Gazipur", "origin_week": "2030-01-07", "source": "live"},
+            )
+            assert r_bad.status_code == 422
+            assert r_bad.headers["content-type"].startswith("application/problem+json")
+            assert "origin_week" in r_bad.text
+
+            r_ok = c.get(
+                "/api/v1/heatmap",
+                params={"city": "Gazipur", "origin_week": valid_origin, "source": "live"},
+            )
+            assert r_ok.status_code == 200
+            assert r_ok.json()["source"] == "live"
+    finally:
+        monkeypatch.delenv("WEATHER_MODE", raising=False)
+        get_settings.cache_clear()
