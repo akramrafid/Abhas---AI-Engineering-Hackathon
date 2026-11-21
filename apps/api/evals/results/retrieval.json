@@ -1,0 +1,11 @@
+{
+  "k": 15,
+  "recall_at_k": 0.5704,
+  "mrr": 0.8019,
+  "n_queries": 36,
+  "climatology_recall_at_k": 0.5704,
+  "model_version": "climatology-le2023",
+  "beats_or_matches_climatology": true,
+  "commit": "0b1687b",
+  "ts": "2026-11-21T10:29:04+00:00"
+}
