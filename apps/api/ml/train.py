@@ -335,7 +335,13 @@ def _fit_poisson_xgboost(
                 monotone_constraints=mc,
             )
             model.fit(X, y)
-            return model, "cuda", None
+            cfg = json.loads(model.get_booster().save_config())
+            actual_dev = str(cfg.get("learner", {}).get("generic_param", {}).get("device", "cuda"))
+            if not actual_dev.startswith("cuda"):
+                reason = f"XGBoost CUDA silently fell back to {actual_dev!r}"
+                logger.warning(reason)
+                return model, actual_dev, reason
+            return model, actual_dev, None
         except Exception as exc:  # noqa: BLE001
             reason = f"XGBoost CUDA fit failed ({type(exc).__name__}: {exc}); fell back to CPU"
             logger.warning(reason)
