@@ -175,6 +175,41 @@ html {
   animation: abhas-ward-enter 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes abhas-marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.abhas-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: abhas-marquee-scroll 46s linear infinite;
+  will-change: transform;
+}
+
+.abhas-marquee-wrap:hover .abhas-marquee-track,
+.abhas-marquee-wrap:focus-within .abhas-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes abhas-progress-fill {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.abhas-spotlight-progress {
+  transform-origin: left center;
+  animation: abhas-progress-fill 6500ms linear forwards;
+}
+
 .abhas-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-mist) transparent;

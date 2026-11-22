@@ -12,6 +12,7 @@ import { ProblemSolution } from "./components/ProblemSolution";
 import { ProofSection } from "./components/ProofSection";
 import { RainClock } from "./components/RainClock";
 import { SiteNav } from "./components/SiteNav";
+import { TestimonialsSection } from "./components/TestimonialsSection";
 import { LandingLangProvider } from "./lang-context";
 
 export function LandingPage() {
@@ -35,6 +36,7 @@ export function LandingPage() {
             <Outputs />
             <ProofSection />
             <IntegrationsAndTrust />
+            <TestimonialsSection />
             <PilotSection />
             <CostSection />
             <Faq />
