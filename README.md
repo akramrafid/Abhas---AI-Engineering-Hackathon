@@ -14,13 +14,50 @@
 [![Open-Meteo](https://img.shields.io/badge/Weather-Open--Meteo%20CC%20BY%204.0-0B1A5C?style=flat-square)](apps/api/config/city_centroids.json)
 [![WCAG 2.2 AA](https://img.shields.io/badge/Accessibility-WCAG%202.2%20AA-15803D?style=flat-square)](docs/brand/BRAND.md)
 [![Red-Team](https://img.shields.io/badge/Security%20Red--Team-30%2F30%20Pass-15803D?style=flat-square)](docs/threat-model.md)
-[![Zero Keys](https://img.shields.io/badge/Local%20Setup-Zero%20API%20Keys%20%C2%B7%20%E2%89%A43%20min-D4F53C?style=flat-square&labelColor=0B0F14)](#quick-start--3-minutes-zero-api-keys)
+[![Zero Keys](https://img.shields.io/badge/Local%20Setup-Zero%20API%20Keys%20%C2%B7%20%E2%89%A43%20min-D4F53C?style=flat-square&labelColor=0B0F14)](#setup--run-instructions--3-minutes-zero-api-keys)
 
 </div>
 
 ---
 
-**Abhas (আভাস)** is a production-grade dengue early-warning operations console engineered for Bangladesh municipal health offices. It models the 2-to-4-week *Aedes aegypti* vector breeding clock to translate weekly rainfall, temperature, humidity, and hyper-local ward vulnerability (`water_logging_risk_index`, `population_density_sqkm`, `sanitation_score`) into calibrated 1–4 week outbreak risk forecasts across **60 wards in five Bangladesh city corporations**: **Dhaka North (DNCC)**, **Dhaka South (DSCC)**, **Chattogram (CCC)**, **Gazipur (GCC)**, and **Narayanganj (NCC)**.
+**Abhas (আভাস)** is a production-grade dengue early-warning operations console engineered for the **AI Engineering Hackathon (Preliminary Round — Urban Dengue Outbreak Early Warning Challenge for Bangladesh)**. It models the 2-to-4-week *Aedes aegypti* vector breeding clock to translate weekly rainfall, temperature, humidity, and hyper-local ward vulnerability (`water_logging_risk_index`, `population_density_sqkm`, `sanitation_score`) into calibrated 1–4 week outbreak risk forecasts across **60 wards in five Bangladesh city corporations**: **Dhaka North (DNCC)**, **Dhaka South (DSCC)**, **Chattogram (CCC)**, **Gazipur (GCC)**, and **Narayanganj (NCC)**.
+
+---
+
+## Demo & Video Links
+
+| Resource | Link / Access |
+|---|---|
+| **Live Web App (Vercel)** | `[Add deployed Vercel URL once live]` *(or run locally in ≤ 3 min below)* |
+| **3-Minute Uncut Video Demo** | `[Add uncut ≤ 3:00 demo video link]` |
+| **Local Landing Page** | `http://localhost:3000` *(after `npm run setup && npm run dev`)* |
+| **Local Pre-Loaded Console** | `http://localhost:3000/dashboard?demo=1` *(Dhaka South Ward 04, offline zero-key demo)* |
+| **Local OpenAPI Docs** | `http://localhost:8000/docs` |
+
+---
+
+## Team
+
+**Team Name:** **Team Abhas**
+
+| Member | Role & Contributions |
+|---|---|
+| **Akram Rafid** | Lead Systems Architect, ML Forecasting & Conformal Calibration Pipeline, FastAPI Modular Monolith, Security & Integration |
+| **Shah Md. Imtiaz Chowdhury** | Frontend & Bilingual (EN/বাংলা) Operations Console, Data Pipeline, Visualization, Responsive UX & QA Verification |
+
+---
+
+## Tech Stack
+
+| Layer | Technologies & Libraries |
+|---|---|
+| **Languages** | Python `3.12`, TypeScript `5`, SQL |
+| **Backend API** | FastAPI, Uvicorn, Pydantic v2 (`extra="forbid"`), SQLAlchemy `2.0`, Alembic, `httpx` |
+| **ML & Data Pipeline** | LightGBM (Poisson multi-horizon + monotonic constraints), `scikit-learn`, `pandas`, `NumPy`, `SciPy`, `statsmodels`, Optuna, TreeSHAP, `joblib`, `openpyxl` |
+| **Frontend Console** | Next.js `16` (App Router, Turbopack, Cache Components), React `19`, Tailwind CSS `v4`, TanStack React Query, Recharts, MapLibre GL JS, GSAP |
+| **Database & Caching** | SQLite WAL (zero-key local Stage 1) / PostgreSQL-ready via Alembic (`0001_initial`), single-flight lock + L1 LRU + L2 SQLite `predictions_cache` & `weather_cache` |
+| **External Services (All Optional)** | Open-Meteo Forecast & ERA5 Archive API (CC BY 4.0, no key), Google Gemini 2.5 Flash API (AI chat), Anthropic Claude Haiku API (officer advisory), Clerk (`@clerk/nextjs` auth) |
+| **Quality, Security & Testing** | `pytest` (139 tests), `ruff`, `pyright`, `eslint`, `tsc`, Schemathesis (767 checks), Playwright + `axe-core` (WCAG 2.2 AA), `k6`, custom 30-attack AI/API red-team suite |
 
 <p align="center">
   <img src="docs/ux/screenshots/dashboard.png" alt="Abhas Ward Forecast Operations Console" width="100%" />
@@ -45,8 +82,11 @@
 
 ## Table of Contents
 
+- [Demo & Video Links](#demo--video-links)
+- [Team](#team)
+- [Tech Stack](#tech-stack)
 - [Why Abhas](#why-abhas)
-- [Quick Start (≤ 3 Minutes, Zero API Keys)](#quick-start--3-minutes-zero-api-keys)
+- [Setup & Run Instructions (≤ 3 Minutes, Zero API Keys)](#setup--run-instructions--3-minutes-zero-api-keys)
 - [Animated Data Flow Diagram](#animated-data-flow-diagram)
 - [Animated System Design Diagram](#animated-system-design-diagram)
 - [Animated Entity Relationship Diagram (ERD)](#animated-entity-relationship-diagram-erd)
@@ -54,7 +94,8 @@
 - [Model Performance & Chronological Validation](#model-performance--chronological-validation)
 - [Repository Layout & Branch Strategy](#repository-layout--branch-strategy)
 - [Testing, Security & Quality Gates](#testing-security--quality-gates)
-- [AI & External Services Disclosure](#ai--external-services-disclosure)
+- [AI Tools & APIs Disclosure](#ai-tools--apis-disclosure)
+- [Attributions](#attributions)
 - [Known Limitations](#known-limitations)
 
 ---
@@ -71,7 +112,7 @@
 
 ---
 
-## Quick Start (≤ 3 Minutes, Zero API Keys)
+## Setup & Run Instructions (≤ 3 Minutes, Zero API Keys)
 
 Abhas launches completely offline with **zero API keys** and zero external databases required.
 
@@ -99,8 +140,8 @@ npm run dev
 | `http://localhost:8000/readyz` | Live readiness check (database seeded + LightGBM artifact loaded) |
 
 ### Measured Fresh-Clone Setup Times
-- **With `uv` (recommended):** `npm run setup` completes in **18.4 s** · full stack ready in **24.1 s**.
-- **Fallback `python -m venv` + `pip` (Windows paths with spaces):** `npm run setup` completes in **92.6 s** · full stack ready in **118.3 s** (well under the 180 s ceiling).
+- **Clean temporary clone verification (`gates.mjs fresh-clone` on `lead@590fd8d`):** `npm run setup` (Python `uv` venv + 53 packages, Web `npm ci` + 469 packages, Alembic migration, 31,320-row SQLite seed, SHA-256 LightGBM verification) completes in **129 s** (≤ 180 s ceiling), followed by 100% green `npm run ci` (`139/139 pytest`, `6/6 smoke`).
+- **Docker alternative (zero local Python/Node version issues):** `docker compose up --build` launches both API (`:8000`) and Web (`:3000`) via [docker-compose.yml](docker-compose.yml).
 
 ### Optional Enhancements (Zero Keys Required by Default)
 
@@ -408,22 +449,37 @@ npm run gates           # Runs the complete release-gate matrix
 
 ---
 
-## AI & External Services Disclosure
+## AI Tools & APIs Disclosure
 
-In full compliance with hackathon transparency rules:
+In full compliance with hackathon transparency rules, every AI assistant, model endpoint, and external API used to build or run Abhas is listed below:
 
 ### AI Coding Assistants Used During Development
-- **Claude Code (Anthropic Opus):** Lead architecture framing, PRD/OpenAPI contracts, vertical-slice integration, and independent code/security review.
-- **Antigravity CLI (Google Gemini 4 Neon & Hydrogen):** Parallel vertical-slice implementation, LightGBM Optuna tuning, bilingual responsive Next.js console engineering, animated diagrams, and hardening.
+| Assistant | Model(s) | What It Was Used For |
+|---|---|---|
+| **Claude Code** | Anthropic Claude Opus | Lead architecture framing, PRD & OpenAPI contract design, vertical-slice integration, and independent code & security review. |
+| **Antigravity CLI** | Google Gemini 4 Neon & Hydrogen | Parallel vertical-slice implementation, LightGBM Optuna tuning, bilingual responsive Next.js console engineering, animated SVG architecture diagrams, SEO/performance optimization, and test hardening. |
 
-### Runtime AI Models & External APIs
-- **Google Gemini 2.5 Flash API (`generativelanguage.googleapis.com`, optional):** Powers the streaming Abhas AI assistant (`apps/api/app/adapters/gemini_chat.py`) with dual-key `429` failover, `llm_traces` auditing, response caching, and grounded offline fallback when no key is set.
-- **Anthropic Claude Haiku API (optional):** Optional bilingual officer briefing phrasing (`apps/api/app/adapters/claude_advisory.py`), hard-capped at `$1.00/day` in SQLite with automatic offline deterministic template fallback.
-- **Open-Meteo Weather Forecast & ERA5 Archive API (`api.open-meteo.com`):** Free, non-commercial weather data under **Creative Commons Attribution 4.0 International (CC BY 4.0)** — batched 5-city requests cached 6 hours (`≤ 4 calls/day`, zero API key).
-- **Hackathon Organizers' Dengue Dataset:** Weekly ward-level dengue cases, weather metrics, and vulnerability indicators for 60 Bangladesh wards (`2016–2025`).
-- **Clerk (`@clerk/nextjs`, optional):** Authentication gate for `/dashboard` when Clerk keys are present; fully bypassed in zero-key local mode.
-- **OpenStreetMap & CARTO Tiles + MapLibre GL JS (BSD-3):** Interactive ward risk map (`© OpenStreetMap contributors`, ODbL).
-- **Self-Hosted Open Assets:** **Poppins** and **Noto Sans Bengali** (SIL OFL via `@fontsource`), plus offline-bundled **Solar Bold Duotone** vector icons (`@iconify-json/solar`, CC BY 4.0) — zero third-party font/icon CDN calls at runtime.
+### Runtime AI Model Endpoints & External APIs
+| Service / Endpoint | Purpose | Fallback / Cost Guard |
+|---|---|---|
+| **Google Gemini 2.5 Flash API** (`generativelanguage.googleapis.com`) | Streaming Abhas AI assistant (`apps/api/app/adapters/gemini_chat.py`, `POST /api/v1/chat/stream`) grounded in live ward forecasts. | Optional. Dual-key `429` failover, `thinkingBudget: 0`, 512-token cap, response TTL cache, `llm_traces` auditing, and grounded offline fallback when no key is set. |
+| **Anthropic Claude Haiku API** (`api.anthropic.com`) | Optional bilingual EN/বাংলা officer action briefing phrasing (`apps/api/app/adapters/claude_advisory.py`, `POST /api/v1/advisory`). | Optional. Capped at 400 output tokens, post-validated against forecast numbers, hard-capped at `$1.00/day` in SQLite, with free deterministic template fallback. |
+| **Open-Meteo Forecast & ERA5 Archive API** (`api.open-meteo.com`) | Live and historical multi-location daily weather ingestion for the 5 Bangladesh city centroids (`apps/api/app/adapters/openmeteo.py`). | Free, zero API key, CC BY 4.0. Batched into 1 call / 6h (`≤ 4 calls/day`), circuit breaker + climatology fallback, and offline dataset default mode. |
+| **Clerk** (`@clerk/nextjs`) | Optional sign-in protection for `/dashboard` (`apps/web/src/proxy.ts`). | Optional. Completely bypassed when Clerk keys are omitted (`AUTH_ENABLED=false`). |
+
+---
+
+## Attributions
+
+Open-source libraries, datasets, fonts, icons, map tiles, and design assets used in Abhas that are not the team's own:
+
+- **Challenge Dataset:** Weekly ward-level dengue cases, weather variables, and static vulnerability factors for 60 Bangladesh wards (`2016–2025`), provided by the AI Engineering Hackathon organizers (`data/raw/hackathon_preli_dataset.xlsx`).
+- **Weather Data:** Weather data by [Open-Meteo.com](https://open-meteo.com/) licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+- **Map Engine & Tiles:** [MapLibre GL JS](https://maplibre.org/) (BSD-3-Clause) rendering map tiles `© OpenStreetMap contributors` (ODbL) and CARTO dark basemap styling.
+- **Typography (Self-Hosted):** [Poppins](https://fontsource.org/fonts/poppins) and [Noto Sans Bengali](https://fontsource.org/fonts/noto-sans-bengali) via `@fontsource` (SIL Open Font License 1.1).
+- **Icons (Self-Hosted):** [Solar Bold Duotone](https://icon-sets.iconify.design/solar/) via `@iconify-json/solar` (CC BY 4.0).
+- **ML, Charts & Motion Libraries:** [LightGBM](https://github.com/microsoft/LightGBM) (MIT), [Recharts](https://recharts.org/) (MIT), [GSAP](https://gsap.com/) (Standard No-Charge License), [TanStack Query](https://tanstack.com/query) (MIT).
+- **UI Pattern References:** Landing page `AnimatedBeam` (inspired by Magic UI, rebuilt on GSAP) and `ContainerScroll` (inspired by Aceternity UI, rebuilt on GSAP ScrollTrigger); illustrative municipal officer portraits in `apps/web/public/images/officers/` are AI-generated editorial avatars clearly labeled as illustrative scenarios.
 
 ---
 
@@ -431,4 +487,4 @@ In full compliance with hackathon transparency rules:
 
 1. **Simulated Dataset Characteristics:** Statistical inspection indicates synthetic/simulated properties in the challenge dataset. Before real clinical deployment, Abhas must be recalibrated on official **DGHS / IEDCR** national surveillance registries.
 2. **Approximate Ward Coordinates:** The dataset provides ward IDs without official GIS polygons, so map points are placed cleanly around each city corporation's real centroid (`apps/api/config/city_centroids.json`) without inventing boundaries.
-3. **Commit Authorship:** Developed and integrated under GitHub handle `@akramrafid`.
+3. **Commit Authorship Note:** Integrated collaboratively by Team Abhas (**Akram Rafid** and **Shah Md. Imtiaz Chowdhury**), with release integration commits pushed via `@akramrafid`.

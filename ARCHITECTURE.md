@@ -87,7 +87,7 @@ To eliminate temporal data leakage in time-series forecasting, the 10-year datas
 
 ---
 
-## 5. Compute, API & LLM Cost Controls
+## 5. Efficiency — Token Budget, Prompt Strategy, Caching & Latency
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -103,15 +103,29 @@ To eliminate temporal data leakage in time-series forecasting, the 10-year datas
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Single-Flight Cold Lock & Two-Tier Cache:** Concurrent requests for the same `(origin_week, source, weather_hash)` coalesce on a per-key lock. Hot forecasts serve in `< 2 ms` from L1 LRU or L2 SQLite `predictions_cache`. What-if counterfactual scenarios bypass persistent cache writes.
-2. **Open-Meteo Call Minimization:** All 5 Bangladesh city centroids are fetched in **1 multi-location HTTP GET** (`past_days=92&forecast_days=16`, `Asia/Dhaka`), aggregated to full Mon–Sun ISO weeks, ERA5 bias-corrected, and cached in SQLite `weather_cache` for **6 hours** (**≤ 4 calls/day** out of Open-Meteo's 10,000/day free tier), with retries, circuit breaker, and climatology fallback.
-3. **LLM Token, Budget & Redaction Controls:**
-   - **Officer Briefings (`advisory`):** Optional Anthropic Claude Haiku capped at 400 output tokens, post-validated against forecast numbers, and hard-capped at **$1.00/day** via SQLite `llm_traces`; falls back to free deterministic bilingual templates.
-   - **Abhas AI Assistant (`chat`):** Optional Google Gemini 2.5 Flash (`thinkingBudget: 0`, max 512 tokens, dual-key `429` failover, response TTL cache, `llm_traces` ledger, `AQ.*`/key log redaction, per-IP rate limiting) with automatic grounded offline fallback when keys are absent.
+1. **Single-Flight Cold Lock & Two-Tier Cache:** Concurrent requests for the same `(origin_week, source, weather_hash)` coalesce on a per-key lock. Hot forecasts serve in `< 2 ms` from L1 LRU or L2 SQLite `predictions_cache`, while full cold 60-ward scoring completes in `< 35 ms` (`0.591 ms/ward p95` CPU). What-if counterfactual scenarios bypass persistent cache writes.
+2. **Open-Meteo Call Minimization:** All 5 Bangladesh city centroids are fetched in **1 multi-location HTTP GET** (`past_days=92&forecast_days=16`, `Asia/Dhaka`), aggregated to full Mon–Sun ISO weeks, ERA5 bias-corrected, and cached in SQLite `weather_cache` for **6 hours** (**≤ 4 calls/day** out of Open-Meteo's 10,000/day free tier).
+3. **Prompt Strategy & Token Budget Controls:**
+   - **Officer Briefings (`advisory`):** Compact, structured JSON-context system prompt (separating untrusted user fields from verified forecast numbers), capped at **400 output tokens**, post-validated so every number matches the LightGBM output, cached by `(ward_id, origin_week, horizon, lang)`, and hard-capped at **$1.00/day** via SQLite `llm_traces`.
+   - **Abhas AI Assistant (`chat`):** Google Gemini 2.5 Flash with `thinkingBudget: 0` (eliminating hidden reasoning token overhead), **512-token** output cap, compact live ward-context grounding, TTL response caching, and full `llm_traces` token/latency accounting.
+4. **Frontend Load & Core Web Vitals Speed:** `WardRiskMap` defers ~1.6 MB of MapLibre GL + Web Worker behind `IntersectionObserver` on below-the-fold sections; 7 secondary `/dashboard` tabs and 2 dialogs are code-split via `next/dynamic`; `AbhasChatWidget` is deferred off initial hydration; and fonts/icons are 100% self-hosted with 1-year immutable caching.
 
 ---
 
-## 6. Deep-Dive Architecture Specifications
+## 6. Resilience — Network Errors, Rate Limits & Fault Isolation
+
+| Failure Mode | Protection & Graceful Degradation |
+|---|---|
+| **Open-Meteo network error / timeout / 5xx** | Bounded connect/read timeouts (`5s` / `10s`), exponential backoff with jitter retries, circuit breaker, stale-cache fallback (`weather_cache`), and automatic historical **climatology fallback** — forecasts never crash when live weather is unreachable. |
+| **LLM rate limits (`429`) or provider outage** | `gemini_chat.py` automatically fails over from `GEMINI_API_KEY` to `GEMINI_API_KEY_FALLBACK` on HTTP `429`; if both fail, timeout (`15s`/`20s`), or hit the `$1.00/day` SQLite budget cap, both `advisory` and `chat` transparently fall back to free, deterministic, forecast-grounded bilingual templates. |
+| **API traffic spikes & abuse** | Per-IP sliding-window rate limiter (`120 req/min` general, `20 req/min` LLM endpoints) returning RFC 9457 `429 Too Many Requests` + `Retry-After` header; streaming **64 KiB** request body guard (`413`) aborts oversized payloads without RAM buffering. |
+| **SSRF, injection & secret leakage** | `Settings` blocks loopback/private/metadata URLs outside `APP_ENV=test`; strict Pydantic `extra="forbid"`; regex log redaction strips API keys (`sk-ant-*`, `AIza*`, `AQ.*`); CSV exports neutralize spreadsheet formulas (`=`, `+`, `-`, `@`). |
+| **Corrupted model artifact or unseeded DB** | Startup verifies `current.joblib` against its SHA-256 digest and confirms seeded SQLite observations; `/readyz` fails closed (`503`) if any check is unhealthy. |
+| **Client WebGL / offline failures** | `WardRiskMap` falls back to `WardMapFallback` (interactive SVG) when WebGL is unavailable; React Query surfaces structured `ErrorBanner` recovery controls; default `WEATHER_MODE=dataset` runs 100% air-gapped. |
+
+---
+
+## 7. Deep-Dive Architecture Specifications
 
 - [Animated System Design Diagram](docs/diagrams/system-design.svg) · [Animated Entity Relationship Diagram](docs/diagrams/erd.svg)
 - [C4 Architecture Diagrams & Module Boundaries](docs/architecture.md)
