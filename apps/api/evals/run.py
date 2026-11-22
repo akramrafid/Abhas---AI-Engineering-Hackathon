@@ -108,7 +108,10 @@ def evaluate_golden_cases(
 
     rows: list[dict[str, Any]] = []
     tier_pass: dict[str, list[bool]] = {t: [] for t in TIERS}
+    skipped = 0
     for case, pred, ms in zip(cases, preds, latencies_ms, strict=True):
+        if pred.used_fallback:
+            skipped += 1
         actual_cases = int(case["actual_cases"])
         actual_tier = str(case["actual_tier"])
         within_one = abs(TIER_TO_IDX[actual_tier] - TIER_TO_IDX[pred.tier]) <= 1
@@ -133,6 +136,7 @@ def evaluate_golden_cases(
                 "risk_score": pred.risk_score,
                 "within_one_tier": within_one,
                 "in_80_band": in_band,
+                "used_fallback": pred.used_fallback,
                 "pass": passed,
                 "ms": round(ms, 3),
                 "ac_refs": case.get("ac_refs", ["AC-5"]),
@@ -151,6 +155,7 @@ def evaluate_golden_cases(
     summary = {
         "n": n,
         "passed": sum(r["pass"] for r in rows),
+        "skipped": skipped,
         "pass_rate": pass_rate,
         "by_tier": by_tier,
         "p50_ms": round(percentile(latencies_ms, 50.0), 3),
@@ -164,6 +169,8 @@ def evaluate_global_holdout(
     forecaster: ForecasterHook,
     target_years: Sequence[int],
     climatology: ClimatologyBaseline,
+    *,
+    latency_sample_size: int = 200,
 ) -> dict[str, Any]:
     """Score ALL ward-weeks in `target_years` across horizons h=1..4 (incl. all 159 Critical rows)."""
     lookup = build_case_lookup(df)
@@ -171,11 +178,13 @@ def evaluate_global_holdout(
     no_weather_map = forecaster.no_weather_mae_by_horizon()
 
     by_horizon: dict[str, dict[str, Any]] = {}
+    all_pairs: list[tuple[str, date, int]] = []
     all_y: list[float] = []
     all_p10: list[float] = []
     all_p90: list[float] = []
     all_pred_tiers: list[str] = []
-    all_latencies: list[float] = []
+    all_batch_latencies: list[float] = []
+    global_skipped = 0
 
     for h in GLOBAL_HORIZONS:
         pairs: list[tuple[str, date, int]] = []
@@ -208,6 +217,8 @@ def evaluate_global_holdout(
 
         preds: list[EvalPrediction]
         preds, lats = forecaster.predict_batch(df, pairs)
+        h_skipped = sum(1 for p in preds if p.used_fallback)
+        global_skipped += h_skipped
         mu = [p.expected_cases for p in preds]
         p10 = [p.p10 for p in preds]
         p90 = [p.p90 for p in preds]
@@ -222,6 +233,7 @@ def evaluate_global_holdout(
         by_horizon[f"h{h}"] = {
             "horizon": h,
             "n": len(y_true),
+            "skipped": h_skipped,
             "mae": round(model_mae, 4),
             "rmse": round(rmse(y_true, mu), 4),
             "poisson_deviance": round(poisson_deviance(y_true, mu), 4),
@@ -253,16 +265,27 @@ def evaluate_global_holdout(
             "mae_improvement_vs_climatology_pct": round(improv * 100.0, 2),
         }
 
+        all_pairs.extend(pairs)
         all_y.extend(y_true)
         all_p10.extend(p10)
         all_p90.extend(p90)
         all_pred_tiers.extend(ptiers)
-        all_latencies.extend(lats)
+        all_batch_latencies.extend(lats)
+
+    # CR-6: measure true single-row end-to-end latency (feature build + predict) on 200 sampled rows,
+    # keeping amortized batch throughput separate.
+    single_row_latencies = forecaster.benchmark_single_row_latencies(
+        df, all_pairs, sample_size=latency_sample_size, seed=42
+    )
+    throughput_ms_per_ward = (
+        round(sum(all_batch_latencies) / max(len(all_batch_latencies), 1), 4) if all_batch_latencies else 0.0
+    )
 
     overall_tiers = tier_metrics(all_y, all_pred_tiers)
     return {
         "target_years": list(target_years),
         "n_ward_weeks_total": len(all_y),
+        "skipped": global_skipped,
         "by_horizon": by_horizon,
         "coverage_80": round(coverage_80(all_y, all_p10, all_p90), 4),
         "within_one_tier": overall_tiers["within_one_tier"],
@@ -273,8 +296,10 @@ def evaluate_global_holdout(
             "labels": overall_tiers["labels"],
             "matrix": overall_tiers["matrix"],
         },
-        "p50_ward_ms": round(percentile(all_latencies, 50.0), 3),
-        "p95_ward_ms": round(percentile(all_latencies, 95.0), 3),
+        "latency_sample_n": len(single_row_latencies),
+        "p50_ward_ms": round(percentile(single_row_latencies, 50.0), 3),
+        "p95_ward_ms": round(percentile(single_row_latencies, 95.0), 3),
+        "throughput_ms_per_ward": throughput_ms_per_ward,
     }
 
 
@@ -330,7 +355,9 @@ def render_report(payload: dict[str, Any]) -> str:
         ),
         (
             f"- **Golden pass rate:** {payload['pass_rate']:.2%} ({payload['passed']}/{payload['n']}, "
-            f"threshold {payload['threshold']:.0%}) · **p95 inference:** {gm['p95_ward_ms']:.2f} ms/ward"
+            f"skipped={payload['skipped']}, threshold {payload['threshold']:.0%}) · "
+            f"**p95 inference (single-row E2E):** {gm['p95_ward_ms']:.2f} ms/ward "
+            f"(batch throughput: {gm.get('throughput_ms_per_ward', 0.0):.3f} ms/ward)"
         ),
         (
             f"- **Global hold-out:** coverage_80={gm['coverage_80']:.3f} · "
@@ -377,6 +404,11 @@ def render_report(payload: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Abhas forecast evaluation & hold-out lock runner.")
     ap.add_argument("--lock", action="store_true", help="Compute heldout_sha256 and write config.json.")
+    ap.add_argument(
+        "--relock",
+        action="store_true",
+        help="Allow --lock to overwrite an existing heldout_sha256 (requires LEAD approval; logged).",
+    )
     ap.add_argument("--split", choices=["dev", "heldout", "all"], default="heldout")
     ap.add_argument("--tag", default="", help="Optional run tag (e.g. baseline).")
     args = ap.parse_args(argv)
@@ -387,22 +419,65 @@ def main(argv: list[str] | None = None) -> int:
     heldout_count = sum(1 for c in cases if c.get("split") == "heldout")
 
     if args.lock:
+        existing_sha = cfg.get("heldout_sha256")
+        if existing_sha and not args.relock:
+            print(
+                "FAIL: hold-out already locked; --relock needs LEAD approval and is logged",
+                file=sys.stderr,
+            )
+            return TAMPER_EXIT_CODE
+        if existing_sha and args.relock:
+            ts_relock = datetime.now(UTC).isoformat(timespec="seconds")
+            relock_entry = {
+                "ts": ts_relock,
+                "commit": git_commit(),
+                "event": "relock",
+                "previous_sha256": str(existing_sha),
+                "new_sha256": current_sha,
+                "heldout_count": heldout_count,
+            }
+            HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with HISTORY_PATH.open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(relock_entry, ensure_ascii=False) + "\n")
+            print(
+                f"WARN: relocking heldout_sha256 ({str(existing_sha)[:12]}... -> {current_sha[:12]}...); "
+                f"logged to {HISTORY_PATH.name}",
+                file=sys.stderr,
+            )
         cfg["heldout_sha256"] = current_sha
         save_config(cfg)
         print(f"Locked {heldout_count} held-out cases in {CONFIG_PATH.name}: {current_sha}")
         return 0
 
     locked_sha = cfg.get("heldout_sha256")
-    if args.split in ("heldout", "all") and locked_sha is not None and locked_sha != current_sha:
-        print(
-            f"FAIL: held-out cases changed after lock (locked={locked_sha[:12]}..., current={current_sha[:12]}...)",
-            file=sys.stderr,
-        )
+    if args.split in ("heldout", "all") and locked_sha != current_sha:
+        if not locked_sha:
+            print(
+                "FAIL: heldout_sha256 is missing in config.json; run python -m evals.run --lock before scoring heldout/all",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"FAIL: held-out cases changed after lock (locked={str(locked_sha)[:12]}..., current={current_sha[:12]}...)",
+                file=sys.stderr,
+            )
         return TAMPER_EXIT_CODE
 
     df = load_raw_dataset()
     fit_year = 2018 if args.split == "dev" else 2023
     forecaster = load_forecaster(df, train_end_year=fit_year)
+
+    # CR-5: never score an artifact trained past 2018 in-sample on 2019-2023 dev targets.
+    if args.split == "dev" and not forecaster.is_baseline_fallback and forecaster.train_end_year > 2018:
+        print(
+            f"FAIL: refusing --split dev for artifact '{forecaster.model_version}' "
+            f"(train_end_year={forecaster.train_end_year} > 2018): scoring 2019-2023 dev targets "
+            "would be in-sample. Use purged rolling-origin CV folds in ml/backtest.py "
+            "(`python -m ml.backtest` / `npm run backtest`) for dev evaluation instead.",
+            file=sys.stderr,
+        )
+        return 2
+
     if forecaster.is_baseline_fallback:
         print(
             f"Note: trained model artifact not found; scoring {forecaster.model_version} "
@@ -415,6 +490,7 @@ def main(argv: list[str] | None = None) -> int:
     target_years = (2019, 2020, 2021, 2022, 2023) if args.split == "dev" else (2024, 2025)
     global_metrics = evaluate_global_holdout(df, forecaster, target_years, forecaster.climatology)
 
+    total_skipped = int(golden_summary["skipped"]) + int(global_metrics["skipped"])
     floors, floors_passed = check_ac5_floors(global_metrics, golden_summary["pass_rate"], cfg)
     ts = datetime.now(UTC).isoformat(timespec="seconds")
     commit = git_commit()
@@ -427,7 +503,9 @@ def main(argv: list[str] | None = None) -> int:
         "tag": args.tag,
         "n": golden_summary["n"],
         "passed": golden_summary["passed"],
-        "skipped": 0,
+        "skipped": total_skipped,
+        "skipped_golden": int(golden_summary["skipped"]),
+        "skipped_global": int(global_metrics["skipped"]),
         "pass_rate": golden_summary["pass_rate"],
         "threshold": float(cfg.get("threshold", 0.80)),
         "generator_model": forecaster.model_version,
@@ -451,7 +529,9 @@ def main(argv: list[str] | None = None) -> int:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     (RESULTS_DIR / f"latest-{args.split}.json").write_text(serialized, encoding="utf-8")
-    (RESULTS_DIR / "eval.json").write_text(serialized, encoding="utf-8")
+    # CR-14: write eval.json ONLY when scoring the locked heldout split.
+    if args.split == "heldout":
+        (RESULTS_DIR / "eval.json").write_text(serialized, encoding="utf-8")
     if args.tag == "baseline":
         (RESULTS_DIR / "baseline.json").write_text(serialized, encoding="utf-8")
 
@@ -461,7 +541,7 @@ def main(argv: list[str] | None = None) -> int:
         "split": args.split,
         "tag": args.tag,
         "n": payload["n"],
-        "skipped": 0,
+        "skipped": total_skipped,
         "pass_rate": payload["pass_rate"],
         "floors_passed": floors_passed,
         "generator_model": payload["generator_model"],
@@ -474,6 +554,7 @@ def main(argv: list[str] | None = None) -> int:
         "within_one_tier": global_metrics["within_one_tier"],
         "critical_recall": global_metrics["critical_recall"],
         "p95_ward_ms": global_metrics["p95_ward_ms"],
+        "throughput_ms_per_ward": global_metrics["throughput_ms_per_ward"],
     }
     with HISTORY_PATH.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(history_entry, ensure_ascii=False) + "\n")
@@ -483,15 +564,25 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"eval[{args.split}] model={forecaster.model_version} "
         f"pass_rate={payload['pass_rate']:.4f} ({payload['passed']}/{payload['n']}) "
+        f"skipped={total_skipped} "
         f"h2_mae={global_metrics['by_horizon']['h2']['mae']:.3f} "
         f"h3_mae={global_metrics['by_horizon']['h3']['mae']:.3f} "
         f"cov80={global_metrics['coverage_80']:.3f} "
+        f"p95_e2e={global_metrics['p95_ward_ms']:.2f}ms "
+        f"throughput={global_metrics['throughput_ms_per_ward']:.3f}ms "
         f"floors_passed={floors_passed}"
     )
 
+    if args.split == "heldout" and total_skipped > 0:
+        print(
+            f"FAIL: held-out run had {total_skipped} climatology-fallback (skipped) row(s) "
+            f"(golden={golden_summary['skipped']}, global={global_metrics['skipped']})",
+            file=sys.stderr,
+        )
+        return 1
     if args.tag == "baseline" or args.split == "dev":
         return 0
-    return 0 if (payload["pass_rate"] >= payload["threshold"] and floors_passed) else 1
+    return 0 if (payload["pass_rate"] >= payload["threshold"] and floors_passed and total_skipped == 0) else 1
 
 
 if __name__ == "__main__":
