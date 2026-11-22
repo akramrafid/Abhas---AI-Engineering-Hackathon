@@ -1,0 +1,47 @@
+# Abhas (আভাস) — Ward-Level Dengue Early Warning for Bangladesh
+
+> Rain today. Risk in three weeks. Act now.
+> Abhas is an open, offline-first, bilingual (English & Bangla) dengue early-warning console built for municipal health officers across five Bangladesh city corporations.
+
+## Key Facts (Verified & Locked)
+- **Coverage**: 60 urban wards across 5 Bangladesh City Corporations:
+  - Dhaka North City Corporation (DNCC): 20 wards (`DNCC_Ward_01`–`DNCC_Ward_20`)
+  - Dhaka South City Corporation (DSCC): 20 wards (`DSCC_Ward_01`–`DSCC_Ward_20`)
+  - Chattogram City Corporation (CCC): 10 wards (`CCC_Ward_01`–`CCC_Ward_10`)
+  - Gazipur City Corporation (GCC): 5 wards (`GCC_Ward_01`–`GCC_Ward_05`)
+  - Narayanganj City Corporation (NCC): 5 wards (`NCC_Ward_01`–`NCC_Ward_05`)
+- **Forecast Horizon**: 1 to 4 weeks ahead (`+1w`, `+2w`, `+3w`, `+4w`), anchored on the biological 2–4 week rainfall-to-dengue lag (deseasonalized Pearson r = 0.47 at 3-week rainfall lag vs r = 0.03 in the same week).
+- **Model Artifact**: `abhas-lgbm-1.1.2` — single CPU-only LightGBM + Conformal P10–P90 + TreeSHAP artifact, `954.6 KiB`, `<1 ms` (`0.59 ms/ward`) inference on standard office laptop CPUs, SHA-256 verified at startup.
+- **Locked 2024–2025 Hold-Out Performance** (trained on 2016–2022, calibrated on 2023, scored once on 2024–2025 with zero future leakage):
+  - +3w MAE: `1.01` cases/ward-week vs `1.26` seasonal climatology baseline (~20% lower error)
+  - Conformal 80% coverage: `86.2%` across horizons (exceeds 80% target)
+  - Ranking quality: `0.611` Recall@15 (vs `0.570` climatology), `0.888` MRR
+  - Automated eval suite: `40/48` (`83.3%`) critical & tiered hold-out cases, `11/11` quality floors
+  - Automated security & contract verification: `30/30` red-team checks, `767/767` Schemathesis OpenAPI tests
+- **Privacy & Cost**: Zero patient PII (ward-level aggregate counts only), `$0` software license fee, runs completely offline on standard office laptops. Optional live weather uses Open-Meteo (CC BY 4.0) with 6-hour SQLite caching and ERA5 bias correction; optional AI officer briefings (Claude Haiku) enforce a `$1/day` hard cap with deterministic free template fallback.
+- **Honest Scientific Disclosure**: The bundled 2016–2025 dataset (31,320 ward-weeks) is the hackathon organisers' benchmark dataset and appears simulated. Hold-out metrics demonstrate engineering performance and require local surveillance recalibration before clinical or real-world operational deployment. Ward map positions are schematic approximations around each city corporation's centroid because GIS ward boundary polygons are not included in the dataset.
+
+## Core Pages
+- [Landing & Overview](https://abhas.vercel.app/): Product story, live monsoon week replay, validation scorecard, FAQ, and municipal pilot intake.
+- [Operations Console](https://abhas.vercel.app/dashboard?demo=1): Interactive 8-view dashboard (Ward Forecast, Risk Map, Lags, Scenario Simulator, City Heatmap, Priority List, Validation, About & Cost).
+- [Documentation & API](https://abhas.vercel.app/docs): Setup guide, OpenAPI endpoint reference, and release changelog.
+- [About & Methodology](https://abhas.vercel.app/about): Epidemiological motivation, chronological split protocol, and model card summary.
+- [Security & Trust](https://abhas.vercel.app/security): Zero-PII architecture, SHA-256 artifact integrity, API rate limiting, and red-team results.
+- [System Status](https://abhas.vercel.app/status): Live API `/readyz` readiness probe status.
+- [Brand System](https://abhas.vercel.app/brand): WCAG 2.2 AA colour tokens, typography scale, and risk tier visual language.
+- [Request a Pilot](https://abhas.vercel.app/contact): Municipal pilot onboarding form, email (`pilot@abhas.dev`), and WhatsApp pilot desk (`+880 1641-414949`).
+
+## API Endpoints (FastAPI `/api/v1`)
+- `GET /healthz` — Liveness probe
+- `GET /readyz` — Readiness probe (SQLite seed + SHA-256 LightGBM artifact verification)
+- `GET /api/v1/wards` — List all 60 monitored wards and static vulnerability metadata
+- `GET /api/v1/wards/{ward_id}/history` — Weekly weather and dengue case history
+- `GET /api/v1/wards/{ward_id}/lags` — Deseasonalized rainfall-to-case lag correlations (`0..8w`)
+- `POST /api/v1/forecast` — 1–4 week forecasts, P10–P90 bands, risk tiers, and TreeSHAP drivers
+- `POST /api/v1/scenario` — What-if rainfall, temperature, and humidity simulation
+- `GET /api/v1/heatmap` — City-wide ranked ward risk matrix
+- `GET /api/v1/validation` — Locked 2024–2025 hold-out metrics and confusion matrix
+- `POST /api/v1/advisory` — Bilingual EN/বাংলা officer action briefing
+- `POST /api/v1/chat/stream` — Grounded streaming AI assistant
+- `GET /api/v1/ops` — Runtime serving latency, artifact size, and cost telemetry
+- `GET /api/v1/weather/status` — Active weather mode and Open-Meteo cache status
