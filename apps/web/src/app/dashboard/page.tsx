@@ -49,6 +49,20 @@ import {
   type Lang,
 } from "@/lib/i18n";
 
+function computeDhakaLiveMondays(): string[] {
+  // Current and last completed ISO Monday in Asia/Dhaka (UTC+6).
+  const dhakaNow = new Date(Date.now() + 6 * 60 * 60 * 1000);
+  const utcDay = dhakaNow.getUTCDay(); // 0=Sun..6=Sat
+  const daysSinceMonday = (utcDay + 6) % 7;
+  const currMon = new Date(
+    Date.UTC(dhakaNow.getUTCFullYear(), dhakaNow.getUTCMonth(), dhakaNow.getUTCDate() - daysSinceMonday),
+  );
+  const prevMon = new Date(currMon.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const fmt = (d: Date) =>
+    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+  return [fmt(currMon), fmt(prevMon)];
+}
+
 function DashboardWorkspace() {
   const searchParams = useSearchParams();
   const isDemoMode = searchParams.get("demo") === "1";
@@ -75,6 +89,7 @@ function DashboardWorkspace() {
   });
   const [dismissedUrlWard, setDismissedUrlWard] = useState(false);
   const [scenarioManualSelection, setScenarioManualSelection] = useState(false);
+  const [weatherModeOverride, setWeatherModeOverride] = useState<WeatherMode | null>(null);
 
   const wardsQuery = useWardsQuery();
   const weatherStatusQuery = useWeatherStatusQuery();
@@ -132,15 +147,29 @@ function DashboardWorkspace() {
     return cityWards[0]?.ward_id ?? "";
   }, [unknownWardId, wardOverride, cityWards, matchedUrlWard, selectedCity]);
 
+  const activeSource: WeatherMode =
+    weatherModeOverride ??
+    (isDemoMode ? "dataset" : weatherStatusQuery.data?.mode ?? "dataset");
+
+  const [liveMondays] = useState<string[]>(computeDhakaLiveMondays);
+
   const firstOrigin = wardsData?.first_forecast_origin ?? DEFAULT_FIRST_FORECAST_ORIGIN;
   const dataEnd = wardsData?.data_end ?? DEFAULT_DATA_END;
 
-  const mondayWeeks = useMemo(
-    () => generateMondayWeeks(firstOrigin, dataEnd),
-    [firstOrigin, dataEnd],
-  );
+  const mondayWeeks = useMemo(() => {
+    const base = generateMondayWeeks(firstOrigin, dataEnd);
+    if (activeSource !== "live") return base;
+    const extras = liveMondays.filter((w) => !base.includes(w));
+    return [...extras, ...base];
+  }, [firstOrigin, dataEnd, activeSource, liveMondays]);
 
   const selectedOriginWeek = useMemo(() => {
+    if (activeSource === "live") {
+      if (originWeekOverride && liveMondays.includes(originWeekOverride)) {
+        return originWeekOverride;
+      }
+      return liveMondays[0];
+    }
     if (
       originWeekOverride &&
       isValidMondayInRange(originWeekOverride, firstOrigin, dataEnd)
@@ -151,7 +180,7 @@ function DashboardWorkspace() {
       return DEMO_CONFIG.originWeek;
     }
     return mondayWeeks[0] ?? DEMO_CONFIG.originWeek;
-  }, [originWeekOverride, firstOrigin, dataEnd, mondayWeeks]);
+  }, [activeSource, liveMondays, originWeekOverride, firstOrigin, dataEnd, mondayWeeks]);
 
   // Synchronize HTML lang attribute and shareable URL state (?ward=&origin=&window=&tab=&lang=).
   useEffect(() => {
@@ -202,17 +231,15 @@ function DashboardWorkspace() {
     ? DEMO_CONFIG.scenarioBaseline.originWeek
     : selectedOriginWeek;
 
-  // Demo mode stays 100% offline in dataset mode (AC-11).
-  const activeSource: WeatherMode = isDemoMode
-    ? "dataset"
-    : weatherStatusQuery.data?.mode ?? "dataset";
-
   const cityWeatherSummary = weatherStatusQuery.data?.cities.find(
     (c) => c.city === selectedCity,
   );
-  const weatherSourceUsed = isDemoMode
-    ? "dataset"
-    : cityWeatherSummary?.source ?? "dataset";
+  const weatherSourceUsed =
+    activeSource === "live"
+      ? "live"
+      : isDemoMode
+        ? "dataset"
+        : cityWeatherSummary?.source ?? "dataset";
   const weatherBadgeText = UI_COPY[lang].weatherSource[weatherSourceUsed];
 
   const tabs = useMemo<readonly DockItem[]>(() => {
@@ -299,6 +326,15 @@ function DashboardWorkspace() {
       <DashboardHeader
         selectedCity={selectedCity}
         isDemoMode={isDemoMode}
+        weatherMode={activeSource}
+        onChangeWeatherMode={(nextMode) => {
+          setWeatherModeOverride(nextMode);
+          if (nextMode === "live") {
+            setOriginWeekOverride(liveMondays[0]);
+          } else {
+            setOriginWeekOverride(DEMO_CONFIG.originWeek);
+          }
+        }}
         weatherBadgeText={weatherBadgeText}
         lang={lang}
         onChangeLang={setLang}

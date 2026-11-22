@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, Moon, Search, Sun } from "@/components/icons";
+import { Bell, CloudRain, Moon, Search, Sun } from "@/components/icons";
 import { clsx } from "clsx";
 import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
-import type { City } from "@/lib/api/client";
+import type { City, WeatherMode } from "@/lib/api/client";
 import { UI_COPY, type Lang } from "@/lib/i18n";
 
 export interface DashboardHeaderProps {
   selectedCity: City;
   isDemoMode: boolean;
+  weatherMode?: WeatherMode;
+  onChangeWeatherMode?: (mode: WeatherMode) => void;
   weatherBadgeText: string;
   lang: Lang;
   onChangeLang: (lang: Lang) => void;
@@ -27,6 +29,8 @@ export interface DashboardHeaderProps {
 export function DashboardHeader({
   selectedCity,
   isDemoMode,
+  weatherMode = "dataset",
+  onChangeWeatherMode,
   weatherBadgeText,
   lang,
   onChangeLang,
@@ -108,9 +112,58 @@ export function DashboardHeader({
             {copy.demoBadge}
           </span>
         ) : null}
-        <span data-testid="weather-source-badge" lang={lang} className={clsx(chip, "max-sm:hidden", bn && "font-bangla")}>
-          {weatherBadgeText}
-        </span>
+        {onChangeWeatherMode ? (
+          <div
+            data-testid="weather-source-badge"
+            role="group"
+            aria-label="Weather data source"
+            title={weatherBadgeText}
+            className={clsx(
+              "inline-flex min-h-10 items-center rounded-full p-0.5 ring-1 max-sm:hidden",
+              dark ? "bg-white/5 ring-white/15" : "bg-paper ring-mist",
+            )}
+          >
+            <button
+              type="button"
+              data-testid="weather-mode-dataset"
+              aria-pressed={weatherMode === "dataset"}
+              onClick={() => onChangeWeatherMode("dataset")}
+              className={clsx(
+                "min-h-9 cursor-pointer rounded-full px-3 text-xs font-semibold transition-colors",
+                bn && "font-bangla",
+                weatherMode === "dataset"
+                  ? "bg-navy text-white"
+                  : dark
+                    ? "text-mist hover:text-white"
+                    : "text-slate hover:text-navy",
+              )}
+            >
+              {bn ? "ডেটাসেট" : "Dataset"}
+            </button>
+            <button
+              type="button"
+              data-testid="weather-mode-live"
+              aria-pressed={weatherMode === "live"}
+              onClick={() => onChangeWeatherMode("live")}
+              className={clsx(
+                "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
+                bn && "font-bangla",
+                weatherMode === "live"
+                  ? "bg-royal text-white"
+                  : dark
+                    ? "text-mist hover:text-white"
+                    : "text-slate hover:text-navy",
+              )}
+            >
+              <CloudRain aria-hidden="true" className="h-3.5 w-3.5" />
+              {bn ? "লাইভ আবহাওয়া" : "Live Open-Meteo"}
+            </button>
+          </div>
+        ) : (
+          <span data-testid="weather-source-badge" lang={lang} className={clsx(chip, "max-sm:hidden", bn && "font-bangla")}>
+            {weatherBadgeText}
+          </span>
+        )}
 
         <div
           data-testid="lang-toggle"

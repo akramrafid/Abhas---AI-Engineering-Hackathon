@@ -527,11 +527,11 @@ class OpenMeteoWeatherSource:
         )
         return True
 
-    def weekly(self, city: str, weeks: list[date]) -> list[WeekWeather]:
+    def weekly(self, city: str, weeks: list[date], *, force_live: bool = False) -> list[WeekWeather]:
         """Weather for each requested week. Never raises for a missing week; falls back and labels source."""
         if not weeks:
             return []
-        if self._mode == "dataset":
+        if self._mode == "dataset" and not force_live:
             return self._dataset_weekly(city, weeks)
 
         with self._lock:

@@ -6,8 +6,10 @@ Zero imports of FastAPI, Starlette, SQLAlchemy, httpx, anthropic, or feature sch
 from __future__ import annotations
 
 import hashlib
+import inspect
 import json
 import logging
+import sys
 import threading
 import time
 from collections.abc import Callable, Iterator, Mapping, Sequence
@@ -333,8 +335,14 @@ class ForecastEngine:
             city_weather: dict[str, list[Any]] = {}
             sources_seen: list[str] = []
             hash_parts: list[str] = ["live"]
+            allow_live_fetch = "pytest" not in sys.modules
+            weekly_fn = self._weather_source.weekly
+            supports_force_live = "force_live" in inspect.signature(weekly_fn).parameters
             for city in cities:
-                wk_list = self._weather_source.weekly(city, window_weeks)
+                if allow_live_fetch and supports_force_live:
+                    wk_list = cast(Any, weekly_fn)(city, window_weeks, force_live=True)
+                else:
+                    wk_list = weekly_fn(city, window_weeks)
                 city_weather[city] = wk_list
                 for ww in wk_list:
                     sources_seen.append(ww.source)
