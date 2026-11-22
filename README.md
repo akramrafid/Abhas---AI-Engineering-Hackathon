@@ -28,7 +28,9 @@
 
 | Resource | Link / Access |
 |---|---|
-| **Live Web App (Vercel)** | `[Add deployed Vercel URL once live]` *(or run locally in ≤ 3 min below)* |
+| **Live Web App (Vercel)** | https://abhas-ai-engineering-hackathon.vercel.app |
+| **Live Operations Console** | https://abhas-ai-engineering-hackathon.vercel.app/dashboard?demo=1 |
+| **Live FastAPI Backend (Render)** | https://abhas-api.onrender.com/readyz |
 | **3-Minute Uncut Video Demo** | `[Add uncut ≤ 3:00 demo video link]` |
 | **Local Landing Page** | `http://localhost:3000` *(after `npm run setup && npm run dev`)* |
 | **Local Pre-Loaded Console** | `http://localhost:3000/dashboard?demo=1` *(Dhaka South Ward 04, offline zero-key demo)* |
