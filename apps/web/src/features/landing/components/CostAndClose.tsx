@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "@/components/icons";
+import { ArrowRight, CloudRain, Sparkles, Timer } from "@/components/icons";
 import { clsx } from "clsx";
 import { RibbonCanvas } from "@/components/brand/RibbonCanvas";
 import { trackEvent } from "@/lib/analytics";
@@ -9,34 +9,96 @@ import { useLandingLang } from "../lang-context";
 
 // Figures from ARCHITECTURE.md §4–5 (measured on the shipped artifact).
 const COSTS = [
-  { term: "Weather", value: "4 calls a day", note: "Five city centroids batched into one Open-Meteo request, cached for 6 hours." },
-  { term: "Forecast", value: "0.59 ms per ward", note: "A 954 KiB model loaded once on the CPU. No GPU needed to serve." },
-  { term: "Advice text", value: "$1 a day, at most", note: "Optional Claude Haiku advisory with a hard daily cap; a free template without a key." },
+  {
+    icon: CloudRain,
+    term: "Weather",
+    tag: "Cached 6h · CC BY 4.0",
+    value: "4 calls a day",
+    note: "Five city centroids batched into one Open-Meteo request, cached for 6 hours.",
+  },
+  {
+    icon: Timer,
+    term: "Forecast",
+    tag: "CPU-only · 954 KiB",
+    value: "0.59 ms per ward",
+    note: "A 954 KiB LightGBM model loaded once on the CPU. No GPU or cloud server needed.",
+  },
+  {
+    icon: Sparkles,
+    term: "Advice text",
+    tag: "Hard cap · Free fallback",
+    value: "$1 a day, at most",
+    note: "Optional bilingual AI advisory with a strict daily cap; a free offline template works without a key.",
+  },
+] as const;
+
+const HARDWARE_SPECS = [
+  { value: "954 KiB", label: "Model size" },
+  { value: "CPU", label: "No GPU needed" },
+  { value: "Offline", label: "Zero keys req." },
 ] as const;
 
 export function CostSection() {
   return (
-    <section aria-labelledby="cost-heading" className="bg-white px-4 py-24 text-ink sm:px-8 lg:px-14">
-      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+    <section
+      aria-labelledby="cost-heading"
+      className="relative overflow-hidden border-t border-mist bg-white px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-28"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[320px] bg-[radial-gradient(50%_50%_at_80%_0%,rgba(47,91,255,0.045),transparent_72%)]"
+      />
+      <div className="relative mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-16">
         <div>
-          <h2 id="cost-heading" className="text-balance text-[clamp(1.75rem,3vw,2.5rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-navy">
+          <h2
+            id="cost-heading"
+            className="text-balance text-[clamp(1.85rem,3.4vw,2.75rem)] font-extrabold leading-[1.06] tracking-[-0.03em] text-navy"
+          >
             Runs on a health office laptop.
           </h2>
-          <p className="mt-4 max-w-md text-body text-slate">
-            No servers to rent and no per-forecast fees. The weather source and the language model are optional;
-            the forecast works offline from the dataset.
+          <p className="mt-4 max-w-md text-base leading-7 text-slate">
+            No servers to rent and no per-forecast fees. The weather source and the language model are optional; the
+            forecast works offline from the dataset.
           </p>
+
+          <dl className="mt-8 grid grid-cols-3 gap-2.5 rounded-2xl bg-paper/85 p-3 ring-1 ring-mist/90">
+            {HARDWARE_SPECS.map((spec) => (
+              <div key={spec.label} className="rounded-xl bg-white px-3 py-3 text-center ring-1 ring-mist/75">
+                <dt className="text-base font-extrabold tracking-tight text-navy tnum">{spec.value}</dt>
+                <dd className="mt-0.5 text-[11px] font-medium text-slate">{spec.label}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <dl className="divide-y divide-mist border-y border-mist">
-          {COSTS.map((cost) => (
-            <div key={cost.term} className="grid gap-1 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-6">
-              <dt className="text-sm font-semibold text-slate sm:pt-1">{cost.term}</dt>
-              <dd>
-                <p className="text-xl font-bold tnum">{cost.value}</p>
-                <p className="mt-1 text-sm text-slate">{cost.note}</p>
-              </dd>
-            </div>
-          ))}
+
+        <dl className="space-y-2.5 rounded-[22px] bg-paper/70 p-2.5 ring-1 ring-mist/90">
+          {COSTS.map((cost) => {
+            const Icon = cost.icon;
+            return (
+              <div
+                key={cost.term}
+                className="group rounded-[16px] bg-white p-5 shadow-[0_1px_2px_rgba(11,26,92,0.03)] ring-1 ring-mist/85 transition-all duration-200 hover:ring-royal/30 hover:shadow-[0_10px_24px_-14px_rgba(47,91,255,0.16)]"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-royal/[0.08] text-royal ring-1 ring-royal/15 transition-colors duration-200 group-hover:bg-royal group-hover:text-white group-hover:ring-royal">
+                    <Icon aria-hidden="true" className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <dt className="text-xs font-bold uppercase tracking-[0.08em] text-slate">{cost.term}</dt>
+                      <span className="rounded-full bg-paper px-2.5 py-0.5 text-[11px] font-semibold text-navy ring-1 ring-mist tnum">
+                        {cost.tag}
+                      </span>
+                    </div>
+                    <dd>
+                      <p className="mt-1.5 text-xl font-extrabold tracking-tight text-navy tnum">{cost.value}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate">{cost.note}</p>
+                    </dd>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </dl>
       </div>
     </section>
