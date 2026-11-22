@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CloudRain, Sparkles, Timer } from "@/components/icons";
+import { ArrowRight, CheckCircle2, CloudRain, Lock, MapPin, Sparkles, Timer } from "@/components/icons";
 import { clsx } from "clsx";
 import { RibbonCanvas } from "@/components/brand/RibbonCanvas";
 import { trackEvent } from "@/lib/analytics";
@@ -105,36 +105,131 @@ export function CostSection() {
   );
 }
 
+const QUICK_WARDS = [
+  { id: "DSCC_Ward_04", city: "Dhaka South", ward: "Ward 04", horizon: "+1w to +4w curve" },
+  { id: "DNCC_Ward_01", city: "Dhaka North", ward: "Ward 01", horizon: "+1w to +4w curve" },
+  { id: "CCC_Ward_01", city: "Chattogram", ward: "Ward 01", horizon: "+1w to +4w curve" },
+] as const;
+
 export function ClosingCta() {
   const { lang } = useLandingLang();
   return (
-    <section aria-labelledby="close-heading" className="relative isolate overflow-hidden bg-navy px-4 py-32 text-white sm:px-8 lg:px-14">
-      <div className="absolute inset-0 -z-10 [mask-image:linear-gradient(to_right,transparent_20%,black_70%)]">
+    <section
+      aria-labelledby="close-heading"
+      className="relative isolate overflow-hidden border-t border-white/10 bg-[radial-gradient(80%_95%_at_12%_15%,#153199_0%,#0B1A5C_48%,#060E30_100%)] px-4 py-28 text-white sm:px-8 lg:px-14 lg:py-36"
+    >
+      {/* Kinetic Abhas signal ribbon refracting behind the glass panel */}
+      <div className="pointer-events-none absolute inset-0 -z-10 [mask-image:linear-gradient(to_right,transparent_8%,black_60%)]">
         <RibbonCanvas className="h-full w-full" from={0.95} to={0.15} period={22} />
       </div>
-      <div className="mx-auto max-w-6xl">
-        <h2 id="close-heading" className="max-w-2xl text-balance text-[clamp(2.25rem,5vw,4rem)] font-extrabold leading-[1.02] tracking-[-0.035em]">
-          Pick a ward. See its next four weeks.
-        </h2>
-        <p className="mt-5 max-w-lg text-lg text-mist">
-          Open the live operations console in one click — zero keys required, works offline, ready in Bangla and English.
-        </p>
-        <div className="mt-10 flex flex-wrap items-center gap-5">
-          <Link
-            href="/dashboard?demo=1"
-            data-testid="closing-cta"
-            onClick={() => trackEvent({ event: "cta_open_dashboard", location: "closing_cta", lang })}
-            className="group inline-flex min-h-12 items-center gap-2 rounded-md bg-lime px-6 text-base font-bold text-ink transition-transform duration-200 hover:-translate-y-0.5"
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-24 top-1/2 -z-10 h-80 w-80 -translate-y-1/2 rounded-full bg-royal/25 blur-3xl"
+      />
+
+      <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-14">
+        <div>
+          <h2
+            id="close-heading"
+            className="max-w-2xl text-balance text-[clamp(2.35rem,5vw,4.15rem)] font-extrabold leading-[1.01] tracking-[-0.035em] text-white"
           >
-            Open the dashboard
-            <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
-          <Link
-            href="/contact"
-            className="text-sm font-semibold text-mist underline-offset-4 transition-colors hover:text-white hover:underline"
-          >
-            Or request a municipal pilot
-          </Link>
+            Pick a ward. See its next four weeks.
+          </h2>
+          <p className="mt-5 max-w-lg text-lg leading-8 text-mist/90">
+            Open the live operations console in one click — zero keys required, works offline, ready in Bangla and
+            English.
+          </p>
+
+          <div className="mt-9 flex flex-wrap items-center gap-3.5">
+            <Link
+              href="/dashboard?demo=1"
+              data-testid="closing-cta"
+              onClick={() => trackEvent({ event: "cta_open_dashboard", location: "closing_cta", lang })}
+              className="group inline-flex min-h-13 items-center gap-2 rounded-full bg-lime px-7 text-base font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_16px_36px_-12px_rgba(212,245,60,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_20px_42px_-10px_rgba(212,245,60,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy"
+            >
+              Open the dashboard
+              <ArrowRight
+                aria-hidden="true"
+                className="h-4.5 w-4.5 transition-transform duration-200 group-hover:translate-x-0.5"
+              />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-13 items-center gap-2 rounded-full bg-white/[0.08] px-6 text-sm font-semibold text-white ring-1 ring-white/18 backdrop-blur-md transition-all hover:bg-white/[0.15] hover:ring-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            >
+              Request a municipal pilot
+            </Link>
+          </div>
+
+          <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-xs font-medium text-mist/85">
+            <li className="inline-flex items-center gap-1.5">
+              <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-lime" />
+              60 wards · 5 cities
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <Lock aria-hidden="true" className="h-4 w-4 text-lime" />
+              Zero patient PII
+            </li>
+            <li className="inline-flex items-center gap-1.5">
+              <Timer aria-hidden="true" className="h-4 w-4 text-lime" />
+              0.59 ms CPU inference
+            </li>
+          </ul>
+        </div>
+
+        {/* Liquid-glass direct ward launcher */}
+        <div className="rounded-[22px] bg-white/[0.07] p-5 shadow-[0_28px_64px_-22px_rgba(0,0,0,0.55)] ring-1 ring-white/15 backdrop-blur-xl sm:p-6">
+          <div className="flex items-center justify-between gap-3 border-b border-white/12 pb-4">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/12 text-white ring-1 ring-white/15">
+                <MapPin aria-hidden="true" className="h-4 w-4" />
+              </span>
+              <p className="text-sm font-bold text-white">Jump directly to a ward</p>
+            </div>
+            <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-mist ring-1 ring-white/15">
+              Live console
+            </span>
+          </div>
+
+          <ul className="mt-3 space-y-2">
+            {QUICK_WARDS.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={`/dashboard?demo=1&ward=${item.id}`}
+                  onClick={() =>
+                    trackEvent({ event: "cta_open_dashboard", location: "closing_cta_quick_ward", label: item.id, lang })
+                  }
+                  className="group flex items-center justify-between gap-3 rounded-xl bg-white/[0.06] px-4 py-3 ring-1 ring-white/10 transition-all hover:bg-white/[0.13] hover:ring-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-white">
+                      {item.city} · {item.ward}
+                    </p>
+                    <p className="mt-0.5 text-xs text-mist/80">{item.horizon} + 80% range</p>
+                  </div>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition-all group-hover:bg-lime group-hover:text-ink">
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                    />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-4 border-t border-white/12 pt-3.5 text-right">
+            <Link
+              href="/dashboard?demo=1&tab=map"
+              className="group inline-flex items-center gap-1.5 text-xs font-semibold text-mist transition-colors hover:text-white"
+            >
+              Browse all 60 wards on the interactive map
+              <ArrowRight
+                aria-hidden="true"
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
