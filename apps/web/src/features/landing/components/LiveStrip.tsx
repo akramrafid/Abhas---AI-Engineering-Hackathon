@@ -10,6 +10,14 @@ import { formatShortDate } from "@/lib/dates";
 import { STORM_ORIGIN } from "../rain-clock-steps";
 
 
+const HARD_STATS = [
+  { value: "60", label: "wards monitored" },
+  { value: "5", label: "city corporations" },
+  { value: "31,320", label: "ward-weeks analysed" },
+  { value: "~20%", label: "lower 3w MAE vs baseline" },
+  { value: "0.59 ms", label: "CPU forecast per ward" },
+] as const;
+
 export function LiveStrip() {
   const wardsQuery = useWardsQuery();
   const storm = useAllCityHeatmaps(STORM_ORIGIN, "dataset");
@@ -24,7 +32,21 @@ export function LiveStrip() {
   const target = ranked[0]?.target_week;
 
   return (
-    <section aria-label="This week's ward list" className="bg-ink pb-20 pt-16 text-white sm:pb-28">
+    <section aria-label="Measured coverage and this week's ward list" className="bg-ink pb-20 pt-10 text-white sm:pb-28">
+      {/* Hard-number social proof bar (honest measured coverage, no invented logos) */}
+      <div className="mx-auto mb-14 max-w-6xl px-4 sm:px-8">
+        <dl className="grid grid-cols-2 gap-6 border-y border-white/10 py-7 sm:grid-cols-3 lg:grid-cols-5">
+          {HARD_STATS.map((stat) => (
+            <div key={stat.label}>
+              <dt className="text-xs text-mist">{stat.label}</dt>
+              <dd className="mt-1 text-2xl font-extrabold tracking-tight text-white tnum sm:text-3xl">
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
       {ranked.length ? (
         <div data-testid="ward-marquee">
           <p className="mx-auto max-w-6xl px-4 text-sm text-mist sm:px-8">

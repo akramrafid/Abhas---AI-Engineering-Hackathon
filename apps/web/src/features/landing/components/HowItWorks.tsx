@@ -66,10 +66,32 @@ export function HowItWorks() {
             From this week&apos;s rain to next month&apos;s ward list.
           </h2>
           <p className="max-w-lg text-lg leading-8 text-mist lg:justify-self-end">
-            Rain sets a clock: one to two weeks for mosquitoes to breed, then incubation. Abhas reads that clock for
-            every ward on its own timeline and hands officers one action per ward.
+            Three quiet steps from raw rainfall to a ranked municipal dispatch sheet — zero cloud servers, runs in
+            under three minutes on an office laptop.
           </p>
         </div>
+
+        {/* Three-step operational sequence: Connect -> Analyse -> Act */}
+        <ol className="mt-12 grid gap-4 border-y border-white/10 py-8 md:grid-cols-3 md:gap-8">
+          <li>
+            <p className="text-base font-bold text-white">1. Connect weekly ward &amp; weather data</p>
+            <p className="mt-1.5 text-sm leading-6 text-mist">
+              Runs offline from the seeded 60-ward dataset by default, or pulls five city centroids from Open-Meteo in one call.
+            </p>
+          </li>
+          <li>
+            <p className="text-base font-bold text-white">2. Analyse the three-week breeding clock</p>
+            <p className="mt-1.5 text-sm leading-6 text-mist">
+              LightGBM scores every ward 1–4 weeks ahead with conformalized 80% uncertainty bands and exact SHAP drivers.
+            </p>
+          </li>
+          <li>
+            <p className="text-base font-bold text-white">3. Act before cases reach clinics</p>
+            <p className="mt-1.5 text-sm leading-6 text-mist">
+              Hand field supervisors one ranked priority list, a 160-character SMS alert, and a printable EN/বাংলা A4 brief.
+            </p>
+          </li>
+        </ol>
 
         <div ref={container} className="relative mt-16 grid gap-6 lg:grid-cols-4 lg:items-center lg:gap-x-16">
           <div className="space-y-4">

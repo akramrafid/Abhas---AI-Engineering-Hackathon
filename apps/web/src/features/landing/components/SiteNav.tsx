@@ -15,13 +15,15 @@ import { Menu, X } from "lucide-react";
 import { clsx } from "clsx";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import { gsap } from "@/components/motion/gsap";
+import { trackEvent } from "@/lib/analytics";
+import { useLandingLang } from "../lang-context";
 
 const LINKS = [
-  { id: "rain-clock", href: "#rain-clock", label: "Product tour" },
-  { id: "how", href: "#how", label: "How it works" },
-  { id: "outputs", href: "#outputs", label: "What officers get" },
-  { id: "proof", href: "#proof", label: "Evidence" },
-  { id: "faq", href: "#faq", label: "FAQ" },
+  { id: "rain-clock", href: "#rain-clock", label: "Product", labelBn: "পণ্য", external: false },
+  { id: "how", href: "#how", label: "How it works", labelBn: "কীভাবে কাজ করে", external: false },
+  { id: "proof", href: "#proof", label: "Accuracy", labelBn: "নির্ভুলতা", external: false },
+  { id: "pilot", href: "#pilot", label: "Pilot", labelBn: "পাইলট", external: false },
+  { id: "docs", href: "/docs", label: "Docs", labelBn: "ডকস", external: true },
 ] as const;
 
 type LinkId = (typeof LINKS)[number]["id"];
@@ -34,6 +36,7 @@ type LinkId = (typeof LINKS)[number]["id"];
  * - Scroll progress thread + full mobile liquid-glass drawer + WCAG 2.2 AA contrast
  */
 export function SiteNav({ actions }: { actions: ReactNode }) {
+  const { lang, setLang } = useLandingLang();
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [activeId, setActiveId] = useState<LinkId | null>(null);
@@ -247,6 +250,11 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
 
   const handleSectionClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>, link: (typeof LINKS)[number]) => {
+      trackEvent({ event: "nav_section_click", location: "site_nav", label: link.id, lang });
+      if (link.external) {
+        setMobileMenuOpen(false);
+        return;
+      }
       const target = document.getElementById(link.id);
       if (!target) return;
 
@@ -260,7 +268,7 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
       const targetY = target.getBoundingClientRect().top + window.scrollY - headerOffset;
       smoothScrollTo(targetY, link.href);
     },
-    [smoothScrollTo, triggerPulse],
+    [lang, smoothScrollTo, triggerPulse],
   );
 
   const handleLogoClick = useCallback(
@@ -399,7 +407,9 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
                             className="h-1.5 w-1.5 rounded-full bg-lime shadow-[0_0_8px_rgba(212,245,60,0.9)]"
                           />
                         ) : null}
-                        {link.label}
+                        <span className={lang === "bn" ? "font-bangla" : undefined}>
+                          {lang === "bn" ? link.labelBn : link.label}
+                        </span>
                       </a>
                     </li>
                   );
@@ -408,8 +418,31 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
             </div>
           </nav>
 
-          {/* Right actions + mobile glass toggle */}
+          {/* Right actions + EN/বাংলা toggle + mobile glass toggle */}
           <div className="flex items-center gap-2">
+            <div
+              role="group"
+              aria-label="Language"
+              data-testid="landing-lang-toggle"
+              className="hidden items-center rounded-full border border-white/15 bg-white/[0.06] p-0.5 sm:inline-flex"
+            >
+              {(["en", "bn"] as const).map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  aria-pressed={lang === code}
+                  lang={code}
+                  onClick={() => setLang(code)}
+                  className={clsx(
+                    "min-h-8 cursor-pointer rounded-full px-2.5 text-xs font-semibold transition-colors",
+                    code === "bn" && "font-bangla",
+                    lang === code ? "bg-royal text-white" : "text-mist hover:text-white",
+                  )}
+                >
+                  {code === "en" ? "EN" : "বাংলা"}
+                </button>
+              ))}
+            </div>
             {actions}
 
             <button

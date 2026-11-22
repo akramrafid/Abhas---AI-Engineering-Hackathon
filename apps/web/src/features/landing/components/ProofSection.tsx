@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { EASE_OUT, FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
 import {
@@ -207,6 +209,16 @@ function HoldoutResult() {
           Trained on 2016 to 2022, tuned on 2023, scored once on the locked years. The data looks simulated, so
           these are not real-world accuracy claims.
         </p>
+        <Link
+          href="/dashboard?demo=1&tab=validation"
+          className="group mt-5 inline-flex min-h-10 items-center gap-1.5 rounded-full border border-mist bg-white px-4 text-sm font-semibold text-navy transition-colors hover:border-royal hover:text-royal"
+        >
+          Inspect full validation &amp; confusion matrix
+          <ArrowRight
+            aria-hidden="true"
+            className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+          />
+        </Link>
       </div>
       <table className="w-full self-end text-left">
         <caption className="sr-only">Mean absolute error by forecast horizon, hold-out 2024 to 2025</caption>

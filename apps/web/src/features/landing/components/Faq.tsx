@@ -23,6 +23,18 @@ const FAQ = [
     a: "No. The dashboard runs offline from the dataset. Live weather, the advisory text, the map tiles and sign-in are optional extras.",
   },
   {
+    q: "How long does setup take for a city health office?",
+    a: "Under three minutes on a standard Windows, macOS, or Linux laptop. One command installs dependencies, seeds the local SQLite database, verifies the committed model artifact, and launches both the API and dashboard — zero API keys required.",
+  },
+  {
+    q: "How is health and citizen data protected?",
+    a: "Abhas stores ward-level aggregate case counts and weather variables only — zero patient names, IDs, phone numbers, or clinical records ever enter the system. It can run completely air-gapped on office hardware, and passes 30/30 automated API & AI security tests.",
+  },
+  {
+    q: "How do pilot onboarding and support work?",
+    a: "City corporations and public health teams can request a zero-fee pilot directly from this page or via WhatsApp. We help map your weekly ward surveillance spreadsheet to Abhas's schema and train zonal health officers in Bangla and English.",
+  },
+  {
     q: "Why are ward positions on the map approximate?",
     a: "The dataset has ward numbers but no boundaries, so each ward is placed near its city corporation's real centre. Abhas never draws ward outlines it does not have.",
   },

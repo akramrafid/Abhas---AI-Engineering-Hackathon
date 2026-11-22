@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { MessageSquareText } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, MessageSquareText } from "lucide-react";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import { RiskTierBadge, TIER_META } from "@/components/brand/RiskTierBadge";
 import { EASE_OUT, FULL_MOTION, gsap, SplitText, useGSAP } from "@/components/motion/gsap";
@@ -132,6 +133,53 @@ export function Outputs() {
             </ol>
           </article>
         </div>
+
+        {/* Features framed as What it does -> Why it matters, each deep-linking to its live view */}
+        <dl className="mt-14 grid gap-px overflow-hidden rounded-[14px] border border-mist bg-mist sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              does: "Per-ward 1–4w curve + 80% range",
+              why: "Stage beds, saline, and larvicide using upper-bound risk (P90) instead of a single guess.",
+              href: "/dashboard?demo=1",
+              cta: "Open Ward Forecast",
+            },
+            {
+              does: "SHAP driver waterfall",
+              why: "Show council officers whether rainfall lag, humidity, or drainage drove a Critical flag.",
+              href: "/dashboard?demo=1&tab=lags",
+              cta: "Explore Rain Lags",
+            },
+            {
+              does: "What-if weather sandbox",
+              why: "Simulate a 150 mm storm or heatwave before it hits and see the exact expected case delta.",
+              href: "/dashboard?demo=1&tab=scenario",
+              cta: "Try Scenario Sandbox",
+            },
+            {
+              does: "Priority list + safe CSV export",
+              why: "Rank all 60 wards worst-first and export clean spreadsheets for zonal dispatch sheets.",
+              href: "/dashboard?demo=1&tab=priority",
+              cta: "View Priority List",
+            },
+          ].map((feat) => (
+            <div key={feat.does} className="flex flex-col justify-between bg-white p-5">
+              <div>
+                <dt className="text-sm font-bold text-navy">{feat.does}</dt>
+                <dd className="mt-2 text-sm leading-6 text-slate">{feat.why}</dd>
+              </div>
+              <Link
+                href={feat.href}
+                className="group mt-4 inline-flex items-center gap-1 text-xs font-semibold text-royal hover:text-navy"
+              >
+                {feat.cta}
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                />
+              </Link>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
