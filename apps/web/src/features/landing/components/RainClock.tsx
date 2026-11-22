@@ -113,11 +113,11 @@ export function RainClock({ hero }: { hero: ReactNode }) {
             }}
             className={clsx(
               "flex min-h-[100svh] items-end px-4 pb-20 sm:items-center sm:px-8 sm:pb-0 lg:px-14",
-              step.id === "rain" && "items-center pb-0 pt-24",
+              step.id === "rain" && "pb-0 sm:items-center sm:pt-24",
             )}
           >
             {step.id === "rain" ? (
-              <div className="pointer-events-auto w-full max-w-3xl max-sm:rounded-[14px] max-sm:bg-ink/80 max-sm:p-5">{hero}</div>
+              <div className="pointer-events-auto -mx-4 w-[calc(100%+2rem)] bg-gradient-to-t from-ink via-ink/90 to-transparent px-4 pb-14 pt-20 sm:mx-0 sm:w-full sm:max-w-3xl sm:bg-none sm:p-0">{hero}</div>
             ) : (
               <StepPanel>
                 <StepBody
@@ -137,7 +137,7 @@ export function RainClock({ hero }: { hero: ReactNode }) {
 
 function StepPanel({ children }: { children: ReactNode }) {
   return (
-    <div className="pointer-events-auto w-full max-w-md overflow-y-auto rounded-[14px] bg-ink/90 p-5 ring-1 ring-white/10 max-sm:max-h-[40svh] sm:p-7">
+    <div className="pointer-events-auto w-full max-w-md rounded-[14px] bg-ink/90 p-5 ring-1 ring-white/10 sm:p-7">
       {children}
     </div>
   );
@@ -193,13 +193,17 @@ function StepBody({ step, wards, observedPeakCases, isLoading }: StepBodyProps) 
             <strong className="font-semibold text-white">
               {spotlight?.expected_cases != null ? `${spotlight.expected_cases.toFixed(1)} expected cases` : "…"}
             </strong>
-            {observedPeakCases !== null ? `; ${observedPeakCases} cases were recorded that week.` : "."}
+            {observedPeakCases !== null ? `; ${observedPeakCases} were recorded.` : "."}
           </p>
-          {spotlight?.tier ? <RiskTierBadge tier={spotlight.tier} size="sm" showAction className="mt-4" /> : null}
-          <p className="mt-4 text-sm text-mist">
-            The window to act is the week of {weekOf(addDaysIso(STORM_ORIGIN, 7))}: clear drains and larvicide
-            before the peak, not after it.
+          <p className="text-sm font-semibold text-white">
+            Act in the week of {weekOf(addDaysIso(STORM_ORIGIN, 7))}: clear drains and larvicide before the peak.
           </p>
+          {spotlight?.tier ? (
+            <>
+              <RiskTierBadge tier={spotlight.tier} size="sm" className="sm:hidden" />
+              <RiskTierBadge tier={spotlight.tier} size="sm" showAction className="max-sm:hidden" />
+            </>
+          ) : null}
         </StepText>
       );
     case "h4":
@@ -232,7 +236,7 @@ function StepText({ kicker, title, children }: { kicker: string; title: string; 
     <>
       <h2 className="text-balance text-2xl font-bold leading-tight tracking-[-0.02em]">{title}</h2>
       <p className="mt-2 font-mono text-xs text-mist tnum">{kicker}</p>
-      <div className="mt-3 space-y-3 text-body text-mist">{children}</div>
+      <div className="mt-3 space-y-3 text-mist max-sm:text-sm sm:text-body">{children}</div>
     </>
   );
 }

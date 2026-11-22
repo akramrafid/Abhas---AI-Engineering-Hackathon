@@ -49,7 +49,7 @@ function cameraPadding(el: HTMLElement | null, reserveForCopy: boolean): Padding
   const height = el?.clientHeight ?? 0;
   if (!reserveForCopy) return { top: 32, right: 32, bottom: 32, left: 32 };
   if (width >= 1024) return { top: 90, right: 300, bottom: 70, left: Math.round(width * 0.42) };
-  return { top: 80, right: 20, bottom: Math.round(height * 0.45), left: 20 };
+  return { top: 80, right: 20, bottom: Math.round(height * 0.6), left: 20 };
 }
 
 function targetColor(ward: MapWard, mode: MapMode, palette: MapPalette): string {

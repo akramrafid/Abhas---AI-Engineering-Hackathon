@@ -20,7 +20,7 @@ test.describe("Landing page", () => {
     await expect(map).toHaveAttribute("data-map-mode", "risk");
     // The spotlight panel quotes the model's expected cases and the observed count for Ward 4.
     await expect(page.locator("#step-h3")).toContainText(/\d+\.\d expected cases/);
-    await expect(page.locator("#step-h3")).toContainText("cases were recorded that week");
+    await expect(page.locator("#step-h3")).toContainText(/\d+ were recorded/);
   });
 
   test("evidence section shows live hold-out validation from the API", async ({ page }) => {
