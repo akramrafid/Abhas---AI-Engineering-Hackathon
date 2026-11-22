@@ -16,6 +16,7 @@ export interface WardMapFallbackProps {
   label: string;
   highlightWardId: string | null;
   onSelectWard?: (wardId: string) => void;
+  testId?: string;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ export function WardMapFallback({
   label,
   highlightWardId,
   onSelectWard,
+  testId = "ward-risk-map",
   className,
 }: WardMapFallbackProps) {
   const [west, south, east, north] = MAP_VIEWS[view];
@@ -40,7 +42,7 @@ export function WardMapFallback({
   return (
     <div
       className={clsx("relative overflow-hidden bg-ink", className)}
-      data-testid="ward-risk-map"
+      data-testid={testId}
       data-map-mode={mode}
       data-map-ready="fallback"
     >

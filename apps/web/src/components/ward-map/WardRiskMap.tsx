@@ -33,6 +33,7 @@ export interface WardRiskMapProps {
   interactive?: boolean;
   /** Keep wards clear of copy laid over the map (landing): left column on desktop, bottom on phones. */
   reserveForCopy?: boolean;
+  testId?: string;
   className?: string;
 }
 
@@ -84,6 +85,7 @@ export function WardRiskMap({
   onSelectWard,
   interactive = false,
   reserveForCopy = false,
+  testId = "ward-risk-map",
   className,
 }: WardRiskMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -263,6 +265,7 @@ export function WardRiskMap({
         label={label}
         highlightWardId={highlightWardId}
         onSelectWard={onSelectWard}
+        testId={testId}
         className={className}
       />
     );
@@ -271,7 +274,7 @@ export function WardRiskMap({
   return (
     <div
       className={clsx("relative overflow-hidden bg-ink", className)}
-      data-testid="ward-risk-map"
+      data-testid={testId}
       data-map-mode={mode}
       data-map-ready={isReady ? "true" : "false"}
     >
