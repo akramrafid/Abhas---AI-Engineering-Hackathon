@@ -103,6 +103,19 @@ export function buildMapStyle(palette: MapPalette): StyleSpecification {
         },
       },
       {
+        // Royal halo outside the white ring: brand colour for the focused ward, white for contrast on Critical.
+        id: "ward-focus-halo",
+        type: "circle",
+        source: "wards",
+        filter: ["==", ["get", "highlight"], true],
+        paint: {
+          "circle-radius": ["+", ["get", "radius"], 10],
+          "circle-color": "rgba(0,0,0,0)",
+          "circle-stroke-width": 3,
+          "circle-stroke-color": palette.royal,
+        },
+      },
+      {
         id: "ward-focus",
         type: "circle",
         source: "wards",

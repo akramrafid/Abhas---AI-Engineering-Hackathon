@@ -57,10 +57,22 @@ function targetColor(ward: MapWard, mode: MapMode, palette: MapPalette): string 
   return palette.tier[ward.tier];
 }
 
-function targetRadius(ward: MapWard, mode: MapMode): number {
+interface CaseRange {
+  min: number;
+  max: number;
+}
+
+function caseRange(wards: readonly MapWard[]): CaseRange {
+  const values = wards.map((w) => w.expected_cases).filter((v): v is number => v !== null);
+  return values.length ? { min: Math.min(...values), max: Math.max(...values) } : { min: 0, max: 0 };
+}
+
+/** Dot area follows expected cases relative to the wards on screen, so size stays readable when all are Critical. */
+function targetRadius(ward: MapWard, mode: MapMode, range: CaseRange): number {
   if (mode === "rain" || ward.expected_cases === null) return 5;
-  // Area grows with expected cases; clamped so a 25-case ward never swallows its neighbours.
-  return Math.min(4 + Math.sqrt(Math.max(ward.expected_cases, 0)) * 1.5, 11);
+  const span = range.max - range.min;
+  if (span < 0.5) return 7;
+  return 3.5 + 8 * Math.sqrt((ward.expected_cases - range.min) / span);
 }
 
 export function WardRiskMap({
@@ -160,10 +172,11 @@ export function WardRiskMap({
     const source = map.getSource("wards") as GeoJSONSource | undefined;
     if (!source) return;
     const shown = shownRef.current;
+    const range = caseRange(wards);
     const targets = wards.map((ward) => ({
       ward,
       color: targetColor(ward, mode, palette),
-      radius: targetRadius(ward, mode),
+      radius: targetRadius(ward, mode, range),
       from: shown.get(ward.ward_id),
     }));
 

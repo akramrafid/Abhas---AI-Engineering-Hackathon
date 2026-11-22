@@ -87,7 +87,7 @@ export function RainClock({ hero }: { hero: ReactNode }) {
         />
         <MapLegend mode={active.mode} />
         {active.horizon !== null ? (
-          <p className="pointer-events-none absolute bottom-5 left-5 z-10 hidden rounded-md bg-ink/80 px-2.5 py-1.5 font-mono text-xs text-mist sm:block tnum">
+          <p className="pointer-events-none absolute bottom-5 left-8 z-10 hidden rounded-md bg-ink/80 px-2.5 py-1.5 font-mono text-xs text-mist sm:block lg:left-14 tnum">
             Forecast for the week of {weekOf(stampWeek)} · made{" "}
             {weekOf(active.origin === "storm" ? STORM_ORIGIN : DRY_ORIGIN)}
           </p>
@@ -137,7 +137,7 @@ export function RainClock({ hero }: { hero: ReactNode }) {
 
 function StepPanel({ children }: { children: ReactNode }) {
   return (
-    <div className="pointer-events-auto w-full max-w-md rounded-[14px] bg-ink/90 p-6 shadow-2xl shadow-ink/50 ring-1 ring-white/10 sm:p-7">
+    <div className="pointer-events-auto w-full max-w-md overflow-y-auto rounded-[14px] bg-ink/90 p-5 ring-1 ring-white/10 max-sm:max-h-[40svh] sm:p-7">
       {children}
     </div>
   );
@@ -254,7 +254,7 @@ function TierTally({ counts }: { counts: ReturnType<typeof countTiers> }) {
 
 function MapLegend({ mode }: { mode: RainClockStep["mode"] }) {
   return (
-    <div className="pointer-events-none absolute bottom-5 right-5 z-10 hidden max-w-[15rem] rounded-lg bg-ink/85 p-3 text-xs text-mist ring-1 ring-white/10 md:block">
+    <div className="pointer-events-none absolute bottom-12 right-5 z-10 hidden max-w-[15rem] rounded-lg bg-ink/85 p-3 text-xs text-mist ring-1 ring-white/10 md:block">
       {mode === "rain" ? (
         <p className="flex items-center gap-2">
           <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-royal" />
@@ -267,7 +267,7 @@ function MapLegend({ mode }: { mode: RainClockStep["mode"] }) {
               <RiskTierBadge tier={tier} size="sm" />
             </li>
           ))}
-          <li className="pt-1">Dot size: expected cases.</li>
+          <li className="pt-1">Bigger dot: more expected cases (relative to the wards shown).</li>
         </ul>
       )}
       <p className="mt-2 border-t border-white/10 pt-2 text-[11px] leading-4 text-mist/80">

@@ -10,13 +10,19 @@ export interface WardMapTooltipProps {
   mode: MapMode;
 }
 
+/** Flips below the cursor near the map's top edge so the card is never clipped. */
+const FLIP_BELOW_PX = 150;
+
 export function WardMapTooltip({ x, y, title, ward, mode }: WardMapTooltipProps) {
+  const below = y < FLIP_BELOW_PX;
   return (
     <div
       role="status"
       data-testid="ward-map-tooltip"
-      className="pointer-events-none absolute z-10 w-56 -translate-x-1/2 -translate-y-[calc(100%+14px)] rounded-lg bg-white p-3 text-ink shadow-xl shadow-ink/40"
-      style={{ left: x, top: y }}
+      className={`pointer-events-none absolute z-10 w-56 -translate-x-1/2 rounded-lg bg-white p-3 text-ink shadow-xl shadow-ink/40 ${
+        below ? "translate-y-[14px]" : "-translate-y-[calc(100%+14px)]"
+      }`}
+      style={{ left: `clamp(7.5rem, ${x}px, calc(100% - 7.5rem))`, top: y }}
     >
       <p className="text-sm font-bold">{title}</p>
       {mode === "risk" && ward.tier ? (

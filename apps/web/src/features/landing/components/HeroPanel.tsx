@@ -16,8 +16,8 @@ export function HeroPanel() {
         আজ বৃষ্টি। তিন সপ্তাহ পরে ঝুঁকি। এখনই ব্যবস্থা নিন।
       </p>
       <p className="mt-6 max-w-[34rem] text-lg leading-8 text-mist">
-        Abhas forecasts dengue risk for each of 60 city wards in Dhaka and Chattogram, 1 to 4 weeks ahead, from
-        the rain that falls this week. Health officers see which ward surges and when, while there is still time
+        Abhas forecasts dengue risk for each of 60 wards across five city corporations, Gazipur to Chattogram,
+        1 to 4 weeks ahead, from the rain that falls this week. Health officers see which ward surges and when, while there is still time
         to clear the water.
       </p>
       <div className="mt-8 flex flex-wrap items-center gap-3">

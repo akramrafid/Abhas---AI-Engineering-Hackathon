@@ -18,7 +18,7 @@ const COPY = {
   en: {
     title: "Ward risk map",
     description: (origin: string) =>
-      `All 60 wards, forecast made ${origin}. Dot colour is the tier, dot size the expected cases. Select a ward to open its forecast.`,
+      `All 60 wards, forecast made ${origin}. Dot colour is the tier; a bigger dot means more expected cases among the wards shown. Select a ward to open its forecast.`,
     approx: "Ward positions are approximate: the dataset has no ward boundaries.",
     peak: "Peak in window",
     views: { dhaka: "Dhaka region", chattogram: "Chattogram", all: "All five" },
@@ -72,11 +72,12 @@ export function RiskMapView({
 }: RiskMapViewProps) {
   const copy = COPY[lang];
   const horizons = WINDOW_HORIZONS[windowKey];
-  const [pick, setPick] = useState<HorizonPick>("peak");
+  // Opens on the nearest horizon in the window: "peak" of a monsoon window is often all Critical.
+  const [pick, setPick] = useState<HorizonPick>(() => WINDOW_HORIZONS[windowKey][0] ?? "peak");
   const [view, setView] = useState<MapView>(selectedCity === "Chattogram" ? "chattogram" : "dhaka");
   const heatmaps = useAllCityHeatmaps(originWeek, source);
 
-  const effectivePick: HorizonPick = pick !== "peak" && !horizons.includes(pick) ? "peak" : pick;
+  const effectivePick: HorizonPick = pick !== "peak" && !horizons.includes(pick) ? (horizons[0] ?? "peak") : pick;
   const mapWards = useMemo(
     () => buildMapWards(wards, heatmaps.cellsByWard, effectivePick, horizons),
     [wards, heatmaps.cellsByWard, effectivePick, horizons],
@@ -112,6 +113,7 @@ export function RiskMapView({
             value={view}
             onChange={setView}
             lang={lang}
+            measure={false}
           />
           <Segmented
             label="Forecast horizon"
@@ -197,6 +199,8 @@ export function RiskMapView({
 }
 
 interface SegmentedProps<T extends string | number> {
+  /** Mono only for measured values (+2w); words stay in Manrope. */
+  measure?: boolean;
   label: string;
   testIdPrefix: string;
   options: readonly { id: T; text: string }[];
@@ -205,7 +209,7 @@ interface SegmentedProps<T extends string | number> {
   lang: Lang;
 }
 
-function Segmented<T extends string | number>({ label, testIdPrefix, options, value, onChange, lang }: SegmentedProps<T>) {
+function Segmented<T extends string | number>({ label, testIdPrefix, options, value, onChange, lang, measure = true }: SegmentedProps<T>) {
   return (
     <div role="group" aria-label={label} className="inline-flex flex-wrap gap-1.5">
       {options.map((option) => (
@@ -218,7 +222,7 @@ function Segmented<T extends string | number>({ label, testIdPrefix, options, va
           lang={lang}
           className={clsx(
             "min-h-8 cursor-pointer rounded-md border px-2.5 text-xs font-semibold",
-            lang === "bn" ? "font-bangla" : "font-mono tnum",
+            lang === "bn" ? "font-bangla" : measure && typeof option.id === "number" ? "font-mono tnum" : "font-sans",
             option.id === value ? "border-royal bg-royal text-white" : "border-mist bg-white text-navy hover:bg-paper",
           )}
         >

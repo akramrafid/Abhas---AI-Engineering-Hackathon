@@ -8,6 +8,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // The dev badge covers bottom-left map stamps in localhost demo recordings.
+  devIndicators: false,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

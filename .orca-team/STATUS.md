@@ -1,6 +1,8 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
+**05:45 BST — Claude Opus (human-directed, in-session build): landing page `/` (rain clock map), dashboard moved to `/dashboard` (old `/?demo=1` redirects), Risk Map tab, Clerk sign-in (enforced only when keys exist in `apps/web/.env.local`). `ci` PASS (124 pytest, smoke 6/6), e2e 24 passed / 1 skipped, axe 0 violations, `next build` PASS with and without Clerk keys. Commits `cb1ca5e..573d01d` pushed. Human: run `npx -y clerk@latest auth login` then `link --app app_3MR4yvYKK4aqNvmYRnru6b38jYL` + `env pull` in `apps/web` to turn sign-in on.**
+
 **04:10 BST — Wave 2B (`wp2-core-serve`, `wp7-ui-brand`, `wp6-ui-dashboard`) MERGED & VERIFIED on `lead` (`823fba4`, pushed). `slices`, `contract`, `traces`, `e2e`, `ci`, and `next build` all PASS green.**
 
 Phase: 3–4 — Build & Harden Wave 2B (WP5 `qa` remaining) → Prove · Deadline: 2026-11-22 14:00 BST · Feature freeze 08:00 ·
