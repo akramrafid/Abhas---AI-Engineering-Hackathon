@@ -9,9 +9,9 @@ import type { Lang } from "@/lib/i18n";
 import { UserMenu } from "./UserMenu";
 
 const quiet =
-  "hidden min-[460px]:inline-flex min-h-9 whitespace-nowrap items-center rounded-full border border-white/15 bg-white/[0.06] px-3 text-xs font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-[0.97] sm:px-4 sm:text-sm";
+  "hidden min-[480px]:inline-flex min-h-9 shrink-0 whitespace-nowrap items-center rounded-full border border-white/15 bg-white/[0.06] px-3 text-xs font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-[0.97] sm:px-4 sm:text-sm";
 const solid =
-  "relative inline-flex min-h-9 whitespace-nowrap items-center overflow-hidden rounded-full bg-royal px-3 text-xs font-semibold text-white shadow-[0_6px_20px_-4px_rgba(47,91,255,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-300 hover:bg-white hover:text-royal hover:shadow-[0_8px_24px_-4px_rgba(255,255,255,0.4)] active:scale-[0.97] sm:px-4 sm:text-sm";
+  "relative inline-flex min-h-9 shrink-0 whitespace-nowrap items-center overflow-hidden rounded-full bg-royal px-2.5 text-xs font-semibold text-white shadow-[0_6px_20px_-4px_rgba(47,91,255,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-300 hover:bg-white hover:text-royal hover:shadow-[0_8px_24px_-4px_rgba(255,255,255,0.4)] active:scale-[0.97] sm:px-4 sm:text-sm";
 
 /** Sign in / Create account when signed out; Dashboard + account menu when signed in. */
 export function AuthControls({ className }: { className?: string }) {
@@ -36,8 +36,28 @@ export function AuthControls({ className }: { className?: string }) {
   const bn = lang === "bn";
   const dashboardHref = bn ? "/dashboard?lang=bn" : "/dashboard";
   const signInLabel = bn ? "সাইন ইন" : "Sign in";
-  const signUpLabel = bn ? "অ্যাকাউন্ট খুলুন" : "Create account";
-  const dashboardLabel = bn ? "ড্যাশবোর্ড খুলুন" : "Open dashboard";
+  const signUpLabel = bn ? (
+    <>
+      <span className="hidden min-[440px]:inline">অ্যাকাউন্ট খুলুন</span>
+      <span className="inline min-[440px]:hidden">অ্যাকাউন্ট</span>
+    </>
+  ) : (
+    <>
+      <span className="hidden min-[440px]:inline">Create account</span>
+      <span className="inline min-[440px]:hidden">Sign up</span>
+    </>
+  );
+  const dashboardLabel = bn ? (
+    <>
+      <span className="hidden min-[440px]:inline">ড্যাশবোর্ড খুলুন</span>
+      <span className="inline min-[440px]:hidden">ড্যাশবোর্ড</span>
+    </>
+  ) : (
+    <>
+      <span className="hidden min-[440px]:inline">Open dashboard</span>
+      <span className="inline min-[440px]:hidden">Dashboard</span>
+    </>
+  );
 
   if (!AUTH_ENABLED) {
     return (
