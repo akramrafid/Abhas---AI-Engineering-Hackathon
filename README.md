@@ -59,25 +59,6 @@
 | **External Services (All Optional)** | Open-Meteo Forecast & ERA5 Archive API (CC BY 4.0, no key), Google Gemini 2.5 Flash API (AI chat), Anthropic Claude Haiku API (officer advisory), Clerk (`@clerk/nextjs` auth) |
 | **Quality, Security & Testing** | `pytest` (139 tests), `ruff`, `pyright`, `eslint`, `tsc`, Schemathesis (767 checks), Playwright + `axe-core` (WCAG 2.2 AA), `k6`, custom 30-attack AI/API red-team suite |
 
-<p align="center">
-  <img src="docs/ux/screenshots/dashboard.png" alt="Abhas Ward Forecast Operations Console" width="100%" />
-</p>
-
-<details>
-<summary><strong>Explore more console views (Mobile, City Heatmap, Rain Lags, What-If Sandbox, Locked Validation)</strong></summary>
-<br />
-<table>
-  <tr>
-    <td><img src="docs/ux/screenshots/lags.png" alt="Multi-Week Rainfall Lag Explorer" /><br /><sub><strong>Multi-Week Rainfall Lag Explorer</strong> (Peak r = 0.47 at lag 3)</sub></td>
-    <td><img src="docs/ux/screenshots/scenario.png" alt="What-If Weather Scenario Sandbox" /><br /><sub><strong>What-If Weather Scenario Sandbox</strong> (Counterfactual storm deltas)</sub></td>
-  </tr>
-  <tr>
-    <td><img src="docs/ux/screenshots/heatmap.png" alt="City Ward Risk Heatmap" /><br /><sub><strong>City Ward Risk Matrix</strong> (Worst-first zonal triage)</sub></td>
-    <td><img src="docs/ux/screenshots/validation.png" alt="Locked 2024-2025 Validation Dashboard" /><br /><sub><strong>Chronological Hold-Out Validation</strong> (MAE, coverage, confusion matrix)</sub></td>
-  </tr>
-</table>
-</details>
-
 ---
 
 ## Table of Contents
