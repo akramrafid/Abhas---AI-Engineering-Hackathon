@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -15,6 +16,7 @@ import { useLandingLang } from "../lang-context";
 interface OfficerVoice {
   id: string;
   initials: string;
+  avatar: string;
   name: string;
   nameBn: string;
   role: string;
@@ -35,6 +37,7 @@ const VOICES: readonly OfficerVoice[] = [
   {
     id: "dscc",
     initials: "FR",
+    avatar: "/images/officers/farhana-rahman.jpg",
     name: "Dr. Farhana Rahman",
     nameBn: "ডা. ফারহানা রহমান",
     role: "Zonal Health Officer",
@@ -55,6 +58,7 @@ const VOICES: readonly OfficerVoice[] = [
   {
     id: "ccc",
     initials: "TI",
+    avatar: "/images/officers/tariqul-islam.jpg",
     name: "Engr. Tariqul Islam",
     nameBn: "প্রকৌ. তারিকুল ইসলাম",
     role: "Vector Control Coordinator",
@@ -75,6 +79,7 @@ const VOICES: readonly OfficerVoice[] = [
   {
     id: "dncc",
     initials: "MR",
+    avatar: "/images/officers/mahbubur-rashid.jpg",
     name: "Dr. Mahbubur Rashid",
     nameBn: "ডা. মাহবুবুর রশিদ",
     role: "Municipal Epidemiologist",
@@ -95,6 +100,7 @@ const VOICES: readonly OfficerVoice[] = [
   {
     id: "gcc",
     initials: "NJ",
+    avatar: "/images/officers/nusrat-jahan.jpg",
     name: "Nusrat Jahan Chowdhury",
     nameBn: "নুসরাত জাহান চৌধুরী",
     role: "Surveillance Data Officer",
@@ -115,6 +121,7 @@ const VOICES: readonly OfficerVoice[] = [
   {
     id: "ncc",
     initials: "KH",
+    avatar: "/images/officers/kamrul-hasan.jpg",
     name: "Dr. Kamrul Hasan",
     nameBn: "ডা. কামরুল হাসান",
     role: "Chief Sanitary Inspector",
@@ -135,6 +142,7 @@ const VOICES: readonly OfficerVoice[] = [
   {
     id: "dghs",
     initials: "RA",
+    avatar: "/images/officers/rafiqul-alam.jpg",
     name: "Rafiqul Alam Bhuiyan",
     nameBn: "রফিকুল আলম ভূঁইয়া",
     role: "Public Health MIS Analyst",
@@ -267,12 +275,16 @@ export function TestimonialsSection() {
               </blockquote>
 
               <div className="mt-7 flex items-center gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#2F5BFF_0%,#0B1A5C_100%)] text-sm font-extrabold tracking-tight text-white ring-1 ring-white/25"
-                >
-                  {active.initials}
-                </span>
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-navy ring-2 ring-white/25 shadow-[0_8px_20px_-6px_rgba(0,0,0,0.45)]">
+                  <Image
+                    src={active.avatar}
+                    alt={bn ? active.nameBn : active.name}
+                    width={56}
+                    height={56}
+                    sizes="56px"
+                    className="h-full w-full object-cover object-top"
+                  />
+                </div>
                 <div>
                   <p className={clsx("text-base font-bold text-white", bn && "font-bangla")}>
                     {bn ? active.nameBn : active.name}
@@ -398,12 +410,16 @@ export function TestimonialsSection() {
                   <div>
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span
-                          aria-hidden="true"
-                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-royal/[0.08] text-xs font-extrabold text-royal ring-1 ring-royal/15 transition-colors group-hover:bg-royal group-hover:text-white"
-                        >
-                          {voice.initials}
-                        </span>
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-paper ring-1 ring-mist transition-all group-hover:ring-royal/60">
+                          <Image
+                            src={voice.avatar}
+                            alt={isDuplicate ? "" : bn ? voice.nameBn : voice.name}
+                            width={40}
+                            height={40}
+                            sizes="40px"
+                            className="h-full w-full object-cover object-top"
+                          />
+                        </div>
                         <div className="min-w-0">
                           <p className={clsx("truncate text-sm font-bold text-navy", bn && "font-bangla")}>
                             {bn ? voice.nameBn : voice.name}

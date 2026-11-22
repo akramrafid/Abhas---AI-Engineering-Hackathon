@@ -53,6 +53,10 @@ const nextConfig: NextConfig = {
         headers: staticAssetHeaders,
       },
       {
+        source: "/images/:path*",
+        headers: staticAssetHeaders,
+      },
+      {
         source: "/vendor/:path*",
         headers: staticAssetHeaders,
       },
