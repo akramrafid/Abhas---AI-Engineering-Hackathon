@@ -22,14 +22,14 @@
 - **Honest Scientific Disclosure**: The bundled 2016–2025 dataset (31,320 ward-weeks) is the hackathon organisers' benchmark dataset and appears simulated. Hold-out metrics demonstrate engineering performance and require local surveillance recalibration before clinical or real-world operational deployment. Ward map positions are schematic approximations around each city corporation's centroid because GIS ward boundary polygons are not included in the dataset.
 
 ## Core Pages
-- [Landing & Overview](https://abhas.vercel.app/): Product story, live monsoon week replay, validation scorecard, FAQ, and municipal pilot intake.
-- [Operations Console](https://abhas.vercel.app/dashboard?demo=1): Interactive 8-view dashboard (Ward Forecast, Risk Map, Lags, Scenario Simulator, City Heatmap, Priority List, Validation, About & Cost).
-- [Documentation & API](https://abhas.vercel.app/docs): Setup guide, OpenAPI endpoint reference, and release changelog.
-- [About & Methodology](https://abhas.vercel.app/about): Epidemiological motivation, chronological split protocol, and model card summary.
-- [Security & Trust](https://abhas.vercel.app/security): Zero-PII architecture, SHA-256 artifact integrity, API rate limiting, and red-team results.
-- [System Status](https://abhas.vercel.app/status): Live API `/readyz` readiness probe status.
-- [Brand System](https://abhas.vercel.app/brand): WCAG 2.2 AA colour tokens, typography scale, and risk tier visual language.
-- [Request a Pilot](https://abhas.vercel.app/contact): Municipal pilot onboarding form, email (`pilot@abhas.dev`), and WhatsApp pilot desk (`+880 1641-414949`).
+- [Landing & Overview](https://abhas-ai-engineering-hackathon.vercel.app/): Product story, live monsoon week replay, validation scorecard, FAQ, and municipal pilot intake.
+- [Operations Console](https://abhas-ai-engineering-hackathon.vercel.app/dashboard?demo=1): Interactive 8-view dashboard (Ward Forecast, Risk Map, Lags, Scenario Simulator, City Heatmap, Priority List, Validation, About & Cost).
+- [Documentation & API](https://abhas-ai-engineering-hackathon.vercel.app/docs): Setup guide, OpenAPI endpoint reference, and release changelog.
+- [About & Methodology](https://abhas-ai-engineering-hackathon.vercel.app/about): Epidemiological motivation, chronological split protocol, and model card summary.
+- [Security & Trust](https://abhas-ai-engineering-hackathon.vercel.app/security): Zero-PII architecture, SHA-256 artifact integrity, API rate limiting, and red-team results.
+- [System Status](https://abhas-ai-engineering-hackathon.vercel.app/status): Live API `/readyz` readiness probe status.
+- [Brand System](https://abhas-ai-engineering-hackathon.vercel.app/brand): WCAG 2.2 AA colour tokens, typography scale, and risk tier visual language.
+- [Request a Pilot](https://abhas-ai-engineering-hackathon.vercel.app/contact): Municipal pilot onboarding form, email (`pilot@abhas.dev`), and WhatsApp pilot desk (`+880 1641-414949`).
 
 ## API Endpoints (FastAPI `/api/v1`)
 - `GET /healthz` — Liveness probe
