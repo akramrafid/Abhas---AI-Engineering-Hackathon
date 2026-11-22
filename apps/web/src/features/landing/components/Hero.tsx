@@ -79,6 +79,24 @@ export function Hero() {
           </Link>
           <a
             href="#rain-clock"
+            onClick={(e) => {
+              const target = document.getElementById("rain-clock");
+              if (!target) return;
+              e.preventDefault();
+              const targetY = target.getBoundingClientRect().top + window.scrollY;
+              window.history.replaceState(null, "", "#rain-clock");
+              if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                window.scrollTo({ top: targetY, behavior: "instant" });
+                return;
+              }
+              const proxy = { y: window.scrollY };
+              gsap.to(proxy, {
+                y: targetY,
+                duration: 0.9,
+                ease: "power3.inOut",
+                onUpdate: () => window.scrollTo({ top: proxy.y, behavior: "instant" }),
+              });
+            }}
             className="inline-flex min-h-12 items-center gap-2 rounded-md px-5 text-base font-semibold text-white ring-1 ring-white/20 transition-colors duration-300 hover:bg-white/10"
           >
             Watch one monsoon week

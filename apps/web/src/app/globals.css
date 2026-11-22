@@ -34,6 +34,105 @@
   animation: marquee var(--duration) linear infinite;
 }
 
+/* Liquid glassmorphism specular drift & optics (see SiteNav.tsx). */
+@keyframes liquid-caustic {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes liquid-border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.liquid-glass-bar {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.72) 0%,
+    rgba(11, 15, 20, 0.82) 100%
+  );
+  backdrop-filter: blur(24px) saturate(185%) brightness(1.06);
+  -webkit-backdrop-filter: blur(24px) saturate(185%) brightness(1.06);
+  box-shadow:
+    0 14px 40px -10px rgba(4, 8, 18, 0.65),
+    0 4px 14px -2px rgba(11, 26, 92, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 0 rgba(47, 91, 255, 0.2),
+    inset 0 0 24px 0 rgba(255, 255, 255, 0.03);
+}
+
+.liquid-glass-bar-scrolled {
+  background: linear-gradient(
+    180deg,
+    rgba(11, 20, 44, 0.84) 0%,
+    rgba(11, 15, 20, 0.92) 100%
+  );
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.08);
+  box-shadow:
+    0 22px 54px -12px rgba(4, 8, 18, 0.8),
+    0 8px 24px -6px rgba(47, 91, 255, 0.25),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 0 rgba(47, 91, 255, 0.28),
+    inset 0 0 32px 0 rgba(47, 91, 255, 0.06);
+}
+
+.liquid-glass-pill {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(47, 91, 255, 0.16) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 0 rgba(47, 91, 255, 0.25),
+    0 4px 16px -2px rgba(47, 91, 255, 0.28);
+}
+
+.liquid-caustic-sweep {
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(212, 245, 60, 0.08) 52%,
+    rgba(47, 91, 255, 0.14) 60%,
+    transparent 80%
+  );
+  animation: liquid-caustic 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.liquid-prismatic-rim {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.34) 22%,
+    rgba(47, 91, 255, 0.55) 50%,
+    rgba(212, 245, 60, 0.38) 76%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  background-size: 200% 100%;
+  animation: liquid-border-flow 12s ease-in-out infinite;
+}
+
 /* Browser surfaces carry the brand: selection, caret, scrollbar. */
 ::selection {
   background-color: var(--color-royal);

@@ -48,8 +48,10 @@ export function DashboardHeader({
   return (
     <header
       className={clsx(
-        "no-print sticky top-3 z-40 mx-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] px-3 py-2 ring-1 sm:mx-5 lg:rounded-full lg:pl-5",
-        dark ? "bg-navy text-white ring-white/10" : "bg-white text-ink ring-mist",
+        "no-print sticky top-3 z-40 mx-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] px-3 py-2 ring-1 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 sm:mx-5 lg:rounded-full lg:pl-5",
+        dark
+          ? "bg-navy/85 text-white ring-white/15 shadow-[0_16px_40px_-10px_rgba(4,8,18,0.7),inset_0_1px_0_rgba(255,255,255,0.22)]"
+          : "bg-white/85 text-ink ring-mist/80 shadow-[0_12px_32px_-10px_rgba(11,26,92,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]",
       )}
     >
       <Link href="/" className="flex shrink-0 items-center gap-3 rounded-md">
