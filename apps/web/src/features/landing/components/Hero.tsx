@@ -12,6 +12,7 @@ import { WardRiskMap } from "@/components/ward-map/WardRiskMap";
 import { useWardsQuery } from "@/lib/api/client";
 import { SPOTLIGHT_WARD, STORM_ORIGIN } from "../rain-clock-steps";
 import { ContainerScroll } from "@/components/ui/ContainerScroll";
+import { trackEvent } from "@/lib/analytics";
 import { ForecastCard } from "./ForecastCard";
 
 const WINDOW_TABS = ["Ward Forecast", "Risk Map", "Lags", "Scenario", "Priority List", "Validation"] as const;
@@ -72,6 +73,7 @@ export function Hero() {
           <Link
             href="/dashboard?demo=1"
             data-testid="hero-cta"
+            onClick={() => trackEvent({ event: "cta_open_dashboard", location: "hero" })}
             className="group inline-flex min-h-12 items-center gap-2 rounded-md bg-royal px-6 text-base font-bold text-white transition-colors duration-300 hover:bg-white hover:text-royal"
           >
             Open the dashboard
@@ -80,6 +82,7 @@ export function Hero() {
           <a
             href="#rain-clock"
             onClick={(e) => {
+              trackEvent({ event: "cta_watch_tour", location: "hero" });
               const target = document.getElementById("rain-clock");
               if (!target) return;
               e.preventDefault();

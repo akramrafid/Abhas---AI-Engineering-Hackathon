@@ -15,7 +15,21 @@ import { AbhasChatWidget } from "@/features/chat/AbhasChatWidget";
 export const metadata: Metadata = {
   title: "Abhas (আভাস) — Ward-Level Dengue Early Warning",
   description:
-    "Rain today. Risk in three weeks. Act now. Multi-week rainfall lag forecasting for Bangladesh urban wards.",
+    "Rain today. Risk in three weeks. Act now. Multi-week rainfall lag forecasting for 60 wards across five Bangladesh city corporations.",
+  openGraph: {
+    title: "Abhas (আভাস) — Ward-Level Dengue Early Warning",
+    description:
+      "Turn this week's rain into a 1–4 week dengue forecast for 60 wards across Dhaka, Chattogram, Gazipur, and Narayanganj.",
+    type: "website",
+    locale: "en_US",
+    alternateLocale: ["bn_BD"],
+    siteName: "Abhas (আভাস)",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Abhas (আভাস) — Ward-Level Dengue Early Warning",
+    description: "Rain today. Risk in three weeks. Act now. 60 wards across five Bangladesh city corporations.",
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

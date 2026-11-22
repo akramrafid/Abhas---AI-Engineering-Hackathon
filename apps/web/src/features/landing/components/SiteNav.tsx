@@ -499,7 +499,9 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
                             : "text-mist hover:bg-white/10 hover:text-white",
                         )}
                       >
-                        <span>{link.label}</span>
+                        <span className={lang === "bn" ? "font-bangla" : undefined}>
+                          {lang === "bn" ? link.labelBn : link.label}
+                        </span>
                         {isActive ? (
                           <span
                             aria-hidden="true"
@@ -510,6 +512,34 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
                     </li>
                   );
                 })}
+                <li className="mt-1 flex items-center justify-between border-t border-white/10 pt-2.5 px-2">
+                  <Link
+                    href="/about"
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-xs font-medium text-mist hover:text-white"
+                  >
+                    About &amp; Team
+                  </Link>
+                  <div className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.06] p-0.5">
+                    {(["en", "bn"] as const).map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        tabIndex={mobileMenuOpen ? 0 : -1}
+                        aria-pressed={lang === code}
+                        onClick={() => setLang(code)}
+                        className={clsx(
+                          "cursor-pointer rounded-full px-2.5 py-1 text-xs font-semibold",
+                          code === "bn" && "font-bangla",
+                          lang === code ? "bg-royal text-white" : "text-mist",
+                        )}
+                      >
+                        {code === "en" ? "EN" : "বাংলা"}
+                      </button>
+                    ))}
+                  </div>
+                </li>
               </ul>
             </nav>
           </div>
