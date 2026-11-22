@@ -40,7 +40,7 @@
 
 ## Team
 
-**Team Name:** **Team Abhas**
+**Team Name:** **El Drago**
 
 | Member | Role & Contributions |
 |---|---|
@@ -72,6 +72,7 @@
 - [Setup & Run Instructions (≤ 3 Minutes, Zero API Keys)](#setup--run-instructions--3-minutes-zero-api-keys)
 - [Animated Data Flow Diagram](#animated-data-flow-diagram)
 - [Animated System Design Diagram](#animated-system-design-diagram)
+- [Why We Chose This Architecture](#why-we-chose-this-architecture)
 - [Animated Entity Relationship Diagram (ERD)](#animated-entity-relationship-diagram-erd)
 - [Core Capabilities & API Reference](#core-capabilities--api-reference)
 - [Model Performance & Chronological Validation](#model-performance--chronological-validation)
@@ -234,6 +235,23 @@ flowchart TB
     S4 --> DB
 ```
 </details>
+
+---
+
+## Why We Chose This Architecture
+
+Every architectural decision in Abhas was made for **Bangladesh municipal health offices** — where budgets are tight, internet connectivity can drop during monsoons, and epidemiological decisions must be explainable and leak-free:
+
+| Architectural Choice | Why We Chose It | Alternative Rejected & Trade-off |
+|---|---|---|
+| **Modular Monolith with Vertical Slices + Hexagonal Ports & Adapters (ADR-0001)** | Isolates all `9` API slices and `11` Web slices behind typed interfaces (enforced automatically by `gates.mjs slices`) so ML, backend, and frontend work cleanly in parallel while deploying as one lightweight process with zero inter-service network hops. | **Microservices:** Adds Docker/broker orchestration, higher latency, and operational overhead that municipal IT teams cannot maintain. |
+| **CPU-Only LightGBM Poisson + 80% Conformal Calibration + Exact TreeSHAP** | Ideal for 31,320 structured tabular ward-week rows: supports strict monotonic rainfall constraints (more rain never lowers risk), produces exact per-ward SHAP attributions, beats climatology by ~20% (`1.01` vs `1.26` MAE), and ships as a `954 KiB` artifact running in `0.591 ms/ward` on standard office laptop CPUs. | **Deep Learning (LSTM / TFT / Chronos) & GPU XGBoost:** Overfit on ~30k rows, require >2 GB GPU runtimes, lack fast exact attribution, or offered `<0.2%` CV delta for far heavier infrastructure. |
+| **SQLite WAL (Stage 1) + SQLAlchemy 2.0 / Alembic PostgreSQL Port (Stage 2)** | Lets any judge or city health office boot the complete system offline with **zero API keys and zero external databases** in ≤ 3 minutes (`129 s` fresh-clone verified), while keeping a zero-rewrite migration path to managed PostgreSQL / Neon. | **Mandatory Cloud DB / Docker-Only Setup:** Breaks offline/air-gapped municipal laptop usage and adds credential friction during evaluation. |
+| **Single-Flight Cold Lock + Two-Tier Caching (`L1 LRU` + `L2 SQLite`) + Batched Open-Meteo** | Coalesces concurrent cold forecast requests, serves hot ward views in `< 2 ms`, and fetches all 5 city centroids in **1 batched Open-Meteo call every 6 hours (`≤ 4 calls/day`)** with ERA5 bias correction, circuit breaker, and climatology fallback. | **Per-Ward Live Weather Polling / Uncached Inference:** Multiplies external API calls 60×, risks rate-limit failures during storm surges, and degrades latency under load. |
+| **Deterministic ML Core + Optional Budget-Capped LLMs (`Gemini 2.5 Flash` & `Claude Haiku`)** | Guarantees reproducible, mathematically audited risk scores and P10–P90 bands even with zero internet; optional LLMs strictly narrate verified forecast numbers under hard token/budget caps (`thinkingBudget: 0`, `$1/day` SQLite cap, dual-key `429` failover) and fall back seamlessly to free bilingual templates. | **LLM-Only / RAG Forecasting:** Non-deterministic, hallucinates numeric case counts, incurs per-request API cost, and fails completely offline. |
+| **Split Production Hosting (`Next.js 16` on Vercel + `FastAPI/LightGBM` Docker on Render)** | Delivers edge-cached SSR/PPR pages, code-split dashboard tabs, and viewport-gated MapLibre on Vercel for fast mobile loads across Bangladesh, paired with a containerized Linux OpenMP (`libgomp1`) backend on Render at `$0–$5/month`. | **Serverless Python Functions:** Cold-start timeouts and native OpenMP/LightGBM binary size limits make container hosting cleaner and faster for ML inference. |
+
+For full ADRs (`ADR-0001`–`ADR-0008`), chronological split details, and resilience controls, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
@@ -470,4 +488,4 @@ Open-source libraries, datasets, fonts, icons, map tiles, and design assets used
 
 1. **Simulated Dataset Characteristics:** Statistical inspection indicates synthetic/simulated properties in the challenge dataset. Before real clinical deployment, Abhas must be recalibrated on official **DGHS / IEDCR** national surveillance registries.
 2. **Approximate Ward Coordinates:** The dataset provides ward IDs without official GIS polygons, so map points are placed cleanly around each city corporation's real centroid (`apps/api/config/city_centroids.json`) without inventing boundaries.
-3. **Commit Authorship Note:** Integrated collaboratively by Team Abhas (**Akram Rafid** and **Shah Md. Imtiaz Chowdhury**), with release integration commits pushed via `@akramrafid`.
+3. **Commit Authorship Note:** Integrated collaboratively by **El Drago** (**Akram Rafid** and **Shah Md. Imtiaz Chowdhury**), with release integration commits pushed via `@akramrafid`.
