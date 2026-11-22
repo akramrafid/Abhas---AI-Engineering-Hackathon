@@ -38,13 +38,26 @@ export function approximateWardPosition(city: City, index: number, count: number
   return [lon + radius * Math.cos(angle) * lonScale, lat + radius * Math.sin(angle)];
 }
 
+export const CITY_LABELS_BN: Record<string, string> = {
+  "Dhaka North": "ঢাকা উত্তর",
+  "Dhaka South": "ঢাকা দক্ষিণ",
+  Chattogram: "চট্টগ্রাম",
+  Gazipur: "গাজীপুর",
+  Narayanganj: "নারায়ণগঞ্জ",
+};
+
+export function cityDisplayName(city: string, lang: "en" | "bn" = "en"): string {
+  return lang === "bn" ? (CITY_LABELS_BN[city] ?? city) : city;
+}
+
 export function wardNumber(wardId: string): number {
   const match = /(\d+)$/.exec(wardId);
   return match ? Number(match[1]) : 0;
 }
 
-export function wardLabel(wardId: string): string {
-  return `Ward ${wardNumber(wardId)}`;
+export function wardLabel(wardId: string, lang: "en" | "bn" = "en"): string {
+  const num = wardNumber(wardId);
+  return lang === "bn" ? `ওয়ার্ড ${num}` : `Ward ${num}`;
 }
 
 export interface PlacedWard {
@@ -74,7 +87,7 @@ export function placeWards(wards: readonly Ward[]): PlacedWard[] {
 
 /** Camera targets: [west, south, east, north]. */
 export const MAP_VIEWS = {
-  dhaka: [90.3, 23.55, 90.62, 24.06],
+  dhaka: [90.28, 23.52, 90.62, 24.08],
   chattogram: [91.68, 22.27, 91.89, 22.45],
   all: [90.2, 22.2, 91.95, 24.12],
 } as const satisfies Record<string, readonly [number, number, number, number]>;

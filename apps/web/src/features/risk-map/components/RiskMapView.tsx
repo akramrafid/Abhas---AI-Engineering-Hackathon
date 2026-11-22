@@ -6,7 +6,7 @@ import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
-import { wardLabel, type MapView } from "@/components/ward-map/geo";
+import { cityDisplayName, wardLabel, type MapView } from "@/components/ward-map/geo";
 import { buildMapWards, useAllCityHeatmaps, type HorizonPick } from "@/components/ward-map/hooks";
 import { WardRiskMap } from "@/components/ward-map/WardRiskMap";
 import type { City, Ward, WeatherMode } from "@/lib/api/client";
@@ -74,7 +74,14 @@ export function RiskMapView({
   const horizons = WINDOW_HORIZONS[windowKey];
   // Opens on the nearest horizon in the window: "peak" of a monsoon window is often all Critical.
   const [pick, setPick] = useState<HorizonPick>(() => WINDOW_HORIZONS[windowKey][0] ?? "peak");
-  const [view, setView] = useState<MapView>(selectedCity === "Chattogram" ? "chattogram" : "dhaka");
+  const [viewOverride, setViewOverride] = useState<{ city: City; view: MapView } | null>(null);
+  const [hoveredWardId, setHoveredWardId] = useState<string | null>(null);
+  const view: MapView =
+    viewOverride && viewOverride.city === selectedCity
+      ? viewOverride.view
+      : selectedCity === "Chattogram"
+        ? "chattogram"
+        : "dhaka";
   const heatmaps = useAllCityHeatmaps(originWeek, source);
 
   const effectivePick: HorizonPick = pick !== "peak" && !horizons.includes(pick) ? (horizons[0] ?? "peak") : pick;
@@ -111,7 +118,7 @@ export function RiskMapView({
             testIdPrefix="risk-map-view"
             options={(["dhaka", "chattogram", "all"] as const).map((v) => ({ id: v, text: copy.views[v] }))}
             value={view}
-            onChange={setView}
+            onChange={(nextView) => setViewOverride({ city: selectedCity, view: nextView })}
             lang={lang}
             measure={false}
           />
@@ -148,9 +155,11 @@ export function RiskMapView({
                 view={view}
                 mode="risk"
                 label={label}
-                highlightWardId={selectedWardId || null}
+                highlightWardId={hoveredWardId ?? (selectedWardId || null)}
                 onSelectWard={onSelectWard}
                 interactive
+                showPinnedData
+                lang={lang}
                 className="h-[clamp(22rem,60vh,36rem)] rounded-[14px]"
               />
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate">
@@ -173,6 +182,10 @@ export function RiskMapView({
                     <button
                       type="button"
                       onClick={() => onSelectWard(ward.ward_id)}
+                      onMouseEnter={() => setHoveredWardId(ward.ward_id)}
+                      onMouseLeave={() => setHoveredWardId(null)}
+                      onFocus={() => setHoveredWardId(ward.ward_id)}
+                      onBlur={() => setHoveredWardId(null)}
                       aria-current={ward.ward_id === selectedWardId ? "true" : undefined}
                       className={clsx(
                         "flex w-full cursor-pointer items-center justify-between gap-3 rounded-md px-2 py-2.5 text-left transition-colors hover:bg-paper",
@@ -180,9 +193,11 @@ export function RiskMapView({
                       )}
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold text-ink">{wardLabel(ward.ward_id)}</span>
-                        <span className="block truncate text-xs text-slate tnum">
-                          {ward.city} · {ward.expected_cases?.toFixed(1)} {copy.cases}
+                        <span className={clsx("block truncate text-sm font-semibold text-ink", lang === "bn" && "font-bangla")}>
+                          {wardLabel(ward.ward_id, lang)}
+                        </span>
+                        <span className={clsx("block truncate text-xs text-slate tnum", lang === "bn" && "font-bangla")}>
+                          {cityDisplayName(ward.city, lang)} · {ward.expected_cases?.toFixed(1)} {copy.cases}
                         </span>
                       </span>
                       {ward.tier ? <RiskTierBadge tier={ward.tier} size="sm" lang={lang} className="shrink-0" /> : null}
