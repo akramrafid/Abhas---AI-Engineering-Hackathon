@@ -1,0 +1,273 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-royal);
+    outline-offset: 2px;
+  }
+}
+
+/* Magic UI marquee keyframes (see components/ui/Marquee.tsx). */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+.animate-marquee {
+  animation: marquee var(--duration) linear infinite;
+}
+
+/* Liquid glassmorphism specular drift & optics (see SiteNav.tsx). */
+@keyframes liquid-caustic {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes liquid-border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.liquid-glass-bar {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.72) 0%,
+    rgba(11, 15, 20, 0.82) 100%
+  );
+  backdrop-filter: blur(24px) saturate(185%) brightness(1.06);
+  -webkit-backdrop-filter: blur(24px) saturate(185%) brightness(1.06);
+  box-shadow:
+    0 14px 40px -10px rgba(4, 8, 18, 0.65),
+    0 4px 14px -2px rgba(11, 26, 92, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 0 rgba(47, 91, 255, 0.2),
+    inset 0 0 24px 0 rgba(255, 255, 255, 0.03);
+}
+
+.liquid-glass-bar-scrolled {
+  background: linear-gradient(
+    180deg,
+    rgba(11, 20, 44, 0.84) 0%,
+    rgba(11, 15, 20, 0.92) 100%
+  );
+  backdrop-filter: blur(28px) saturate(200%) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.08);
+  box-shadow:
+    0 22px 54px -12px rgba(4, 8, 18, 0.8),
+    0 8px 24px -6px rgba(47, 91, 255, 0.25),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 0 rgba(47, 91, 255, 0.28),
+    inset 0 0 32px 0 rgba(47, 91, 255, 0.06);
+}
+
+.liquid-glass-pill {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(47, 91, 255, 0.16) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.32),
+    inset 0 -1px 0 0 rgba(47, 91, 255, 0.25),
+    0 4px 16px -2px rgba(47, 91, 255, 0.28);
+}
+
+.liquid-caustic-sweep {
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(212, 245, 60, 0.08) 52%,
+    rgba(47, 91, 255, 0.14) 60%,
+    transparent 80%
+  );
+  animation: liquid-caustic 9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.liquid-prismatic-rim {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.34) 22%,
+    rgba(47, 91, 255, 0.55) 50%,
+    rgba(212, 245, 60, 0.38) 76%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  background-size: 200% 100%;
+  animation: liquid-border-flow 12s ease-in-out infinite;
+}
+
+/* Browser surfaces carry the brand: selection, caret, scrollbar. */
+html,
+body {
+  overflow-x: clip;
+}
+
+::selection {
+  background-color: var(--color-royal);
+  color: var(--color-white);
+}
+
+html {
+  caret-color: var(--color-royal);
+  scrollbar-color: var(--color-slate) transparent;
+  scroll-padding-top: 5rem;
+}
+
+/* MapLibre attribution: links must not rely on colour alone (WCAG 1.4.1). */
+.maplibregl-map .maplibregl-ctrl-attrib a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.print-only {
+  display: none;
+}
+
+@keyframes abhas-ward-enter {
+  0% {
+    opacity: 0.45;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.abhas-ward-enter {
+  animation: abhas-ward-enter 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes abhas-marquee-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.abhas-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: abhas-marquee-scroll 46s linear infinite;
+  will-change: transform;
+}
+
+.abhas-marquee-wrap:hover .abhas-marquee-track,
+.abhas-marquee-wrap:focus-within .abhas-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes abhas-progress-fill {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.abhas-spotlight-progress {
+  transform-origin: left center;
+  animation: abhas-progress-fill 6500ms linear forwards;
+}
+
+.abhas-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-mist) transparent;
+}
+
+.abhas-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.abhas-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.abhas-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-mist);
+  border-radius: 999px;
+}
+
+.abhas-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-slate);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background-color: var(--color-white) !important;
+    color: var(--color-ink) !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-break-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

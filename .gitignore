@@ -23,11 +23,17 @@ coverage/
 htmlcov/
 playwright-report/
 test-results/
+.schemathesis/
 
 # local data stores (embedded Qdrant, SQLite, uploads)
 .qdrant/
 *.sqlite
+*.sqlite-wal
+*.sqlite-shm
 *.db
+*.db-wal
+*.db-shm
+*.db-journal
 uploads/
 
 # OS / editor

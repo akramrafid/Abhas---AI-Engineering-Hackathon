@@ -49,7 +49,14 @@ let exited = false;
 server.on("exit", () => { exited = true; });
 server.on("error", (e) => { exited = true; logs.push(`spawn error: ${e.message} (is uv installed and on PATH?)`); });
 
+let activeChild = null;
 function stop() {
+  if (activeChild && !activeChild.killed && activeChild.pid) {
+    try {
+      if (isWin) spawnSync("taskkill", ["/pid", String(activeChild.pid), "/T", "/F"], { stdio: "ignore" });
+      else activeChild.kill("SIGTERM");
+    } catch { /* already gone */ }
+  }
   if (exited || !server.pid) return;
   try {
     if (isWin) spawnSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
@@ -75,13 +82,28 @@ if (!up) {
 }
 console.log(`with-server: API (${mode} mode) up at ${api}`);
 
-// Run without a shell (no quoting problems); on Windows fall back to the shell for .cmd tools (npm, npx).
+// Run asynchronously so Node's event loop keeps draining server stdout/stderr pipes (prevents Windows 4 KB pipe deadlock).
+function runAsync(file, args, opts) {
+  return new Promise((resolve) => {
+    const child = spawn(file, args, opts);
+    activeChild = child;
+    let settled = false;
+    child.on("error", (error) => {
+      if (!settled) { settled = true; activeChild = null; resolve({ status: null, error }); }
+    });
+    child.on("close", (code, signal) => {
+      if (!settled) { settled = true; activeChild = null; resolve({ status: code ?? (signal ? 1 : 0), error: null }); }
+    });
+  });
+}
+
 const finalArgs = cmd.map((a) => a.replaceAll("{API}", api));
-const runOpts = { cwd: root, env: { ...env, API_BASE_URL: api }, stdio: "inherit" };
-let r = spawnSync(finalArgs[0], finalArgs.slice(1), { ...runOpts, shell: false });
+const runOpts = { cwd: root, env: { ...env, API_BASE_URL: api }, stdio: "inherit", shell: false };
+let r = await runAsync(finalArgs[0], finalArgs.slice(1), runOpts);
 if (r.error?.code === "ENOENT" && isWin) {
-  const q = (a) => (/^[\w.\/:=@%+,{}-]+$/.test(a) ? a : `"${a.replace(/"/g, '""')}"`);
-  r = spawnSync(finalArgs.map(q).join(" "), { ...runOpts, shell: true });
+  // On Windows, fall back to ComSpec (/d /s /c) for .cmd/.bat shims (npm, npx) without shell:true.
+  const comspec = process.env.ComSpec || "cmd.exe";
+  r = await runAsync(comspec, ["/d", "/s", "/c", ...finalArgs], runOpts);
 }
 if (r.error) console.error(`with-server: could not run ${finalArgs[0]}: ${r.error.message}`);
 stop();

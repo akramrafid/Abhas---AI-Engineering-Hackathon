@@ -1,0 +1,8 @@
+# Merge review: akramrafid/wp6-ui-dashboard
+
+- **Author**: UI (`antigravity/Gemini 4 Neon (XHigh)`)
+- **Reviewer**: LEAD (`antigravity/Gemini 4 Neon (XHigh)`) — same-family integration check; cross-family Claude Opus 5.5 review pending (r2).
+- **Checked**: `git diff lead..akramrafid/wp6-ui-dashboard` (53 files, `6f9bdef..8239518`, strictly owned `apps/web/src/**` excluding `features/brand/**`/`styles/tokens*`/`layout.tsx`, `apps/web/e2e/**`, `docs/ux/**`). Completes §11 Operations Console: EN/BN switcher (`?lang=en|bn`) with Noto Sans Bengali, shareable URL state sync (`?ward=&origin=&window=&tab=&lang=` + `?demo=1`), ISO week range labels, Act-by larviciding deadline card, diverging horizontal SHAP waterfall, live Officer Brief (`POST /api/v1/advisory`), ranked Priority List with deterministic SHAP-derived actions and OWASP formula-injection safe CSV export, `@media print` one-page ward brief, About & Cost tab with live `/api/v1/ops` telemetry + model card + Open-Meteo CC BY 4.0 attribution, sortable City Heatmap, chronological Validation timeline, `BrandRibbon` Next.js 16 LCP fix (`loading="eager"` + `preload`), and CR-17 modular split (all owned TS/TSX files < 450 lines). Includes 8 refreshed 1280×720 and 375×812 screenshots under `docs/ux/screenshots/`. Worker gates: eslint, `tsc --noEmit`, `next build`, `slices`, and real-API Playwright E2E + axe WCAG 2.2 A/AA (18 passed, 1 skipped, 0 axe violations) PASS.
+- **Not verified**: Post-merge full-stack E2E + axe verification combined with WP2 and WP7 on `lead`; cross-family Claude Opus 5.5 review pending in r2.
+
+Verdict: MERGE

@@ -1,0 +1,11 @@
+{
+  "k": 15,
+  "recall_at_k": 0.6111,
+  "mrr": 0.8875,
+  "n_queries": 36,
+  "climatology_recall_at_k": 0.5704,
+  "model_version": "abhas-lgbm-1.1.2",
+  "beats_or_matches_climatology": true,
+  "commit": "a3c7e96",
+  "ts": "2026-11-22T03:05:57+00:00"
+}

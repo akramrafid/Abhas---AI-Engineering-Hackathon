@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 430" width="1160" height="430" role="img" aria-labelledby="title desc">
+  <title id="title">Abhas End-to-End Animated Data Flow Diagram</title>
+  <desc id="desc">Animated data flow from historical dataset and Open-Meteo API through rainfall lag feature engineering, LightGBM multi-horizon model, conformal calibration and TreeSHAP explainability, FastAPI caching layer, to the bilingual Next.js operations console.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070B14"/>
+      <stop offset="52%" stop-color="#0B1A5C"/>
+      <stop offset="100%" stop-color="#09112E"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#12215E" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#0B1338" stop-opacity="0.96"/>
+    </linearGradient>
+    <linearGradient id="accentCard" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2F5BFF"/>
+      <stop offset="100%" stop-color="#1A3AC4"/>
+    </linearGradient>
+    <linearGradient id="flowGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2F5BFF"/>
+      <stop offset="65%" stop-color="#6B8EFF"/>
+      <stop offset="100%" stop-color="#D4F53C"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .t-head { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 800; fill: #FFFFFF; }
+      .t-sub  { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 500; fill: #C8D4F4; }
+      .t-card { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 700; fill: #FFFFFF; font-size: 13.5px; }
+      .t-body { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 400; fill: #C5D1F0; font-size: 11px; }
+      .t-tag  { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 700; fill: #D4F53C; font-size: 10px; letter-spacing: 0.06em; }
+      .t-pill { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 600; fill: #FFFFFF; font-size: 10.5px; }
+      .flow-line {
+        fill: none;
+        stroke: url(#flowGrad);
+        stroke-width: 2.5;
+        stroke-dasharray: 8 7;
+        animation: dashMove 1.4s linear infinite;
+      }
+      .flow-base {
+        fill: none;
+        stroke: rgba(255,255,255,0.12);
+        stroke-width: 2.5;
+      }
+      .pulse-dot {
+        animation: pulseNode 2.2s ease-in-out infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes dashMove {
+        from { stroke-dashoffset: 30; }
+        to   { stroke-dashoffset: 0; }
+      }
+      @keyframes pulseNode {
+        0%, 100% { opacity: 0.7; transform: scale(1); }
+        50%      { opacity: 1;   transform: scale(1.25); }
+      }
+    </style>
+  </defs>
+
+  <!-- Frame -->
+  <rect x="0" y="0" width="1160" height="430" rx="22" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1158" height="428" rx="21" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>
+
+  <!-- Subtle architectural dots -->
+  <g fill="rgba(255,255,255,0.06)">
+    <circle cx="40" cy="40" r="1.5"/><circle cx="80" cy="40" r="1.5"/><circle cx="120" cy="40" r="1.5"/>
+    <circle cx="1040" cy="40" r="1.5"/><circle cx="1080" cy="40" r="1.5"/><circle cx="1120" cy="40" r="1.5"/>
+  </g>
+
+  <!-- Title Header -->
+  <text x="36" y="44" class="t-head" font-size="20">ABHAS — End-to-End Dengue Early-Warning Data Flow</text>
+  <text x="36" y="66" class="t-sub" font-size="12.5">Rain today  &#x2192;  3-week Aedes breeding clock  &#x2192;  Sub-millisecond ward risk tiers across 60 Bangladesh wards</text>
+  <rect x="938" y="26" width="188" height="30" rx="15" fill="rgba(47,91,255,0.22)" stroke="rgba(255,255,255,0.2)"/>
+  <circle cx="956" cy="41" r="4.5" fill="#D4F53C" class="pulse-dot" filter="url(#glow)"/>
+  <text x="970" y="45" class="t-pill">LIVE PIPELINE · 0.59 ms/ward</text>
+
+  <!-- Connecting Flow Paths (Base + Animated Overlay) -->
+  <!-- Stage 1 -> Stage 2 -->
+  <path id="p1a" d="M 216 155 C 244 155, 246 215, 274 215" class="flow-base"/>
+  <path d="M 216 155 C 244 155, 246 215, 274 215" class="flow-line"/>
+  <path id="p1b" d="M 216 285 C 244 285, 246 235, 274 235" class="flow-base"/>
+  <path d="M 216 285 C 244 285, 246 235, 274 235" class="flow-line"/>
+
+  <!-- Stage 2 -> Stage 3 -->
+  <path id="p2" d="M 454 225 L 502 225" class="flow-base"/>
+  <path d="M 454 225 L 502 225" class="flow-line"/>
+
+  <!-- Stage 3 -> Stage 4 -->
+  <path id="p3" d="M 686 225 L 734 225" class="flow-base"/>
+  <path d="M 686 225 L 734 225" class="flow-line"/>
+
+  <!-- Stage 4 -> Stage 5 (3 outputs) -->
+  <path id="p4a" d="M 910 205 C 938 205, 938 145, 962 145" class="flow-base"/>
+  <path d="M 910 205 C 938 205, 938 145, 962 145" class="flow-line"/>
+  <path id="p4b" d="M 910 225 L 962 225" class="flow-base"/>
+  <path d="M 910 225 L 962 225" class="flow-line"/>
+  <path id="p4c" d="M 910 245 C 938 245, 938 305, 962 305" class="flow-base"/>
+  <path d="M 910 245 C 938 245, 938 305, 962 305" class="flow-line"/>
+
+  <!-- Animated Traveling Data Orbs (SMIL animateMotion) -->
+  <circle r="4" fill="#D4F53C" filter="url(#glow)">
+    <animateMotion dur="2.2s" repeatCount="indefinite"><mpath href="#p1a"/></animateMotion>
+  </circle>
+  <circle r="4" fill="#6B8EFF" filter="url(#glow)">
+    <animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#p1b"/></animateMotion>
+  </circle>
+  <circle r="4.5" fill="#D4F53C" filter="url(#glow)">
+    <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion>
+  </circle>
+  <circle r="4.5" fill="#D4F53C" filter="url(#glow)">
+    <animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion>
+  </circle>
+  <circle r="3.5" fill="#D4F53C" filter="url(#glow)">
+    <animateMotion dur="1.8s" repeatCount="indefinite"><mpath href="#p4a"/></animateMotion>
+  </circle>
+  <circle r="3.5" fill="#6B8EFF" filter="url(#glow)">
+    <animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#p4b"/></animateMotion>
+  </circle>
+  <circle r="3.5" fill="#D4F53C" filter="url(#glow)">
+    <animateMotion dur="2.0s" repeatCount="indefinite"><mpath href="#p4c"/></animateMotion>
+  </circle>
+
+  <!-- STAGE 1: DATA INGESTION -->
+  <g>
+    <rect x="36" y="102" width="180" height="108" rx="14" fill="url(#card)" stroke="rgba(255,255,255,0.16)"/>
+    <text x="50" y="124" class="t-tag">01 · HISTORICAL DATA</text>
+    <text x="50" y="146" class="t-card">60-Ward Dataset</text>
+    <text x="50" y="165" class="t-body">31,320 ward-weeks (2016–25)</text>
+    <text x="50" y="181" class="t-body">Rain, Temp, Humidity, Cases</text>
+    <text x="50" y="197" class="t-body">Drainage, Density, Sanitation</text>
+
+    <rect x="36" y="232" width="180" height="108" rx="14" fill="url(#card)" stroke="rgba(47,91,255,0.65)"/>
+    <text x="50" y="254" class="t-tag">01B · LIVE WEATHER</text>
+    <text x="50" y="276" class="t-card">Open-Meteo API</text>
+    <text x="50" y="295" class="t-body">5 Bangladesh city centroids</text>
+    <text x="50" y="311" class="t-body">1 batched call / 6h (CC BY 4.0)</text>
+    <text x="50" y="327" class="t-body">ERA5 bias-corrected ISO wks</text>
+  </g>
+
+  <!-- STAGE 2: FEATURE ENGINEERING -->
+  <g>
+    <rect x="274" y="138" width="180" height="174" rx="16" fill="url(#card)" stroke="rgba(255,255,255,0.18)"/>
+    <text x="288" y="162" class="t-tag">02 · FEATURE PIPELINE</text>
+    <text x="288" y="185" class="t-card">Breeding Clock Lags</text>
+    <text x="288" y="206" class="t-body">• Rainfall lags 0–8 per ward</text>
+    <text x="288" y="223" class="t-body">• Peak signal r = 0.47 @ wk 3</text>
+    <text x="288" y="240" class="t-body">• 4-wk rolling rain &amp; heat</text>
+    <text x="288" y="257" class="t-body">• Cyclical ISO week sin/cos</text>
+    <text x="288" y="274" class="t-body">• Zero future leakage guard</text>
+    <rect x="288" y="284" width="152" height="18" rx="9" fill="rgba(47,91,255,0.28)"/>
+    <text x="298" y="297" class="t-pill" font-size="9.5">app/shared/features.py</text>
+  </g>
+
+  <!-- STAGE 3: ML RISK ENGINE -->
+  <g>
+    <rect x="502" y="128" width="184" height="194" rx="18" fill="url(#accentCard)" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+    <text x="518" y="153" class="t-tag">03 · ML RISK ENGINE</text>
+    <text x="518" y="177" class="t-card" font-size="15">LightGBM Poisson</text>
+    <text x="518" y="198" class="t-body" fill="#EEF3FF">• 4 horizon models (h = 1..4w)</text>
+    <text x="518" y="215" class="t-body" fill="#EEF3FF">• Monotonic rain constraints</text>
+    <text x="518" y="232" class="t-body" fill="#EEF3FF">• 80% Conformal P10–P90</text>
+    <text x="518" y="249" class="t-body" fill="#EEF3FF">• Cost-weighted 4 risk tiers</text>
+    <text x="518" y="266" class="t-body" fill="#EEF3FF">• Exact TreeSHAP drivers</text>
+    <rect x="518" y="282" width="152" height="24" rx="12" fill="rgba(7,11,20,0.45)"/>
+    <text x="530" y="298" class="t-pill">954 KiB · Hold-out MAE 1.01</text>
+  </g>
+
+  <!-- STAGE 4: FASTAPI SERVING & CACHE -->
+  <g>
+    <rect x="734" y="138" width="176" height="174" rx="16" fill="url(#card)" stroke="rgba(255,255,255,0.18)"/>
+    <text x="748" y="162" class="t-tag">04 · SERVING LAYER</text>
+    <text x="748" y="185" class="t-card">FastAPI + Cache</text>
+    <text x="748" y="206" class="t-body">• Single-flight cold lock</text>
+    <text x="748" y="223" class="t-body">• L1 LRU + SQLite WAL</text>
+    <text x="748" y="240" class="t-body">• 9 vertical API slices</text>
+    <text x="748" y="257" class="t-body">• Gemini 2.5 / Haiku $1 cap</text>
+    <text x="748" y="274" class="t-body">• 30/30 red-team hardened</text>
+    <rect x="748" y="284" width="148" height="18" rx="9" fill="rgba(212,245,60,0.18)"/>
+    <text x="758" y="297" class="t-tag">RFC 9457 · ETag · SSE</text>
+  </g>
+
+  <!-- STAGE 5: ACTIONABLE OUTPUTS -->
+  <g>
+    <rect x="962" y="102" width="164" height="76" rx="13" fill="url(#card)" stroke="rgba(255,255,255,0.18)"/>
+    <text x="976" y="124" class="t-tag">05A · CONSOLE</text>
+    <text x="976" y="144" class="t-card">Next.js 16 UI</text>
+    <text x="976" y="162" class="t-body">EN / বাংলা · 60-ward Map</text>
+
+    <rect x="962" y="188" width="164" height="76" rx="13" fill="url(#card)" stroke="rgba(255,255,255,0.18)"/>
+    <text x="976" y="210" class="t-tag">05B · FIELD BRIEF</text>
+    <text x="976" y="230" class="t-card">A4 Print &amp; SMS</text>
+    <text x="976" y="248" class="t-body">≤160 char GSM-7 · CSV</text>
+
+    <rect x="962" y="274" width="164" height="76" rx="13" fill="url(#card)" stroke="rgba(47,91,255,0.7)"/>
+    <text x="976" y="296" class="t-tag">05C · AI COPILOT</text>
+    <text x="976" y="316" class="t-card">Abhas AI Chat</text>
+    <text x="976" y="334" class="t-body">Streaming · Grounded</text>
+  </g>
+
+  <!-- Footer Telemetry Strip -->
+  <line x1="36" y1="382" x2="1126" y2="382" stroke="rgba(255,255,255,0.1)"/>
+  <text x="36" y="406" class="t-sub" font-size="11">Chronological Split: 2016–2022 Train (Purged 4-Fold CV)  &#x2192;  2023 Calibration (Optuna + Conformal)  &#x2192;  2024–2025 SHA-256 Locked Hold-Out (83.3% Pass · 11/11 Floors)</text>
+</svg>
