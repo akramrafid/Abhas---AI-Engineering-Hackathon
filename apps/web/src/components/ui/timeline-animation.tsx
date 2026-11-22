@@ -48,7 +48,7 @@ export const TimelineContent = forwardRef(
       style,
       ...restProps
     }: TimelineContentComponentProps<T>,
-    forwardedRef: React.ForwardedRef<any>,
+    forwardedRef: React.ForwardedRef<HTMLElement>,
   ) => {
     const Component = as || "div";
     const localRef = useRef<HTMLElement>(null);
@@ -102,12 +102,12 @@ export const TimelineContent = forwardRef(
 
     return (
       <Component
-        ref={(node: any) => {
+        ref={(node: HTMLElement | null) => {
           localRef.current = node;
           if (typeof forwardedRef === "function") {
             forwardedRef(node);
           } else if (forwardedRef) {
-            (forwardedRef as React.MutableRefObject<any>).current = node;
+            (forwardedRef as React.MutableRefObject<HTMLElement | null>).current = node;
           }
         }}
         className={clsx(className)}
