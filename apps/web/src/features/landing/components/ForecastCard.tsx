@@ -56,7 +56,7 @@ export function ForecastCard({ className }: { className?: string }) {
             </span>
             <span className="text-sm text-slate">
               expected cases · range{" "}
-              <span className="font-mono font-semibold text-ink tnum">
+              <span className="whitespace-nowrap font-mono font-semibold text-ink tnum">
                 {h ? `${Math.round(h.p10)}–${Math.round(h.p90)}` : "…"}
               </span>
             </span>

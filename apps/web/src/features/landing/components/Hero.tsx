@@ -10,6 +10,7 @@ import { buildMapWards, useAllCityHeatmaps } from "@/components/ward-map/hooks";
 import { WardRiskMap } from "@/components/ward-map/WardRiskMap";
 import { useWardsQuery } from "@/lib/api/client";
 import { SPOTLIGHT_WARD, STORM_ORIGIN } from "../rain-clock-steps";
+import { ContainerScroll } from "@/components/ui/ContainerScroll";
 import { ForecastCard } from "./ForecastCard";
 
 const WINDOW_TABS = ["Ward Forecast", "Risk Map", "Lags", "Scenario", "Priority List", "Validation"] as const;
@@ -25,24 +26,7 @@ export function Hero() {
         const tl = gsap.timeline({ defaults: { ease: EASE_OUT } });
         tl.from(split.words, { yPercent: 110, duration: 1.1, stagger: 0.045 })
           .from("[data-hero-fade]", { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.08 }, "-=0.75")
-          .from("[data-hero-ribbon]", { autoAlpha: 0, duration: 1.6, ease: "power2.out" }, 0)
-          .from(
-            "[data-product-window]",
-            { y: 80, autoAlpha: 0, duration: 1.3 },
-            "-=0.9",
-          );
-
-        // The product window starts tilted back and settles flat as it scrolls into view.
-        gsap.fromTo(
-          "[data-product-tilt]",
-          { rotateX: 16, scale: 0.94, transformOrigin: "50% 0%" },
-          {
-            rotateX: 0,
-            scale: 1,
-            ease: "none",
-            scrollTrigger: { trigger: "[data-product-window]", start: "top 92%", end: "top 28%", scrub: 0.6 },
-          },
-        );
+          .from("[data-hero-ribbon]", { autoAlpha: 0, duration: 1.6, ease: "power2.out" }, 0);
         return () => split.revert();
       });
     },
@@ -118,12 +102,22 @@ function ProductWindow() {
   );
 
   return (
-    <div className="relative mx-auto mt-20 max-w-6xl px-4 [perspective:1600px] sm:mt-24 sm:px-8">
-      <div data-product-window>
+    <ContainerScroll
+      title={
+        <>
+          <h2 className="text-balance text-[clamp(2rem,4.4vw,3.75rem)] font-extrabold leading-[1.02] tracking-[-0.035em] text-white">
+            Every ward, three weeks ahead.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-mist">
+            Live model output: the forecast made on <span className="font-mono tnum">5 Aug 2024</span> for the week
+            of <span className="font-mono tnum">26 Aug</span>, after 216 mm of rain on Ward 4, Dhaka South.
+          </p>
+        </>
+      }
+    >
         <figure
-          data-product-tilt
           aria-label="The Abhas dashboard: Ward 4, Dhaka South, forecast three weeks after the 5 Aug 2024 rain"
-          className="overflow-hidden rounded-t-[14px] bg-navy ring-1 ring-white/10"
+          className="overflow-hidden bg-navy"
         >
           <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
             <AbhasLogo variant="reverse" size="sm" />
@@ -151,7 +145,6 @@ function ProductWindow() {
             </div>
           </div>
         </figure>
-      </div>
-    </div>
+    </ContainerScroll>
   );
 }
