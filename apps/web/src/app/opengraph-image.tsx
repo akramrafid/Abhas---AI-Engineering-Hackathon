@@ -92,12 +92,15 @@ export default function OpenGraphImage() {
           </div>
           <div
             style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
               fontSize: "28px",
               fontWeight: 600,
               color: "#DCE6F9",
             }}
           >
-            Rain today. Risk in three weeks.{" "}
+            <span>Rain today. Risk in three weeks.</span>
             <span style={{ color: "#D4F53C", fontWeight: 800 }}>Act now.</span>
           </div>
         </div>

@@ -212,7 +212,6 @@ export function WardRiskMap({
     if (shouldLoad) return;
     const el = containerRef.current;
     if (!el || typeof IntersectionObserver === "undefined") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShouldLoad(true);
       return;
     }
