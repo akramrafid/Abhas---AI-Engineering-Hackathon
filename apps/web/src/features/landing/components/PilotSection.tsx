@@ -60,6 +60,8 @@ const ORG_OPTIONS = [
   "Other Municipality or NGO",
 ] as const;
 
+const WHATSAPP_NUMBER_E164 = "8801641414949"; // Bangladesh 01641414949
+
 const PILOT_TOPICS = [
   "Weekly ward forecast",
   "SMS officer alerts",
@@ -151,7 +153,7 @@ export function PilotSection() {
     }
   };
 
-  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(
+  const whatsappHref = `https://wa.me/${WHATSAPP_NUMBER_E164}?text=${encodeURIComponent(
     "Hello Abhas team, I would like to discuss a municipal dengue early-warning pilot.",
   )}`;
 
@@ -168,7 +170,7 @@ export function PilotSection() {
         .join("\n")
     : "";
 
-  const receiptWhatsappHref = `https://wa.me/?text=${encodeURIComponent(
+  const receiptWhatsappHref = `https://wa.me/${WHATSAPP_NUMBER_E164}?text=${encodeURIComponent(
     `Hello Abhas Pilot Desk,\nI just submitted a municipal pilot request:\n${receiptSummaryText}`,
   )}`;
 
@@ -246,6 +248,7 @@ export function PilotSection() {
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link
               href="/dashboard?demo=1&tab=validation"
+              prefetch={false}
               onClick={() =>
                 trackEvent({ event: "cta_view_validation", location: "pilot_section", lang })
               }
@@ -262,6 +265,8 @@ export function PilotSection() {
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
+              title="WhatsApp Abhas pilot desk (+880 1641-414949)"
+              aria-label="Open WhatsApp chat with Abhas pilot desk (01641414949)"
               onClick={() =>
                 trackEvent({ event: "cta_whatsapp_contact", location: "pilot_section", lang })
               }
