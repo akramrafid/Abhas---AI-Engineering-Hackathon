@@ -158,7 +158,7 @@ function SpotlightChart() {
           </ResponsiveContainer>
         )}
       </div>
-      <p className="mt-3 font-mono text-xs text-slate">
+      <p className="mt-3 text-xs text-slate">
         Shaded: the three weeks from rain to peak ({formatShortDate(STORM_ORIGIN)} to {formatShortDate(peakWeek)}).
       </p>
     </figure>
@@ -211,7 +211,7 @@ function HoldoutResult() {
       <table className="w-full self-end text-left">
         <caption className="sr-only">Mean absolute error by forecast horizon, hold-out 2024 to 2025</caption>
         <thead>
-          <tr className="font-mono text-xs text-slate">
+          <tr className="text-xs text-slate">
             <th scope="col" className="pb-3 font-normal">Weeks ahead</th>
             <th scope="col" className="pb-3 font-normal">Mean absolute error (cases per ward-week)</th>
           </tr>

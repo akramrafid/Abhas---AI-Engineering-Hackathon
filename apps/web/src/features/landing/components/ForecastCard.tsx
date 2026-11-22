@@ -33,15 +33,15 @@ export function ForecastCard({ className }: { className?: string }) {
       className={clsx("rounded-[14px] bg-white p-5 text-ink ring-1 ring-mist", className)}
       aria-busy={forecast.isPending}
     >
-      <header className="flex items-start justify-between gap-3">
-        <div>
+      <header>
+        <div className="flex items-center justify-between gap-3">
           <h3 className="text-lg font-bold text-navy">{wardLabel(SPOTLIGHT_WARD)}</h3>
-          <p className="text-sm text-slate">
-            Dhaka South · 3 weeks ahead
-            {h ? <span className="font-mono tnum"> · {formatShortDate(h.target_week)}</span> : null}
-          </p>
+          {h ? <RiskTierBadge tier={h.tier} size="sm" /> : null}
         </div>
-        {h ? <RiskTierBadge tier={h.tier} size="sm" /> : null}
+        <p className="mt-1 text-sm text-slate">
+          Dhaka South · 3 weeks ahead
+          {h ? <span className="font-mono tnum"> · {formatShortDate(h.target_week)}</span> : null}
+        </p>
       </header>
 
       {forecast.isError ? (
@@ -52,7 +52,7 @@ export function ForecastCard({ className }: { className?: string }) {
         <>
           <p className="mt-5 flex items-baseline gap-2">
             <span className="font-mono text-5xl font-semibold leading-none text-navy tnum">
-              {h ? Math.round(h.expected_cases) : "…"}
+              {h ? h.expected_cases.toFixed(1) : "…"}
             </span>
             <span className="text-sm text-slate">
               expected cases · range{" "}

@@ -25,7 +25,7 @@ export function CostSection() {
         <dl className="divide-y divide-mist border-y border-mist">
           {COSTS.map((cost) => (
             <div key={cost.term} className="grid gap-1 py-5 sm:grid-cols-[8rem_minmax(0,1fr)] sm:gap-6">
-              <dt className="font-mono text-xs text-slate sm:pt-1.5">{cost.term}</dt>
+              <dt className="text-sm font-semibold text-slate sm:pt-1">{cost.term}</dt>
               <dd>
                 <p className="text-xl font-bold tnum">{cost.value}</p>
                 <p className="mt-1 text-sm text-slate">{cost.note}</p>

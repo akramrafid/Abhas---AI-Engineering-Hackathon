@@ -1,42 +1,32 @@
 "use client";
 
 import { useRef, type ReactNode, type RefObject } from "react";
-import { BrainCircuit, CloudRain, Database, LayoutDashboard, MessageSquareText, Timer, FileText } from "lucide-react";
 import { clsx } from "clsx";
 import { EASE_OUT, FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
 import { AnimatedBeam } from "@/components/ui/AnimatedBeam";
 
 interface NodeProps {
   nodeRef: RefObject<HTMLDivElement | null>;
-  icon: ReactNode;
   title: string;
   detail: string;
+  /** One real measured value per node, set in Plex Mono. */
+  measure: ReactNode;
   emphasis?: boolean;
 }
 
-function FlowNode({ nodeRef, icon, title, detail, emphasis = false }: NodeProps) {
+function FlowNode({ nodeRef, title, detail, measure, emphasis = false }: NodeProps) {
   return (
     <div
       ref={nodeRef}
       data-flow-node
       className={clsx(
-        "relative z-10 flex items-start gap-3 rounded-[14px] p-4 ring-1",
+        "relative z-10 rounded-[14px] p-4 ring-1",
         emphasis ? "bg-royal text-white ring-royal" : "bg-ink text-white ring-white/10",
       )}
     >
-      <span
-        aria-hidden="true"
-        className={clsx(
-          "grid h-9 w-9 shrink-0 place-items-center rounded-[10px]",
-          emphasis ? "bg-white/15" : "bg-navy",
-        )}
-      >
-        {icon}
-      </span>
-      <span>
-        <span className="block text-sm font-bold">{title}</span>
-        <span className={clsx("mt-0.5 block text-xs leading-5", emphasis ? "text-white/85" : "text-mist")}>{detail}</span>
-      </span>
+      <p className="font-mono text-lg font-semibold leading-none tnum">{measure}</p>
+      <p className="mt-3 text-sm font-bold">{title}</p>
+      <p className={clsx("mt-0.5 text-xs leading-5", emphasis ? "text-white/85" : "text-mist")}>{detail}</p>
     </div>
   );
 }
@@ -68,7 +58,6 @@ export function HowItWorks() {
     { scope },
   );
 
-  const icon = "h-[18px] w-[18px]";
   return (
     <section ref={scope} id="how" aria-labelledby="how-heading" className="bg-navy px-4 py-24 text-white sm:px-8 lg:py-32">
       <div className="mx-auto max-w-6xl">
@@ -84,15 +73,15 @@ export function HowItWorks() {
 
         <div ref={container} className="relative mt-16 grid gap-6 lg:grid-cols-4 lg:items-center lg:gap-x-16">
           <div className="space-y-4">
-            <FlowNode nodeRef={dataset} icon={<Database className={icon} />} title="Ward history" detail="31,320 ward-weeks: rain, heat, humidity, cases, drainage, crowding, sanitation." />
-            <FlowNode nodeRef={meteo} icon={<CloudRain className={icon} />} title="Weather feed" detail="Dataset by default; Open-Meteo for live weeks, one call per 6 hours for all five cities." />
+            <FlowNode nodeRef={dataset} measure="31,320" title="Ward history" detail="60 wards · 522 weeks of rain, heat, humidity, cases, drainage, crowding, sanitation." />
+            <FlowNode nodeRef={meteo} measure="4 calls/day" title="Weather feed" detail="Dataset by default; Open-Meteo for live weeks, all five cities in one call." />
           </div>
-          <FlowNode nodeRef={lags} icon={<Timer className={icon} />} title="Breeding clock" detail="Rain lagged 1 to 6 weeks, grouped by ward_id, nothing after the forecast week." />
-          <FlowNode nodeRef={model} emphasis icon={<BrainCircuit className={icon} />} title="Forecast model" detail="LightGBM, Poisson, one model per horizon (1–4 weeks), 80% ranges, cost-based tiers." />
+          <FlowNode nodeRef={lags} measure="r 0.47 at 3 wk" title="Breeding clock" detail="Rain lagged 1 to 6 weeks, grouped by ward_id, nothing after the forecast week." />
+          <FlowNode nodeRef={model} emphasis measure="MAE 1.01" title="Forecast model" detail="LightGBM, Poisson, one model per horizon, 80% ranges, cost-based tiers." />
           <div className="space-y-4">
-            <FlowNode nodeRef={dashboard} icon={<LayoutDashboard className={icon} />} title="Dashboard" detail="Tier, range and drivers for each ward; map, priority list, what-if rain." />
-            <FlowNode nodeRef={sms} icon={<MessageSquareText className={icon} />} title="SMS alert" detail="Ward and window first, then one action, in 160 characters." />
-            <FlowNode nodeRef={notice} icon={<FileText className={icon} />} title="Field notice" detail="Printable A4 ward brief in Bangla and English." />
+            <FlowNode nodeRef={dashboard} measure="60 wards" title="Dashboard" detail="Tier, range and drivers for each ward; map, priority list, what-if rain." />
+            <FlowNode nodeRef={sms} measure="≤ 160 chars" title="SMS alert" detail="Ward and window first, then one action." />
+            <FlowNode nodeRef={notice} measure="A4 · EN + BN" title="Field notice" detail="Printable A4 ward brief in Bangla and English." />
           </div>
 
           <div className="hidden lg:contents">

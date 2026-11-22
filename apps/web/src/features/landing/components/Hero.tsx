@@ -104,7 +104,7 @@ function SignalPattern() {
   return (
     <div
       aria-hidden="true"
-      className="absolute inset-x-0 bottom-0 -z-20 h-[32rem] bg-royal/[0.07] [mask-image:url(/brand/signal-pattern.svg),linear-gradient(to_top,black,transparent)] [mask-composite:intersect] [mask-size:28px_16px,100%_100%]"
+      className="absolute inset-x-0 bottom-0 -z-20 h-[32rem] bg-royal/[0.16] [mask-image:url(/brand/signal-pattern.svg),linear-gradient(to_top,black,transparent)] [mask-composite:intersect] [mask-size:28px_16px,100%_100%]"
     />
   );
 }
@@ -134,7 +134,7 @@ function ProductWindow() {
                 </li>
               ))}
             </ul>
-            <span className="ml-auto font-mono text-xs text-mist tnum">Dhaka South · week of 26 Aug 2024</span>
+            <span className="ml-auto whitespace-nowrap text-xs text-mist"><span className="max-sm:hidden">Dhaka South · week of </span><span className="font-mono tnum">26 Aug 2024</span></span>
           </div>
           <div className="grid gap-px bg-white/10 lg:grid-cols-[minmax(0,1fr)_24rem]">
             <WardRiskMap

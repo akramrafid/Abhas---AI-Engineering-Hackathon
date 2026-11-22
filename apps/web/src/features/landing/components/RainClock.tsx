@@ -142,7 +142,7 @@ export function RainClock() {
                 <h2 id="rain-clock-heading" className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.03em]">
                   One monsoon week, played forward.
                 </h2>
-                <p className="mt-2 font-mono text-xs text-mist tnum">Rain week · {formatShortDate(STORM_ORIGIN)}</p>
+                <p className="mt-2 text-xs text-mist">Rain week · <span className="font-mono tnum">{formatShortDate(STORM_ORIGIN)}</span></p>
                 <p className="mt-3 text-mist max-sm:text-sm sm:text-body">
                   216 mm of rain fell on {wardLabel(SPOTLIGHT_WARD)}, Dhaka South, and over 200 mm on five of its
                   neighbours. Every ripple is a ward that got wet. Scroll to watch the model&apos;s forecast for the
@@ -266,7 +266,7 @@ function StepText({ kicker, title, children }: { kicker: string; title: string; 
   return (
     <>
       <h2 className="text-balance text-2xl font-bold leading-tight tracking-[-0.02em]">{title}</h2>
-      <p className="mt-2 font-mono text-xs text-mist tnum">{kicker}</p>
+      <p className="mt-2 text-xs font-semibold text-mist tnum">{kicker}</p>
       <div className="mt-3 space-y-3 text-mist max-sm:text-sm sm:text-body">{children}</div>
     </>
   );

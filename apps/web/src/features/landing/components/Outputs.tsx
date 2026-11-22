@@ -86,8 +86,9 @@ export function Outputs() {
                 <div className="mt-3">
                   <RiskTierBadge tier={tier} size="md" lang="bn" />
                 </div>
-                <p className="mt-4 font-mono text-sm text-slate tnum">
-                  {h ? `${Math.round(h.expected_cases)} expected cases · range ${Math.round(h.p10)}–${Math.round(h.p90)}` : "…"}
+                <p className="mt-4 text-sm text-slate">
+                  <span className="font-mono font-semibold text-ink tnum">{h ? h.expected_cases.toFixed(1) : "…"}</span> expected cases ·
+                  range <span className="font-mono text-ink tnum">{h ? `${Math.round(h.p10)}–${Math.round(h.p90)}` : "…"}</span>
                 </p>
               </div>
               <ul className="space-y-2.5 border-t border-mist pt-5 text-sm leading-6">
