@@ -1,13 +1,23 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Download } from "lucide-react";
+import { clsx } from "clsx";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SelectionBar } from "@/components/dashboard/SelectionBar";
 import { Providers } from "@/components/Providers";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
-import { TabNav, type TabItem } from "@/components/ui/Tabs";
+import { AlertsDialog } from "@/components/dashboard/shell/AlertsDialog";
+import { CommandSearch } from "@/components/dashboard/shell/CommandSearch";
+import { StatTiles } from "@/components/dashboard/shell/StatTiles";
+import { useWorkspaceSignals } from "@/components/dashboard/shell/useWorkspaceSignals";
+import { useDashboardTheme } from "@/components/dashboard/shell/theme";
+import { VIEW_META } from "@/components/dashboard/shell/views";
+import { ViewDock, type DockItem } from "@/components/dashboard/shell/ViewDock";
+import { FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
+import { downloadCsv } from "@/lib/csv";
 import { AboutCostView } from "@/features/about/components/AboutCostView";
 import { HeatmapView } from "@/features/heatmap/components/HeatmapView";
 import { LagsPanel } from "@/features/lags/components/LagsPanel";
@@ -205,7 +215,7 @@ function DashboardWorkspace() {
     : cityWeatherSummary?.source ?? "dataset";
   const weatherBadgeText = UI_COPY[lang].weatherSource[weatherSourceUsed];
 
-  const tabs = useMemo<readonly TabItem<DashboardTab>[]>(() => {
+  const tabs = useMemo<readonly DockItem[]>(() => {
     const labels = UI_COPY[lang].tabs;
     return [
       { id: "ward-risk", label: labels["ward-risk"], testId: "tab-ward-risk" },
@@ -237,34 +247,100 @@ function DashboardWorkspace() {
 
   const showSelectionBar = activeTab !== "validation" && activeTab !== "about";
 
+  // Shell: theme (remembered per browser), search (Ctrl+K), alerts, CSV export, view transitions.
+  const [dark, toggleTheme] = useDashboardTheme();
+  const [dialog, setDialog] = useState<"search" | "alerts" | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const signals = useWorkspaceSignals(allWards, selectedCity, selectedOriginWeek, windowKey, activeSource);
+  const meta = VIEW_META[activeTab];
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setDialog("search");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const exportCsv = useCallback(() => {
+    downloadCsv("abhas-forecasts-" + selectedOriginWeek + "-" + windowKey + ".csv", signals.exportRows);
+  }, [selectedOriginWeek, windowKey, signals.exportRows]);
+
+  useGSAP(
+    () => {
+      gsap.matchMedia().add(FULL_MOTION, () => {
+        const layer = contentRef.current;
+        if (!layer) return;
+        gsap
+          .timeline({ defaults: { ease: "power3.out" } })
+          .fromTo(layer, { opacity: 0.55, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.35, clearProps: "opacity,filter" })
+          .from(layer.querySelectorAll(":scope > * > *"), { y: 16, opacity: 0, duration: 0.5, stagger: 0.05, clearProps: "transform,opacity" }, 0.04);
+      });
+    },
+    { dependencies: [activeTab], scope: contentRef, revertOnUpdate: true },
+  );
+
   return (
-    <div className="flex min-h-screen flex-col bg-paper text-ink">
+    <div
+      data-theme={dark ? "dark" : "light"}
+      className={clsx("flex min-h-screen flex-col pb-24 pt-3 lg:pb-0", dark ? "bg-ink text-white" : "bg-paper text-ink")}
+    >
       <DashboardHeader
         selectedCity={selectedCity}
         isDemoMode={isDemoMode}
         weatherBadgeText={weatherBadgeText}
         lang={lang}
         onChangeLang={setLang}
+        dark={dark}
+        onToggleTheme={toggleTheme}
+        onOpenSearch={() => setDialog("search")}
+        alertCount={signals.alerts.length}
+        onOpenAlerts={() => setDialog("alerts")}
       />
 
-      <nav
-        aria-label="Dashboard views"
-        className="no-print border-b border-mist bg-white"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <TabNav
-            tabs={tabs}
-            activeTab={activeTab}
-            onChange={setActiveTab}
-          />
-        </div>
-      </nav>
+      <div className="mx-auto flex w-full max-w-[96rem] flex-1 gap-5 px-3 pt-5 sm:px-5">
+        <ViewDock items={tabs} active={activeTab} onChange={setActiveTab} lang={lang} dark={dark} />
 
       {/* Main Clinical Data Workspace — strictly zero Lime anywhere inside [data-view="data"] */}
       <main
         data-view="data"
-        className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-5 sm:px-6"
+        className="flex min-w-0 flex-1 flex-col gap-5 pb-8"
       >
+        <header className="no-print flex flex-wrap items-end justify-between gap-4 pt-2">
+          <div className="max-w-3xl">
+            <h1
+              lang={lang}
+              className={clsx(
+                "text-[clamp(1.75rem,3.2vw,2.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em]",
+                dark ? "text-white" : "text-navy",
+                lang === "bn" && "font-bangla",
+              )}
+            >
+              {tabs.find((t) => t.id === activeTab)?.label}
+            </h1>
+            <p lang={lang} className={clsx("mt-2 text-body", dark ? "text-mist" : "text-slate", lang === "bn" && "font-bangla")}>
+              {meta.description[lang]}
+            </p>
+          </div>
+          <button
+            type="button"
+            data-testid="export-csv"
+            onClick={exportCsv}
+            disabled={signals.exportRows.length < 2}
+            className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-royal px-4 text-sm font-semibold text-white transition-colors duration-300 hover:bg-navy disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download aria-hidden="true" className="h-4 w-4" />
+            Export forecasts CSV
+          </button>
+        </header>
+
+        {meta.showStats && !wardsQuery.isError ? (
+          <StatTiles signals={signals} city={selectedCity} lang={lang} />
+        ) : null}
+
         {showSelectionBar ? (
           <SelectionBar
             cities={cities}
@@ -307,6 +383,7 @@ function DashboardWorkspace() {
           aria-labelledby={`tab-btn-${activeTab}`}
           className="flex-1"
         >
+          <div ref={contentRef} key={activeTab}>
           {activeTab === "ward-risk" && !wardsQuery.isError ? (
             wardsQuery.isPending ? (
               <PanelSkeleton
@@ -403,16 +480,38 @@ function DashboardWorkspace() {
           {activeTab === "validation" ? <ValidationView lang={lang} /> : null}
 
           {activeTab === "about" ? <AboutCostView lang={lang} /> : null}
+          </div>
         </section>
       </main>
+      </div>
 
-      <footer className="no-print border-t border-mist bg-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-xs text-slate sm:px-6">
+      {dialog === "search" ? (
+        <CommandSearch
+          views={tabs}
+          wards={allWards}
+          lang={lang}
+          onSelectView={setActiveTab}
+          onSelectWard={handleSelectWardFromMatrix}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
+      {dialog === "alerts" ? (
+        <AlertsDialog
+          signals={signals}
+          originWeek={selectedOriginWeek}
+          lang={lang}
+          onSelectWard={handleSelectWardFromMatrix}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
+
+      <footer className={clsx("no-print mb-20 lg:mb-0", dark ? "text-mist" : "text-slate")}>
+        <div className="mx-auto flex max-w-[96rem] flex-wrap items-center justify-between gap-3 px-5 py-5 text-xs">
           <span>
             Abhas (<span lang="bn" className="font-bangla">আভাস</span>) · Multi-week rainfall lag
             early warning · Weather data by Open-Meteo.com (CC BY 4.0)
           </span>
-          <Link href="/brand" className="font-semibold text-royal hover:underline">
+          <Link href="/brand" className={clsx("font-semibold hover:underline", dark ? "text-white" : "text-royal")}>
             Brand tokens &amp; tier scale
           </Link>
         </div>

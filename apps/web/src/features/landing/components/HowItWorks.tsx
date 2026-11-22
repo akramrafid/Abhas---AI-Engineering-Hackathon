@@ -26,7 +26,7 @@ function FlowNode({ nodeRef, title, detail, measure, emphasis = false }: NodePro
     >
       <p className="font-mono text-lg font-semibold leading-none tnum">{measure}</p>
       <p className="mt-3 text-sm font-bold">{title}</p>
-      <p className={clsx("mt-0.5 text-xs leading-5", emphasis ? "text-white/85" : "text-mist")}>{detail}</p>
+      <p className={clsx("mt-0.5 text-xs leading-5", emphasis ? "text-white" : "text-mist")}>{detail}</p>
     </div>
   );
 }

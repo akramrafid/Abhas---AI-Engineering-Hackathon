@@ -388,6 +388,8 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
   test("nfr_6 / test_cr_18_wcag_aa: WCAG 2.2 A/AA axe scan has zero violations of any impact across all views", async ({
     page,
   }) => {
+    // Scan settled views: the view transition fades panels in, and axe would flag mid-fade contrast.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
     await assertWcagAA(page, "Ward Forecast (/?demo=1)");

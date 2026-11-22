@@ -43,6 +43,8 @@ test.describe("Landing page", () => {
   });
 
   test("landing page has zero WCAG 2.2 A/AA violations", async ({ page }) => {
+    // Scan the settled page: entrance tweens fade text in, and axe would flag mid-fade contrast.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.getByTestId("hero-cta")).toBeVisible();
     await assertWcagAA(page, "Landing page");
@@ -65,5 +67,36 @@ test.describe("Dashboard risk map", () => {
     await ledger.first().click();
     await expect(page.getByTestId("tab-ward-risk")).toHaveAttribute("aria-selected", "true");
     await expect(page).toHaveURL(/ward=CCC_Ward_\d+/);
+  });
+});
+
+test.describe("Dashboard shell", () => {
+  test("search jumps to a ward, alerts list wards, theme toggles, CSV exports", async ({ page }) => {
+    await page.goto("/dashboard?demo=1");
+    await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await expect(page.getByTestId("stat-tiles")).toContainText("Wards Critical");
+
+    await page.keyboard.press("Control+k");
+    const search = page.getByTestId("search-dialog");
+    await expect(search).toBeVisible();
+    await page.keyboard.type("ward 4 chattogram");
+    await page.keyboard.press("Enter");
+    await expect(search).toBeHidden();
+    await expect(page).toHaveURL(/ward=CCC_Ward_04/);
+
+    await page.getByTestId("open-alerts").click();
+    const alerts = page.getByTestId("alerts-dialog");
+    await expect(alerts).toContainText(/wards reach High or Critical/);
+    await page.keyboard.press("Escape");
+    await expect(alerts).toBeHidden();
+
+    await page.getByTestId("theme-toggle").click();
+    await expect(page.locator("[data-theme=dark]")).toHaveCount(1);
+    await page.getByTestId("theme-toggle").click();
+    await expect(page.locator("[data-theme=light]")).toHaveCount(1);
+
+    const download = page.waitForEvent("download");
+    await page.getByTestId("export-csv").click();
+    expect((await download).suggestedFilename()).toMatch(/^abhas-forecasts-2024-08-05-2-4w\.csv$/);
   });
 });
