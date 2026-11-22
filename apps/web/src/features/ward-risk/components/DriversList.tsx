@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Minus } from "@/components/icons";
 import { clsx } from "clsx";
 import type { Driver } from "@/lib/api/client";
 import { formatDriverLabel, UI_COPY, type Lang } from "@/lib/i18n";

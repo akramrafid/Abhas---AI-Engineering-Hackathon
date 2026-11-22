@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/components/icons";
 import { RiskTierBadge } from "@/components/brand/RiskTierBadge";
 import { wardLabel } from "@/components/ward-map/geo";
 import { formatShortDate } from "@/lib/dates";

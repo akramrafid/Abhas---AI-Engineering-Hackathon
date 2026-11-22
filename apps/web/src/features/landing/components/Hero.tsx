@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight } from "@/components/icons";
 import { clsx } from "clsx";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import { RibbonCanvas } from "@/components/brand/RibbonCanvas";

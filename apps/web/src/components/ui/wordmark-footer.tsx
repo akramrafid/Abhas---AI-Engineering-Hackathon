@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/icons";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

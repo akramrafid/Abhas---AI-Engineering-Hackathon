@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/icons";
 
 // Every answer restates facts from TASK.md, ARCHITECTURE.md or the live validation endpoint.
 const FAQ = [

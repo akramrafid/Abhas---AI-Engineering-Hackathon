@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, MessageSquareText } from "lucide-react";
+import { ArrowRight, MessageSquareText } from "@/components/icons";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import { RiskTierBadge, TIER_META } from "@/components/brand/RiskTierBadge";
 import { EASE_OUT, FULL_MOTION, gsap, SplitText, useGSAP } from "@/components/motion/gsap";

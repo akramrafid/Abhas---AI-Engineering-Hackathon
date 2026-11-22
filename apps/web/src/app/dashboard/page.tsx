@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Download } from "lucide-react";
+import { Download } from "@/components/icons";
 import { clsx } from "clsx";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

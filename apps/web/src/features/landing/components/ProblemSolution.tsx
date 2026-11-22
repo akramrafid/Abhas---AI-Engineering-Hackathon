@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, Clock3 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock3 } from "@/components/icons";
 import { clsx } from "clsx";
 import { useLandingLang } from "../lang-context";
 

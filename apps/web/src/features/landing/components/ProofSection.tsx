@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/icons";
 import { useQuery } from "@tanstack/react-query";
 import { EASE_OUT, FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
 import {

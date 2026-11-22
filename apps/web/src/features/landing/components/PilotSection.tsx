@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Mail, MessageCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, Mail, MessageCircle } from "@/components/icons";
 import { clsx } from "clsx";
 import { trackEvent } from "@/lib/analytics";
 import { useLandingLang } from "../lang-context";

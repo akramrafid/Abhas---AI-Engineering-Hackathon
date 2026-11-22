@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer } from "@/components/icons";
 import { clsx } from "clsx";
 import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
 import {

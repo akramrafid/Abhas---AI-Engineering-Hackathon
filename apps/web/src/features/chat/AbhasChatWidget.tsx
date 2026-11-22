@@ -21,7 +21,7 @@ import {
   Sparkles,
   Square,
   X,
-} from "lucide-react";
+} from "@/components/icons";
 import { clsx } from "clsx";
 import { streamAbhasChat, type ChatTurn } from "./api";
 import { FormattedMessage } from "./FormattedMessage";

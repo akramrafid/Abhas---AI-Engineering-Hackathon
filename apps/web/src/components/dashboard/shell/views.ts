@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Timer,
   type LucideIcon,
-} from "lucide-react";
+} from "@/components/icons";
 import type { DashboardTab, Lang } from "@/lib/i18n";
 
 export interface ViewMeta {

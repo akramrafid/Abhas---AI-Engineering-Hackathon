@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
-import { LogOut } from "lucide-react";
+import { LogOut } from "@/components/icons";
 import { clsx } from "clsx";
 import { Dialog } from "@/components/dashboard/shell/Dialog";
 import { AUTH_ENABLED } from "@/lib/auth-config";

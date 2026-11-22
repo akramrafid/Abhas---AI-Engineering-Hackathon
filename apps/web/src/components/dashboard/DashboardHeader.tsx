@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, Moon, Search, Sun } from "lucide-react";
+import { Bell, Moon, Search, Sun } from "@/components/icons";
 import { clsx } from "clsx";
 import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { UserMenu } from "@/components/auth/UserMenu";

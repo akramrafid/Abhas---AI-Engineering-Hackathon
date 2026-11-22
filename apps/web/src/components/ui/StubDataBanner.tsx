@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import { Info } from "@/components/icons";
 import { clsx } from "clsx";
 
 export function isStubModelVersion(modelVersion?: string | null): boolean {

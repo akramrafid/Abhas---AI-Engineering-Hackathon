@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, FileText, RotateCw } from "lucide-react";
+import { CheckCircle2, FileText, RotateCw } from "@/components/icons";
 import { clsx } from "clsx";
 import {
   Card,

@@ -10,7 +10,7 @@ import {
   MessageSquare,
   ShieldCheck,
   Sparkles,
-} from "lucide-react";
+} from "@/components/icons";
 import { clsx } from "clsx";
 import { useLandingLang } from "../lang-context";
 

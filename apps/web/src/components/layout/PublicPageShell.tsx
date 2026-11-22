@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@/components/icons";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 
 export interface PublicPageShellProps {

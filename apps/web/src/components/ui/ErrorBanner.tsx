@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, RotateCw } from "lucide-react";
+import { AlertTriangle, RotateCw } from "@/components/icons";
 import { clsx } from "clsx";
 import { ApiError } from "@/lib/api/client";
 

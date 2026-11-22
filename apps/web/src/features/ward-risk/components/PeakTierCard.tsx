@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, Printer } from "lucide-react";
+import { CalendarClock, Printer } from "@/components/icons";
 import { clsx } from "clsx";
 import { RiskTierBadge } from "@/components/brand/RiskTierBadge";
 import {

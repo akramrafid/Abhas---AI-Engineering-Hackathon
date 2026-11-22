@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight, MapPin, Search } from "lucide-react";
+import { ChevronRight, MapPin, Search } from "@/components/icons";
 import { clsx } from "clsx";
 import { wardLabel, wardNumber } from "@/components/ward-map/geo";
 import type { Ward } from "@/lib/api/client";
