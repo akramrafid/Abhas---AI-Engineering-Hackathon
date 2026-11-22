@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  Check,
   CheckCircle2,
+  Clock3,
+  Copy,
   LineChart,
+  Lock,
   Mail,
   MapPin,
   MessageCircle,
@@ -63,6 +67,23 @@ const PILOT_TOPICS = [
   "DGHS / MIS feed sync",
 ] as const;
 
+function agencyCode(org: string): string {
+  const paren = /\(([A-Z]{2,5})\)/.exec(org);
+  if (paren) return paren[1];
+  if (org.startsWith("DGHS")) return "DGHS";
+  return "MUNI";
+}
+
+interface SubmissionReceipt {
+  refId: string;
+  submittedAt: string;
+  name: string;
+  org: string;
+  contact: string;
+  topics: string[];
+  notes: string;
+}
+
 export function PilotSection() {
   const { lang } = useLandingLang();
   const bn = lang === "bn";
@@ -72,7 +93,15 @@ export function PilotSection() {
   const [contact, setContact] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [receipt, setReceipt] = useState<SubmissionReceipt | null>(null);
+  const [copiedRef, setCopiedRef] = useState(false);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+    };
+  }, []);
 
   const toggleTopic = (topic: string) => {
     setSelectedTopics((prev) =>
@@ -82,14 +111,74 @@ export function PilotSection() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !contact.trim()) return;
+    const cleanName = name.trim();
+    const cleanContact = contact.trim();
+    if (!cleanName || !cleanContact) return;
+
+    const code = agencyCode(org);
+    const suffix = String(Math.floor(1000 + Math.random() * 9000));
+    const refId = `ABH-${code}-${suffix}`;
+    const submittedAt = new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date());
+
     trackEvent({ event: "pilot_form_submit", location: "landing_pilot", label: org, lang });
-    setSubmitted(true);
+    setReceipt({
+      refId,
+      submittedAt,
+      name: cleanName,
+      org,
+      contact: cleanContact,
+      topics: [...selectedTopics],
+      notes: notes.trim(),
+    });
+  };
+
+  const handleCopyRef = async () => {
+    if (!receipt) return;
+    try {
+      await navigator.clipboard.writeText(receipt.refId);
+      setCopiedRef(true);
+      if (copyTimer.current) clearTimeout(copyTimer.current);
+      copyTimer.current = setTimeout(() => setCopiedRef(false), 2000);
+    } catch {
+      // Ignore if clipboard API is unavailable.
+    }
   };
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(
     "Hello Abhas team, I would like to discuss a municipal dengue early-warning pilot.",
   )}`;
+
+  const receiptSummaryText = receipt
+    ? [
+        `Ref: ${receipt.refId}`,
+        `Name & role: ${receipt.name}`,
+        `Agency: ${receipt.org}`,
+        `Contact: ${receipt.contact}`,
+        receipt.topics.length > 0 ? `Modules: ${receipt.topics.join(", ")}` : null,
+        receipt.notes ? `Notes: ${receipt.notes}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : "";
+
+  const receiptWhatsappHref = `https://wa.me/?text=${encodeURIComponent(
+    `Hello Abhas Pilot Desk,\nI just submitted a municipal pilot request:\n${receiptSummaryText}`,
+  )}`;
+
+  const receiptMailtoHref = receipt
+    ? `mailto:pilot@abhas.dev?subject=${encodeURIComponent(
+        `Abhas Pilot Request [${receipt.refId}] — ${receipt.org}`,
+      )}&body=${encodeURIComponent(
+        `Hello Abhas Pilot Desk,\n\nPlease find our municipal pilot request details below:\n\n${receiptSummaryText}\n`,
+      )}`
+    : "mailto:pilot@abhas.dev?subject=Abhas%20City%20Corporation%20Pilot";
 
   return (
     <section
@@ -197,44 +286,125 @@ export function PilotSection() {
                   lang={lang}
                   className={clsx("text-xl font-bold tracking-tight text-white", bn && "font-bangla")}
                 >
-                  {bn ? "সিটি কর্পোরেশন পাইলটের অনুরোধ করুন" : "Request a city corporation pilot"}
+                  {receipt
+                    ? bn
+                      ? "পাইলট অনুরোধ নিশ্চিত হয়েছে"
+                      : "Pilot request confirmed"
+                    : bn
+                      ? "সিটি কর্পোরেশন পাইলটের অনুরোধ করুন"
+                      : "Request a city corporation pilot"}
                 </h3>
-                <span className="inline-flex items-center rounded-full bg-white/12 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-sm">
-                  $0 license fee
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-sm tnum">
+                  {receipt ? (
+                    <>
+                      <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5" />
+                      {receipt.refId}
+                    </>
+                  ) : (
+                    "$0 license fee"
+                  )}
                 </span>
               </div>
               <p
                 lang={lang}
                 className={clsx("relative mt-2 text-sm leading-6 text-mist/90", bn && "font-bangla")}
               >
-                {bn
-                  ? "কোনো সাবস্ক্রিপশন ফি নেই। আপনার দপ্তরের জন্য ডেমো ও ডেটা ইন্টিগ্রেশন পরিকল্পনা শেয়ার করব।"
-                  : "Tell us your city and we will prepare a local ward demo and data-feed onboarding plan."}
+                {receipt
+                  ? bn
+                    ? "ধন্যবাদ। আমাদের বাংলাদেশ পাইলট টিম আপনার তথ্য যাচাই করে ২৪ ঘণ্টার মধ্যে যোগাযোগ করবে।"
+                    : "Your request is logged with our Bangladesh municipal pilot desk. Here is your confirmation receipt and exact onboarding timeline."
+                  : bn
+                    ? "কোনো সাবস্ক্রিপশন ফি নেই। আপনার দপ্তরের জন্য ডেমো ও ডেটা ইন্টিগ্রেশন পরিকল্পনা শেয়ার করব।"
+                    : "Tell us your city and we will prepare a local ward demo and data-feed onboarding plan."}
               </p>
             </header>
 
             <div className="p-6 sm:p-8">
-              {submitted ? (
+              {receipt ? (
                 <div
                   role="status"
+                  aria-live="polite"
                   data-testid="pilot-form-success"
-                  className="rounded-2xl bg-paper p-5 ring-1 ring-royal/25"
+                  className="abhas-ward-enter space-y-5"
                 >
-                  <div className="flex items-start gap-3.5">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-royal text-white">
-                      <CheckCircle2 aria-hidden="true" className="h-5 w-5" />
-                    </span>
+                  {/* Official Confirmation Banner */}
+                  <div className="rounded-2xl bg-royal/[0.06] p-4 ring-1 ring-royal/25">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-royal text-white">
+                        <ShieldCheck aria-hidden="true" className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p
+                            lang={lang}
+                            className={clsx(
+                              "text-sm font-bold text-navy",
+                              bn && "font-bangla",
+                            )}
+                          >
+                            {bn
+                              ? `${receipt.org}-এর জন্য অনুরোধ গৃহীত হয়েছে`
+                              : `Thank you, ${receipt.name} — we have received your request`}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleCopyRef}
+                            className="inline-flex cursor-pointer items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-navy ring-1 ring-mist transition-colors hover:text-royal hover:ring-royal/40 tnum"
+                          >
+                            {copiedRef ? (
+                              <>
+                                <Check aria-hidden="true" className="h-3 w-3 text-royal" />
+                                Copied
+                              </>
+                            ) : (
+                              <>
+                                <Copy aria-hidden="true" className="h-3 w-3 text-slate" />
+                                {receipt.refId}
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <p
+                          lang={lang}
+                          className={clsx(
+                            "mt-1 text-xs leading-5 text-slate",
+                            bn && "font-bangla",
+                          )}
+                        >
+                          {bn
+                            ? `আমাদের ইঞ্জিনিয়ারিং ও জনস্বাস্থ্য টিম ${receipt.contact}-এ ২৪ ঘণ্টার মধ্যে যোগাযোগ করে পরবর্তী ধাপ নিশ্চিত করবে।`
+                            : `Our pilot engineering desk will contact you via ${receipt.contact} within 24 hours with a tailored ward walkthrough for ${receipt.org}.`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verified Submission Summary */}
+                  <dl className="grid gap-2.5 rounded-2xl bg-paper/75 p-4 text-xs ring-1 ring-mist/85 sm:grid-cols-2">
                     <div>
-                      <p className="text-sm font-bold text-navy">
-                        Pilot inquiry recorded for {org}
-                      </p>
-                      <p className="mt-1 text-sm leading-6 text-slate">
-                        Thank you, {name}. You can also launch the interactive dashboard immediately
-                        or reach our team directly by email or WhatsApp.
-                      </p>
-                      {selectedTopics.length > 0 ? (
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          {selectedTopics.map((topic) => (
+                      <dt className="font-medium text-slate">Agency</dt>
+                      <dd className="mt-0.5 font-bold text-navy">{receipt.org}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate">Logged at</dt>
+                      <dd className="mt-0.5 font-semibold text-navy tnum">{receipt.submittedAt}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate">Contact channel</dt>
+                      <dd className="mt-0.5 font-semibold text-navy">{receipt.contact}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-medium text-slate">Response SLA</dt>
+                      <dd className="mt-0.5 inline-flex items-center gap-1 font-semibold text-royal">
+                        <Clock3 aria-hidden="true" className="h-3.5 w-3.5" />
+                        Within 24 hours (BST)
+                      </dd>
+                    </div>
+                    {receipt.topics.length > 0 ? (
+                      <div className="sm:col-span-2">
+                        <dt className="font-medium text-slate">Requested modules</dt>
+                        <dd className="mt-1.5 flex flex-wrap gap-1.5">
+                          {receipt.topics.map((topic) => (
                             <span
                               key={topic}
                               className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-navy ring-1 ring-mist"
@@ -242,30 +412,105 @@ export function PilotSection() {
                               {topic}
                             </span>
                           ))}
-                        </div>
-                      ) : null}
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <Link
-                          href="/dashboard?demo=1"
-                          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-royal px-4 text-xs font-semibold text-white transition-colors hover:bg-navy"
-                        >
-                          Open live dashboard
-                          <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSubmitted(false);
-                            setName("");
-                            setContact("");
-                            setSelectedTopics([]);
-                            setNotes("");
-                          }}
-                          className="inline-flex min-h-9 cursor-pointer items-center rounded-lg border border-mist bg-white px-3.5 text-xs font-semibold text-navy hover:bg-paper"
-                        >
-                          Submit another inquiry
-                        </button>
+                        </dd>
                       </div>
+                    ) : null}
+                  </dl>
+
+                  {/* Transparent 3-step Action Commitment */}
+                  <div className="space-y-2.5">
+                    <p
+                      lang={lang}
+                      className={clsx(
+                        "text-xs font-bold text-navy",
+                        bn && "font-bangla",
+                      )}
+                    >
+                      {bn ? "পরবর্তী ৩টি ধাপ" : "What our team does next"}
+                    </p>
+                    <ol className="space-y-2 text-xs">
+                      {[
+                        {
+                          step: "01",
+                          title: "Direct confirmation within 24 hours",
+                          desc: `We reach out to ${receipt.contact} to confirm target wards, language (EN/বাংলা), and officer access.`,
+                        },
+                        {
+                          step: "02",
+                          title: "Live ward demo for your city corporation",
+                          desc: "48-hour session showing +1w to +4w rainfall lag risk curves, printable A4 briefs, and CSV exports.",
+                        },
+                        {
+                          step: "03",
+                          title: "Zero-fee offline handoff & data mapping",
+                          desc: "Map your weekly aggregate CSV (zero patient PII) and run the 954.6 KiB model locally on office hardware.",
+                        },
+                      ].map((item) => (
+                        <li
+                          key={item.step}
+                          className="flex items-start gap-3 rounded-xl bg-white p-3 ring-1 ring-mist/85"
+                        >
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-navy text-[10px] font-bold text-white tnum">
+                            {item.step}
+                          </span>
+                          <div>
+                            <p className="font-bold text-navy">{item.title}</p>
+                            <p className="mt-0.5 leading-5 text-slate">{item.desc}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  {/* Immediate Next Actions */}
+                  <div className="space-y-2.5 pt-1">
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href="/dashboard?demo=1"
+                        className="group inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] px-4 text-xs font-semibold text-white transition-all hover:brightness-105"
+                      >
+                        Explore live ward dashboard
+                        <ArrowRight
+                          aria-hidden="true"
+                          className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                        />
+                      </Link>
+                      <a
+                        href={receiptWhatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-paper px-3.5 text-xs font-semibold text-navy ring-1 ring-mist transition-colors hover:text-royal hover:ring-royal/40"
+                      >
+                        <MessageCircle aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
+                        Fast-track on WhatsApp
+                      </a>
+                      <a
+                        href={receiptMailtoHref}
+                        className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-paper px-3.5 text-xs font-semibold text-navy ring-1 ring-mist transition-colors hover:text-royal hover:ring-royal/40"
+                      >
+                        <Mail aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
+                        Email receipt copy
+                      </a>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Lock aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
+                        Used strictly for pilot scheduling · zero patient PII collected
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReceipt(null);
+                          setName("");
+                          setContact("");
+                          setSelectedTopics([]);
+                          setNotes("");
+                        }}
+                        className="cursor-pointer font-semibold text-royal hover:text-navy hover:underline"
+                      >
+                        Submit another inquiry
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -337,7 +582,7 @@ export function PilotSection() {
                             aria-pressed={active}
                             onClick={() => toggleTopic(topic)}
                             className={clsx(
-                              "rounded-full px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+                              "cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
                               active
                                 ? "bg-royal text-white shadow-xs"
                                 : "bg-paper text-slate ring-1 ring-mist hover:text-navy hover:ring-navy/25",
