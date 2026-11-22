@@ -194,8 +194,8 @@ export function Faq() {
                     />
                   </span>
                 </summary>
-                <div className="border-t border-mist/70 mx-5 pt-4 pb-5">
-                  <p className={clsx("max-w-[64ch] pl-10 text-sm leading-7 text-slate", bn && "font-bangla")}>
+                <div className="border-t border-mist/70 mx-4 pt-3.5 pb-4 sm:mx-5 sm:pt-4 sm:pb-5">
+                  <p className={clsx("max-w-[64ch] text-sm leading-7 text-slate sm:pl-10", bn && "font-bangla")}>
                     {bn ? item.aBn : item.aEn}
                   </p>
                 </div>

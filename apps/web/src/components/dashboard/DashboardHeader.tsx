@@ -121,7 +121,7 @@ export function DashboardHeader({
             aria-label="Weather data source"
             title={weatherBadgeText}
             className={clsx(
-              "inline-flex min-h-10 items-center rounded-full p-0.5 ring-1 max-sm:hidden",
+              "inline-flex min-h-9 items-center rounded-full p-0.5 ring-1 sm:min-h-10",
               dark ? "bg-white/5 ring-white/15" : "bg-paper ring-mist",
             )}
           >
@@ -131,7 +131,7 @@ export function DashboardHeader({
               aria-pressed={weatherMode === "dataset"}
               onClick={() => onChangeWeatherMode("dataset")}
               className={clsx(
-                "min-h-9 cursor-pointer rounded-full px-3 text-xs font-semibold transition-colors",
+                "min-h-8 cursor-pointer rounded-full px-2.5 text-[11px] font-semibold transition-colors sm:min-h-9 sm:px-3 sm:text-xs",
                 bn && "font-bangla",
                 weatherMode === "dataset"
                   ? "bg-navy text-white"
@@ -148,7 +148,7 @@ export function DashboardHeader({
               aria-pressed={weatherMode === "live"}
               onClick={() => onChangeWeatherMode("live")}
               className={clsx(
-                "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors",
+                "inline-flex min-h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-[11px] font-semibold transition-colors sm:min-h-9 sm:gap-1.5 sm:px-3 sm:text-xs",
                 bn && "font-bangla",
                 weatherMode === "live"
                   ? "bg-royal text-white"
@@ -157,8 +157,9 @@ export function DashboardHeader({
                     : "text-slate hover:text-navy",
               )}
             >
-              <CloudRain aria-hidden="true" className="h-3.5 w-3.5" />
-              {bn ? "লাইভ আবহাওয়া" : "Live Open-Meteo"}
+              <CloudRain aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+              <span className="sm:hidden">{bn ? "লাইভ" : "Live"}</span>
+              <span className="hidden sm:inline">{bn ? "লাইভ আবহাওয়া" : "Live Open-Meteo"}</span>
             </button>
           </div>
         ) : (

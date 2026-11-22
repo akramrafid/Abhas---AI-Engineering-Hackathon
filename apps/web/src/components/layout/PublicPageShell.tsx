@@ -28,11 +28,22 @@ export function PublicPageShell({ title, subtitle, children }: PublicPageShellPr
           </nav>
           <Link
             href="/dashboard?demo=1"
-            className="inline-flex min-h-9 items-center rounded-full bg-royal px-4 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-royal sm:text-sm"
+            className="inline-flex min-h-9 shrink-0 whitespace-nowrap items-center rounded-full bg-royal px-3.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-royal sm:px-4 sm:text-sm"
           >
             Open dashboard
           </Link>
         </div>
+        {/* Mobile/tablet scrollable secondary navigation bar */}
+        <nav
+          aria-label="Mobile Secondary"
+          className="flex items-center gap-4 overflow-x-auto border-t border-white/10 px-4 py-2 text-xs font-medium text-mist md:hidden"
+        >
+          <Link href="/docs" className="shrink-0 hover:text-white">Docs</Link>
+          <Link href="/security" className="shrink-0 hover:text-white">Security</Link>
+          <Link href="/status" className="shrink-0 hover:text-white">Status</Link>
+          <Link href="/about" className="shrink-0 hover:text-white">About</Link>
+          <Link href="/contact" className="shrink-0 hover:text-white">Pilot &amp; Contact</Link>
+        </nav>
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-8 sm:py-16">

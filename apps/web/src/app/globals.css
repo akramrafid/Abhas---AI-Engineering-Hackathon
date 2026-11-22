@@ -134,6 +134,11 @@
 }
 
 /* Browser surfaces carry the brand: selection, caret, scrollbar. */
+html,
+body {
+  overflow-x: clip;
+}
+
 ::selection {
   background-color: var(--color-royal);
   color: var(--color-white);
@@ -153,11 +158,6 @@ html {
 
 .print-only {
   display: none;
-}
-
-::selection {
-  background-color: rgba(47, 91, 255, 0.16);
-  color: var(--color-navy);
 }
 
 @keyframes abhas-ward-enter {

@@ -177,7 +177,7 @@ export function SelectionBar({
                     }
                   }}
                   placeholder={copy.wardFilterPlaceholder}
-                  className="w-32 rounded-full border border-mist/90 bg-paper/70 py-0.5 pl-6 pr-2.5 text-[11px] font-medium text-ink placeholder:text-slate/75 transition-all hover:border-royal/40 focus-visible:w-36 focus-visible:border-royal focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal/15"
+                  className="w-28 rounded-full border border-mist/90 bg-paper/70 py-0.5 pl-6 pr-2.5 text-[11px] font-medium text-ink placeholder:text-slate/75 transition-all hover:border-royal/40 focus-visible:w-32 focus-visible:border-royal focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal/15 sm:w-32 sm:focus-visible:w-36"
                 />
               </div>
             </div>
@@ -228,7 +228,7 @@ export function SelectionBar({
               data-testid="window-toggle"
               role="group"
               aria-label="Forecast horizon window"
-              className="relative inline-flex min-h-10 items-center rounded-xl border border-mist/95 bg-paper/80 p-1"
+              className="relative inline-flex min-h-10 w-full items-center justify-between rounded-xl border border-mist/95 bg-paper/80 p-1 sm:w-auto"
             >
               <span
                 ref={togglePillRef}
@@ -245,7 +245,7 @@ export function SelectionBar({
                     aria-pressed={active}
                     onClick={() => onChangeWindow(w.id)}
                     className={clsx(
-                      "relative z-10 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold tnum transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+                      "relative z-10 flex-1 cursor-pointer rounded-lg px-2.5 py-1.5 text-center text-xs font-semibold tnum transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal sm:flex-none sm:px-3",
                       lang === "bn" && "font-bangla",
                       active ? "text-white" : "text-navy hover:text-royal",
                     )}

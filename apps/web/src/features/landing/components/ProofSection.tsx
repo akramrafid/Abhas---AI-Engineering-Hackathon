@@ -326,7 +326,7 @@ function MaeBar({
   bn?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[8.5rem_minmax(0,1fr)_3rem] items-center gap-3 text-sm">
+    <div className="grid grid-cols-[minmax(0,6.5rem)_minmax(0,1fr)_2.75rem] items-center gap-2.5 text-xs sm:grid-cols-[8.5rem_minmax(0,1fr)_3rem] sm:gap-3 sm:text-sm">
       <span className={clsx(strong ? "font-semibold text-ink" : "text-slate", bn && "font-bangla")}>{label}</span>
       <span aria-hidden="true" className="h-2.5 rounded-full bg-mist">
         <span

@@ -27,26 +27,30 @@ export function ContainerScroll({ title, children }: ContainerScrollProps) {
         const trigger = { trigger: scope.current, start: "top bottom", end: "center center", scrub: 0.6 };
         gsap.fromTo(
           "[data-cs-card]",
-          { rotateX: 20, scale: mobile ? 0.7 : 1.05 },
-          { rotateX: 0, scale: mobile ? 0.9 : 1, ease: "none", scrollTrigger: trigger },
+          { rotateX: mobile ? 10 : 18, scale: mobile ? 0.94 : 1.0 },
+          { rotateX: 0, scale: 1, ease: "none", scrollTrigger: trigger },
         );
-        gsap.fromTo("[data-cs-title], [data-cs-card]", { y: 0 }, { y: -100, ease: "none", scrollTrigger: trigger });
+        gsap.fromTo(
+          "[data-cs-title], [data-cs-card]",
+          { y: 0 },
+          { y: mobile ? -24 : -72, ease: "none", scrollTrigger: trigger },
+        );
       });
     },
     { scope },
   );
 
   return (
-    <div ref={scope} className="relative flex items-center justify-center px-2 py-10 md:px-20 md:py-28">
+    <div ref={scope} className="relative flex items-center justify-center overflow-x-clip px-3 py-10 sm:px-6 md:px-14 md:py-24 lg:px-20">
       <div className="w-full [perspective:1000px]">
         <div data-cs-title className="mx-auto max-w-5xl text-center">
           {title}
         </div>
         <div
           data-cs-card
-          className="mx-auto mt-10 w-full max-w-6xl rounded-[30px] bg-navy p-2 shadow-[0_9px_20px_color-mix(in_srgb,var(--color-ink)_29%,transparent),0_37px_37px_color-mix(in_srgb,var(--color-ink)_26%,transparent),0_84px_50px_color-mix(in_srgb,var(--color-ink)_15%,transparent)] ring-1 ring-white/15 md:p-4"
+          className="mx-auto mt-8 w-full max-w-6xl rounded-[22px] bg-navy p-2 shadow-[0_9px_20px_color-mix(in_srgb,var(--color-ink)_29%,transparent),0_37px_37px_color-mix(in_srgb,var(--color-ink)_26%,transparent),0_84px_50px_color-mix(in_srgb,var(--color-ink)_15%,transparent)] ring-1 ring-white/15 sm:mt-10 sm:rounded-[30px] md:p-4"
         >
-          <div className="overflow-hidden rounded-[22px] bg-ink">{children}</div>
+          <div className="overflow-hidden rounded-[16px] bg-ink sm:rounded-[22px]">{children}</div>
         </div>
       </div>
     </div>

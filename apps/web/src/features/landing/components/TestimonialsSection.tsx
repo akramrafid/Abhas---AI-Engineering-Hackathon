@@ -390,7 +390,7 @@ export function TestimonialsSection() {
                   tabIndex={isDuplicate ? -1 : 0}
                   onClick={() => setActiveIndex(voiceIndex)}
                   className={clsx(
-                    "group flex w-[320px] shrink-0 cursor-pointer flex-col justify-between rounded-[18px] bg-white p-5 text-left shadow-[0_1px_2px_rgba(11,26,92,0.04),0_12px_28px_-18px_rgba(11,26,92,0.12)] ring-1 transition-all duration-200 hover:-translate-y-0.5 hover:ring-royal/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal sm:w-[355px]",
+                    "group flex w-[280px] shrink-0 cursor-pointer flex-col justify-between rounded-[18px] bg-white p-5 text-left shadow-[0_1px_2px_rgba(11,26,92,0.04),0_12px_28px_-18px_rgba(11,26,92,0.12)] ring-1 transition-all duration-200 hover:-translate-y-0.5 hover:ring-royal/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal sm:w-[350px]",
                     isDuplicate && "motion-reduce:hidden",
                     isCurrent ? "ring-royal/50 bg-paper/45" : "ring-mist/90",
                   )}

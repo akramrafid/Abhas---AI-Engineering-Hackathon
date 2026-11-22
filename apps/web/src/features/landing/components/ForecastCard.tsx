@@ -72,7 +72,7 @@ export function ForecastCard({ className }: { className?: string }) {
           </p>
           <ul className="mt-5 space-y-2.5" aria-label={bn ? "প্রধান কারণসমূহ" : "Main drivers"}>
             {drivers.map((driver) => (
-              <li key={driver.key} className="grid grid-cols-[8.5rem_minmax(0,1fr)_3.75rem] items-center gap-3 text-sm">
+              <li key={driver.key} className="grid grid-cols-[minmax(0,7rem)_minmax(0,1fr)_3.25rem] items-center gap-2.5 text-xs sm:grid-cols-[8.5rem_minmax(0,1fr)_3.75rem] sm:gap-3 sm:text-sm">
                 <span className={bn ? "font-bangla" : undefined}>{formatDriverLabel(driver, lang)}</span>
                 <span aria-hidden="true" className="h-2 rounded-full bg-paper">
                   <span

@@ -293,15 +293,27 @@ function ChatWidgetInner() {
     return null;
   }
 
+  const isDashboard = pathname?.startsWith("/dashboard");
+
   return (
-    <div className="no-print fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div
+      className={clsx(
+        "no-print fixed right-3 z-50 flex flex-col items-end gap-3 sm:right-5",
+        isDashboard ? "bottom-24 lg:bottom-5" : "bottom-4 sm:bottom-5",
+      )}
+    >
       {/* Chat panel */}
       {open ? (
         <section
           role="dialog"
           aria-label="Abhas AI Assistant"
           data-testid="abhas-chat-dialog"
-          className="flex h-[min(600px,calc(100svh-6rem))] w-[min(420px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/95 shadow-[0_24px_64px_-12px_rgba(11,15,20,0.45),0_8px_24px_-6px_rgba(47,91,255,0.22)] backdrop-blur-2xl"
+          className={clsx(
+            "flex w-[min(420px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-2xl border border-white/20 bg-white/95 shadow-[0_24px_64px_-12px_rgba(11,15,20,0.45),0_8px_24px_-6px_rgba(47,91,255,0.22)] backdrop-blur-2xl",
+            isDashboard
+              ? "h-[min(560px,calc(100svh-10.5rem))] lg:h-[min(600px,calc(100svh-6rem))]"
+              : "h-[min(600px,calc(100svh-5.5rem))]",
+          )}
         >
           {/* Liquid-glass dark header */}
           <header className="relative flex items-center justify-between gap-2 overflow-hidden bg-gradient-to-r from-ink via-navy to-ink px-4 py-3 text-white">

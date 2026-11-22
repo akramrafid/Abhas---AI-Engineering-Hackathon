@@ -9,9 +9,9 @@ import type { Lang } from "@/lib/i18n";
 import { UserMenu } from "./UserMenu";
 
 const quiet =
-  "inline-flex min-h-9 items-center rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-[0.97]";
+  "hidden min-[460px]:inline-flex min-h-9 whitespace-nowrap items-center rounded-full border border-white/15 bg-white/[0.06] px-3 text-xs font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-[0.97] sm:px-4 sm:text-sm";
 const solid =
-  "relative inline-flex min-h-9 items-center overflow-hidden rounded-full bg-royal px-4 text-sm font-semibold text-white shadow-[0_6px_20px_-4px_rgba(47,91,255,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-300 hover:bg-white hover:text-royal hover:shadow-[0_8px_24px_-4px_rgba(255,255,255,0.4)] active:scale-[0.97]";
+  "relative inline-flex min-h-9 whitespace-nowrap items-center overflow-hidden rounded-full bg-royal px-3 text-xs font-semibold text-white shadow-[0_6px_20px_-4px_rgba(47,91,255,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all duration-300 hover:bg-white hover:text-royal hover:shadow-[0_8px_24px_-4px_rgba(255,255,255,0.4)] active:scale-[0.97] sm:px-4 sm:text-sm";
 
 /** Sign in / Create account when signed out; Dashboard + account menu when signed in. */
 export function AuthControls({ className }: { className?: string }) {

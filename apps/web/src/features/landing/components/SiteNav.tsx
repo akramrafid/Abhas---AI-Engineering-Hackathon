@@ -512,15 +512,25 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
                     </li>
                   );
                 })}
-                <li className="mt-1 flex items-center justify-between border-t border-white/10 pt-2.5 px-2">
-                  <Link
-                    href="/about"
-                    tabIndex={mobileMenuOpen ? 0 : -1}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-xs font-medium text-mist hover:text-white"
-                  >
-                    About &amp; Team
-                  </Link>
+                <li className="mt-1 flex flex-wrap items-center justify-between gap-2 border-t border-white/10 px-2 pt-2.5">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href="/sign-in"
+                      tabIndex={mobileMenuOpen ? 0 : -1}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={clsx("text-xs font-semibold text-white hover:text-mist min-[460px]:hidden", lang === "bn" && "font-bangla")}
+                    >
+                      {lang === "bn" ? "সাইন ইন" : "Sign in"}
+                    </Link>
+                    <Link
+                      href="/about"
+                      tabIndex={mobileMenuOpen ? 0 : -1}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={clsx("text-xs font-medium text-mist hover:text-white", lang === "bn" && "font-bangla")}
+                    >
+                      {lang === "bn" ? "আমাদের সম্পর্কে" : "About & Team"}
+                    </Link>
+                  </div>
                   <div className="inline-flex items-center rounded-full border border-white/15 bg-white/[0.06] p-0.5">
                     {(["en", "bn"] as const).map((code) => (
                       <button
