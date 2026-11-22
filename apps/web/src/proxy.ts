@@ -1,9 +1,10 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { AUTH_ENABLED, SIGN_IN_URL, SIGN_UP_URL } from "@/lib/auth-config";
 
 // The dashboard used to live at "/". Old links such as "/?demo=1" keep working.
 const DASHBOARD_PARAMS = ["demo", "ward", "origin", "window", "tab", "lang"];
+const isDashboardRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 function redirectLegacyDashboardUrl(req: NextRequest): NextResponse | null {
   const { pathname, searchParams } = req.nextUrl;
@@ -15,9 +16,19 @@ function redirectLegacyDashboardUrl(req: NextRequest): NextResponse | null {
   return NextResponse.redirect(url);
 }
 
-// Clerk only attaches the session here; the dashboard layout enforces sign-in (resource-based check).
+// Enforce Clerk sign-in immediately when navigating to /dashboard (defense-in-depth with dashboard/layout.tsx).
 const withClerk = clerkMiddleware(
-  async (_auth, req) => redirectLegacyDashboardUrl(req) ?? NextResponse.next(),
+  async (auth, req) => {
+    const legacy = redirectLegacyDashboardUrl(req);
+    if (legacy) return legacy;
+    if (isDashboardRoute(req)) {
+      const session = await auth();
+      if (!session.userId) {
+        return session.redirectToSignIn({ returnBackUrl: req.url });
+      }
+    }
+    return NextResponse.next();
+  },
   { signInUrl: SIGN_IN_URL, signUpUrl: SIGN_UP_URL },
 );
 
