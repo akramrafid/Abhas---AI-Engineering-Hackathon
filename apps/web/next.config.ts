@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "cdn.21st.dev" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {
