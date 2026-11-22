@@ -1,8 +1,11 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { Show } from "@clerk/nextjs";
 import { clsx } from "clsx";
 import { AUTH_ENABLED, SIGN_IN_URL, SIGN_UP_URL } from "@/lib/auth-config";
+import type { Lang } from "@/lib/i18n";
 import { UserMenu } from "./UserMenu";
 
 const quiet =
@@ -12,11 +15,35 @@ const solid =
 
 /** Sign in / Create account when signed out; Dashboard + account menu when signed in. */
 export function AuthControls({ className }: { className?: string }) {
+  const [lang, setLang] = useState<Lang>("en");
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("abhas-lang");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved === "bn" || saved === "en") setLang(saved);
+    } catch {
+      // ignore
+    }
+    const onLang = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      if (detail === "bn" || detail === "en") setLang(detail);
+    };
+    window.addEventListener("abhas:lang", onLang);
+    return () => window.removeEventListener("abhas:lang", onLang);
+  }, []);
+
+  const bn = lang === "bn";
+  const dashboardHref = bn ? "/dashboard?lang=bn" : "/dashboard";
+  const signInLabel = bn ? "সাইন ইন" : "Sign in";
+  const signUpLabel = bn ? "অ্যাকাউন্ট খুলুন" : "Create account";
+  const dashboardLabel = bn ? "ড্যাশবোর্ড খুলুন" : "Open dashboard";
+
   if (!AUTH_ENABLED) {
     return (
       <div className={clsx("flex items-center gap-2", className)}>
-        <Link href="/dashboard" className={solid} data-testid="nav-dashboard-link">
-          Open dashboard
+        <Link href={dashboardHref} className={clsx(solid, bn && "font-bangla")} data-testid="nav-dashboard-link">
+          {dashboardLabel}
         </Link>
       </div>
     );
@@ -25,16 +52,16 @@ export function AuthControls({ className }: { className?: string }) {
     <div className={clsx("flex items-center gap-2", className)}>
       <Suspense fallback={<span className="inline-block h-10 w-44" aria-hidden="true" />}>
         <Show when="signed-out">
-          <Link href={SIGN_IN_URL} className={quiet} data-testid="nav-sign-in">
-            Sign in
+          <Link href={SIGN_IN_URL} className={clsx(quiet, bn && "font-bangla")} data-testid="nav-sign-in">
+            {signInLabel}
           </Link>
-          <Link href={SIGN_UP_URL} className={solid} data-testid="nav-sign-up">
-            Create account
+          <Link href={SIGN_UP_URL} className={clsx(solid, bn && "font-bangla")} data-testid="nav-sign-up">
+            {signUpLabel}
           </Link>
         </Show>
         <Show when="signed-in">
-          <Link href="/dashboard" className={solid} data-testid="nav-dashboard-link">
-            Open dashboard
+          <Link href={dashboardHref} className={clsx(solid, bn && "font-bangla")} data-testid="nav-dashboard-link">
+            {dashboardLabel}
           </Link>
           <UserMenu />
         </Show>

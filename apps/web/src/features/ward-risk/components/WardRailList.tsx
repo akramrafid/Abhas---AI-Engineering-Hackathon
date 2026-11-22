@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { clsx } from "clsx";
-import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
+import { RiskTierBadge, TIER_META, TIER_ORDER } from "@/components/brand/RiskTierBadge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { City, HorizonForecast, RiskTier, WardForecast } from "@/lib/api/client";
 import { UI_COPY, type Lang } from "@/lib/i18n";
@@ -68,12 +68,13 @@ export function WardRailList({
             onClick={() => setTierFilter("all")}
             className={clsx(
               "cursor-pointer rounded-full px-2.5 py-0.5 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+              lang === "bn" && "font-bangla",
               tierFilter === "all"
                 ? "bg-navy text-white"
                 : "bg-white text-slate ring-1 ring-mist hover:text-navy",
             )}
           >
-            All ({sortedForecasts.length})
+            {lang === "bn" ? `সব (${sortedForecasts.length})` : `All (${sortedForecasts.length})`}
           </button>
           {([...TIER_ORDER].reverse() as RiskTier[]).map((t) => {
             const count = tierCounts[t];
@@ -87,6 +88,7 @@ export function WardRailList({
                 onClick={() => setTierFilter(active ? "all" : t)}
                 className={clsx(
                   "rounded-full px-2 py-0.5 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+                  lang === "bn" && "font-bangla",
                   count === 0
                     ? "cursor-default bg-white/50 text-slate/55 ring-1 ring-mist/60"
                     : active
@@ -94,7 +96,7 @@ export function WardRailList({
                       : "cursor-pointer bg-white text-slate ring-1 ring-mist hover:text-navy",
                 )}
               >
-                {t} {count}
+                {lang === "bn" ? TIER_META[t].labelBn : t} {count}
               </button>
             );
           })}

@@ -71,6 +71,25 @@ function ChatWidgetInner() {
   const [open, setOpen] = useState(false);
   const [langOverride, setLangOverride] = useState<"en" | "bn" | null>(null);
   const lang: "en" | "bn" = langOverride ?? urlLang;
+
+  // Stay synchronized whenever the user switches EN <-> বাংলা anywhere on the site.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("abhas-lang");
+      if (saved === "bn" || saved === "en") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLangOverride(saved);
+      }
+    } catch {
+      // ignore
+    }
+    const onLang = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      if (detail === "bn" || detail === "en") setLangOverride(detail);
+    };
+    window.addEventListener("abhas:lang", onLang);
+    return () => window.removeEventListener("abhas:lang", onLang);
+  }, []);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);

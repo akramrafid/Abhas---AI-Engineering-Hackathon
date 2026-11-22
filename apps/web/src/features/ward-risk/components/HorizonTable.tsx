@@ -43,13 +43,13 @@ export function HorizonTable({
           className="w-full border-collapse text-left text-sm"
         >
           <thead>
-            <tr className="border-b border-mist/85 bg-paper/75 text-[11px] font-semibold uppercase tracking-[0.04em] text-slate">
-              <th scope="col" className="px-4 py-2.5">Horizon</th>
-              <th scope="col" className="px-3 py-2.5">Target week</th>
-              <th scope="col" className="px-3 py-2.5 text-right">Expected</th>
-              <th scope="col" className="px-3 py-2.5 text-right">80% band</th>
-              <th scope="col" className="px-3 py-2.5 text-right">Score</th>
-              <th scope="col" className="px-4 py-2.5">Tier</th>
+            <tr className={clsx("border-b border-mist/85 bg-paper/75 text-[11px] font-semibold uppercase tracking-[0.04em] text-slate", lang === "bn" && "font-bangla tracking-normal")}>
+              <th scope="col" className="px-4 py-2.5">{lang === "bn" ? "সময়সীমা" : "Horizon"}</th>
+              <th scope="col" className="px-3 py-2.5">{lang === "bn" ? "লক্ষ্য সপ্তাহ" : "Target week"}</th>
+              <th scope="col" className="px-3 py-2.5 text-right">{lang === "bn" ? "প্রত্যাশিত" : "Expected"}</th>
+              <th scope="col" className="px-3 py-2.5 text-right">{lang === "bn" ? "৮০% পরিসর" : "80% band"}</th>
+              <th scope="col" className="px-3 py-2.5 text-right">{lang === "bn" ? "স্কোর" : "Score"}</th>
+              <th scope="col" className="px-4 py-2.5">{lang === "bn" ? "ঝুঁকির স্তর" : "Tier"}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-mist/75">

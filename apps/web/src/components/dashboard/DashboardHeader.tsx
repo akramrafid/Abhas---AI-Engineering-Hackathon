@@ -97,7 +97,9 @@ export function DashboardHeader({
           )}
         >
           <Search aria-hidden="true" className="h-4 w-4" />
-          <span className="flex-1">Search wards and views</span>
+          <span className={clsx("flex-1", bn && "font-bangla")}>
+            {bn ? "ওয়ার্ড ও ভিউ খুঁজুন" : "Search wards and views"}
+          </span>
           <kbd className="font-mono text-[11px]">Ctrl K</kbd>
         </button>
       ) : null}

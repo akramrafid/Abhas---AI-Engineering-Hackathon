@@ -209,31 +209,33 @@ export function PeakTierCard({
         ) : null}
 
         {escalated ? (
-          <div className="flex items-start gap-2.5 rounded-xl bg-paper px-3.5 py-2.5 text-xs font-medium text-navy ring-1 ring-risk-medium/70">
+          <div className={clsx("flex items-start gap-2.5 rounded-xl bg-paper px-3.5 py-2.5 text-xs font-medium text-navy ring-1 ring-risk-medium/70", lang === "bn" && "font-bangla")}>
             <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-navy" />
             <p>
-              Upper 80% bound (P90) exceeds this ward&apos;s seasonal endemic threshold — tier escalated by +1 level.
+              {lang === "bn"
+                ? "সর্বোচ্চ ৮০% সীমা (P90) এই ওয়ার্ডের মৌসুমি এন্ডেমিক সীমা অতিক্রম করেছে — ঝুঁকির স্তর +১ ধাপ বাড়ানো হয়েছে।"
+                : "Upper 80% bound (P90) exceeds this ward's seasonal endemic threshold — tier escalated by +1 level."}
             </p>
           </div>
         ) : null}
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-mist/80 pt-3.5">
           {wardMeta ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate">
+            <div className={clsx("flex flex-wrap items-center gap-2 text-xs text-slate", lang === "bn" && "font-bangla")}>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
-                Water-logging
+                {lang === "bn" ? "জলাবদ্ধতা" : "Water-logging"}
                 <strong className="font-bold text-navy tnum">
                   {wardMeta.water_logging_risk_index.toFixed(2)}
                 </strong>
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
-                Density
+                {lang === "bn" ? "জনঘনত্ব" : "Density"}
                 <strong className="font-bold text-navy tnum">
                   {Math.round(wardMeta.population_density_sqkm).toLocaleString()} / km²
                 </strong>
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
-                Sanitation
+                {lang === "bn" ? "স্যানিটেশন" : "Sanitation"}
                 <strong className="font-bold text-navy tnum">
                   {wardMeta.sanitation_score.toFixed(2)}
                 </strong>

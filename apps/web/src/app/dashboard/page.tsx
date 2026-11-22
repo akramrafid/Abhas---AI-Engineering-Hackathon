@@ -75,9 +75,34 @@ function DashboardWorkspace() {
   const [activeTab, setActiveTab] = useState<DashboardTab>(() =>
     isDashboardTab(urlTabParam) ? urlTabParam : "ward-risk",
   );
-  const [lang, setLang] = useState<Lang>(() =>
-    isLang(urlLangParam) ? urlLangParam : "en",
-  );
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (isLang(urlLangParam)) return urlLangParam;
+    return "en";
+  });
+
+  // Sync saved language preference from landing page when ?lang= is not pinned in URL.
+  useEffect(() => {
+    if (isLang(urlLangParam)) return;
+    try {
+      const saved = window.localStorage.getItem("abhas-lang");
+      if (saved === "bn" || saved === "en") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setLangState(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, [urlLangParam]);
+
+  const setLang = useCallback((next: Lang) => {
+    setLangState(next);
+    try {
+      window.localStorage.setItem("abhas-lang", next);
+      window.dispatchEvent(new CustomEvent("abhas:lang", { detail: next }));
+    } catch {
+      // ignore
+    }
+  }, []);
   const [cityOverride, setCityOverride] = useState<City | null>(null);
   const [wardOverride, setWardOverride] = useState<string | null>(null);
   const [originWeekOverride, setOriginWeekOverride] = useState<string | null>(
@@ -374,10 +399,13 @@ function DashboardWorkspace() {
             data-testid="export-csv"
             onClick={exportCsv}
             disabled={signals.exportRows.length < 2}
-            className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] px-5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className={clsx(
+              "inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] px-5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              lang === "bn" && "font-bangla",
+            )}
           >
             <Download aria-hidden="true" className="h-4 w-4" />
-            Export forecasts CSV
+            {lang === "bn" ? "পূর্বাভাস CSV ডাউনলোড" : "Export forecasts CSV"}
           </button>
         </header>
 
@@ -550,13 +578,14 @@ function DashboardWorkspace() {
       ) : null}
 
       <footer className={clsx("no-print mb-20 lg:mb-0", dark ? "text-mist" : "text-slate")}>
-        <div className="mx-auto flex max-w-[96rem] flex-wrap items-center justify-between gap-3 px-5 py-5 text-xs">
+        <div className={clsx("mx-auto flex max-w-[96rem] flex-wrap items-center justify-between gap-3 px-5 py-5 text-xs", lang === "bn" && "font-bangla")}>
           <span>
-            Abhas (<span lang="bn" className="font-bangla">আভাস</span>) · Multi-week rainfall lag
-            early warning · Weather data by Open-Meteo.com (CC BY 4.0)
+            {lang === "bn"
+              ? "আভাস · বহু-সপ্তাহের বৃষ্টিপাতভিত্তিক ডেঙ্গু আগাম সতর্কতা · আবহাওয়া Open-Meteo.com (CC BY 4.0)"
+              : "Abhas · Multi-week rainfall lag early warning · Weather data by Open-Meteo.com (CC BY 4.0)"}
           </span>
           <Link href="/brand" className={clsx("font-semibold hover:underline", dark ? "text-white" : "text-royal")}>
-            Brand tokens &amp; tier scale
+            {lang === "bn" ? "ব্র্যান্ড টোকেন ও ঝুঁকির স্তর" : "Brand tokens & tier scale"}
           </Link>
         </div>
       </footer>

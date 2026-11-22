@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { clsx } from "clsx";
 import {
   isUnknownWardError,
   type City,
@@ -232,17 +233,17 @@ export function WardForecastView({
                   {copy.trajectoryDesc}
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-3 text-xs font-medium text-slate">
+              <div className={clsx("flex items-center gap-3 text-xs font-medium text-slate", lang === "bn" && "font-bangla")}>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
                   <span className="h-0.5 w-3.5 rounded-full bg-royal" aria-hidden="true" />
-                  Expected cases
+                  {lang === "bn" ? "প্রত্যাশিত রোগী" : "Expected cases"}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
                   <span
                     className="h-2.5 w-3.5 rounded-xs border border-royal/30 bg-forecast-band"
                     aria-hidden="true"
                   />
-                  80% band
+                  {lang === "bn" ? "৮০% পরিসর" : "80% band"}
                 </span>
               </div>
             </CardHeader>
