@@ -1,150 +1,434 @@
-# Abhas (আভাস) — Dengue Early-Warning Operations Console
+<div align="center">
 
-> **Rain today. Outbreak risk in three weeks. Act now.**  
-> *আজ বৃষ্টি। তিন সপ্তাহ পরে ঝুঁকি। এখনই ব্যবস্থা নিন।*
+# ABHAS · আভাস
 
-Abhas is a production-grade dengue early-warning operations console built for Bangladesh municipal health officers. It translates multi-week monsoon rainfall surges into actionable, ward-level outbreak risk forecasts 1–4 weeks in advance across 60 city corporation wards in Dhaka, Chattogram, Khulna, and Rajshahi.
+### Ward-Level Urban Dengue Early-Warning Operations Console
 
-![Abhas Operations Console](docs/ux/screenshots/dashboard.png)
+**Rain today. Outbreak risk in three weeks. Act now.**  
+*আজ বৃষ্টি। তিন সপ্তাহ পরে ঝুঁকি। এখনই ব্যবস্থা নিন।*
+
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-0B1A5C?style=flat-square&logo=python&logoColor=white)](apps/api/pyproject.toml)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Modular%20Monolith-2F5BFF?style=flat-square&logo=fastapi&logoColor=white)](apps/api/README.md)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16%20App%20Router-0B0F14?style=flat-square&logo=nextdotjs&logoColor=white)](apps/web/README.md)
+[![LightGBM](https://img.shields.io/badge/LightGBM-954%20KiB%20CPU-2F5BFF?style=flat-square)](docs/model-card.md)
+[![Open-Meteo](https://img.shields.io/badge/Weather-Open--Meteo%20CC%20BY%204.0-0B1A5C?style=flat-square)](apps/api/config/city_centroids.json)
+[![WCAG 2.2 AA](https://img.shields.io/badge/Accessibility-WCAG%202.2%20AA-15803D?style=flat-square)](docs/brand/BRAND.md)
+[![Red-Team](https://img.shields.io/badge/Security%20Red--Team-30%2F30%20Pass-15803D?style=flat-square)](docs/threat-model.md)
+[![Zero Keys](https://img.shields.io/badge/Local%20Setup-Zero%20API%20Keys%20%C2%B7%20%E2%89%A43%20min-D4F53C?style=flat-square&labelColor=0B0F14)](#quick-start--3-minutes-zero-api-keys)
+
+</div>
 
 ---
 
-## Run it
+**Abhas (আভাস)** is a production-grade dengue early-warning operations console engineered for Bangladesh municipal health offices. It models the 2-to-4-week *Aedes aegypti* vector breeding clock to translate weekly rainfall, temperature, humidity, and hyper-local ward vulnerability (`water_logging_risk_index`, `population_density_sqkm`, `sanitation_score`) into calibrated 1–4 week outbreak risk forecasts across **60 wards in five Bangladesh city corporations**: **Dhaka North (DNCC)**, **Dhaka South (DSCC)**, **Chattogram (CCC)**, **Gazipur (GCC)**, and **Narayanganj (NCC)**.
 
-Abhas runs out of the box with **zero API keys** and zero external services.
+<p align="center">
+  <img src="docs/ux/screenshots/dashboard.png" alt="Abhas Ward Forecast Operations Console" width="100%" />
+</p>
+
+<details>
+<summary><strong>Explore more console views (Mobile, City Heatmap, Rain Lags, What-If Sandbox, Locked Validation)</strong></summary>
+<br />
+<table>
+  <tr>
+    <td><img src="docs/ux/screenshots/lags.png" alt="Multi-Week Rainfall Lag Explorer" /><br /><sub><strong>Multi-Week Rainfall Lag Explorer</strong> (Peak r = 0.47 at lag 3)</sub></td>
+    <td><img src="docs/ux/screenshots/scenario.png" alt="What-If Weather Scenario Sandbox" /><br /><sub><strong>What-If Weather Scenario Sandbox</strong> (Counterfactual storm deltas)</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/ux/screenshots/heatmap.png" alt="City Ward Risk Heatmap" /><br /><sub><strong>City Ward Risk Matrix</strong> (Worst-first zonal triage)</sub></td>
+    <td><img src="docs/ux/screenshots/validation.png" alt="Locked 2024-2025 Validation Dashboard" /><br /><sub><strong>Chronological Hold-Out Validation</strong> (MAE, coverage, confusion matrix)</sub></td>
+  </tr>
+</table>
+</details>
+
+---
+
+## Table of Contents
+
+- [Why Abhas](#why-abhas)
+- [Quick Start (≤ 3 Minutes, Zero API Keys)](#quick-start--3-minutes-zero-api-keys)
+- [Animated Data Flow Diagram](#animated-data-flow-diagram)
+- [Animated System Design Diagram](#animated-system-design-diagram)
+- [Animated Entity Relationship Diagram (ERD)](#animated-entity-relationship-diagram-erd)
+- [Core Capabilities & API Reference](#core-capabilities--api-reference)
+- [Model Performance & Chronological Validation](#model-performance--chronological-validation)
+- [Repository Layout & Branch Strategy](#repository-layout--branch-strategy)
+- [Testing, Security & Quality Gates](#testing-security--quality-gates)
+- [AI & External Services Disclosure](#ai--external-services-disclosure)
+- [Known Limitations](#known-limitations)
+
+---
+
+## Why Abhas
+
+| Operational Reality | How Abhas Solves It |
+|---|---|
+| **3-week blind spot:** Hospital admissions spike 2–4 weeks after heavy rain, long after mosquito breeding begins. | Computes grouped multi-week rainfall lags (`0–8` weeks, peak `r = 0.468` at week 3) per `ward_id` with zero future data leakage. |
+| **Uneven ward vulnerability:** Identical rainfall floods one ward while sparing its neighbor. | Combines lagged weather with ward-level `water_logging_risk_index`, `population_density_sqkm`, and `sanitation_score` + exact **TreeSHAP** drivers. |
+| **Single-number guesswork:** Point estimates hide surge risk when staging hospital beds & saline. | Delivers conformalized **80% prediction intervals (`P10–P90`)** (84.54% hold-out coverage) and asymmetric 5× cost-weighted risk tiers (`Low`, `Medium`, `High`, `Critical`). |
+| **Constrained municipal IT budgets:** Health offices cannot pay cloud GPU bills or per-forecast API fees. | Ships a **954 KiB LightGBM** artifact running on CPU in **0.591 ms/ward (p95)**, offline SQLite WAL storage, batched Open-Meteo caching (**4 calls/day**), and **$0/month** baseline cost. |
+| **Field usability in Bangladesh:** Field crews need Bangla & English printouts, mobile access, and short SMS alerts. | Full **EN ↔ বাংলা** site-wide switch, printable A4 ward notices, ≤ 160-character GSM-7 SMS templates, formula-safe CSV exports, and mobile-first responsive UI. |
+
+---
+
+## Quick Start (≤ 3 Minutes, Zero API Keys)
+
+Abhas launches completely offline with **zero API keys** and zero external databases required.
 
 ### Prerequisites
-- **Python 3.12** (managed automatically via `uv` or standard `py`/`python` launcher)
+- **Python 3.12** (managed automatically via `uv` or standard `python` / `py`)
 - **Node.js 22+** and `npm`
-- *macOS only:* `brew install libomp` (required by LightGBM)
-- *Windows only:* Visual C++ 2015–2022 Redistributable (standard on modern Windows)
+- *macOS only:* `brew install libomp` (LightGBM runtime dependency)
+- *Windows:* standard Visual C++ 2015–2022 Redistributable
 
-### Quick Start (Two Commands)
+### Two-Command Launch
+
 ```bash
-# 1. One-command zero-key setup (installs deps, runs migrations, seeds local DB)
+# 1. Install dependencies, run Alembic migrations, seed 31,320 ward-weeks, verify model artifact
 npm run setup
 
-# 2. Start both the FastAPI backend (port 8000) and Next.js frontend (port 3000)
+# 2. Launch FastAPI backend (http://localhost:8000) + Next.js console (http://localhost:3000)
 npm run dev
 ```
 
-Open **`http://localhost:3000`** for the landing page: the rain clock map steps one monsoon week (5 Aug 2024) through the model's +1 to +4 week forecasts for all 60 wards. **`http://localhost:3000/dashboard?demo=1`** opens the pre-loaded operations console for Dhaka South Ward 4 at the peak monsoon week (old `/?demo=1` links redirect there).
+| URL | Purpose |
+|---|---|
+| `http://localhost:3000` | Bilingual landing page with interactive Rain Clock monsoon tour & live 60-ward preview |
+| `http://localhost:3000/dashboard?demo=1` | Pre-loaded operations console (Dhaka South Ward 4, peak monsoon origin `2024-08-05`, offline mode) |
+| `http://localhost:8000/docs` | Interactive OpenAPI / Swagger API explorer (dev mode) |
+| `http://localhost:8000/readyz` | Live readiness check (database seeded + LightGBM artifact loaded) |
 
-### Sign-in (optional, Clerk)
-With no Clerk keys the app runs with sign-in off and the dashboard open, so the zero-key setup above always works.
-To require sign-in, add Clerk development keys to `apps/web/.env.local` (never committed):
-```bash
-cd apps/web
-npx -y clerk@latest auth login          # once, in your own terminal
-npx -y clerk@latest link --app <your Clerk application id>
-npx -y clerk@latest env pull            # writes NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY
-```
-Restart `npm run dev`: `/dashboard` now asks for sign-in at `/sign-in` (create an account at `/sign-up`).
+### Measured Fresh-Clone Setup Times
+- **With `uv` (recommended):** `npm run setup` completes in **18.4 s** · full stack ready in **24.1 s**.
+- **Fallback `python -m venv` + `pip` (Windows paths with spaces):** `npm run setup` completes in **92.6 s** · full stack ready in **118.3 s** (well under the 180 s ceiling).
 
-### Measured Setup & Startup Times
-Tested and verified from a fresh clone:
-- **With `uv` (recommended):** `npm run setup` completes in **18.4 seconds**; full stack ready in **24.1 seconds**.
-- **Without `uv` (Windows path with spaces, fallback `python -m venv` + `pip`):** `npm run setup` completes in **92.6 seconds**; full stack ready in **118.3 seconds** (well within the 180-second ceiling).
+### Optional Enhancements (Zero Keys Required by Default)
+
+Copy `.env.example` to `.env` (gitignored) only if you want optional cloud features:
+
+| Feature | Environment Variable(s) | Behavior When Omitted |
+|---|---|---|
+| **Live Real-Time Weather** | `WEATHER_MODE=live` *(or click **Live Open-Meteo** in dashboard header)* | Runs offline from seeded 2016–2025 dataset (Open-Meteo requires **no API key**). |
+| **Abhas AI Chat Assistant** | `GEMINI_API_KEY` *(optional `GEMINI_API_KEY_FALLBACK`)* | Falls back cleanly to deterministic grounded answers from live forecasts. |
+| **Bilingual Officer Briefings** | `ANTHROPIC_API_KEY` *(hard capped at `$1.00/day` in SQLite)* | Deterministic bilingual EN/বাংলা template renders the same structured actions for free. |
+| **Clerk Sign-In Gate** | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` *(in `apps/web/.env.local`)* | Sign-in disabled; `/dashboard` opens immediately without authentication. |
+| **Ops Telemetry Auth** | `OPS_TOKEN` | Server-side `/api/ops` proxy keeps token out of browser bundles. |
 
 ---
 
-## Architecture
+## Animated Data Flow Diagram
 
-Abhas is architected as a modular monolith adhering to strict vertical-slice boundaries (ADR-0001):
+<p align="center">
+  <img src="docs/diagrams/data-flow.svg" alt="Abhas Animated End-to-End Data Flow Diagram" width="100%" />
+</p>
+
+<details>
+<summary><strong>View Mermaid source (Data Flow)</strong></summary>
 
 ```mermaid
 flowchart LR
-    A["Raw Data & Open-Meteo"] --> B["app/shared/features.py<br/>(Lags 0–8, 4-Wk Rolling)"]
-    B --> C["LightGBM Poisson Engine<br/>(Monotonic Rain Constraints)"]
-    C --> D["Conformal 80% Calibration<br/>(NegBin Dispersion on 2023)"]
-    D --> E["FastAPI Endpoints<br/>(Sub-ms CPU Serving)"]
-    E --> F["Next.js 16 Console<br/>(Bilingual EN/BN · WCAG 2.2 AA)"]
+    subgraph Ingestion ["1. Data Ingestion"]
+        DS["60-Ward Dataset<br/>(31,320 ward-weeks · 2016–2025)"]
+        OM["Open-Meteo API<br/>(5 City Centroids · 1 call / 6h · CC BY 4.0)"]
+    end
+
+    subgraph Features ["2. Deterministic Feature Pipeline"]
+        FE["app/shared/features.py<br/>• Grouped rainfall lags 0–8 per ward_id (peak r=0.47 @ wk 3)<br/>• 4-week rolling rain, temperature, humidity<br/>• Ward vulnerability + cyclical ISO week"]
+    end
+
+    subgraph Model ["3. Multi-Horizon Risk Engine"]
+        LGBM["LightGBM Poisson Regressors<br/>(current.joblib · 954 KiB · h=1..4)<br/>Monotonic rainfall constraints"]
+        CAL["80% Conformal Calibration (P10–P90)<br/>Asymmetric 5x Cost Tiers + TreeSHAP"]
+    end
+
+    subgraph Serving ["4. FastAPI Modular Monolith"]
+        API["Single-Flight Lock · L1 LRU · SQLite WAL<br/>9 Vertical Slices · Gemini/Haiku $1 Cap"]
+    end
+
+    subgraph Outputs ["5. Municipal Operations Console"]
+        UI["Next.js 16 Console (EN / বাংলা)<br/>Risk Map · A4 Brief · ≤160 SMS · CSV · AI Chat"]
+    end
+
+    DS --> FE
+    OM --> FE
+    FE --> LGBM
+    LGBM --> CAL
+    CAL --> API
+    API --> UI
 ```
-
-### Key Engineering Decisions
-1. **Multi-Horizon LightGBM Poisson Model:** 4 independent horizon regressors ($h=1..4$) enforce strict monotonic constraints—increased rainfall can never paradoxically lower predicted disease risk.
-2. **Calibrated Uncertainty:** Negative Binomial conformal calibration delivers honest 80% prediction intervals (measured 84.54% coverage on hold-out).
-3. **Asymmetric Cost Tiers:** Outbreak risk tiers (Low, Medium, High, Critical) penalize missed outbreaks 5× more heavily than false alarms, matching public health priorities.
-4. **Sub-Millisecond Edge Serving:** The trained model is a lightweight 954 KiB `joblib` file loaded once at boot; inference executes on CPU in **0.591 ms** per ward (p95).
-5. **Zero-Dollar Operational Cost:** Using local SQLite with WAL mode and free Open-Meteo weather caching, monthly infrastructure cost for a municipal office is **$0.00**.
-
-For detailed C4 diagrams, sequence flows, and ADRs:
-- Root Architecture Overview: [ARCHITECTURE.md](file:///e:/AI%20Engineering%20Hackathon/ARCHITECTURE.md)
-- Complete C4 System Architecture: [docs/architecture.md](file:///e:/AI%20Engineering%20Hackathon/docs/architecture.md)
-- AI Model Training & Verification: [docs/ai-design.md](file:///e:/AI%20Engineering%20Hackathon/docs/ai-design.md)
-- Threat Model & Security Posture: [docs/threat-model.md](file:///e:/AI%20Engineering%20Hackathon/docs/threat-model.md)
+</details>
 
 ---
 
-## Testing
+## Animated System Design Diagram
 
-Every pull request and build passes an automated battery of quality, contract, security, and accessibility checks:
+Abhas follows a **Modular Monolith with Vertical-Slice Boundaries (ADR-0001)** and **Hexagonal Ports & Adapters** — enforced automatically by `node .orca-team/tools/gates.mjs slices` (`9 API slices · 11 Web slices · 0 violations`).
+
+<p align="center">
+  <img src="docs/diagrams/system-design.svg" alt="Abhas Animated Production System Design Diagram" width="100%" />
+</p>
+
+<details>
+<summary><strong>View Mermaid source (System Design)</strong></summary>
+
+```mermaid
+flowchart TB
+    subgraph Client ["Client Layer — Next.js 16 (App Router · Tailwind v4 · EN/বাংলা)"]
+        LAND["Landing & Public Pages<br/>/, /docs, /security, /status, /contact"]
+        DASH["Operations Console (/dashboard)<br/>8 Views · MapLibre · Recharts · A4 Print"]
+        CHATUI["Abhas AI Chat Widget<br/>SSE Streaming · Ward Context"]
+        PROXY["Next.js Server Route (/api/ops)<br/>Server-Only OPS_TOKEN Proxy"]
+    end
+
+    subgraph Edge ["FastAPI Security Middleware Onion"]
+        MW["CORS Allowlist → Security Headers → Request-ID → Rate Limiter (120/m · 20/m LLM) → 64 KiB Body Cap → RFC 9457"]
+    end
+
+    subgraph Slices ["9 Isolated API Vertical Slices (apps/api/app/features/*)"]
+        S1["wards · lags"]
+        S2["forecast · heatmap"]
+        S3["validation · weather"]
+        S4["advisory · chat · ops"]
+    end
+
+    subgraph Adapters ["Hexagonal Ports & Adapters (apps/api/app/adapters/*)"]
+        DB[("SQLite WAL / PostgreSQL<br/>Alembic 0001_initial")]
+        ML["LightGBM CPU Engine<br/>current.joblib (0.59 ms/ward)"]
+        WX["Open-Meteo Adapter<br/>6h Cache · Retries · Circuit Breaker"]
+        LLM["Gemini 2.5 Flash & Claude Haiku<br/>$1/day Ledger · Offline Fallback"]
+    end
+
+    LAND --> MW
+    DASH --> MW
+    CHATUI --> MW
+    PROXY --> MW
+    MW --> S1 & S2 & S3 & S4
+    S1 & S2 & S3 --> DB
+    S2 --> ML
+    S2 & S3 --> WX
+    S4 --> LLM
+    S4 --> DB
+```
+</details>
+
+---
+
+## Animated Entity Relationship Diagram (ERD)
+
+All six tables are managed via Alembic (`0001_initial`) in [apps/api/app/adapters/db/models.py](apps/api/app/adapters/db/models.py) and run identically on **SQLite WAL** (Stage 1 local/zero-key) or **PostgreSQL / Neon** (Stage 2 cloud). **Zero patient PII** exists anywhere in the schema.
+
+<p align="center">
+  <img src="docs/diagrams/erd.svg" alt="Abhas Animated Entity Relationship Diagram" width="100%" />
+</p>
+
+<details>
+<summary><strong>View Mermaid source (Entity Relationship Diagram)</strong></summary>
+
+```mermaid
+erDiagram
+    wards ||--o{ observations : "has weekly weather & cases (CASCADE)"
+    wards ||--o{ llm_traces : "optionally scoped to ward_id"
+    weather_cache ||--o{ predictions_cache : "hashes into cache_key"
+
+    wards {
+        varchar(16) ward_id PK
+        varchar(32) city "indexed"
+        float population_density_sqkm "CHECK >= 0"
+        float water_logging_risk_index "CHECK 0..1"
+        float sanitation_score "CHECK 0..1"
+        timestamptz created_at
+    }
+
+    observations {
+        varchar(16) ward_id PK,FK
+        date week PK "ISO Monday"
+        float avg_temp_c
+        float max_temp_c
+        float min_temp_c
+        float rainfall_mm "CHECK >= 0"
+        float relative_humidity_pct "CHECK 0..100"
+        int dengue_cases "CHECK >= 0"
+    }
+
+    weather_cache {
+        varchar(32) city PK
+        date week PK "ISO Monday"
+        float avg_temp_c
+        float max_temp_c
+        float min_temp_c
+        float rainfall_mm "CHECK >= 0"
+        float relative_humidity_pct "CHECK 0..100"
+        varchar(16) source "live | cache"
+        timestamptz fetched_at
+        timestamptz expires_at "6h TTL"
+    }
+
+    predictions_cache {
+        varchar(128) cache_key PK "SHA-256"
+        text payload_json
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    api_calls {
+        int id PK
+        varchar(32) kind "weather | llm"
+        boolean ok
+        float latency_ms "CHECK >= 0"
+        float cost_usd "CHECK >= 0"
+        varchar(500) detail
+        timestamptz created_at
+    }
+
+    llm_traces {
+        int id PK
+        varchar(64) request_id "indexed"
+        varchar(16) ward_id "nullable"
+        date origin_week "nullable"
+        int horizon "nullable"
+        varchar(8) language "en | bn"
+        varchar(64) model
+        varchar(32) prompt_version
+        int input_tokens "CHECK >= 0"
+        int output_tokens "CHECK >= 0"
+        float cost_usd "CHECK >= 0"
+        float latency_ms "CHECK >= 0"
+        boolean cache_hit
+        boolean numbers_validated
+        boolean ok
+        varchar(64) error_type "nullable"
+        timestamptz created_at
+    }
+```
+</details>
+
+---
+
+## Core Capabilities & API Reference
+
+Contract specification exported at [contracts/openapi.json](contracts/openapi.json) (`14` routes across `9` domain slices + health probes):
+
+| Method & Route | Slice | Purpose |
+|---|---|---|
+| `GET /healthz`, `GET /readyz` | Core | Liveness and deep readiness (DB seeded + LightGBM loaded) |
+| `GET /api/v1/wards` | `wards` | 60 wards across 5 cities with vulnerability metrics + dataset date bounds |
+| `GET /api/v1/wards/{ward_id}/history` | `wards` | Weekly historical rainfall, temperature, humidity, and recorded cases |
+| `GET /api/v1/lags/{ward_id}` | `lags` | Multi-week rainfall lag correlations (`0–8w`) proving the 3-week peak |
+| `POST /api/v1/forecast` | `forecast` | Multi-ward, multi-horizon (`1–4w`) LightGBM predictions, `P10–P90`, tiers, TreeSHAP drivers (`dataset` or `live` Open-Meteo) |
+| `POST /api/v1/scenario` | `forecast` | Counterfactual what-if weather simulator (e.g., +150 mm storm delta without polluting persistent cache) |
+| `GET /api/v1/heatmap` | `heatmap` | City-wide ward × horizon risk matrix for map and priority triage |
+| `GET /api/v1/validation` | `validation` | Locked 2024–2025 chronological hold-out MAE/RMSE, 80% coverage, and tier confusion matrix |
+| `GET /api/v1/weather/status` | `weather` | Open-Meteo 5-city centroid coordinates, cache age, bias-check flag, and daily call count |
+| `POST /api/v1/advisory` | `advisory` | Bilingual EN/বাংলা structured officer briefing (`$1/day` capped LLM + offline template fallback) |
+| `POST /api/v1/chat`, `POST /api/v1/chat/stream` | `chat` | Grounded Abhas AI assistant (Gemini 2.5 Flash SSE streaming + dual-key failover + offline fallback) |
+| `GET /api/v1/ops` | `ops` | Live model load telemetry, cache hit ratios, inference latency, and LLM/weather budget usage |
+
+---
+
+## Model Performance & Chronological Validation
+
+Strictly split by calendar year to eliminate temporal leakage: **`2016–2022` Train (4-fold purged expanding CV) → `2023` Calibration & Optuna Tuning → `2024–2025` SHA-256 Locked Hold-Out (scored once)**.
+
+| Metric (Locked 2024–2025 Hold-Out) | Abhas LightGBM (`abhas-lgbm-1.1.2`) | Seasonal Baseline | Gain / Target |
+|---|---:|---:|---|
+| **Horizon +2w MAE** | **0.9912** cases | 1.259 | **-21.3% error** |
+| **Horizon +3w MAE** *(primary lead)* | **1.0101** cases | 1.260 | **-19.8% error** |
+| **80% Conformal Coverage** | **84.54%** | — | Target ≥ 80% |
+| **Within-One-Tier Accuracy** | **95.96%** | — | High operational reliability |
+| **Critical Outbreak Recall** | **93.24%** | — | 5× false-negative penalty |
+| **Hotspot Retrieval Recall@15** | **0.6111** *(MRR 0.8875)* | 0.5704 | Beats climatology |
+| **CPU Inference Latency (p95)** | **0.591 ms / ward** | — | 954 KiB artifact · zero GPU |
+
+Read the complete model card in [docs/model-card.md](docs/model-card.md) and architecture rationale in [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
+## Repository Layout & Branch Strategy
+
+```text
+.
+├── README.md                     # Flagship repository guide (this file)
+├── ARCHITECTURE.md               # Concise 1–2 page architecture, split, model & cost rationale
+├── apps/
+│   ├── api/                      # FastAPI + LightGBM backend (see apps/api/README.md)
+│   │   ├── app/features/         # 9 isolated vertical slices (router, service, schemas, deps)
+│   │   ├── app/ports/            # Hexagonal interfaces (DB, ML, Weather, LLM)
+│   │   ├── app/adapters/         # Concrete SQLAlchemy, LightGBM, Open-Meteo, Gemini/Claude
+│   │   ├── config/               # Versioned 5-city centroids & ERA5 bias check
+│   │   └── ml/                   # Training, backtesting, verification & current.joblib (954 KiB)
+│   └── web/                      # Next.js 16 bilingual console (see apps/web/README.md)
+│       └── src/features/         # 11 isolated frontend slices (landing, ward-risk, chat, etc.)
+├── contracts/openapi.json        # Locked OpenAPI 3.1 contract synced to TypeScript types
+├── docs/
+│   ├── diagrams/                 # Animated SVG architecture diagrams (data-flow, system-design, erd)
+│   ├── adr/                      # Architecture Decision Records (ADR-0001..0008)
+│   ├── brand/                    # Brand guidelines & generated design tokens
+│   ├── PRD.md                    # Product Requirements & Given/When/Then ACs
+│   ├── architecture.md           # Detailed C4 architecture & sequence flows
+│   ├── model-card.md             # Full model card & simulated-data disclosures
+│   └── threat-model.md           # STRIDE threat model & security controls
+└── scripts/                      # One-command setup, seed, smoke test & Python launcher
+```
+
+### Component Documentation
+- **Backend API & ML Guide:** [apps/api/README.md](apps/api/README.md)
+- **Frontend Console & i18n Guide:** [apps/web/README.md](apps/web/README.md)
+- **Architecture & Cost Controls:** [ARCHITECTURE.md](ARCHITECTURE.md)
+
+### Branch Topology
+- **`main`** — Release-ready submission branch mirrored from verified `lead` (default clone target for judges & deployment).
+- **`lead`** — Active integration branch where vertical-slice merges, CI gates, and security reviews land before promotion to `main`.
+- **`akramrafid/*`** — Historical vertical-slice & review branches preserved for full auditability of iterative development.
+
+---
+
+## Testing, Security & Quality Gates
 
 ```bash
-# 1. Full Merge Gate (Linting, typecheck, 122 unit/integration tests, and local smoke)
-npm run ci
-
-# 2. End-to-End & Automated Accessibility (Playwright + axe WCAG 2.2 AA)
-npm run e2e
-
-# 3. Schemathesis API Contract Fuzzing (767 operations tested against OpenAPI)
-npm run test:contract
-
-# 4. Locked 2024–2025 Hold-Out Evaluation (11/11 AC-5 floors passing)
-npm run eval
-
-# 5. Automated Security Red-Team Attack Suite (30 attack vectors, 100% pass)
-npm run redteam
-
-# 6. LLMOps Tracing & Budget Verification
-npm run check:traces
+npm run ci              # Ruff lint/format + Pyright + ESLint + tsc + 133+ pytest + local smoke
+npm run e2e             # Playwright end-to-end suite + axe WCAG 2.2 AA accessibility audit
+npm run test:contract   # Schemathesis OpenAPI contract fuzzing
+npm run eval            # Locked 2024–2025 hold-out evaluation (11/11 AC-5 quality floors)
+npm run eval:retrieval  # Hotspot ranking Recall@15 & MRR check
+npm run redteam         # 30 automated API & AI prompt-injection security attack vectors
+npm run check:traces    # SQLite llm_traces persistence & $1/day budget enforcement
+npm run gates           # Runs the complete release-gate matrix
 ```
 
-### Automated Gate Summary
-| Gate | Target / Threshold | Verified Result | Status |
+| Gate | Scope & Threshold | Verified Result | Status |
 |---|---|---|---|
-| `ci` | Zero lint/type errors, 100% unit tests | 122/122 pytest passed in 25.2s; 0 pyright/tsc errors | **PASS** |
-| `slices` | Zero cross-slice boundary violations | 8 API slices, 8 Web slices clean | **PASS** |
-| `contract` | Schemathesis fuzzing vs `/openapi.json` | 767/767 checks passed across 12 operations | **PASS** |
-| `e2e` | Playwright E2E + axe WCAG 2.2 AA | 18 passed, 0 violations across all 7 views | **PASS** |
-| `eval` | Hold-out pass rate $\ge 80\%$, all floors | 40/48 (83.33%) pass rate, 11/11 floors pass | **PASS** |
-| `retrieval` | Historical analogy recall@15 $\ge 0.55$ | Recall@15 = 0.6111 (vs climatology 0.5704) | **PASS** |
-| `redteam` | Security attack pass rate $\ge 95\%$ | 30/30 attacks passed (100% pass rate) | **PASS** |
-| `traces` | Persisted SQLite trace budget check | 5/5 tests passed; budget cap enforced | **PASS** |
+| `ci` | Zero lint/type errors, 100% unit/integration tests + smoke | 133+ pytest, 6/6 smoke, 0 ruff/pyright/eslint/tsc errors | **PASS** |
+| `slices` | Zero cross-slice boundary violations (ADR-0001) | 9 API slices · 11 Web slices clean | **PASS** |
+| `contract` | Schemathesis fuzzing vs `contracts/openapi.json` | 767/767 checks passed | **PASS** |
+| `e2e` | Playwright flows + axe WCAG 2.2 AA | 0 accessibility violations | **PASS** |
+| `eval` | Hold-out pass rate ≥ 80%, all 11 quality floors | 40/48 (83.33%), 11/11 floors | **PASS** |
+| `retrieval` | Top-15 hotspot Recall@15 ≥ 0.55 | Recall@15 = 0.6111 · MRR = 0.8875 | **PASS** |
+| `redteam` | Prompt injection, SSRF, payload cap, rate limit | 30/30 attacks blocked (100%) | **PASS** |
+| `traces` | SQLite trace & daily spend cap verification | 5/5 tracing tests passed | **PASS** |
 
 ---
 
-## AI and external services
+## AI & External Services Disclosure
 
-In strict compliance with hackathon disclosure guidelines:
+In full compliance with hackathon transparency rules:
 
-### AI Models & Agents
-- **Claude Code (Anthropic Opus 5.5 max):** Technical lead architecture, OpenAPI schemas, initial framing, and cross-family code review.
-- **Antigravity CLI (Google Gemini 4 Neon XHigh & Hydrogen XHigh):** Parallel vertical-slice implementation, Optuna GPU model tuning, UI console features, and security hardening.
-- **Anthropic Claude Haiku 5.5 (Optional Runtime):** Optional bilingual advisory phrasing when `ANTHROPIC_API_KEY` is provided. Strictly budget-capped ($1.00/day limit in SQLite); falls back to deterministic rule-based templates when omitted.
+### AI Coding Assistants Used During Development
+- **Claude Code (Anthropic Opus):** Lead architecture framing, PRD/OpenAPI contracts, vertical-slice integration, and independent code/security review.
+- **Antigravity CLI (Google Gemini 4 Neon & Hydrogen):** Parallel vertical-slice implementation, LightGBM Optuna tuning, bilingual responsive Next.js console engineering, animated diagrams, and hardening.
 
-### External APIs & Data Sources
-- **Open-Meteo Forecast & Historical Archive API:** Free, non-commercial weather forecast and ERA5 historical reanalysis data. Attributed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
-- **Hackathon Organizers' Dengue Dataset:** Historical weekly dengue case counts and rainfall metrics for 60 Bangladesh wards (2016–2025).
-- **OpenStreetMap raster tiles** (`tile.openstreetmap.org`): basemap for the ward risk maps, © OpenStreetMap contributors (ODbL), used under the OSM tile usage policy (attribution, light interactive use). Rendered with **MapLibre GL JS** (BSD-3). Ward positions on the map are approximate because the dataset has no ward geometry.
-- **Clerk** (optional): sign-in and account management when Clerk keys are configured; not contacted when they are absent.
-- **Magic UI** `number-ticker` pattern adapted (rewritten without the `motion` dependency) for the landing page's validation figure.
-- **Self-Hosted Open Fonts:** Manrope, IBM Plex Mono, and Noto Sans Bengali distributed under the **SIL Open Font License (OFL)** via `@fontsource` npm packages (zero third-party font network calls).
-
----
-
-## Model Card Summary
-
-- **Primary Architecture:** Multi-horizon LightGBM Poisson Regressor (`abhas-lgbm-1.1.2`, SHA-256 `093bd000...a32e`).
-- **Performance:** Horizon 2 MAE is 0.9912 (-21.3% below climatology); Horizon 3 MAE is 1.0101 (-19.8% below climatology); 80% conformal band coverage is 84.54%; within-one-tier accuracy is 95.96%; critical outbreak recall is 93.24%.
-- **Simulated Data Caveat:** Statistical inspection reveals that the hackathon challenge dataset exhibits characteristics of synthetic or simulated generation. Abhas is designed as an operational decision-support prototype and must be cross-calibrated against official DGHS (Directorate General of Health Services) national surveillance registries before real clinical or operational deployment.
-
-Read the comprehensive model card at [docs/model-card.md](file:///e:/AI%20Engineering%20Hackathon/docs/model-card.md).
+### Runtime AI Models & External APIs
+- **Google Gemini 2.5 Flash API (`generativelanguage.googleapis.com`, optional):** Powers the streaming Abhas AI assistant (`apps/api/app/adapters/gemini_chat.py`) with dual-key `429` failover, `llm_traces` auditing, response caching, and grounded offline fallback when no key is set.
+- **Anthropic Claude Haiku API (optional):** Optional bilingual officer briefing phrasing (`apps/api/app/adapters/claude_advisory.py`), hard-capped at `$1.00/day` in SQLite with automatic offline deterministic template fallback.
+- **Open-Meteo Weather Forecast & ERA5 Archive API (`api.open-meteo.com`):** Free, non-commercial weather data under **Creative Commons Attribution 4.0 International (CC BY 4.0)** — batched 5-city requests cached 6 hours (`≤ 4 calls/day`, zero API key).
+- **Hackathon Organizers' Dengue Dataset:** Weekly ward-level dengue cases, weather metrics, and vulnerability indicators for 60 Bangladesh wards (`2016–2025`).
+- **Clerk (`@clerk/nextjs`, optional):** Authentication gate for `/dashboard` when Clerk keys are present; fully bypassed in zero-key local mode.
+- **OpenStreetMap & CARTO Tiles + MapLibre GL JS (BSD-3):** Interactive ward risk map (`© OpenStreetMap contributors`, ODbL).
+- **Self-Hosted Open Assets:** **Poppins** and **Noto Sans Bengali** (SIL OFL via `@fontsource`), plus offline-bundled **Solar Bold Duotone** vector icons (`@iconify-json/solar`, CC BY 4.0) — zero third-party font/icon CDN calls at runtime.
 
 ---
 
 ## Known Limitations
 
-1. **Simulated Weather and Case Distributions:** While the model captures the empirical 3-week lag cleanly ($r = 0.468$), real-world microclimate variations in individual neighborhoods require hyper-local rain gauge integration.
-2. **Schematic Ward Geometry:** Because official GIS shapefiles for all 60 wards were not provided in the raw dataset, the city heatmap view utilizes an aligned schematic tile matrix rather than true GIS polygon boundaries.
-3. **Team Usernames:** Built by team members participating under GitHub handle `@akramrafid`.
+1. **Simulated Dataset Characteristics:** Statistical inspection indicates synthetic/simulated properties in the challenge dataset. Before real clinical deployment, Abhas must be recalibrated on official **DGHS / IEDCR** national surveillance registries.
+2. **Approximate Ward Coordinates:** The dataset provides ward IDs without official GIS polygons, so map points are placed cleanly around each city corporation's real centroid (`apps/api/config/city_centroids.json`) without inventing boundaries.
+3. **Commit Authorship:** Developed and integrated under GitHub handle `@akramrafid`.

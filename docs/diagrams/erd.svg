@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 560" width="1160" height="560" role="img" aria-labelledby="title desc">
+  <title id="title">Abhas Entity Relationship Diagram (SQLAlchemy / Alembic 0001_initial)</title>
+  <desc id="desc">Animated Entity Relationship Diagram detailing all 6 relational tables in Abhas: wards, observations, weather_cache, predictions_cache, api_calls, and llm_traces with primary keys, foreign keys, and constraints.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070B14"/>
+      <stop offset="55%" stop-color="#0B1A5C"/>
+      <stop offset="100%" stop-color="#08102C"/>
+    </linearGradient>
+    <linearGradient id="tblBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#111F59" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0A1233" stop-opacity="0.98"/>
+    </linearGradient>
+    <linearGradient id="tblHead" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2F5BFF"/>
+      <stop offset="100%" stop-color="#1B3BB8"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .t-h1   { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 800; fill: #FFFFFF; }
+      .t-sub  { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 500; fill: #C8D4F4; }
+      .t-tbl  { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 700; fill: #FFFFFF; font-size: 13px; }
+      .t-col  { font-family: "Consolas", "SFMono-Regular", ui-monospace, monospace; fill: #E8EEFC; font-size: 10.5px; }
+      .t-type { font-family: "Consolas", "SFMono-Regular", ui-monospace, monospace; fill: #9FB2E2; font-size: 10px; }
+      .t-pk   { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 700; fill: #D4F53C; font-size: 9.5px; }
+      .t-fk   { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 700; fill: #7CA2FF; font-size: 9.5px; }
+      .t-card { font-family: "Poppins", "Segoe UI", system-ui, sans-serif; font-weight: 700; fill: #D4F53C; font-size: 10px; }
+      .rel-solid { fill: none; stroke: #D4F53C; stroke-width: 2.2; stroke-dasharray: 8 6; animation: relFlow 1.6s linear infinite; }
+      .rel-soft  { fill: none; stroke: #6B8EFF; stroke-width: 1.8; stroke-dasharray: 5 6; animation: relFlow 2.2s linear infinite; }
+      @keyframes relFlow {
+        from { stroke-dashoffset: 28; }
+        to   { stroke-dashoffset: 0; }
+      }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1160" height="560" rx="22" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1158" height="558" rx="21" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="36" y="42" class="t-h1" font-size="20">ABHAS — Entity Relationship Diagram (Alembic 0001_initial)</text>
+  <text x="36" y="64" class="t-sub" font-size="12">Zero Patient PII · Aggregate Ward-Week Observations · SQLite WAL &amp; PostgreSQL Compatible</text>
+
+  <!-- RELATIONSHIPS -->
+  <!-- wards (1) -> observations (N) -->
+  <path id="r1" d="M 346 184 L 414 184" class="rel-solid"/>
+  <circle r="3.5" fill="#D4F53C" filter="url(#glow)"><animateMotion dur="1.5s" repeatCount="indefinite"><mpath href="#r1"/></animateMotion></circle>
+  <text x="352" y="176" class="t-card">1</text>
+  <text x="396" y="176" class="t-card">0..*</text>
+
+  <!-- wards -> llm_traces (logical ward_id ref) -->
+  <path id="r2" d="M 191 278 L 191 318 C 191 334, 430 334, 430 368" class="rel-soft"/>
+  <circle r="3" fill="#6B8EFF" filter="url(#glow)"><animateMotion dur="2.6s" repeatCount="indefinite"><mpath href="#r2"/></animateMotion></circle>
+
+  <!-- weather_cache -> predictions_cache (feeds forecast key hash) -->
+  <path id="r3" d="M 946 286 L 946 346" class="rel-soft"/>
+  <circle r="3" fill="#6B8EFF" filter="url(#glow)"><animateMotion dur="1.9s" repeatCount="indefinite"><mpath href="#r3"/></animateMotion></circle>
+  <text x="954" y="320" class="t-sub" font-size="10">hashes into</text>
+
+  <!-- observations -> predictions_cache (logical feed) -->
+  <path id="r4" d="M 734 250 C 760 250, 760 398, 790 398" class="rel-soft"/>
+  <circle r="3" fill="#6B8EFF" filter="url(#glow)"><animateMotion dur="2.3s" repeatCount="indefinite"><mpath href="#r4"/></animateMotion></circle>
+
+  <!-- TABLE 1: wards -->
+  <g transform="translate(36, 92)">
+    <rect width="310" height="186" rx="14" fill="url(#tblBody)" stroke="rgba(255,255,255,0.2)"/>
+    <path d="M 0 14 Q 0 0 14 0 L 296 0 Q 310 0 310 14 L 310 36 L 0 36 Z" fill="url(#tblHead)"/>
+    <text x="16" y="23" class="t-tbl">wards</text>
+    <text x="242" y="22" class="t-pk">60 ROWS</text>
+    <text x="16" y="56"  class="t-pk">PK</text><text x="44" y="56"  class="t-col">ward_id</text><text x="220" y="56"  class="t-type">VARCHAR(16)</text>
+    <text x="44" y="76"  class="t-col">city (idx)</text><text x="220" y="76"  class="t-type">VARCHAR(32)</text>
+    <text x="44" y="96"  class="t-col">population_density_sqkm</text><text x="220" y="96"  class="t-type">FLOAT &#x2265; 0</text>
+    <text x="44" y="116" class="t-col">water_logging_risk_index</text><text x="220" y="116" class="t-type">FLOAT [0,1]</text>
+    <text x="44" y="136" class="t-col">sanitation_score</text><text x="220" y="136" class="t-type">FLOAT [0,1]</text>
+    <text x="44" y="156" class="t-col">created_at</text><text x="220" y="156" class="t-type">TIMESTAMPTZ</text>
+  </g>
+
+  <!-- TABLE 2: observations -->
+  <g transform="translate(414, 92)">
+    <rect width="320" height="214" rx="14" fill="url(#tblBody)" stroke="rgba(212,245,60,0.45)"/>
+    <path d="M 0 14 Q 0 0 14 0 L 306 0 Q 320 0 320 14 L 320 36 L 0 36 Z" fill="url(#tblHead)"/>
+    <text x="16" y="23" class="t-tbl">observations</text>
+    <text x="224" y="22" class="t-pk">31,320 ROWS</text>
+    <text x="16" y="56"  class="t-pk">PK</text><text x="36" y="56" class="t-fk">FK</text><text x="58" y="56"  class="t-col">ward_id &#x2192; wards</text><text x="230" y="56"  class="t-type">VARCHAR(16)</text>
+    <text x="16" y="76"  class="t-pk">PK</text><text x="58" y="76"  class="t-col">week (ISO Mon)</text><text x="230" y="76"  class="t-type">DATE</text>
+    <text x="58" y="96"  class="t-col">avg_temp_c</text><text x="230" y="96"  class="t-type">FLOAT</text>
+    <text x="58" y="116" class="t-col">max_temp_c / min_temp_c</text><text x="230" y="116" class="t-type">FLOAT</text>
+    <text x="58" y="136" class="t-col">rainfall_mm</text><text x="230" y="136" class="t-type">FLOAT &#x2265; 0</text>
+    <text x="58" y="156" class="t-col">relative_humidity_pct</text><text x="230" y="156" class="t-type">FLOAT [0,100]</text>
+    <text x="58" y="176" class="t-col">dengue_cases</text><text x="230" y="176" class="t-type">INT &#x2265; 0</text>
+    <text x="16" y="198" class="t-sub" font-size="9.5">ON DELETE CASCADE · Indexed (ward_id, week), (week)</text>
+  </g>
+
+  <!-- TABLE 3: weather_cache -->
+  <g transform="translate(790, 92)">
+    <rect width="334" height="194" rx="14" fill="url(#tblBody)" stroke="rgba(255,255,255,0.2)"/>
+    <path d="M 0 14 Q 0 0 14 0 L 320 0 Q 334 0 334 14 L 334 36 L 0 36 Z" fill="url(#tblHead)"/>
+    <text x="16" y="23" class="t-tbl">weather_cache</text>
+    <text x="242" y="22" class="t-pk">6H TTL</text>
+    <text x="16" y="56"  class="t-pk">PK</text><text x="44" y="56"  class="t-col">city</text><text x="232" y="56"  class="t-type">VARCHAR(32)</text>
+    <text x="16" y="76"  class="t-pk">PK</text><text x="44" y="76"  class="t-col">week</text><text x="232" y="76"  class="t-type">DATE</text>
+    <text x="44" y="96"  class="t-col">avg/max/min_temp_c</text><text x="232" y="96"  class="t-type">FLOAT</text>
+    <text x="44" y="116" class="t-col">rainfall_mm</text><text x="232" y="116" class="t-type">FLOAT &#x2265; 0</text>
+    <text x="44" y="136" class="t-col">relative_humidity_pct</text><text x="232" y="136" class="t-type">FLOAT [0,100]</text>
+    <text x="44" y="156" class="t-col">source (live|cache)</text><text x="232" y="156" class="t-type">VARCHAR(16)</text>
+    <text x="44" y="176" class="t-col">fetched_at / expires_at</text><text x="232" y="176" class="t-type">TIMESTAMPTZ</text>
+  </g>
+
+  <!-- TABLE 4: api_calls -->
+  <g transform="translate(36, 356)">
+    <rect width="310" height="170" rx="14" fill="url(#tblBody)" stroke="rgba(255,255,255,0.2)"/>
+    <path d="M 0 14 Q 0 0 14 0 L 296 0 Q 310 0 310 14 L 310 36 L 0 36 Z" fill="#172A7A"/>
+    <text x="16" y="23" class="t-tbl">api_calls</text>
+    <text x="220" y="22" class="t-pk">QUOTA LOG</text>
+    <text x="16" y="56"  class="t-pk">PK</text><text x="44" y="56"  class="t-col">id (autoincrement)</text><text x="220" y="56"  class="t-type">INTEGER</text>
+    <text x="44" y="76"  class="t-col">kind (weather|llm)</text><text x="220" y="76"  class="t-type">VARCHAR(32)</text>
+    <text x="44" y="96"  class="t-col">ok</text><text x="220" y="96"  class="t-type">BOOLEAN</text>
+    <text x="44" y="116" class="t-col">latency_ms / cost_usd</text><text x="220" y="116" class="t-type">FLOAT &#x2265; 0</text>
+    <text x="44" y="136" class="t-col">detail</text><text x="220" y="136" class="t-type">VARCHAR(500)</text>
+    <text x="44" y="156" class="t-col">created_at</text><text x="220" y="156" class="t-type">TIMESTAMPTZ</text>
+  </g>
+
+  <!-- TABLE 5: llm_traces -->
+  <g transform="translate(378, 356)">
+    <rect width="376" height="170" rx="14" fill="url(#tblBody)" stroke="rgba(47,91,255,0.65)"/>
+    <path d="M 0 14 Q 0 0 14 0 L 362 0 Q 376 0 376 14 L 376 36 L 0 36 Z" fill="#172A7A"/>
+    <text x="16" y="23" class="t-tbl">llm_traces</text>
+    <text x="258" y="22" class="t-pk">$1/DAY LEDGER</text>
+    <text x="16" y="56"  class="t-pk">PK</text><text x="44" y="56"  class="t-col">id / request_id (idx)</text><text x="272" y="56"  class="t-type">INT / STR(64)</text>
+    <text x="44" y="76"  class="t-col">ward_id / origin_week / horizon</text><text x="272" y="76"  class="t-type">NULLABLE</text>
+    <text x="44" y="96"  class="t-col">model / language / prompt_ver</text><text x="272" y="96"  class="t-type">VARCHAR</text>
+    <text x="44" y="116" class="t-col">input_tokens / output_tokens</text><text x="272" y="116" class="t-type">INT &#x2265; 0</text>
+    <text x="44" y="136" class="t-col">cost_usd / latency_ms</text><text x="272" y="136" class="t-type">FLOAT &#x2265; 0</text>
+    <text x="44" y="156" class="t-col">cache_hit / numbers_validated / ok</text><text x="272" y="156" class="t-type">BOOLEAN</text>
+  </g>
+
+  <!-- TABLE 6: predictions_cache -->
+  <g transform="translate(790, 346)">
+    <rect width="334" height="180" rx="14" fill="url(#tblBody)" stroke="rgba(255,255,255,0.2)"/>
+    <path d="M 0 14 Q 0 0 14 0 L 320 0 Q 334 0 334 14 L 334 36 L 0 36 Z" fill="#172A7A"/>
+    <text x="16" y="23" class="t-tbl">predictions_cache</text>
+    <text x="242" y="22" class="t-pk">L2 CACHE</text>
+    <text x="16" y="56"  class="t-pk">PK</text><text x="44" y="56"  class="t-col">cache_key (SHA-256)</text><text x="232" y="56"  class="t-type">VARCHAR(128)</text>
+    <text x="44" y="78"  class="t-col">payload_json</text><text x="232" y="78"  class="t-type">TEXT (JSON)</text>
+    <text x="44" y="100" class="t-col">created_at (idx)</text><text x="232" y="100" class="t-type">TIMESTAMPTZ</text>
+    <text x="44" y="122" class="t-col">updated_at</text><text x="232" y="122" class="t-type">TIMESTAMPTZ</text>
+    <text x="16" y="152" class="t-sub" font-size="9.5">Keyed by (ward_id, origin_week, horizon,</text>
+    <text x="16" y="166" class="t-sub" font-size="9.5">model_version, weather_hash). Scenarios bypass.</text>
+  </g>
+</svg>
