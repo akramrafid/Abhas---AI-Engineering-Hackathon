@@ -194,7 +194,7 @@ export function WardForecastView({
         lang={lang}
       />
 
-      <div className="no-print grid gap-5 lg:grid-cols-[296px_1fr] lg:items-start">
+      <div className="no-print grid gap-5 lg:grid-cols-[332px_1fr] lg:items-start">
         <WardRailList
           city={city}
           sortedForecasts={sortedForecasts}

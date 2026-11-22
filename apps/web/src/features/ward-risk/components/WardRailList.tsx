@@ -65,29 +65,42 @@ export function WardRailList({
                 aria-current={isSelected ? "true" : undefined}
                 onClick={() => onSelectWard(wf.ward_id)}
                 className={clsx(
-                  "flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-left",
+                  "flex w-full cursor-pointer flex-col gap-2 px-3.5 py-3 text-left transition-colors",
                   isSelected
-                    ? "bg-paper ring-1 ring-inset ring-royal/30"
+                    ? "bg-paper ring-1 ring-inset ring-royal/35"
                     : "bg-white hover:bg-paper/60",
                 )}
               >
-                <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 font-mono text-xs font-semibold text-navy tnum">
+                <div className="flex w-full items-center justify-between gap-2">
+                  <p className="flex min-w-0 items-center gap-1.5 text-[13px] font-semibold text-navy tnum">
                     {isSelected ? (
                       <span
                         aria-hidden="true"
-                        className="h-1.5 w-1.5 shrink-0 rounded-full bg-royal"
+                        className="h-2 w-2 shrink-0 rounded-full bg-royal"
                       />
                     ) : null}
-                    <span className="whitespace-nowrap">{wf.ward_id}</span>
+                    <span className="truncate">{wf.ward_id}</span>
                   </p>
                   {wfPeak ? (
-                    <p className="font-mono text-[11px] text-slate tnum">
-                      {wfPeak.expected_cases.toFixed(1)} {copy.casesUnit} (+{wfPeak.horizon}w)
-                    </p>
+                    <span className="shrink-0 whitespace-nowrap text-xs font-medium text-slate tnum">
+                      {wfPeak.expected_cases.toFixed(1)} {copy.casesUnit} · +{wfPeak.horizon}w
+                    </span>
                   ) : null}
                 </div>
-                <RiskTierBadge tier={wf.peak_tier} size="sm" lang={lang} className="shrink-0" />
+                <div className="flex w-full items-center justify-between gap-2">
+                  <RiskTierBadge tier={wf.peak_tier} size="sm" lang={lang} className="shrink-0" />
+                  {isSelected ? (
+                    <span
+                      lang={lang}
+                      className={clsx(
+                        "shrink-0 rounded-full bg-royal/10 px-2 py-0.5 text-[11px] font-semibold text-royal",
+                        lang === "bn" && "font-bangla",
+                      )}
+                    >
+                      {lang === "bn" ? "নির্বাচিত" : "Selected"}
+                    </span>
+                  ) : null}
+                </div>
               </button>
             </li>
           );

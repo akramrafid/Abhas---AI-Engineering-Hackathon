@@ -95,7 +95,7 @@ const SIZE_CLASSES: Record<
   { pill: string; text: string; barWidth: string; barHeights: readonly [string, string, string, string] }
 > = {
   sm: {
-    pill: "gap-2 px-2.5 py-1 text-xs",
+    pill: "gap-1.5 px-2.5 py-1 text-xs whitespace-nowrap",
     text: "text-xs",
     barWidth: "w-1",
     barHeights: ["h-1.5", "h-2", "h-2.5", "h-3"],

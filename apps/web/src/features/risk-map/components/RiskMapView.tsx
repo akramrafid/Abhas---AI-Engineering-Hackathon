@@ -179,13 +179,13 @@ export function RiskMapView({
                         ward.ward_id === selectedWardId && "bg-paper",
                       )}
                     >
-                      <span>
-                        <span className="block text-sm font-semibold text-ink">{wardLabel(ward.ward_id)}</span>
-                        <span className="block text-xs text-slate">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-ink">{wardLabel(ward.ward_id)}</span>
+                        <span className="block truncate text-xs text-slate tnum">
                           {ward.city} · {ward.expected_cases?.toFixed(1)} {copy.cases}
                         </span>
                       </span>
-                      {ward.tier ? <RiskTierBadge tier={ward.tier} size="sm" lang={lang} /> : null}
+                      {ward.tier ? <RiskTierBadge tier={ward.tier} size="sm" lang={lang} className="shrink-0" /> : null}
                     </button>
                   </li>
                 ))}
