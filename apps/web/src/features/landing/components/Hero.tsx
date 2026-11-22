@@ -3,6 +3,7 @@
 import { useMemo, useRef } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowRight } from "lucide-react";
+import { clsx } from "clsx";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import { RibbonCanvas } from "@/components/brand/RibbonCanvas";
 import { EASE_OUT, FULL_MOTION, gsap, SplitText, useGSAP } from "@/components/motion/gsap";
@@ -14,6 +15,14 @@ import { ContainerScroll } from "@/components/ui/ContainerScroll";
 import { ForecastCard } from "./ForecastCard";
 
 const WINDOW_TABS = ["Ward Forecast", "Risk Map", "Lags", "Scenario", "Priority List", "Validation"] as const;
+const TAB_VIEW_MAP: Record<string, string> = {
+  "Ward Forecast": "forecast",
+  "Risk Map": "risk-map",
+  "Lags": "lags",
+  "Scenario": "scenario",
+  "Priority List": "priority",
+  "Validation": "validation",
+};
 
 export function Hero() {
   const scope = useRef<HTMLElement>(null);
@@ -121,13 +130,21 @@ function ProductWindow() {
         >
           <div className="flex items-center gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
             <AbhasLogo variant="reverse" size="sm" />
-            <ul aria-hidden="true" className="hidden items-center gap-1 text-xs text-mist/80 md:flex">
+            <nav aria-label="Demo tabs" className="hidden items-center gap-1 text-xs text-mist/80 md:flex">
               {WINDOW_TABS.map((tab, i) => (
-                <li key={tab} className={i === 1 ? "rounded-md bg-white/10 px-2.5 py-1 font-semibold text-white" : "px-2.5 py-1"}>
+                <Link
+                  key={tab}
+                  href={`/dashboard?demo=1&tab=${TAB_VIEW_MAP[tab] || "forecast"}`}
+                  className={clsx(
+                    "rounded-md px-2.5 py-1 transition-colors hover:bg-white/20 hover:text-white",
+                    i === 1 ? "bg-white/10 font-semibold text-white" : "text-mist",
+                  )}
+                  title={`Open ${tab} in dashboard`}
+                >
                   {tab}
-                </li>
+                </Link>
               ))}
-            </ul>
+            </nav>
             <span className="ml-auto whitespace-nowrap text-xs text-mist"><span className="max-sm:hidden">Dhaka South · week of </span><span className="font-mono tnum">26 Aug 2024</span></span>
           </div>
           <div className="grid gap-px bg-white/10 lg:grid-cols-[minmax(0,1fr)_24rem]">

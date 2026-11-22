@@ -6,6 +6,6 @@
   "climatology_recall_at_k": 0.5704,
   "model_version": "abhas-lgbm-1.1.2",
   "beats_or_matches_climatology": true,
-  "commit": "8d55c0e",
-  "ts": "2026-11-21T22:18:08+00:00"
+  "commit": "a3c7e96",
+  "ts": "2026-11-22T03:05:57+00:00"
 }

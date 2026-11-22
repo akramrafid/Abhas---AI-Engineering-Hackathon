@@ -98,7 +98,7 @@ export function RainClock() {
   const mapLabel = describeMap(active, activeWards);
 
   return (
-    <section ref={sectionRef} id="rain-clock" aria-labelledby="rain-clock-heading" className="relative bg-ink text-white">
+    <section ref={sectionRef} id="rain-clock" aria-labelledby="rain-clock-heading" className="relative bg-ink text-white scroll-mt-20">
       <div className="sticky top-0 h-[100svh] w-full">
         <WardRiskMap
           wards={activeWards}

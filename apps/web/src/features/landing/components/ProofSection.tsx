@@ -39,7 +39,7 @@ const HOLDOUT = "holdout_2024_2025";
 
 export function ProofSection() {
   return (
-    <section id="proof" aria-labelledby="proof-heading" className="bg-paper px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-32">
+    <section id="proof" aria-labelledby="proof-heading" className="bg-paper px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-32 scroll-mt-20">
       <div className="mx-auto max-w-6xl">
         <h2 id="proof-heading" className="max-w-3xl text-balance text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-navy">
           The lag is in the data. The model is checked on years it never saw.

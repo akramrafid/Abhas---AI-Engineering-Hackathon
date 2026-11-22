@@ -166,6 +166,13 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
     Accept: "application/json, application/problem+json",
     "X-Request-ID": clientRequestId,
   };
+  const opsToken =
+    typeof process !== "undefined"
+      ? process.env.NEXT_PUBLIC_OPS_TOKEN || process.env.OPS_TOKEN
+      : undefined;
+  if (opsToken) {
+    headers["X-Ops-Token"] = opsToken;
+  }
   if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
   }
@@ -202,17 +209,19 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
         retryAfterSeconds,
       });
 
-      console.error(
-        JSON.stringify({
-          level: "error",
-          msg: "api_request_failed",
-          route: path,
-          method,
-          status: apiErr.status,
-          duration_ms: durationMs,
-          request_id: apiErr.requestId,
-        }),
-      );
+      if (path !== "/api/v1/ops" || apiErr.status !== 401) {
+        console.error(
+          JSON.stringify({
+            level: "error",
+            msg: "api_request_failed",
+            route: path,
+            method,
+            status: apiErr.status,
+            duration_ms: durationMs,
+            request_id: apiErr.requestId,
+          }),
+        );
+      }
       throw apiErr;
     }
 

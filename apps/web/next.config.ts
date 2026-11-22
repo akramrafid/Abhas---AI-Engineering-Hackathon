@@ -8,6 +8,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_OPS_TOKEN: process.env.OPS_TOKEN || process.env.NEXT_PUBLIC_OPS_TOKEN || "",
+  },
   // The dev badge covers bottom-left map stamps in localhost demo recordings.
   devIndicators: false,
   cacheComponents: true,

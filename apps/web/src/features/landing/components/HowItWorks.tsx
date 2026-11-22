@@ -59,7 +59,7 @@ export function HowItWorks() {
   );
 
   return (
-    <section ref={scope} id="how" aria-labelledby="how-heading" className="bg-navy px-4 py-24 text-white sm:px-8 lg:py-32">
+    <section ref={scope} id="how" aria-labelledby="how-heading" className="bg-navy px-4 py-24 text-white sm:px-8 lg:py-32 scroll-mt-20">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
           <h2 id="how-heading" className="text-balance text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-[1.05] tracking-[-0.03em]">
