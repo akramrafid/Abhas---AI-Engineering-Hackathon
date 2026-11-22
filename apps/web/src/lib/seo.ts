@@ -4,7 +4,7 @@ export const SITE_NAME = "Abhas (আভাস)";
 export const SITE_SHORT_NAME = "Abhas";
 export const SITE_TAGLINE = "Rain today. Risk in three weeks. Act now.";
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://abhas.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://abhas-ai-engineering-hackathon.vercel.app"
 ).replace(/\/+$/, "");
 
 export const DEFAULT_DESCRIPTION =

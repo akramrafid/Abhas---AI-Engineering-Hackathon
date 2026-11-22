@@ -293,8 +293,8 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
     <header
       ref={headerRef}
       className={clsx(
-        "fixed inset-x-0 top-0 z-40 px-3 transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-6",
-        isScrolled ? "pt-2.5 sm:pt-3" : "pt-3.5 sm:pt-5",
+        "fixed inset-x-0 top-0 z-40 px-2.5 transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-6",
+        isScrolled ? "pt-2 sm:pt-3" : "pt-2.5 sm:pt-5",
       )}
     >
       <div
@@ -348,14 +348,14 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
         {/* Main bar content */}
         <div
           className={clsx(
-            "relative z-10 flex items-center justify-between gap-3 px-4 transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-6",
+            "relative z-10 flex items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6 transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             isScrolled ? "h-14" : "h-16",
           )}
         >
           <Link
             href="/"
             onClick={handleLogoClick}
-            className="group/logo relative flex items-center rounded-full py-1 pr-2 transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-royal"
+            className="group/logo relative flex shrink-0 items-center rounded-full py-1 pr-1 sm:pr-2 transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-royal"
           >
             <AbhasLogo variant="reverse" size="sm" showBangla />
             <span className="sr-only">Abhas home</span>
@@ -419,7 +419,7 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
           </nav>
 
           {/* Right actions + EN/বাংলা toggle + mobile glass toggle */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <div
               role="group"
               aria-label="Language"
@@ -449,13 +449,14 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
               type="button"
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
+              data-testid="mobile-menu-toggle"
               onClick={() => setMobileMenuOpen((open) => !open)}
-              className="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal lg:hidden"
+              className="relative inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur-md transition-all duration-300 hover:border-white/30 hover:bg-white/15 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal lg:hidden"
             >
               {mobileMenuOpen ? (
-                <X className="h-5 w-5" aria-hidden="true" />
+                <X className="h-4.5 w-4.5 sm:h-5 sm:w-5" aria-hidden="true" />
               ) : (
-                <Menu className="h-5 w-5" aria-hidden="true" />
+                <Menu className="h-4.5 w-4.5 sm:h-5 sm:w-5" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -482,6 +483,23 @@ export function SiteNav({ actions }: { actions: ReactNode }) {
               aria-label="Mobile Navigation"
               className="border-t border-white/10 px-3 py-3"
             >
+              {/* Primary action in mobile drawer */}
+              <div className="mb-2.5">
+                <Link
+                  href={lang === "bn" ? "/dashboard?lang=bn" : "/dashboard"}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={clsx(
+                    "flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-royal px-4 py-2.5 text-sm font-semibold text-white shadow-[0_6px_20px_-4px_rgba(47,91,255,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-all hover:bg-white hover:text-royal active:scale-[0.98]",
+                    lang === "bn" && "font-bangla",
+                  )}
+                  data-testid="mobile-drawer-dashboard-cta"
+                >
+                  <span>{lang === "bn" ? "ড্যাশবোর্ড খুলুন" : "Open dashboard"}</span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+
               <ul className="flex flex-col gap-1">
                 {LINKS.map((link) => {
                   const isActive = activeId === link.id;

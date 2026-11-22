@@ -221,7 +221,7 @@ export function AbhasLogo({
               <span
                 lang="bn"
                 className={clsx(
-                  "font-bangla font-bold leading-none",
+                  "font-bangla font-bold leading-none hidden min-[360px]:inline",
                   palette.banglaClass,
                 )}
                 style={{ fontSize: Math.round(m.fontPx * 0.78) }}
