@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy — Abhas (আভাস)",
-  description: "Abhas privacy policy: zero patient PII, zero tracking cookies, and transparent optional third-party services.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Privacy Policy",
+  description:
+    "Abhas privacy policy: zero patient PII, zero tracking cookies, and transparent optional third-party services.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

@@ -4,8 +4,14 @@ import { redirect } from "next/navigation";
 import { SignIn } from "@clerk/nextjs";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AUTH_ENABLED } from "@/lib/auth-config";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Sign in · Abhas" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Sign in",
+  description: "Sign in to the Abhas ward-level dengue early-warning console.",
+  path: "/sign-in",
+  noIndex: true,
+});
 
 export default function SignInPage() {
   if (!AUTH_ENABLED) redirect("/dashboard");

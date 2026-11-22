@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Security & Trust — Abhas (আভাস)",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Security & Trust",
   description:
-    "Data handling, zero-PII architecture, API hardening, and automated 30/30 AI red-team verification for Abhas.",
-};
+    "Zero-PII architecture, SHA-256 LightGBM artifact verification, API hardening, and 30/30 automated AI red-team verification for Abhas.",
+  path: "/security",
+});
 
 const CONTROLS = [
   {

@@ -49,6 +49,10 @@ export function RibbonCanvas({
     let height = 0;
     let frame = 0;
     let visible = true;
+    let lastDraw = 0;
+    let gradient: CanvasGradient | null = null;
+    let activeLines = lines;
+    let activeSteps = 64;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -57,24 +61,28 @@ export function RibbonCanvas({
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const draw = (time: number) => {
-      const t = (time / 1000 / period) * Math.PI * 2;
-      ctx.clearRect(0, 0, width, height);
-      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      gradient = ctx.createLinearGradient(0, 0, width, 0);
       gradient.addColorStop(0, palette.navy);
       gradient.addColorStop(0.35, palette.royal);
       gradient.addColorStop(0.72, palette.lime);
       gradient.addColorStop(1, palette.white);
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = 0.6;
+      const compact = width < 768;
+      activeLines = compact ? Math.min(lines, 42) : Math.min(lines, 72);
+      activeSteps = compact ? 44 : 64;
+    };
 
-      const steps = 90;
+    const draw = (time: number) => {
+      if (!width || !height || !gradient) return;
+      const t = (time / 1000 / period) * Math.PI * 2;
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 0.65;
+
+      const steps = activeSteps;
       // Two strands, like the cover: a wide main ribbon and a thinner one crossing below it.
       const strands = [
-        { a: from, b: to, phase: 0, scale: 1, count: lines },
-        { a: Math.min(from + 0.18, 1.05), b: to + 0.42, phase: 2.2, scale: 0.6, count: Math.round(lines * 0.7) },
+        { a: from, b: to, phase: 0, scale: 1, count: activeLines },
+        { a: Math.min(from + 0.18, 1.05), b: to + 0.42, phase: 2.2, scale: 0.6, count: Math.round(activeLines * 0.68) },
       ];
       for (const strand of strands) {
         for (let i = 0; i < strand.count; i++) {
@@ -99,29 +107,57 @@ export function RibbonCanvas({
       ctx.globalAlpha = 1;
     };
 
+    const stopLoop = () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
     const loop = (time: number) => {
-      if (visible) draw(time);
+      if (!visible || document.hidden) {
+        frame = 0;
+        return;
+      }
+      // Ambient 18s drift needs ~30fps max — saves ~50% GPU/CPU main-thread work.
+      if (time - lastDraw >= 32) {
+        lastDraw = time;
+        draw(time);
+      }
+      frame = requestAnimationFrame(loop);
+    };
+
+    const startLoop = () => {
+      if (reduced || frame || !visible || document.hidden) return;
       frame = requestAnimationFrame(loop);
     };
 
     resize();
+    draw(0);
     const resizeObserver = new ResizeObserver(() => {
       resize();
-      if (reduced) draw(0);
+      draw(performance.now());
     });
     resizeObserver.observe(canvas);
     const io = new IntersectionObserver(([entry]) => {
       visible = Boolean(entry?.isIntersecting);
+      if (visible) startLoop();
+      else stopLoop();
     });
     io.observe(canvas);
+    const onVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
-    if (reduced) draw(0);
-    else frame = requestAnimationFrame(loop);
+    startLoop();
 
     return () => {
-      cancelAnimationFrame(frame);
+      stopLoop();
       resizeObserver.disconnect();
       io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [lines, from, to, period]);
 

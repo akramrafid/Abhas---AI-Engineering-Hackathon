@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Documentation & Changelog — Abhas (আভাস)",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Documentation & API Reference",
   description:
-    "Quickstart guide, API endpoints, forecasting methodology, and release changelog for Abhas dengue early warning.",
-};
+    "Quickstart guide, FastAPI OpenAPI endpoints, LightGBM forecasting methodology, and release changelog for Abhas dengue early warning.",
+  path: "/docs",
+});
 
 const ENDPOINTS = [
   { method: "GET", path: "/healthz", desc: "Liveness probe (200 OK, no-store)." },

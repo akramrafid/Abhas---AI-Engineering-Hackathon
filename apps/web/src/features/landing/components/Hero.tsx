@@ -36,9 +36,9 @@ export function Hero() {
       mm.add(FULL_MOTION, () => {
         const split = SplitText.create("[data-hero-title]", { type: "lines,words", mask: "lines" });
         const tl = gsap.timeline({ defaults: { ease: EASE_OUT } });
-        tl.from(split.words, { yPercent: 110, duration: 1.1, stagger: 0.045 })
-          .from("[data-hero-fade]", { y: 18, autoAlpha: 0, duration: 0.9, stagger: 0.08 }, "-=0.75")
-          .from("[data-hero-ribbon]", { autoAlpha: 0, duration: 1.6, ease: "power2.out" }, 0);
+        tl.from(split.words, { yPercent: 35, duration: 0.55, stagger: 0.025 })
+          .from("[data-hero-fade]", { y: 12, autoAlpha: 0, duration: 0.45, stagger: 0.05 }, "-=0.35")
+          .from("[data-hero-ribbon]", { autoAlpha: 0, duration: 0.9, ease: "power2.out" }, 0);
         return () => split.revert();
       });
     },
@@ -141,6 +141,30 @@ export function Hero() {
             <ArrowDown aria-hidden="true" className="h-4 w-4" />
           </a>
         </div>
+
+        {/* Above-the-fold CRO trust & proof strip */}
+        <ul
+          data-hero-fade
+          lang={lang}
+          aria-label={bn ? "মূল যাচাইকৃত বৈশিষ্ট্য" : "Verified platform highlights"}
+          className={clsx(
+            "mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-mist/85 tnum",
+            bn && "font-bangla",
+          )}
+        >
+          <li className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" aria-hidden="true" />
+            {bn ? "৬০টি ওয়ার্ড · ৫ সিটি কর্পোরেশন" : "60 wards · 5 city corporations"}
+          </li>
+          <li className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" aria-hidden="true" />
+            {bn ? "২০% কম ত্রুটি (২০২৪–২৫ যাচাই)" : "~20% lower MAE (2024–25 hold-out)"}
+          </li>
+          <li className="inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime" aria-hidden="true" />
+            {bn ? "$০ লাইসেন্স · অফলাইনে চলে · ০ PII" : "$0 license · Runs offline · 0 patient PII"}
+          </li>
+        </ul>
       </div>
 
       <ProductWindow />

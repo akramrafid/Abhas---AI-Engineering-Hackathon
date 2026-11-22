@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "About Abhas — Dengue Early Warning for Bangladesh",
+export const metadata: Metadata = buildPageMetadata({
+  title: "About & Methodology",
   description:
-    "Mission, epidemiological methodology, honest dataset disclosure, and engineering principles behind Abhas (আভাস).",
-};
+    "Mission, epidemiological rainfall-lag methodology, honest dataset disclosure, and engineering principles behind Abhas (আভাস).",
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service — Abhas (আভাস)",
-  description: "Terms of use, early-warning decision-support scope, and open-data attributions for Abhas.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Terms of Service",
+  description:
+    "Terms of use, early-warning decision-support scope, and open-data attributions for Abhas.",
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

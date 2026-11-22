@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 import { StatusClient } from "./StatusClient";
 
-export const metadata: Metadata = {
-  title: "System Status — Abhas (আভাস)",
-  description: "Live health and readiness status for the Abhas API, LightGBM forecast artifact, and SQLite ward store.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "System Status",
+  description:
+    "Live health and readiness status for the Abhas API, SHA-256 LightGBM forecast artifact, and SQLite ward store.",
+  path: "/status",
+});
 
 export default function StatusPage() {
   return (

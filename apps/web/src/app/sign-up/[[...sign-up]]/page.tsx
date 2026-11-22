@@ -4,8 +4,14 @@ import { redirect } from "next/navigation";
 import { SignUp } from "@clerk/nextjs";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { AUTH_ENABLED } from "@/lib/auth-config";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Create account · Abhas" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Create account",
+  description: "Create a municipal health office account for Abhas.",
+  path: "/sign-up",
+  noIndex: true,
+});
 
 export default function SignUpPage() {
   if (!AUTH_ENABLED) redirect("/dashboard");

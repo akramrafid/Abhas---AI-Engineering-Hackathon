@@ -115,6 +115,7 @@ export function WardRiskMap({
   const selectRef = useRef(onSelectWard);
   const highlightRef = useRef(highlightWardId);
   const showPinnedRef = useRef(showPinnedData);
+  const [shouldLoad, setShouldLoad] = useState(interactive);
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
   const [hover, setHover] = useState<ProjectedAnchor | null>(null);
@@ -206,8 +207,31 @@ export function WardRiskMap({
     setCityPins(pins);
   }, []);
 
+  // Defer ~1.6 MB MapLibre + Web Worker download for below-the-fold non-interactive maps until near viewport.
+  useEffect(() => {
+    if (shouldLoad) return;
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShouldLoad(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShouldLoad(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "320px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [shouldLoad]);
+
   // Create the map once; maplibre-gl is loaded on demand so it never weighs on first paint.
   useEffect(() => {
+    if (!shouldLoad) return;
     let cancelled = false;
     let map: MapLibreMap | null = null;
     void import("maplibre-gl")
@@ -266,9 +290,9 @@ export function WardRiskMap({
       map?.remove();
       mapRef.current = null;
     };
-    // The map instance is created once; view/interactive changes are applied below.
+    // The map instance is created once when visible; view/interactive changes are applied below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [shouldLoad]);
 
   // Re-project pinned ward & city overlays whenever wards, highlight, view, or readiness changes.
   useEffect(() => {

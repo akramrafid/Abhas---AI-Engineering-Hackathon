@@ -4,75 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, FileText, MessageSquareText, Plus } from "@/components/icons";
 import { clsx } from "clsx";
+import { ABHAS_FAQ_ITEMS } from "@/lib/seo";
 import { useLandingLang } from "../lang-context";
 
 type FaqTopic = "all" | "model" | "ops" | "trust";
 
-const FAQ = [
-  {
-    topic: "model",
-    qEn: "Is this real outbreak data?",
-    qBn: "এটি কি বাস্তব ডেঙ্গু প্রাদুর্ভাবের ডেটা?",
-    aEn: "It is the organisers' dataset: 60 wards across Dhaka North, Dhaka South, Chattogram, Gazipur and Narayanganj, weekly from January 2016 to December 2025. It looks simulated, so treat the accuracy figures as a demonstration, not a real-world claim.",
-    aBn: "এটি হ্যাকাথন আয়োজকদের প্রদত্ত ডেটাসেট: ঢাকা উত্তর, ঢাকা দক্ষিণ, চট্টগ্রাম, গাজীপুর ও নারায়ণগঞ্জের ৬০টি ওয়ার্ডের জানুয়ারি ২০১৬ থেকে ডিসেম্বর ২০২৫ পর্যন্ত সাপ্তাহিক তথ্য। এটি সিমুলেটেড ধরনের, তাই নির্ভুলতার সংখ্যাগুলো প্রদর্শনী হিসেবে বিবেচনা করুন।",
-  },
-  {
-    topic: "model",
-    qEn: "How far ahead does it see?",
-    qBn: "কতদিন আগে পূর্বাভাস দেওয়া যায়?",
-    aEn: "One to four weeks for every ward. The rain signal is strongest three weeks out: cases correlate 0.47 with rain three weeks earlier once the season is removed, against 0.03 for the same week.",
-    aBn: "প্রতিটি ওয়ার্ডের জন্য ১ থেকে ৪ সপ্তাহ আগে। বৃষ্টির সংকেত ৩ সপ্তাহ আগে সবচেয়ে শক্তিশালী: মৌসুমি প্রভাব বাদ দিলে ৩ সপ্তাহ আগের বৃষ্টির সাথে রোগীর সহসম্পর্ক ০.৪৭, যেখানে একই সপ্তাহের ক্ষেত্রে মাত্র ০.০৩।",
-  },
-  {
-    topic: "model",
-    qEn: "How accurate is it?",
-    qBn: "পূর্বাভাস কতটা নির্ভুল?",
-    aEn: "On 2024 and 2025, years locked away before training and scored once, the three-week forecast misses by about one case per ward-week on average, 20% less than each ward's seasonal average. Every forecast carries an 80% range so officers see the uncertainty.",
-    aBn: "প্রশিক্ষণের আগেই আলাদা করে রাখা ২০২৪–২০২৫ সালের ডেটায় তিন সপ্তাহের পূর্বাভাসের গড় ত্রুটি প্রতি ওয়ার্ড-সপ্তাহে মাত্র ১ জন রোগী, যা মৌসুমি গড়ের চেয়ে ২০% কম। প্রতিটি পূর্বাভাসে ৮০% অনিশ্চয়তা পরিসর দেওয়া থাকে।",
-  },
-  {
-    topic: "ops",
-    qEn: "What does it cost a health office to run?",
-    qBn: "একটি স্বাস্থ্য দপ্তরের এটি চালাতে কত খরচ হয়?",
-    aEn: "Nothing beyond a laptop. The model is a 954 KiB file that answers in under a millisecond per ward on the CPU. Live weather is one Open-Meteo request for all five cities every six hours. The optional AI advisory has a hard cap of one dollar a day; without a key a free template writes the same advice.",
-    aBn: "অফিসের একটি ল্যাপটপ ছাড়া কোনো খরচ নেই। মডেলটি মাত্র ৯৫৪ কি.বা. যা CPU-তে এক মিলিসেকেন্ডের কম সময়ে ফলাফল দেয়। লাইভ আবহাওয়ার জন্য ৬ ঘণ্টায় একবার Open-Meteo কল হয়। এআই পরামর্শ ঐচ্ছিক (সর্বোচ্চ $১/দিন), আর কী ছাড়া ফ্রি টেমপ্লেটেই কাজ চলে।",
-  },
-  {
-    topic: "ops",
-    qEn: "Does it need the internet?",
-    qBn: "এটি চালাতে কি সবসময় ইন্টারনেট লাগে?",
-    aEn: "No. The dashboard runs offline from the dataset. Live weather, the advisory text, the map tiles and sign-in are optional extras.",
-    aBn: "না। পুরো ড্যাশবোর্ড ডেটাসেট থেকে সম্পূর্ণ অফলাইনে চলে। লাইভ আবহাওয়া, এআই পরামর্শ, মানচিত্র টাইলস ও লগইন ঐচ্ছিক।",
-  },
-  {
-    topic: "ops",
-    qEn: "How long does setup take for a city health office?",
-    qBn: "একটি সিটি স্বাস্থ্য অফিসে সেটআপ করতে কত সময় লাগে?",
-    aEn: "Under three minutes on a standard Windows, macOS, or Linux laptop. One command installs dependencies, seeds the local SQLite database, verifies the committed model artifact, and launches both the API and dashboard — zero API keys required.",
-    aBn: "সাধারণ Windows, macOS বা Linux ল্যাপটপে তিন মিনিটেরও কম। একটি কমান্ডেই সব ডিপেন্ডেন্সি, লোকাল ডেটাবেস, মডেল যাচাই ও ড্যাশবোর্ড চালু হয় — কোনো এপিআই কী লাগে না।",
-  },
-  {
-    topic: "trust",
-    qEn: "How is health and citizen data protected?",
-    qBn: "স্বাস্থ্য ও নাগরিক তথ্য কীভাবে সুরক্ষিত থাকে?",
-    aEn: "Abhas stores ward-level aggregate case counts and weather variables only — zero patient names, IDs, phone numbers, or clinical records ever enter the system. It can run completely air-gapped on office hardware, and passes 30/30 automated API & AI security tests.",
-    aBn: "আভাসে শুধু ওয়ার্ডভিত্তিক মোট রোগীর সংখ্যা ও আবহাওয়া সংরক্ষিত থাকে — কোনো রোগীর নাম, আইডি, ফোন নম্বর বা ক্লিনিকাল তথ্য নেওয়া হয় না। এটি সম্পূর্ণ অফলাইনে চলে এবং ৩০/৩০ নিরাপত্তা পরীক্ষায় পাস করেছে।",
-  },
-  {
-    topic: "trust",
-    qEn: "How do pilot onboarding and support work?",
-    qBn: "পাইলট চালু ও প্রশিক্ষণ সহায়তা কীভাবে কাজ করে?",
-    aEn: "City corporations and public health teams can request a zero-fee pilot directly from this page or via WhatsApp. We help map your weekly ward surveillance spreadsheet to Abhas's schema and train zonal health officers in Bangla and English.",
-    aBn: "সিটি কর্পোরেশন ও জনস্বাস্থ্য দল এই পেজ বা হোয়াটসঅ্যাপের মাধ্যমে বিনা খরচে পাইলটের অনুরোধ করতে পারেন। আমরা সাপ্তাহিক স্প্রেডশিট ম্যাপিং এবং বাংলা-ইংরেজিতে কর্মকর্তাদের প্রশিক্ষণে সহায়তা করি।",
-  },
-  {
-    topic: "model",
-    qEn: "Why are ward positions on the map approximate?",
-    qBn: "মানচিত্রে ওয়ার্ডগুলোর অবস্থান আনুমানিক কেন?",
-    aEn: "The dataset has ward numbers but no boundaries, so each ward is placed near its city corporation's real centre. Abhas never draws ward outlines it does not have.",
-    aBn: "ডেটাসেটে ওয়ার্ড নম্বর আছে কিন্তু ভৌগোলিক সীমানা (GIS পলিগন) নেই, তাই প্রতিটি ওয়ার্ডকে সংশ্লিষ্ট সিটি কর্পোরেশনের প্রকৃত কেন্দ্রের কাছে বসানো হয়েছে।",
-  },
-] as const;
+const FAQ = ABHAS_FAQ_ITEMS;
 
 export function Faq() {
   const { lang } = useLandingLang();

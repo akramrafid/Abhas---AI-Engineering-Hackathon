@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Download } from "@/components/icons";
 import { clsx } from "clsx";
 import Link from "next/link";
@@ -9,8 +10,6 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SelectionBar } from "@/components/dashboard/SelectionBar";
 import { Providers } from "@/components/Providers";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
-import { AlertsDialog } from "@/components/dashboard/shell/AlertsDialog";
-import { CommandSearch } from "@/components/dashboard/shell/CommandSearch";
 import { StatTiles } from "@/components/dashboard/shell/StatTiles";
 import { useWorkspaceSignals } from "@/components/dashboard/shell/useWorkspaceSignals";
 import { useDashboardTheme } from "@/components/dashboard/shell/theme";
@@ -18,14 +17,45 @@ import { VIEW_META } from "@/components/dashboard/shell/views";
 import { ViewDock, type DockItem } from "@/components/dashboard/shell/ViewDock";
 import { FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
 import { downloadCsv } from "@/lib/csv";
-import { AboutCostView } from "@/features/about/components/AboutCostView";
-import { HeatmapView } from "@/features/heatmap/components/HeatmapView";
-import { LagsPanel } from "@/features/lags/components/LagsPanel";
-import { PriorityListView } from "@/features/priority/components/PriorityListView";
-import { RiskMapView } from "@/features/risk-map/components/RiskMapView";
-import { ScenarioPanel } from "@/features/scenario/components/ScenarioPanel";
-import { ValidationView } from "@/features/validation/components/ValidationView";
 import { WardForecastView } from "@/features/ward-risk/components/WardForecastView";
+
+// Keep WardForecastView eager (default LCP tab); code-split secondary views & modals on demand.
+const RiskMapView = dynamic(
+  () => import("@/features/risk-map/components/RiskMapView").then((m) => m.RiskMapView),
+  { loading: () => <PanelSkeleton testId="risk-map-loading" label="Loading risk map…" /> },
+);
+const LagsPanel = dynamic(
+  () => import("@/features/lags/components/LagsPanel").then((m) => m.LagsPanel),
+  { loading: () => <PanelSkeleton label="Loading rainfall lag analysis…" /> },
+);
+const ScenarioPanel = dynamic(
+  () => import("@/features/scenario/components/ScenarioPanel").then((m) => m.ScenarioPanel),
+  { loading: () => <PanelSkeleton label="Loading scenario simulator…" /> },
+);
+const HeatmapView = dynamic(
+  () => import("@/features/heatmap/components/HeatmapView").then((m) => m.HeatmapView),
+  { loading: () => <PanelSkeleton label="Loading city heatmap…" /> },
+);
+const PriorityListView = dynamic(
+  () => import("@/features/priority/components/PriorityListView").then((m) => m.PriorityListView),
+  { loading: () => <PanelSkeleton label="Loading priority list…" /> },
+);
+const ValidationView = dynamic(
+  () => import("@/features/validation/components/ValidationView").then((m) => m.ValidationView),
+  { loading: () => <PanelSkeleton label="Loading hold-out validation…" /> },
+);
+const AboutCostView = dynamic(
+  () => import("@/features/about/components/AboutCostView").then((m) => m.AboutCostView),
+  { loading: () => <PanelSkeleton label="Loading telemetry & model card…" /> },
+);
+const CommandSearch = dynamic(
+  () => import("@/components/dashboard/shell/CommandSearch").then((m) => m.CommandSearch),
+  { ssr: false },
+);
+const AlertsDialog = dynamic(
+  () => import("@/components/dashboard/shell/AlertsDialog").then((m) => m.AlertsDialog),
+  { ssr: false },
+);
 import {
   useWardsQuery,
   useWeatherStatusQuery,

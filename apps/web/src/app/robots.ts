@@ -1,14 +1,33 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const PUBLIC_ALLOW = ["/", "/llms.txt"];
+const PRIVATE_DISALLOW = ["/api/", "/sign-in/", "/sign-up/"];
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: ["/api/"],
-    },
-    sitemap: `${BASE}/sitemap.xml`,
+    rules: [
+      {
+        userAgent: "*",
+        allow: PUBLIC_ALLOW,
+        disallow: PRIVATE_DISALLOW,
+      },
+      // Explicitly welcome search and AI answer/citation crawlers (GEO & AEO).
+      {
+        userAgent: [
+          "Googlebot",
+          "Bingbot",
+          "OAI-SearchBot",
+          "GPTBot",
+          "ClaudeBot",
+          "PerplexityBot",
+          "Applebot",
+        ],
+        allow: PUBLIC_ALLOW,
+        disallow: PRIVATE_DISALLOW,
+      },
+    ],
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }

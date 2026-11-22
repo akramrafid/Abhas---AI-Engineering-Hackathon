@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/layout/PublicPageShell";
 import { PilotSection } from "@/features/landing/components/PilotSection";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Request a Pilot & Contact — Abhas (আভাস)",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Request a Pilot & Contact",
   description:
-    "Schedule a municipal dengue early-warning pilot for Bangladesh city corporations via form, email, or WhatsApp.",
-};
+    "Schedule a zero-fee municipal dengue early-warning pilot for Bangladesh city corporations via intake form, email, or WhatsApp.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
