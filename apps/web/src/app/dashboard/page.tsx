@@ -275,9 +275,17 @@ function DashboardWorkspace() {
         const layer = contentRef.current;
         if (!layer) return;
         gsap
-          .timeline({ defaults: { ease: "power3.out" } })
-          .fromTo(layer, { opacity: 0.55, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.35, clearProps: "opacity,filter" })
-          .from(layer.querySelectorAll(":scope > * > *"), { y: 16, opacity: 0, duration: 0.5, stagger: 0.05, clearProps: "transform,opacity" }, 0.04);
+          .timeline({ defaults: { ease: "expo.out" } })
+          .fromTo(
+            layer,
+            { opacity: 0.72, y: 8 },
+            { opacity: 1, y: 0, duration: 0.28, clearProps: "opacity,transform" },
+          )
+          .from(
+            layer.querySelectorAll(":scope > * > *"),
+            { y: 10, opacity: 0, duration: 0.34, stagger: 0.035, clearProps: "transform,opacity" },
+            0.02,
+          );
       });
     },
     { dependencies: [activeTab], scope: contentRef, revertOnUpdate: true },
@@ -330,7 +338,7 @@ function DashboardWorkspace() {
             data-testid="export-csv"
             onClick={exportCsv}
             disabled={signals.exportRows.length < 2}
-            className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-royal px-4 text-sm font-semibold text-white transition-colors duration-300 hover:bg-navy disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] px-5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download aria-hidden="true" className="h-4 w-4" />
             Export forecasts CSV

@@ -5,7 +5,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={clsx(
-        "rounded-lg border border-mist bg-white text-ink",
+        "rounded-[16px] bg-white text-ink ring-1 ring-mist/90 transition-colors duration-200",
         className,
       )}
       {...props}
@@ -16,7 +16,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={clsx("flex flex-col gap-1 border-b border-mist px-5 py-4", className)}
+      className={clsx("flex flex-col gap-1 border-b border-mist/80 px-5 py-4", className)}
       {...props}
     />
   );
@@ -25,7 +25,7 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
-      className={clsx("font-sans text-base font-bold text-navy leading-snug", className)}
+      className={clsx("font-sans text-[15px] font-bold tracking-[-0.01em] text-navy leading-snug", className)}
       {...props}
     />
   );
@@ -34,7 +34,7 @@ export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingEle
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      className={clsx("text-sm text-slate leading-relaxed", className)}
+      className={clsx("text-xs text-slate leading-relaxed sm:text-[13px]", className)}
       {...props}
     />
   );

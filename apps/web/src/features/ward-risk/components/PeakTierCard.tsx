@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, Printer } from "@/components/icons";
+import { CalendarClock, Info, MapPin, Printer } from "@/components/icons";
 import { clsx } from "clsx";
 import { RiskTierBadge } from "@/components/brand/RiskTierBadge";
 import {
@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import { NumberTicker } from "@/components/ui/NumberTicker";
 import type {
   ForecastResponse,
   HorizonForecast,
@@ -50,22 +51,45 @@ export function PeakTierCard({
   const windowLabel =
     windowKey === "1w" ? "1w" : windowKey === "2-4w" ? "2–4w" : "1–4w";
 
+  const riskScorePct = peakHorizon ? Math.min(100, Math.max(0, peakHorizon.risk_score)) : 0;
+  const bandMarkerPct =
+    peakHorizon && peakHorizon.p90 > peakHorizon.p10
+      ? Math.min(
+          92,
+          Math.max(
+            8,
+            Math.round(
+              ((peakHorizon.expected_cases - peakHorizon.p10) /
+                (peakHorizon.p90 - peakHorizon.p10)) *
+                100,
+            ),
+          ),
+        )
+      : 50;
+
   return (
-    <Card data-testid="peak-tier-card" className="no-print">
-      <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
+    <Card
+      key={selectedForecast.ward_id}
+      data-testid="peak-tier-card"
+      className="abhas-ward-enter no-print overflow-hidden"
+    >
+      <CardHeader className="gap-3 bg-paper/45 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle className="font-mono text-lg tnum">
+            <CardTitle className="flex items-center gap-2 font-sans text-xl font-extrabold tracking-[-0.02em] text-navy tnum">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-royal/10 text-royal ring-1 ring-royal/15">
+                <MapPin aria-hidden="true" className="h-4 w-4" />
+              </span>
               {selectedForecast.ward_id}
             </CardTitle>
-            <span className="rounded-sm bg-paper px-2 py-0.5 text-xs font-medium text-navy">
+            <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-navy ring-1 ring-mist">
               {selectedForecast.city}
             </span>
-            <span className="rounded-sm border border-mist px-2 py-0.5 font-mono text-xs text-slate tnum">
+            <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-slate ring-1 ring-mist tnum">
               Window {windowLabel}
             </span>
           </div>
-          <CardDescription className="font-mono text-xs tnum">
+          <CardDescription className="text-xs tnum">
             Origin {originInfo ? `${originInfo.shortLabel} (${response.origin_week})` : response.origin_week} ·{" "}
             {weatherLabel} · Model {response.model_version}
             {response.cached ? " · cached" : ""}
@@ -86,96 +110,131 @@ export function PeakTierCard({
       <CardContent className="space-y-4">
         {peakHorizon && actBy ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-md border border-mist bg-paper p-3.5">
-              <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
-                {copy.peakRiskScore}
-              </p>
-              <p
-                data-testid="peak-risk-score"
-                className="mt-1 font-mono text-2xl font-bold text-navy tnum"
-              >
-                {peakHorizon.risk_score}
-                <span className="text-sm font-medium text-slate"> / 100</span>
-              </p>
-              <p className={clsx("mt-0.5 text-xs text-slate", lang === "bn" && "font-bangla")}>
-                {copy.peakRiskHint}
-              </p>
+            {/* 1. Peak risk score with 0–100 gauge bar */}
+            <div className="flex flex-col justify-between rounded-xl bg-paper/75 p-4 ring-1 ring-mist/85">
+              <div>
+                <p className={clsx("text-[11px] font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                  {copy.peakRiskScore}
+                </p>
+                <p
+                  data-testid="peak-risk-score"
+                  className="mt-1.5 font-sans text-2xl font-extrabold tracking-tight text-navy tnum"
+                >
+                  <NumberTicker value={peakHorizon.risk_score} decimalPlaces={0} />
+                  <span className="text-sm font-semibold text-slate"> / 100</span>
+                </p>
+              </div>
+              <div className="mt-2.5">
+                <div
+                  aria-hidden="true"
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-white ring-1 ring-mist/80"
+                >
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#0B1A5C_0%,#2F5BFF_100%)] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    style={{ width: `${riskScorePct}%` }}
+                  />
+                </div>
+                <p className={clsx("mt-1.5 text-[11px] leading-snug text-slate", lang === "bn" && "font-bangla")}>
+                  {copy.peakRiskHint}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-md border border-mist bg-paper p-3.5">
-              <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
-                {copy.peakExpectedCases} (+{peakHorizon.horizon}w)
-              </p>
-              <p
-                data-testid="peak-expected-cases"
-                className="mt-1 font-mono text-2xl font-bold text-navy tnum"
-              >
-                {peakHorizon.expected_cases.toFixed(1)}
-              </p>
-              <p className="mt-0.5 font-mono text-xs text-slate tnum">
-                {copy.bandLabel}: {peakHorizon.p10.toFixed(1)}–{peakHorizon.p90.toFixed(1)} {copy.casesUnit}
-              </p>
+            {/* 2. Peak expected cases with P10–P90 conformal whisker */}
+            <div className="flex flex-col justify-between rounded-xl bg-paper/75 p-4 ring-1 ring-mist/85">
+              <div>
+                <p className={clsx("text-[11px] font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                  {copy.peakExpectedCases} (+{peakHorizon.horizon}w)
+                </p>
+                <p
+                  data-testid="peak-expected-cases"
+                  className="mt-1.5 font-sans text-2xl font-extrabold tracking-tight text-navy tnum"
+                >
+                  <NumberTicker value={peakHorizon.expected_cases} decimalPlaces={1} />
+                </p>
+              </div>
+              <div className="mt-2.5">
+                <div
+                  aria-hidden="true"
+                  className="relative h-1.5 w-full rounded-full bg-royal/15"
+                >
+                  <span
+                    className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-royal transition-[left] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    style={{ left: `${bandMarkerPct}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-[11px] font-medium text-slate tnum">
+                  {copy.bandLabel}: {peakHorizon.p10.toFixed(1)}–{peakHorizon.p90.toFixed(1)} {copy.casesUnit}
+                </p>
+              </div>
             </div>
 
-            <div className="rounded-md border border-royal/30 bg-paper p-3.5">
+            {/* 3. Act-by operational deadline callout */}
+            <div className="flex flex-col justify-between rounded-xl bg-royal/[0.06] p-4 ring-1 ring-royal/25">
               <p
                 className={clsx(
-                  "flex items-center gap-1.5 text-xs font-semibold text-navy",
+                  "flex items-center gap-1.5 text-[11px] font-bold text-royal",
                   lang === "bn" && "font-bangla",
                 )}
               >
-                <CalendarClock className="h-3.5 w-3.5 text-royal" aria-hidden="true" />
+                <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>{copy.actByLabel}</span>
               </p>
               <p
                 data-testid="peak-act-by"
-                className="mt-1 font-mono text-xl font-bold text-navy tnum"
+                className="mt-1.5 font-sans text-xl font-extrabold tracking-tight text-navy tnum"
               >
                 {actBy.displayDate}
               </p>
-              <p className={clsx("mt-0.5 text-xs text-slate", lang === "bn" && "font-bangla")}>
+              <p className={clsx("mt-2 text-[11px] leading-snug text-slate", lang === "bn" && "font-bangla")}>
                 {actBy.urgent ? copy.actImmediately : copy.actByHint}
               </p>
             </div>
 
-            <div className="rounded-md border border-mist bg-paper p-3.5">
-              <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
+            {/* 4. Peak target week */}
+            <div className="flex flex-col justify-between rounded-xl bg-paper/75 p-4 ring-1 ring-mist/85">
+              <p className={clsx("text-[11px] font-semibold text-slate", lang === "bn" && "font-bangla")}>
                 {copy.peakTargetWeek}
               </p>
-              <p className="mt-1 font-mono text-xl font-bold text-navy tnum">
+              <p className="mt-1.5 font-sans text-xl font-extrabold tracking-tight text-navy tnum">
                 {peakHorizon.target_week}
               </p>
-              <p className="mt-0.5 text-xs text-slate">
-                +{peakHorizon.horizon} week{peakHorizon.horizon === 1 ? "" : "s"} after origin
+              <p className="mt-2">
+                <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-navy ring-1 ring-mist tnum">
+                  +{peakHorizon.horizon} week{peakHorizon.horizon === 1 ? "" : "s"} after origin
+                </span>
               </p>
             </div>
           </div>
         ) : null}
 
         {escalated ? (
-          <p className="rounded-md border border-risk-medium bg-paper px-3 py-2 text-xs font-medium text-ink">
-            Upper 80% bound (P90) exceeds this ward&apos;s seasonal endemic threshold — tier escalated by +1 level.
-          </p>
+          <div className="flex items-start gap-2.5 rounded-xl bg-paper px-3.5 py-2.5 text-xs font-medium text-navy ring-1 ring-risk-medium/70">
+            <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-navy" />
+            <p>
+              Upper 80% bound (P90) exceeds this ward&apos;s seasonal endemic threshold — tier escalated by +1 level.
+            </p>
+          </div>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-mist pt-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-mist/80 pt-3.5">
           {wardMeta ? (
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate">
-              <span>
-                Water-logging index:{" "}
-                <strong className="font-mono text-ink tnum">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
+                Water-logging
+                <strong className="font-bold text-navy tnum">
                   {wardMeta.water_logging_risk_index.toFixed(2)}
                 </strong>
               </span>
-              <span>
-                Population density:{" "}
-                <strong className="font-mono text-ink tnum">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
+                Density
+                <strong className="font-bold text-navy tnum">
                   {Math.round(wardMeta.population_density_sqkm).toLocaleString()} / km²
                 </strong>
               </span>
-              <span>
-                Sanitation score:{" "}
-                <strong className="font-mono text-ink tnum">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
+                Sanitation
+                <strong className="font-bold text-navy tnum">
                   {wardMeta.sanitation_score.toFixed(2)}
                 </strong>
               </span>
@@ -189,11 +248,11 @@ export function PeakTierCard({
             data-testid="print-ward-brief-btn"
             onClick={onPrintBrief}
             className={clsx(
-              "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-3 py-1.5 text-xs font-semibold text-navy hover:border-royal hover:bg-paper",
+              "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-navy ring-1 ring-mist transition-all hover:bg-royal hover:text-white hover:ring-royal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
               lang === "bn" && "font-bangla",
             )}
           >
-            <Printer className="h-3.5 w-3.5 text-royal" aria-hidden="true" />
+            <Printer className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{copy.printBrief}</span>
           </button>
         </div>

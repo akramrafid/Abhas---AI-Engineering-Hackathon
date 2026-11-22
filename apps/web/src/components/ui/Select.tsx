@@ -25,10 +25,10 @@ export function SelectField({
   ...props
 }: SelectFieldProps) {
   return (
-    <div className={clsx("flex flex-col gap-1", className)}>
+    <div className={clsx("flex flex-col gap-1.5", className)}>
       <label
         htmlFor={id}
-        className="text-xs font-semibold text-slate"
+        className="text-[11px] font-semibold tracking-tight text-slate"
       >
         {label}
       </label>
@@ -36,9 +36,10 @@ export function SelectField({
         id={id}
         data-testid={testId}
         className={clsx(
-          "min-h-10 rounded-md border border-mist bg-white px-3 py-1.5 text-sm text-ink",
-          "hover:border-slate focus-visible:border-royal disabled:cursor-not-allowed disabled:bg-paper disabled:text-slate",
-          mono && "font-mono tnum",
+          "min-h-10 rounded-xl border border-mist/95 bg-paper/45 px-3 py-2 text-sm font-medium text-navy transition-all duration-150",
+          "hover:border-royal/40 hover:bg-white focus-visible:border-royal focus-visible:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-royal/12",
+          "disabled:cursor-not-allowed disabled:bg-paper disabled:text-slate",
+          mono && "tnum",
         )}
         {...props}
       >

@@ -63,7 +63,7 @@ export function DriversList({
     return (
       <div
         data-testid="drivers-panel"
-        className="rounded-md border border-mist bg-paper p-4 text-sm text-slate"
+        className="rounded-xl bg-paper p-4 text-sm text-slate ring-1 ring-mist"
       >
         No feature attribution drivers returned for {horizonLabel}.
       </div>
@@ -73,12 +73,14 @@ export function DriversList({
   const maxAbs = Math.max(15, ...rows.map((r) => Math.abs(r.effectPct)));
 
   return (
-    <div data-testid="drivers-panel" className="space-y-3">
-      <div className="flex items-center justify-between gap-2 text-xs font-medium text-slate">
+    <div data-testid="drivers-panel" className="space-y-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-paper/75 px-3 py-2 text-[11px] font-medium text-slate ring-1 ring-mist/80">
         <p className={lang === "bn" ? "font-bangla" : undefined}>
           {copy.driversWaterfallCaption} ({horizonLabel})
         </p>
-        <span className="font-mono text-[11px] tnum">−{Math.round(maxAbs)}% · 0 · +{Math.round(maxAbs)}%</span>
+        <span className="font-semibold text-navy tnum">
+          −{Math.round(maxAbs)}% · 0 · +{Math.round(maxAbs)}%
+        </span>
       </div>
 
       <ul className="space-y-3">
@@ -100,15 +102,15 @@ export function DriversList({
               data-testid={`driver-row-${row.key}`}
               className={clsx(
                 "space-y-1.5",
-                row.isOther && "border-t border-mist pt-2.5",
+                row.isOther && "border-t border-mist/80 pt-3",
               )}
             >
               <div className="flex items-center justify-between gap-2 text-sm">
                 <span
                   lang={lang}
                   className={clsx(
-                    "inline-flex items-center gap-1.5 font-medium",
-                    row.isOther ? "text-slate" : "text-ink",
+                    "inline-flex items-center gap-1.5 text-[13px] font-semibold",
+                    row.isOther ? "text-slate" : "text-navy",
                     lang === "bn" && "font-bangla",
                   )}
                 >
@@ -132,28 +134,30 @@ export function DriversList({
                 </span>
                 <span
                   className={clsx(
-                    "font-mono text-sm font-semibold tnum",
-                    isPositive ? "text-navy" : "text-slate",
+                    "rounded-full px-2 py-0.5 text-xs font-bold tnum",
+                    isPositive
+                      ? "bg-royal/10 text-royal"
+                      : "bg-paper text-slate ring-1 ring-mist",
                   )}
                 >
                   {formattedPct}
                 </span>
               </div>
 
-              {/* Horizontal diverging waterfall bar centered on 0% baseline */}
+              {/* Smoothly animated diverging waterfall bar centered on 0% baseline */}
               <div
-                className="relative h-2.5 w-full overflow-hidden rounded-sm border border-mist bg-paper"
+                className="relative h-2.5 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist/85"
                 aria-hidden="true"
               >
-                <span className="absolute inset-y-0 left-1/2 w-px bg-slate/50" />
+                <span className="absolute inset-y-0 left-1/2 z-10 w-px bg-navy/25" />
                 {isPositive ? (
                   <div
-                    className="absolute inset-y-0 bg-royal"
+                    className="absolute inset-y-0 rounded-r-full bg-[linear-gradient(90deg,#2F5BFF_0%,#5B7EFF_100%)] transition-[left,width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
                     style={{ left: "50%", width: `${halfPct}%` }}
                   />
                 ) : isNegative ? (
                   <div
-                    className="absolute inset-y-0 bg-slate"
+                    className="absolute inset-y-0 rounded-l-full bg-slate/80 transition-[left,width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
                     style={{ left: `${50 - halfPct}%`, width: `${halfPct}%` }}
                   />
                 ) : null}

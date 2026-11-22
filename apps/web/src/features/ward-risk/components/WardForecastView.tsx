@@ -222,8 +222,8 @@ export function WardForecastView({
             }}
           />
 
-          <Card>
-            <CardHeader className="sm:flex-row sm:items-center sm:justify-between">
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-paper/40 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle className={lang === "bn" ? "font-bangla" : undefined}>
                   {copy.trajectoryTitle}
@@ -232,14 +232,14 @@ export function WardForecastView({
                   {copy.trajectoryDesc}
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-4 text-xs text-slate">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-0.5 w-4 bg-royal" aria-hidden="true" />
+              <div className="flex items-center gap-3 text-xs font-medium text-slate">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
+                  <span className="h-0.5 w-3.5 rounded-full bg-royal" aria-hidden="true" />
                   Expected cases
                 </span>
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
                   <span
-                    className="h-3 w-4 rounded-xs border border-royal/30 bg-forecast-band"
+                    className="h-2.5 w-3.5 rounded-xs border border-royal/30 bg-forecast-band"
                     aria-hidden="true"
                   />
                   80% band
@@ -251,7 +251,7 @@ export function WardForecastView({
             </CardContent>
           </Card>
 
-          <div className="grid gap-5 xl:grid-cols-[1.55fr_1fr]">
+          <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
             <HorizonTable
               horizons={selectedForecast.horizons}
               activeHorizon={activeDriverHorizon?.horizon ?? null}
@@ -259,14 +259,14 @@ export function WardForecastView({
               onSelectHorizon={setInspectedHorizon}
             />
 
-            <Card>
-              <CardHeader>
+            <Card className="overflow-hidden">
+              <CardHeader className="bg-paper/40">
                 <CardTitle className={lang === "bn" ? "font-bangla" : undefined}>
                   {copy.driversTitle}
                 </CardTitle>
                 <CardDescription className={lang === "bn" ? "font-bangla" : undefined}>
                   {copy.driversDescPrefix}{" "}
-                  <span className="font-mono text-navy tnum">
+                  <span className="font-semibold text-navy tnum">
                     {activeDriverHorizon
                       ? `+${activeDriverHorizon.horizon}w (${activeDriverHorizon.target_week})`
                       : "selected window"}
