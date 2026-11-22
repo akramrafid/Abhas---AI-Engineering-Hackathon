@@ -17,7 +17,6 @@ const appearance = {
     colorInput: "var(--color-white)",
     colorInputForeground: "var(--color-ink)",
     colorBorder: "var(--color-mist)",
-    colorDanger: "var(--color-risk-high)",
     fontFamily: "var(--font-sans)",
     borderRadius: "var(--radius-md)",
   },

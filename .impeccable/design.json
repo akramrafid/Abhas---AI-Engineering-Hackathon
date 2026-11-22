@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-22T00:00:00+06:00",
+  "title": "Design System: Abhas",
+  "extensions": {
+    "colorMeta": {
+      "royal": { "role": "primary", "displayName": "Royal Signal", "canonical": "#2F5BFF", "tonalRamp": ["oklch(22% 0.08 266)", "oklch(32% 0.13 266)", "oklch(42% 0.19 266)", "oklch(50% 0.23 266)", "oklch(55% 0.24 266)", "oklch(68% 0.16 266)", "oklch(82% 0.08 266)", "oklch(94% 0.03 266)"] },
+      "ink": { "role": "secondary", "displayName": "Ink Night", "canonical": "#0B0F14", "tonalRamp": ["oklch(15% 0.01 250)", "oklch(25% 0.01 250)", "oklch(35% 0.012 250)", "oklch(45% 0.012 250)", "oklch(55% 0.01 250)", "oklch(68% 0.008 250)", "oklch(82% 0.005 250)", "oklch(95% 0.003 250)"] },
+      "navy": { "role": "secondary", "displayName": "Navy Depth", "canonical": "#0B1A5C", "tonalRamp": ["oklch(15% 0.07 268)", "oklch(24% 0.11 268)", "oklch(34% 0.13 268)", "oklch(44% 0.13 268)", "oklch(55% 0.11 268)", "oklch(68% 0.08 268)", "oklch(82% 0.04 268)", "oklch(95% 0.015 268)"] },
+      "lime": { "role": "tertiary", "displayName": "Lime Spark", "canonical": "#D4F53C", "tonalRamp": ["oklch(25% 0.06 118)", "oklch(38% 0.1 118)", "oklch(52% 0.14 118)", "oklch(66% 0.18 118)", "oklch(80% 0.2 118)", "oklch(91% 0.2 118)", "oklch(94% 0.12 118)", "oklch(97% 0.05 118)"] },
+      "white": { "role": "neutral", "displayName": "White" },
+      "paper": { "role": "neutral", "displayName": "Paper" },
+      "mist": { "role": "neutral", "displayName": "Mist" },
+      "slate": { "role": "neutral", "displayName": "Slate" },
+      "forecast-band": { "role": "neutral", "displayName": "Forecast Band" },
+      "risk-low": { "role": "risk", "displayName": "Risk Low" },
+      "risk-medium": { "role": "risk", "displayName": "Risk Medium" },
+      "risk-high": { "role": "risk", "displayName": "Risk High" },
+      "risk-critical": { "role": "risk", "displayName": "Risk Critical" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Landing hero, closing band, auth headline; landing runs fluid clamp(2.25rem, 5.4vw, 5rem), tracking -0.03em." },
+      "h1": { "displayName": "H1", "purpose": "App page headings." },
+      "h2": { "displayName": "H2", "purpose": "App section headings and rain-clock step titles." },
+      "body": { "displayName": "Body", "purpose": "Running text." },
+      "data": { "displayName": "Data", "purpose": "Measured values with tabular numerals." },
+      "caption": { "displayName": "Caption", "purpose": "Legends, chips, helper notes." },
+      "bangla": { "displayName": "Bangla", "purpose": "Every Bangla string: promise line, tier labels, Bangla UI mode." }
+    },
+    "shadows": [
+      { "name": "dark-panel-ring", "value": "0 0 0 1px rgb(255 255 255 / 0.1)", "purpose": "Translucent Ink panels over the map: legend, step panels, week rail." },
+      { "name": "tooltip-lift", "value": "0 20px 25px -5px rgb(11 15 20 / 0.4), 0 8px 10px -6px rgb(11 15 20 / 0.4)", "purpose": "The light ward tooltip floating over the night map only." }
+    ],
+    "motion": [
+      { "name": "tier-crossfade", "value": "700ms cubic-bezier(0.33, 1, 0.68, 1)", "purpose": "Ward colour and radius tween between rain-clock steps (ease-out cubic, 1-(1-p)^3)." },
+      { "name": "camera-fit", "value": "1600ms", "purpose": "Map camera fitBounds between views." },
+      { "name": "rain-ripple", "value": "2200ms linear loop", "purpose": "Staggered Royal ripples per ward in rain mode, radius 5 to 21px, opacity 0.85 to 0." },
+      { "name": "micro", "value": "200ms", "purpose": "Spark button lift and arrow nudge." },
+      { "name": "reduced-motion", "value": "0.01ms", "purpose": "Global reduced-motion rule; map snaps colours, skips ripples, moves camera instantly." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Spark Button",
+      "kind": "button",
+      "refersTo": "button-spark",
+      "description": "The one Lime action per view, on a dark ground (landing hero and closing band).",
+      "html": "<div class=\"ds-dark\"><a class=\"ds-btn-spark\" href=\"#\">Open the dashboard<svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></a></div>",
+      "css": ".ds-dark { background: var(--color-ink); padding: 24px; } .ds-btn-spark { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 24px; border-radius: var(--radius-md); background: var(--color-lime); color: var(--color-ink); font-family: var(--font-sans); font-size: 16px; font-weight: 700; text-decoration: none; transition: transform 200ms; } .ds-btn-spark:hover { transform: translateY(-2px); } .ds-btn-spark:focus-visible { outline: 2px solid var(--color-royal); outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Royal working action across the app.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Try again</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 16px; border: 0; border-radius: var(--radius-md); background: var(--color-royal); color: var(--color-white); font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 150ms; } .ds-btn-primary:hover { background: var(--color-navy); } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-royal); outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button on Dark",
+      "kind": "button",
+      "refersTo": "button-ghost-dark",
+      "description": "Secondary action over Ink.",
+      "html": "<div class=\"ds-dark2\"><a class=\"ds-btn-ghost\" href=\"#\">Watch one monsoon week</a></div>",
+      "css": ".ds-dark2 { background: var(--color-ink); padding: 24px; } .ds-btn-ghost { display: inline-flex; align-items: center; min-height: 48px; padding: 0 16px; border-radius: var(--radius-md); color: var(--color-white); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25); font-family: var(--font-sans); font-size: 16px; font-weight: 600; text-decoration: none; transition: background 150ms; } .ds-btn-ghost:hover { background: rgb(255 255 255 / 0.1); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--color-royal); outline-offset: 2px; }"
+    },
+    {
+      "name": "Segmented Chips",
+      "kind": "chip",
+      "refersTo": "chip-segment",
+      "description": "Horizon and filter choices; numeric options in mono.",
+      "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"Weeks ahead\"><button class=\"ds-chip\" aria-pressed=\"false\">1</button><button class=\"ds-chip\" aria-pressed=\"true\">2</button><button class=\"ds-chip\" aria-pressed=\"false\">3</button><button class=\"ds-chip\" aria-pressed=\"false\">4</button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 6px; } .ds-chip { min-height: 32px; padding: 0 10px; border: 1px solid var(--color-mist); border-radius: var(--radius-md); background: var(--color-white); color: var(--color-navy); font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; cursor: pointer; } .ds-chip:hover { background: var(--color-paper); } .ds-chip[aria-pressed=\"true\"] { border-color: var(--color-royal); background: var(--color-royal); color: var(--color-white); } .ds-chip:focus-visible { outline: 2px solid var(--color-royal); outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White working surface on Paper, Mist border, no shadow.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-h\"><h2 class=\"ds-card-t\">Ward risk map</h2><p class=\"ds-card-d\">Forecast for the week of 19 Aug 2024.</p></div><div class=\"ds-card-c\">Content</div></div>",
+      "css": ".ds-card { border: 1px solid var(--color-mist); border-radius: var(--radius-lg); background: var(--color-white); color: var(--color-ink); font-family: var(--font-sans); } .ds-card-h { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; border-bottom: 1px solid var(--color-mist); } .ds-card-t { margin: 0; font-size: 16px; font-weight: 700; color: var(--color-navy); } .ds-card-d { margin: 0; font-size: 14px; color: var(--color-slate); } .ds-card-c { padding: 16px 20px; }"
+    },
+    {
+      "name": "Dashboard Tabs",
+      "kind": "nav",
+      "description": "Underline tabs with a Royal selected bar.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab\" role=\"tab\" aria-selected=\"true\">Risk map</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Ward detail</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Validation</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 4px; font-family: var(--font-sans); } .ds-tab { min-height: 44px; padding: 10px 16px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--color-slate); font-size: 14px; font-weight: 500; cursor: pointer; } .ds-tab:hover { border-bottom-color: var(--color-mist); color: var(--color-ink); } .ds-tab[aria-selected=\"true\"] { border-bottom-color: var(--color-royal); color: var(--color-navy); font-weight: 600; } .ds-tab:focus-visible { outline: 2px solid var(--color-royal); outline-offset: 2px; }"
+    },
+    {
+      "name": "Risk Tier Badge",
+      "kind": "custom",
+      "refersTo": "risk-badge-high",
+      "description": "Tier colour, 1-4 bar meter, English and Bangla label. Always together.",
+      "html": "<span class=\"ds-badge ds-high\"><span class=\"ds-meter\" role=\"img\" aria-label=\"Risk level 3 of 4: High\"><i class=\"on\" style=\"height:8px\"></i><i class=\"on\" style=\"height:10px\"></i><i class=\"on\" style=\"height:12px\"></i><i style=\"height:14px\"></i></span>High <span aria-hidden=\"true\" style=\"opacity:.65\">/</span> <span lang=\"bn\" class=\"ds-bn\">উচ্চ</span></span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; border: 1px solid; border-radius: var(--radius-md); font-family: var(--font-sans); font-size: 14px; font-weight: 600; line-height: 1; } .ds-high { background: var(--color-risk-high); color: var(--color-risk-high-on); border-color: var(--color-risk-high); } .ds-meter { display: inline-flex; align-items: flex-end; gap: 2px; } .ds-meter i { display: block; width: 6px; border-radius: 1px; border: 1px solid currentColor; opacity: .6; } .ds-meter i.on { background: currentColor; opacity: 1; } .ds-bn { font-family: var(--font-bangla); }"
+    },
+    {
+      "name": "Map Legend Panel",
+      "kind": "custom",
+      "refersTo": "panel-on-map",
+      "description": "Translucent Ink panel over the night map with the approximation note.",
+      "html": "<div class=\"ds-mapbg\"><div class=\"ds-legend\"><p>Bigger dot: more expected cases (relative to the wards shown).</p><p class=\"ds-approx\">Ward positions are approximate: the dataset has no ward boundaries.</p></div></div>",
+      "css": ".ds-mapbg { background: var(--color-ink); padding: 24px; } .ds-legend { max-width: 15rem; padding: 12px; border-radius: var(--radius-lg); background: rgb(11 15 20 / 0.85); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1); color: var(--color-mist); font-family: var(--font-sans); font-size: 12px; } .ds-legend p { margin: 0; } .ds-legend .ds-approx { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgb(255 255 255 / 0.1); font-size: 11px; line-height: 16px; opacity: .8; }"
+    },
+    {
+      "name": "Ward Map Tooltip",
+      "kind": "custom",
+      "refersTo": "tooltip-map",
+      "description": "The one shadowed surface: White card over the night map.",
+      "html": "<div class=\"ds-mapbg2\"><div class=\"ds-tip\"><p class=\"ds-tip-t\">Ward 4, Dhaka South</p><p class=\"ds-tip-m\">7.8 expected cases · week of 26 Aug</p></div></div>",
+      "css": ".ds-mapbg2 { background: var(--color-ink); padding: 24px; } .ds-tip { width: 224px; padding: 12px; border-radius: var(--radius-lg); background: var(--color-white); color: var(--color-ink); box-shadow: 0 20px 25px -5px rgb(11 15 20 / 0.4), 0 8px 10px -6px rgb(11 15 20 / 0.4); font-family: var(--font-sans); } .ds-tip p { margin: 0; } .ds-tip-t { font-size: 14px; font-weight: 700; } .ds-tip .ds-tip-m { margin-top: 8px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--color-slate); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night Map Before the Rain Clock",
+    "overview": "Abhas is a public-health instrument dressed in the Abhas brand kit (`docs/brand/BRAND.md`, `docs/brand/tokens.json`; tokens generated into `apps/web/src/styles/tokens.css`, never hand-edited). Its ground is Ink and Navy: an inverted, colour-drained OpenStreetMap night map of 60 wards on which risk glows in four tier colours. Royal does every working job (links, buttons, selected states, the focused ward's halo, rain ripples, charts). Lime is a single spark per view, on a dark ground, on the one action that matters.\n\nTwo grounds share the work. Ink/Navy owns the story moments: the landing hero, the pinned rain-clock map, the closing band, the auth split screen and the dashboard header. Paper and White own the reading and working moments: evidence charts, tables, cards, the dashboard body and Clerk's form. Density is calm: light 300-weight display type, generous section padding on the landing, compact 12-14px controls in the dashboard.\n\nMeasured values speak in IBM Plex Mono with tabular numerals (week stamps, mm of rain, expected cases, MAE). Bangla is a first-class voice, set in Noto Sans Bengali next to every English promise and tier label.",
+    "keyCharacteristics": [
+      "Ink night map as the hero surface; wards are glowing dots, never polygons.",
+      "Royal for every interactive part; Lime once per view, never in data views.",
+      "Risk tiers in their own four colours, always with label (EN and BN) and a 1-4 bar meter.",
+      "Manrope 300 display against Manrope 700/800 emphasis; Plex Mono for numbers.",
+      "Depth by tone and a hairline white ring on dark panels; one real shadow, on the light map tooltip."
+    ],
+    "rules": [
+      { "name": "The Lime Spark Rule", "body": "Lime appears at most once per view, only on Ink, Navy or Royal, and never in a data view: it sits too close to Low and Medium.", "section": "colors" },
+      { "name": "The Risk Is Only Risk Rule", "body": "The four tier colours mean risk and nothing else. Every tier always shows its label and its 1-4 bar meter, so colour is never the only signal.", "section": "colors" },
+      { "name": "The Token Source Rule", "body": "Colours come from `tokens.json` through the generated CSS variables. No hex in components; map paint resolves `--color-*` at runtime.", "section": "colors" },
+      { "name": "The Measured Mono Rule", "body": "Every number a health officer might act on (dates, mm, cases, MAE, week offsets) is Plex Mono with tabular numerals.", "section": "typography" },
+      { "name": "The Two Scripts Rule", "body": "Bangla sits beside English, not behind a toggle only: the promise line and every tier label carry both, Bangla set in Noto Sans Bengali.", "section": "typography" },
+      { "name": "The Tone Before Shadow Rule", "body": "Separate surfaces with ground colour and hairline rings; reserve a cast shadow for the light tooltip that floats above the dark map.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** take every colour from the generated `--color-*` tokens; regenerate `tokens.css` from `tokens.json` instead of editing it.",
+      "**Do** use Royal for every link, button, selected state, focus outline and chart line.",
+      "**Do** keep Lime to one spark per view, on Ink, Navy or Royal, on the primary action.",
+      "**Do** show tier label (English and Bangla) and the 1-4 bar meter wherever a tier colour appears.",
+      "**Do** set measured values in IBM Plex Mono with tabular numerals.",
+      "**Do** label ward positions as approximate on every map and keep the OSM attribution visible.",
+      "**Do** size ward dots relative to the wards in view, so a monsoon peak of all-Critical wards still reads.",
+      "**Do** give every motion a reduced-motion path that snaps to the end state."
+    ],
+    "donts": [
+      "**Don't** use Lime in data views, on light grounds, or twice in one viewport.",
+      "**Don't** use tier colours for anything other than risk, including errors, success states or decoration.",
+      "**Don't** put ribbon art behind data; it belongs to hero bands, covers and the auth screen.",
+      "**Don't** draw ward polygons or imply exact boundaries; the dataset has none.",
+      "**Don't** add cast shadows to cards on light grounds; separate with Mist borders and tone.",
+      "**Don't** use capitals or exclamation marks for emphasis."
+    ]
+  }
+}
