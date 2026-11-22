@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Bell, Moon, Search, Sun } from "lucide-react";
 import { clsx } from "clsx";
+import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import type { City } from "@/lib/api/client";
@@ -34,6 +36,7 @@ export function DashboardHeader({
   alertCount = 0,
   onOpenAlerts,
 }: DashboardHeaderProps) {
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const copy = UI_COPY[lang];
   const bn = lang === "bn";
   const chip = clsx(
@@ -46,18 +49,25 @@ export function DashboardHeader({
   );
 
   return (
-    <header
-      className={clsx(
-        "no-print sticky top-3 z-40 mx-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] px-3 py-2 ring-1 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 sm:mx-5 lg:rounded-full lg:pl-5",
-        dark
-          ? "bg-navy/85 text-white ring-white/15 shadow-[0_16px_40px_-10px_rgba(4,8,18,0.7),inset_0_1px_0_rgba(255,255,255,0.22)]"
-          : "bg-white/85 text-ink ring-mist/80 shadow-[0_12px_32px_-10px_rgba(11,26,92,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]",
-      )}
-    >
-      <Link href="/" className="flex shrink-0 items-center gap-3 rounded-md">
-        <AbhasLogo variant={dark ? "reverse" : "primary"} size="sm" showBangla city={selectedCity} />
-        <span className="sr-only">Abhas home</span>
-      </Link>
+    <>
+      <header
+        className={clsx(
+          "no-print sticky top-3 z-40 mx-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] px-3 py-2 ring-1 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 sm:mx-5 lg:rounded-full lg:pl-5",
+          dark
+            ? "bg-navy/85 text-white ring-white/15 shadow-[0_16px_40px_-10px_rgba(4,8,18,0.7),inset_0_1px_0_rgba(255,255,255,0.22)]"
+            : "bg-white/85 text-ink ring-mist/80 shadow-[0_12px_32px_-10px_rgba(11,26,92,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]",
+        )}
+      >
+        <button
+          type="button"
+          data-testid="dashboard-logo-logout"
+          onClick={() => setConfirmLogout(true)}
+          title={bn ? "লগআউট করে হোম পেজে যান" : "Log out and return to landing page"}
+          className="flex shrink-0 cursor-pointer items-center gap-3 rounded-md text-left transition-opacity hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal"
+        >
+          <AbhasLogo variant={dark ? "reverse" : "primary"} size="sm" showBangla city={selectedCity} />
+          <span className="sr-only">Log out and return to Abhas landing page</span>
+        </button>
       <div className={clsx("hidden min-w-0 border-l pl-4 xl:block", dark ? "border-white/15" : "border-mist")}>
         <p data-testid="header-heading" lang={lang} className={clsx("truncate text-sm font-semibold", bn && "font-bangla")}>
           {copy.appHeading}
@@ -172,5 +182,9 @@ export function DashboardHeader({
         <UserMenu />
       </div>
     </header>
+    {confirmLogout ? (
+      <LogoutConfirmDialog lang={lang} onClose={() => setConfirmLogout(false)} />
+    ) : null}
+    </>
   );
 }
