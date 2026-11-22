@@ -50,14 +50,19 @@ export function HowItWorks() {
   useGSAP(
     () => {
       gsap.matchMedia().add(FULL_MOTION, () => {
-        gsap.from("[data-flow-node]", {
-          y: 24,
-          autoAlpha: 0,
-          duration: 0.9,
-          ease: EASE_OUT,
-          stagger: 0.08,
-          scrollTrigger: { trigger: container.current, start: "top 78%" },
-        });
+        gsap.fromTo(
+          "[data-flow-node]",
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.75,
+            ease: EASE_OUT,
+            stagger: 0.08,
+            clearProps: "transform,opacity",
+            scrollTrigger: { trigger: container.current, start: "top 82%", once: true },
+          },
+        );
       });
     },
     { scope },

@@ -46,7 +46,7 @@ export function ProofSection() {
       id="proof"
       aria-labelledby="proof-heading"
       lang={lang}
-      className="bg-paper px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-32 scroll-mt-20"
+      className="border-t border-mist/80 bg-paper px-4 pt-16 pb-24 text-ink sm:px-8 lg:px-14 lg:pt-20 lg:pb-28 scroll-mt-20"
     >
       <div className="mx-auto max-w-6xl">
         <h2

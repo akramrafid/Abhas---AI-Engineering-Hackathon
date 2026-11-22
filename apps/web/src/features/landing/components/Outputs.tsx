@@ -76,6 +76,7 @@ export function Outputs() {
   const { lang } = useLandingLang();
   const bn = lang === "bn";
   const scope = useRef<HTMLElement>(null);
+  const capRowRef = useRef<HTMLDivElement>(null);
   const [copiedSms, setCopiedSms] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -123,28 +124,64 @@ export function Outputs() {
     }
   }
 
+  // Animate the three primary output cards and four capability cards once with explicit fromTo targets
+  // (never tied to async `sms` updates, so staggered cards can never freeze at opacity 0).
   useGSAP(
     () => {
       gsap.matchMedia().add(FULL_MOTION, () => {
-        gsap.from("[data-output]", {
-          y: 36,
-          autoAlpha: 0,
-          duration: 0.9,
-          ease: EASE_OUT,
-          stagger: 0.1,
-          scrollTrigger: { trigger: scope.current, start: "top 72%" },
-        });
+        gsap.fromTo(
+          "[data-output]",
+          { y: 24, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.7,
+            ease: EASE_OUT,
+            stagger: 0.08,
+            clearProps: "transform,opacity",
+            scrollTrigger: { trigger: scope.current, start: "top 82%", once: true },
+          },
+        );
+        if (capRowRef.current) {
+          gsap.fromTo(
+            "[data-output-cap]",
+            { y: 20, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.6,
+              ease: EASE_OUT,
+              stagger: 0.06,
+              clearProps: "transform,opacity",
+              scrollTrigger: { trigger: capRowRef.current, start: "top 90%", once: true },
+            },
+          );
+        }
+      });
+    },
+    { scope },
+  );
+
+  // Separate SMS typewriter effect with revertOnUpdate so switching EN/বাংলা cleanly resets only the SMS text.
+  useGSAP(
+    () => {
+      gsap.matchMedia().add(FULL_MOTION, () => {
         const split = SplitText.create("[data-sms-text]", { type: "words,chars" });
-        gsap.from(split.chars, {
-          autoAlpha: 0,
-          duration: 0.01,
-          stagger: 0.018,
-          scrollTrigger: { trigger: "[data-sms-text]", start: "top 82%" },
-        });
+        gsap.fromTo(
+          split.chars,
+          { opacity: 0 },
+          {
+            opacity: 1,
+            duration: 0.01,
+            stagger: 0.014,
+            clearProps: "opacity",
+            scrollTrigger: { trigger: "[data-sms-text]", start: "top 88%", once: true },
+          },
+        );
         return () => split.revert();
       });
     },
-    { scope, dependencies: [sms] },
+    { scope, dependencies: [sms], revertOnUpdate: true },
   );
 
   return (
@@ -153,7 +190,7 @@ export function Outputs() {
       id="outputs"
       aria-labelledby="outputs-heading"
       lang={lang}
-      className="relative overflow-hidden bg-paper px-4 py-24 text-ink sm:px-8 lg:py-32 scroll-mt-20"
+      className="relative overflow-hidden bg-paper px-4 pt-24 pb-16 text-ink sm:px-8 lg:pt-28 lg:pb-20 scroll-mt-20"
     >
       <div
         aria-hidden="true"
@@ -452,14 +489,14 @@ export function Outputs() {
         </div>
 
         {/* Bottom 4-column capabilities */}
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref={capRowRef} className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CAPABILITIES.map((feat) => {
             const Icon = feat.icon;
             return (
               <Link
                 key={feat.doesEn}
                 href={`${feat.href}&lang=${lang}`}
-                data-output
+                data-output-cap
                 className="group flex flex-col justify-between rounded-[18px] bg-white p-5 shadow-[0_1px_2px_rgba(11,26,92,0.04),0_12px_28px_-16px_rgba(11,26,92,0.12)] ring-1 ring-mist/90 transition-all duration-200 hover:-translate-y-0.5 hover:ring-royal/35 hover:shadow-[0_10px_28px_-14px_rgba(47,91,255,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2"
               >
                 <div>
