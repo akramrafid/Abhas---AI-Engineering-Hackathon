@@ -60,6 +60,12 @@ class Settings(BaseSettings):
     llm_daily_budget_usd: float = Field(default=1.0, gt=0, allow_inf_nan=False)
     llm_timeout_s: float = Field(default=20.0, gt=0, allow_inf_nan=False)
 
+    gemini_api_key: SecretStr | None = None
+    gemini_api_key_fallback: SecretStr | None = None
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_max_output_tokens: int = Field(default=512, ge=32, le=1024)
+    gemini_timeout_s: float = Field(default=15.0, gt=0, allow_inf_nan=False)
+
     ops_token: SecretStr | None = None
     rate_limit_per_minute: int = Field(default=120, ge=1)
     trusted_proxies: str = ""
@@ -139,6 +145,14 @@ class Settings(BaseSettings):
     @property
     def llm_enabled(self) -> bool:
         return bool(self.anthropic_api_key and self.anthropic_api_key.get_secret_value())
+
+    @property
+    def chat_llm_enabled(self) -> bool:
+        has_primary = bool(self.gemini_api_key and self.gemini_api_key.get_secret_value().strip())
+        has_fallback = bool(
+            self.gemini_api_key_fallback and self.gemini_api_key_fallback.get_secret_value().strip()
+        )
+        return has_primary or has_fallback
 
 
 @lru_cache

@@ -20,10 +20,11 @@ _SECRET_RE = re.compile(
     r"sk-ant-[A-Za-z0-9_-]{12,}"
     r"|sk-[A-Za-z0-9_-]{20,}"
     r"|AIza[A-Za-z0-9_-]{30,}"
+    r"|AQ\.[A-Za-z0-9._-]{20,}"
     r"|ghp_[A-Za-z0-9]{36}"
     r"|xox[abprs]-[A-Za-z0-9-]+"
     r"|AKIA[0-9A-Z]{16}"
-    r"|(?i:(?:authorization\s*[:=]\s*(?:bearer\s+)?|bearer\s+|x-ops-token['\":=\s]+|password\s*=\s*)[^\s'\",;]+)"
+    r"|(?i:(?:authorization\s*[:=]\s*(?:bearer\s+)?|bearer\s+|x-ops-token['\":=\s]+|x-goog-api-key['\":=\s]+|password\s*=\s*)[^\s'\",;]+)"
 )
 
 

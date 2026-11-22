@@ -4,17 +4,20 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 from pathlib import Path
 from threading import RLock
 from typing import Any
 
 from app.adapters.db.factory import get_call_log, get_engine
+from app.adapters.gemini_chat import GeminiChatAdapter
 from app.adapters.lgbm_model import LGBMForecastModel, load_model, verify_artifact_integrity
 from app.adapters.llm import AnthropicLLM
 from app.core.config import API_DIR, active_faults, get_settings
 from app.core.errors import AppError
 from app.observability.metrics import OpsMetrics, get_ops_metrics
 from app.observability.traces import FanOutSink, MemorySink, SqlLlmTraceSink, StdoutSink, TraceSink
+from app.ports.chat_llm import ChatLLM
 from app.ports.llm import LLM
 
 logger = logging.getLogger("abhas.runtime")
@@ -25,6 +28,7 @@ _lock = RLock()
 _model_singleton: LGBMForecastModel | None = None
 _model_path_loaded: Path | None = None
 _llm_singleton: AnthropicLLM | None = None
+_chat_llm_singleton: GeminiChatAdapter | None = None
 _memory_sink = MemorySink()
 _trace_sink: TraceSink | None = None
 _validation_cache: tuple[float, dict[str, Any]] | None = None
@@ -108,6 +112,23 @@ def get_llm_adapter() -> LLM | None:
         return _llm_singleton
 
 
+def get_chat_llm_adapter() -> ChatLLM | None:
+    """Return process-wide GeminiChatAdapter when GEMINI_API_KEY is set, else None (offline grounded fallback)."""
+    global _chat_llm_singleton
+    settings = get_settings()
+    if not settings.chat_llm_enabled or settings.app_env == "test" or "pytest" in sys.modules:
+        return None
+    with _lock:
+        if _chat_llm_singleton is None:
+            _chat_llm_singleton = GeminiChatAdapter(
+                call_log=get_call_log(),
+                trace_sink=get_trace_sink(),
+                ops_metrics=get_ops_metrics(),
+                settings=settings,
+            )
+        return _chat_llm_singleton
+
+
 def get_validation_payload(path: Path | None = None) -> dict[str, Any]:
     """Load and cache apps/api/evals/results/validation.json; raise 503 if unavailable."""
     global _validation_cache
@@ -143,13 +164,20 @@ def get_ops_registry() -> OpsMetrics:
 
 def reset_runtime() -> None:
     """Reset process-wide singletons (primarily for tests)."""
-    global _model_singleton, _model_path_loaded, _llm_singleton, _trace_sink, _validation_cache
+    global \
+        _model_singleton, \
+        _model_path_loaded, \
+        _llm_singleton, \
+        _chat_llm_singleton, \
+        _trace_sink, \
+        _validation_cache
     with _lock:
         if _llm_singleton is not None:
             _llm_singleton.close()
         _model_singleton = None
         _model_path_loaded = None
         _llm_singleton = None
+        _chat_llm_singleton = None
         _trace_sink = None
         _validation_cache = None
         _memory_sink.clear()

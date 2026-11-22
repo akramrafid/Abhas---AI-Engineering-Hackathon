@@ -151,6 +151,8 @@ interface RequestOptions {
   body?: unknown;
   signal?: AbortSignal;
   timeoutMs?: number;
+  /** Call a same-origin Next.js route (e.g. /api/ops) instead of the FastAPI base URL. */
+  sameOrigin?: boolean;
 }
 
 async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -166,19 +168,12 @@ async function apiRequest<T>(path: string, options: RequestOptions = {}): Promis
     Accept: "application/json, application/problem+json",
     "X-Request-ID": clientRequestId,
   };
-  const opsToken =
-    typeof process !== "undefined"
-      ? process.env.NEXT_PUBLIC_OPS_TOKEN || process.env.OPS_TOKEN
-      : undefined;
-  if (opsToken) {
-    headers["X-Ops-Token"] = opsToken;
-  }
   if (options.body !== undefined) {
     headers["Content-Type"] = "application/json";
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`, {
+    const response = await fetch(options.sameOrigin ? path : `${API_BASE_URL}${path}`, {
       method,
       headers,
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
@@ -331,8 +326,12 @@ export function fetchWeatherStatus(signal?: AbortSignal): Promise<WeatherStatus>
   return apiRequest<WeatherStatus>("/api/v1/weather/status", { signal });
 }
 
+/**
+ * Ops telemetry goes through the server-only route app/api/ops/route.ts, which adds the
+ * X-Ops-Token from OPS_TOKEN on the server. The token is never sent to the browser.
+ */
 export function fetchOps(signal?: AbortSignal): Promise<OpsResponse> {
-  return apiRequest<OpsResponse>("/api/v1/ops", { signal });
+  return apiRequest<OpsResponse>("/api/ops", { signal, sameOrigin: true });
 }
 
 export function postAdvisory(

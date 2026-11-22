@@ -23,6 +23,7 @@ from app.core.ratelimit import BodySizeLimitMiddleware, RateLimitMiddleware
 from app.core.readiness import evaluate_readiness_checks, get_readiness_checks
 from app.core.security import SecurityHeadersMiddleware
 from app.features.advisory.router import router as advisory_router
+from app.features.chat.router import router as chat_router
 from app.features.forecast.router import router as forecast_router
 from app.features.heatmap.router import router as heatmap_router
 from app.features.lags.deps import warm_lags_cache
@@ -107,7 +108,11 @@ def create_app() -> FastAPI:
     app.add_middleware(
         RateLimitMiddleware,
         per_minute=settings.rate_limit_per_minute,
-        advisory_per_minute=20 if settings.llm_enabled else settings.rate_limit_per_minute,
+        advisory_per_minute=(
+            20
+            if settings.llm_enabled
+            else (30 if settings.chat_llm_enabled else settings.rate_limit_per_minute)
+        ),
         trusted_proxies=settings.trusted_proxy_set,
     )
     app.add_middleware(RequestIdMiddleware)
@@ -156,6 +161,7 @@ def create_app() -> FastAPI:
         validation_router,
         weather_router,
         advisory_router,
+        chat_router,
         ops_router,
     ):
         app.include_router(r)

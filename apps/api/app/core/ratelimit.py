@@ -136,7 +136,9 @@ class RateLimitMiddleware:
 
         headers = Headers(scope=scope)
         ip = self._client_ip(scope, headers)
-        is_adv = path == "/api/v1/advisory" and self.advisory_per_minute < self.per_minute
+        is_adv = path in {"/api/v1/advisory", "/api/v1/chat", "/api/v1/chat/stream"} and (
+            self.advisory_per_minute < self.per_minute
+        )
         limit = self.advisory_per_minute if is_adv else self.per_minute
         key = f"adv:{ip}" if is_adv else ip
         now = time.monotonic()
