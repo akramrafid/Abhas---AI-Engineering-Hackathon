@@ -278,9 +278,7 @@ def evaluate_global_holdout(
         df, all_pairs, sample_size=latency_sample_size, seed=42
     )
     throughput_ms_per_ward = (
-        round(sum(all_batch_latencies) / max(len(all_batch_latencies), 1), 4)
-        if all_batch_latencies
-        else 0.0
+        round(sum(all_batch_latencies) / max(len(all_batch_latencies), 1), 4) if all_batch_latencies else 0.0
     )
 
     overall_tiers = tier_metrics(all_y, all_pred_tiers)
