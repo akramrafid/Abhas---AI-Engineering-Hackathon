@@ -20,8 +20,8 @@
   --color-risk-low-border: #9FCBB0;
   --color-forecast-band: rgba(47,91,255,0.15);
   --gradient-signal: linear-gradient(90deg,#0B0F14 0%,#0B1A5C 26%,#2F5BFF 52%,#D4F53C 80%,#FFFFFF 100%);
-  --font-sans: "Manrope", "Noto Sans Bengali", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "Poppins", "Noto Sans Bengali", system-ui, sans-serif;
+  --font-mono: "Poppins", "Noto Sans Bengali", system-ui, sans-serif;
   --font-bangla: "Noto Sans Bengali", sans-serif;
   --type-display-size: 48px;
   --type-display-line: 52px;

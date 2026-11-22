@@ -56,7 +56,7 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
       {tiles.map((tile) => (
         <div key={tile.label} data-enter className="flex flex-col-reverse justify-end rounded-[14px] bg-white p-4 ring-1 ring-mist">
           <dd className="mt-2">
-            <span className="block font-mono text-[1.75rem] font-semibold leading-none text-navy">
+            <span className="block font-sans text-[1.85rem] font-semibold leading-none tracking-tight text-navy tnum">
               {tile.value === null ? "…" : <NumberTicker value={tile.value} decimalPlaces={tile.decimals} />}
             </span>
             <span lang={lang} className={clsx("mt-2 block text-xs text-slate", bn && "font-bangla")}>

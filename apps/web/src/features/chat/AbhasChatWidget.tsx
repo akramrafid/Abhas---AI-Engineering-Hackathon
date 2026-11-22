@@ -69,25 +69,21 @@ function ChatWidgetInner() {
   const urlLang = searchParams.get("lang") === "bn" ? "bn" : "en";
 
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState<"en" | "bn">(urlLang);
+  const [langOverride, setLangOverride] = useState<"en" | "bn" | null>(null);
+  const lang: "en" | "bn" = langOverride ?? urlLang;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([...STARTER_PROMPTS.en]);
+  const [followUpSuggestions, setFollowUpSuggestions] = useState<string[]>([]);
   const [activeModelLabel, setActiveModelLabel] = useState<string>("Gemini 2.5 Flash");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const suggestions =
+    messages.length === 0 ? [...STARTER_PROMPTS[lang]] : followUpSuggestions;
 
   const abortRef = useRef<AbortController | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Sync language if URL toggles lang.
-  useEffect(() => {
-    setLang(urlLang);
-    if (messages.length === 0) {
-      setSuggestions([...STARTER_PROMPTS[urlLang]]);
-    }
-  }, [urlLang, messages.length]);
 
   // Global keyboard shortcut: Ctrl+/ or Cmd+/ toggles chat; Escape closes.
   useEffect(() => {
@@ -138,8 +134,8 @@ function ChatWidgetInner() {
   const clearConversation = useCallback(() => {
     stopStreaming();
     setMessages([]);
-    setSuggestions([...STARTER_PROMPTS[lang]]);
-  }, [lang, stopStreaming]);
+    setFollowUpSuggestions([]);
+  }, [stopStreaming]);
 
   const sendMessage = useCallback(
     async (textOverride?: string) => {
@@ -207,7 +203,7 @@ function ChatWidgetInner() {
             },
             onDone: (done) => {
               if (done.suggestions.length > 0) {
-                setSuggestions(done.suggestions);
+                setFollowUpSuggestions(done.suggestions);
               }
               setMessages((prev) =>
                 prev.map((m) =>
@@ -327,10 +323,7 @@ function ChatWidgetInner() {
                     key={code}
                     type="button"
                     aria-pressed={lang === code}
-                    onClick={() => {
-                      setLang(code);
-                      if (messages.length === 0) setSuggestions([...STARTER_PROMPTS[code]]);
-                    }}
+                    onClick={() => setLangOverride(code)}
                     className={clsx(
                       "cursor-pointer rounded-full px-2 py-0.5 text-[11px] font-semibold transition-colors",
                       code === "bn" && "font-bangla",
