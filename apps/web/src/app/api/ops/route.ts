@@ -2,13 +2,14 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { AUTH_ENABLED } from "@/lib/auth-config";
+import { serverEnv } from "@/lib/server-env";
 
 // Server-side proxy for the ops telemetry endpoint. OPS_TOKEN (no NEXT_PUBLIC_ prefix) stays on the
 // server; the browser only ever calls this same-origin route.
 const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000";
 
 function apiBaseUrl(): string {
-  const raw = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL).trim();
+  const raw = (serverEnv("API_BASE_URL") || process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL).trim();
   try {
     const url = new URL(raw);
     return url.protocol === "http:" || url.protocol === "https:" ? url.origin : DEFAULT_API_BASE_URL;
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
   const headers: Record<string, string> = { Accept: "application/json, application/problem+json" };
   const requestId = request.headers.get("x-request-id");
   if (requestId) headers["X-Request-ID"] = requestId.slice(0, 64);
-  const token = process.env.OPS_TOKEN?.trim();
+  const token = serverEnv("OPS_TOKEN");
   if (token) headers["X-Ops-Token"] = token;
 
   try {
