@@ -8,20 +8,14 @@ related_targets: ["apps/web/src/features/landing"]
 # Landing page (/)
 
 Mode: Persuade. Audience: hackathon judges watching the demo; framed for city public health officers.
-Action: sign in (Clerk) and open the ward dashboard at /dashboard. Proof: model output on the map, lag correlation, validation MAE from the API.
-Constraints: brand kit binding; Lime once per view, never in data views; risk colours only for risk with label + meter; map positions approximate and labelled; no invented claims.
+Action: open the dashboard (/dashboard?demo=1; Clerk sign-in when keys exist). Proof: live model output (map, Ward 4 forecast card with 80% range and drivers), lag correlation, locked hold-out MAE.
+Constraints: Abhas Brand Guidelines PDF + docs/brand (binding); Lime once per view and never in data views; risk colours only for risk with label + meter; ribbons never behind data; map positions approximate and labelled; no invented claims; no capitals or exclamation marks.
 
 ## Direction contract
 
-THESIS: The page is the rain clock. One pinned map of 60 wards steps from rain week to +3 weeks as you scroll, so the 2-to-4-week lag is watched, not read. Refuses the split hero with a screenshot and a row of feature cards.
-OWN-WORLD: Ink and Navy ground, Royal for every working part (links, buttons, focused ward ring), Lime spark only on the primary action in the hero. Risk tiers in their own colours with 1-4 meters. Manrope 800 wordmark, Manrope 300 display, IBM Plex Mono for week stamps and measured values. Ribbon art as the hero band's edge only.
-STORY: Visitor understands rain today becomes cases in three weeks, believes Abhas knows which ward and when because the map shows it for a real week, and signs in.
-FIRST VIEWPORT: Full-bleed Ink map of Dhaka region filling the viewport, ward markers glowing by tier. Top-left: logo and nav. Left third over the map: display headline "Rain today. Risk in three weeks.", Bangla line, one sentence, primary action "Sign in to the dashboard" (Lime on Ink) plus secondary "Watch the demo week". Bottom: week scrubber stamp "2024-08-05 · rain week".
-FORM: Rain clock scrollytelling map, position 7 of 7 on my list, seed:c24b06273e2ac4ff. Signature interaction: scroll-driven week steps recolour the pinned map; hover a ward shows its tier, expected cases range and window.
+THESIS: A premium SaaS product page, the category canon played straight at Linear/Vercel craft, whose signature is the brand's own fine-line ribbon rendered live as rain curtains in wind; refuses the generic gradient-blob hero and icon-card rows.
+OWN-WORLD: Ink and Navy grounds for hero, product tour and close; Paper/White for evidence and features (brand: charts on plain Paper or White). Royal does every working part; Lime only on "Act now." in the hero and the final CTA. Tints from the guideline ramps only. Manrope 800 headlines, 300 display promise, Plex Mono for every number, Noto Sans Bengali for Bangla. Ribbon canvas, Λ signal pattern at low contrast, sky/city shapes cropped by edges.
+STORY: Visitor sees which wards will rise and when, watches one monsoon week play out on the real map, trusts the numbers (range, hold-out), sees the outputs officers get (dashboard card, SMS, field notice), opens the dashboard.
+FIRST VIEWPORT: Ink ground, live ribbon canvas sweeping from the right edge. Left-aligned H1 "Know which wards will rise, three weeks before they do." (ExtraBold), promise line with "Act now." in Lime, body sentence, Royal primary "Open the dashboard" + ghost "Watch one monsoon week". Below the fold line a framed product window (live map + Ward 4 forecast card) rises with a 3D tilt that flattens on scroll.
+FORM: SaaS canon (standing exit, user-chosen: "look like a SaaS website"), reference craft bar Linear / Vercel, seed: none (pinned). Signature interaction: GSAP-pinned rain clock scrubbed by scroll; ribbon canvas drift; SplitText headline reveal; product window flatten.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
-
-## Adaptations (recorded after finish review r1)
-- Focused ward: white ring for contrast on Critical red, inside a Royal halo (OWN-WORLD Royal kept as the outer mark).
-- Evidence, How it works and Cost sit on Paper/White: BRAND.md lists Paper as the supporting neutral and Royal for charts; charts and tables read better on a light ground. Ink/Navy own the hero, rain clock and closing band.
-- Primary CTA reads "Open the dashboard": sign-in only appears when Clerk keys exist, so the label stays true in both modes.
-- Dot size is relative to the wards on screen (in-view min to max of expected cases), because in a monsoon peak every ward can be Critical.

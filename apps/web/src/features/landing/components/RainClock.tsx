@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
 import { useQuery } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
@@ -26,9 +27,32 @@ function weekOf(iso: string | null | undefined): string {
   return iso ? formatShortDate(iso) : "—";
 }
 
-export function RainClock({ hero }: { hero: ReactNode }) {
+export function RainClock() {
+  const sectionRef = useRef<HTMLElement>(null);
   const [activeId, setActiveId] = useState<StepId>("rain");
   const stepRefs = useRef(new Map<StepId, HTMLElement>());
+
+  // The rail fills with scroll progress through the tour (scrubbed, so it tracks the reader exactly).
+  useGSAP(
+    () => {
+      gsap.matchMedia().add(FULL_MOTION, () => {
+        gsap.to("[data-rail-fill]", {
+          scaleY: 1,
+          ease: "none",
+          scrollTrigger: { trigger: sectionRef.current, start: "top top", end: "bottom bottom", scrub: 0.4 },
+        });
+        gsap.utils.toArray<HTMLElement>("[data-step-panel]").forEach((panel) => {
+          gsap.from(panel, {
+            y: 48,
+            autoAlpha: 0,
+            ease: "power3.out",
+            scrollTrigger: { trigger: panel, start: "top 85%", end: "top 55%", scrub: 0.5 },
+          });
+        });
+      });
+    },
+    { scope: sectionRef },
+  );
 
   const wardsQuery = useWardsQuery();
   const storm = useAllCityHeatmaps(STORM_ORIGIN, "dataset");
@@ -74,7 +98,7 @@ export function RainClock({ hero }: { hero: ReactNode }) {
   const mapLabel = describeMap(active, activeWards);
 
   return (
-    <section id="rain-clock" aria-label="The rain clock: one monsoon week, forecast ward by ward" className="relative bg-ink text-white">
+    <section ref={sectionRef} id="rain-clock" aria-labelledby="rain-clock-heading" className="relative bg-ink text-white">
       <div className="sticky top-0 h-[100svh] w-full">
         <WardRiskMap
           wards={activeWards}
@@ -111,13 +135,20 @@ export function RainClock({ hero }: { hero: ReactNode }) {
               if (el) stepRefs.current.set(step.id, el);
               else stepRefs.current.delete(step.id);
             }}
-            className={clsx(
-              "flex min-h-[100svh] items-end px-4 pb-20 sm:items-center sm:px-8 sm:pb-0 lg:px-14",
-              step.id === "rain" && "pb-0 sm:items-center sm:pt-24",
-            )}
+            className="flex min-h-[100svh] items-end px-4 pb-20 sm:items-center sm:px-8 sm:pb-0 lg:px-14"
           >
             {step.id === "rain" ? (
-              <div className="pointer-events-auto -mx-4 w-[calc(100%+2rem)] bg-gradient-to-t from-ink via-ink/90 to-transparent px-4 pb-14 pt-20 sm:mx-0 sm:w-full sm:max-w-3xl sm:bg-none sm:p-0">{hero}</div>
+              <StepPanel>
+                <h2 id="rain-clock-heading" className="text-balance text-3xl font-extrabold leading-tight tracking-[-0.03em]">
+                  One monsoon week, played forward.
+                </h2>
+                <p className="mt-2 font-mono text-xs text-mist tnum">Rain week · {formatShortDate(STORM_ORIGIN)}</p>
+                <p className="mt-3 text-mist max-sm:text-sm sm:text-body">
+                  216 mm of rain fell on {wardLabel(SPOTLIGHT_WARD)}, Dhaka South, and over 200 mm on five of its
+                  neighbours. Every ripple is a ward that got wet. Scroll to watch the model&apos;s forecast for the
+                  next four weeks.
+                </p>
+              </StepPanel>
             ) : (
               <StepPanel>
                 <StepBody
@@ -137,7 +168,7 @@ export function RainClock({ hero }: { hero: ReactNode }) {
 
 function StepPanel({ children }: { children: ReactNode }) {
   return (
-    <div className="pointer-events-auto w-full max-w-md rounded-[14px] bg-ink/90 p-5 ring-1 ring-white/10 sm:p-7">
+    <div data-step-panel className="pointer-events-auto w-full max-w-md rounded-[14px] bg-ink/90 p-5 ring-1 ring-white/10 sm:p-7">
       {children}
     </div>
   );
@@ -291,6 +322,11 @@ function ClockRail({
   return (
     <nav aria-label="Rain clock weeks" className="absolute right-10 top-1/2 z-20 hidden -translate-y-1/2 lg:block">
       <ol className="relative flex flex-col gap-3 rounded-[14px] bg-ink/80 py-4 pl-8 pr-5 ring-1 ring-white/10 before:absolute before:bottom-6 before:left-[19px] before:top-6 before:w-px before:bg-white/15">
+        <span
+          aria-hidden="true"
+          data-rail-fill
+          className="absolute bottom-6 left-[19px] top-6 w-px origin-top scale-y-0 bg-royal"
+        />
         {RAIN_CLOCK_STEPS.map((step) => {
           const isActive = step.id === activeId;
           return (

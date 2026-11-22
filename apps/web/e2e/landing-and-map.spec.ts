@@ -4,11 +4,17 @@ import { assertWcagAA, assertZeroLimeInDataView } from "./helpers";
 test.describe("Landing page", () => {
   test("hero states the promise and links to the dashboard", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Rain today.");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Act now.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Know which wards will rise");
+    await expect(page.getByText("Act now.", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("landing-forecast-card")).toContainText(/expected cases · range \d+–\d+/);
     const cta = page.getByTestId("hero-cta");
     await expect(cta).toHaveAttribute("href", "/dashboard?demo=1");
-    await expect(page.getByTestId("ward-risk-map")).toBeVisible();
+    await expect(page.getByTestId("hero-ward-map")).toBeVisible();
+  });
+
+  test("live ward ticker lists forecast wards with tiers", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("ward-marquee")).toContainText(/Ward \d+/);
   });
 
   test("rain clock places all 60 wards and recolours them by forecast tier", async ({ page }) => {

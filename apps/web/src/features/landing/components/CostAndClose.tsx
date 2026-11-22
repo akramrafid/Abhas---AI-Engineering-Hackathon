@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { BrandRibbon } from "@/components/brand/BrandRibbon";
+import { RibbonCanvas } from "@/components/brand/RibbonCanvas";
 
 // Figures from ARCHITECTURE.md §4–5 (measured on the shipped artifact).
 const COSTS = [
@@ -14,7 +14,7 @@ export function CostSection() {
     <section aria-labelledby="cost-heading" className="bg-paper px-4 py-24 text-ink sm:px-8 lg:px-14">
       <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
         <div>
-          <h2 id="cost-heading" className="text-balance text-[clamp(1.75rem,3vw,2.5rem)] font-light leading-[1.1] tracking-[-0.02em]">
+          <h2 id="cost-heading" className="text-balance text-[clamp(1.75rem,3vw,2.5rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-navy">
             Runs on a health office laptop.
           </h2>
           <p className="mt-4 max-w-md text-body text-slate">
@@ -40,10 +40,12 @@ export function CostSection() {
 
 export function ClosingCta() {
   return (
-    <section aria-labelledby="close-heading" className="relative isolate overflow-hidden bg-navy px-4 py-28 text-white sm:px-8 lg:px-14">
-      <BrandRibbon variant="fan" surface="navy" className="-z-10" />
+    <section aria-labelledby="close-heading" className="relative isolate overflow-hidden bg-navy px-4 py-32 text-white sm:px-8 lg:px-14">
+      <div className="absolute inset-0 -z-10 [mask-image:linear-gradient(to_right,transparent_20%,black_70%)]">
+        <RibbonCanvas className="h-full w-full" from={0.95} to={0.15} period={22} />
+      </div>
       <div className="mx-auto max-w-6xl">
-        <h2 id="close-heading" className="max-w-2xl text-balance text-[clamp(2.25rem,5vw,4rem)] font-light leading-[1.04] tracking-[-0.03em]">
+        <h2 id="close-heading" className="max-w-2xl text-balance text-[clamp(2.25rem,5vw,4rem)] font-extrabold leading-[1.02] tracking-[-0.035em]">
           Pick a ward. See its next four weeks.
         </h2>
         <p className="mt-5 max-w-lg text-lg text-mist">

@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { EASE_OUT, FULL_MOTION, gsap, useGSAP } from "@/components/motion/gsap";
 import {
   Bar,
   CartesianGrid,
@@ -39,7 +41,7 @@ export function ProofSection() {
   return (
     <section id="proof" aria-labelledby="proof-heading" className="bg-paper px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-32">
       <div className="mx-auto max-w-6xl">
-        <h2 id="proof-heading" className="max-w-3xl text-balance text-[clamp(2rem,4vw,3.25rem)] font-light leading-[1.08] tracking-[-0.025em]">
+        <h2 id="proof-heading" className="max-w-3xl text-balance text-[clamp(2rem,4vw,3.25rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-navy">
           The lag is in the data. The model is checked on years it never saw.
         </h2>
         <div className="mt-16 grid gap-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
@@ -53,8 +55,24 @@ export function ProofSection() {
 }
 
 function LagBars() {
+  const scope = useRef<HTMLElement>(null);
+  useGSAP(
+    () => {
+      gsap.matchMedia().add(FULL_MOTION, () => {
+        gsap.from("[data-lag-bar]", {
+          scaleY: 0,
+          transformOrigin: "50% 100%",
+          duration: 1.2,
+          ease: EASE_OUT,
+          stagger: 0.07,
+          scrollTrigger: { trigger: scope.current, start: "top 75%" },
+        });
+      });
+    },
+    { scope },
+  );
   return (
-    <figure>
+    <figure ref={scope}>
       <figcaption>
         <h3 className="text-h2 font-bold">Rain shows up in cases three weeks later</h3>
         <p className="mt-2 max-w-md text-body text-slate">
@@ -72,6 +90,7 @@ function LagBars() {
               </span>
               <div
                 aria-hidden="true"
+                data-lag-bar
                 className={`w-full rounded-t-[6px] ${isPeak ? "bg-royal" : "bg-royal/25"}`}
                 style={{ height: `${Math.max((r / 0.47) * 160, 3)}px` }}
               />
