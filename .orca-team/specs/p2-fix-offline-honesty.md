@@ -30,6 +30,17 @@ SKILLS: production-hardening, frontend-engineering, webapp-testing, verification
    - assert that no `[role="alert"]` error card is visible.
 3. Add one assertion that the `offline` badge is visible on the provenance strip under
    `NEXT_PUBLIC_ABHAS_OFFLINE=1`.
+4. **QA Q7.** The Offline chip must also react to the browser.
+   - Combine the API's `offline` flag with `navigator.onLine` and the `online` / `offline` window events.
+   - Label the states:
+     - "Offline (network)" when the browser is offline;
+     - "Offline mode" when the API says offline;
+     - otherwise "Local API".
+   - `?demo=1` must not show "offline" while online. Rename that chip to "Demo data".
+5. **QA Q7, Phase 1 dashboard.**
+   - When `NEXT_PUBLIC_ABHAS_OFFLINE=1`, or the API reports offline, disable the "Live Open-Meteo" toggle with the
+     tooltip "Offline — dataset weather".
+   - Show the same Offline chip in the Phase 1 header.
 
 ## Tests that prove the fix
 - `grep -rn "api.open-meteo.com" apps/web/src` returns nothing; display-only links in the About text are allowed.

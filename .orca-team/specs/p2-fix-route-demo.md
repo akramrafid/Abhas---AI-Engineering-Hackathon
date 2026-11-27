@@ -38,10 +38,16 @@ Weeks verified from the API (scope all, service level 0.90):
    Never claim capacity is fine when `unroutable_patients > 0`.
 2. Each city card always shows `capacity_total`, `required_total`, utilisation before and after,
    `headroom_after` and `unroutable_patients`. These already exist; keep them visible when the city has no transfers.
-3. Optional, if it takes under 15 minutes: add a "Shoulder week" quick action in Step 3 that sets origin 2024-08-12
+3. **QA Q5.** The card's "Utilisation after 100 %" hides the unserved demand. `utilisation_after` is beds filled
+   divided by capacity (ADR-0012), so it caps at 100 % while the ward table shows 129–150 %.
+   - Label it "Beds filled after".
+   - Add "Demand / capacity" = `required_total / capacity_total` (for example 122 %).
+   - Show `unroutable_patients` in the risk colour with the label "patients without a bed".
+   - The API contract does not change; this is UI only.
+4. Optional, if it takes under 15 minutes: add a "Shoulder week" quick action in Step 3 that sets origin 2024-08-12
    and horizon 3 (re-verified on `9688857`: 5 transfers in 2 cities, 10 unroutable). The default origin stays as it
    is.
-4. `docs/demo-7min.md` keeps the 2024-08-05 shortage case and the override beat. Add one spoken line: "In a shoulder
+5. `docs/demo-7min.md` keeps the 2024-08-05 shortage case and the override beat. Add one spoken line: "In a shoulder
    week such as 12 August, the same engine moves patients between wards on its own."
 
 ## Tests that prove the fix

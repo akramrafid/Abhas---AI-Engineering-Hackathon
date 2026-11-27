@@ -32,9 +32,14 @@ steps, 0 suboptimal cases against brute force, and A1–A3 unchanged.
 
 1. **Available stock.** S = `(stock_pct * total_demand + 50) // 100`, integer round-half-up. The target is
    T = min(S, Σd).
-2. **Integer floors.** fᵢ = min(dᵢ, (floor_pct·dᵢ + 50) // 100). This is round-half-up of φ·dᵢ in integer
-   arithmetic, so there is no float noise. With the default φ = 20 %, every ward with dᵢ ≥ 3 is guaranteed at least
-   one unit.
+2. **Integer floors (ceiling).** fᵢ = min(dᵢ, ⌈floor_pct·dᵢ / 100⌉) = min(dᵢ, (floor_pct·dᵢ + 99) // 100), in
+   integer arithmetic.
+   - With the ceiling, "at least 20 % of need" is literally true. QA found CCC_Ward_02 at 14 / 72 = 19.4 %, below the
+     stated floor, with today's rounding.
+   - Every ward with dᵢ ≥ 1 and φ > 0 gets at least one unit.
+   - This was re-validated outside the repo with ceiling floors: 0 monotonicity violations and 0 suboptimal cases
+     against brute force.
+   - When Σf > T, rule 4 (floor scaling) applies.
 3. **When Σf ≤ T:**
    - Solve the same HiGHS LP with integer bounds [fᵢ, dᵢ] and the same tie-break weights.
    - The vertex is integral: one budget row plus integer box bounds and an integer right-hand side. Snap it with
