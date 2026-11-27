@@ -68,27 +68,30 @@ Sequence diagrams, the resilience register, latency budget and rate limits are i
 
 ## Phase 2 — operational command system (version-onsite-final)
 Architecture style is unchanged (ADR-0001: modular monolith, vertical slices, ports & adapters).
-- **New API slices** (`apps/api/app/features/`): `allocation` · `overflow` · `simulator` · `dispatch` · `plans` · `planning` (structural-fix planner, ADR-0021); `validation` gains `GET /api/v1/validation/trigger` (ADR-0020).
+- **New API slices** (`apps/api/app/features/`): `allocation` · `overflow` · `simulator` · `dispatch` · `plans` · `planning` (structural-fix planner, ADR-0021) · `facilities` (nearest bed & ambulance control-room view, ADR-0018); `validation` gains `GET /api/v1/validation/trigger` (ADR-0020).
 - **New shared modules** (`apps/api/app/shared/`): `supply.py` (cases → supplies at a service level),
   `optimizer.py` (weighted LP allocation, rounding, deficit flags, greedy crews), `routing.py` (intra-city
   min-max transportation LP + arc-minimising MILP, capacity derivation), `intervention.py` (efficacy curve,
   monotone feature reduction, counterfactual bookkeeping), `trigger.py` (early-action threshold rule, Peirce
   skill score, episode lead-time quartiles), `structural.py` (Poisson GLM + LightGBM partial dependence
-  annualised case-prevention helpers and build-vs-send ratio).
+  annualised case-prevention helpers and build-vs-send ratio), `facilities.py` (Haversine distance, 3-tier
+  nearest-bed ranking, phone/`tel:` sanitisation).
 - **New ports**: `ports/supply.py` (supply ratio source), `ports/capacity.py` (bed capacity source),
   `ports/intervention.py` (counterfactual forecaster, implemented by the forecast engine),
-  `ports/planning.py` (precomputed trigger evaluation and structural-planner JSON sources).
+  `ports/planning.py` (precomputed trigger evaluation and structural-planner JSON sources),
+  `ports/facilities.py` (hospital directory, bed updates, and ambulance request log store).
 - **New web slice**: `apps/web/src/features/command/` — the 5-step Command Center
-  (Forecast → Allocate → Route → Simulate → Dispatch), plus Validation trigger panel and Structural Planner view.
+  (Forecast → Allocate → Route → Simulate → Dispatch), `apps/web/src/features/nearest-bed/` (Nearest Bed &
+  Ambulance control-room view, ADR-0018), plus Validation trigger panel and Command Center Build-vs-Send panel.
 - **Rules**: all Phase 2 maths is pure, deterministic, offline Python (NumPy/SciPy). No network on any core path.
   Features never import each other; cross-slice logic lives in `shared/`. Every Phase 2 response carries
   `model_version`, `git_sha`, `data_as_of` and `offline`.
 
 Phase 2 decisions: 0009 supply conversion · 0010 constrained allocation · 0011 crew assignment ·
 0012 overflow routing · 0013 counterfactual simulator · 0014 dispatch templates · 0015 offline resilience ·
-0016 plans and decision log · 0020 early-action trigger · 0021 structural-fix planner.
+0016 plans and decision log · 0018 nearest bed & ambulance · 0020 early-action trigger · 0021 structural-fix planner.
 
-### Phase 2 ADR summary (full text in `docs/adr/0009…0016`; ADR-0020 and ADR-0021 below)
+### Phase 2 ADR summary (full text in `docs/adr/0009…0016`; ADR-0018, ADR-0020, and ADR-0021 below)
 | ADR | Decision | Rejected (why) |
 |---|---|---|
 | 0009 Supply conversion | The data's exact rule `round(c × cases)` with c = 2.385 saline, 1.164 kits, 0.298 beds (reproduces 100 % of rows), applied to a service-level quantile of window cases (moment-matched NB; P80 saline/kits, P90 beds) | Regression ratios (approximate a deterministic rule); unverified multipliers; three extra models (nothing to learn) |
@@ -99,8 +102,43 @@ Phase 2 decisions: 0009 supply conversion · 0010 constrained allocation · 0011
 | 0014 Dispatch | Deterministic templates; segment-aware SMS (GSM-7 160/153, UCS-2 70/67); WhatsApp text; HTML brief + Playwright PDF; number-faithfulness test; HTML escaping | LLM-written notices (network, altered numbers); server PDF libraries (broken Bangla shaping) |
 | 0015 Offline resilience | ABHAS_OFFLINE kill switch + probe; 2 s timeouts, breakers, cache → climatology; no network at startup; self-hosted assets; map fallback; Clerk off; `npm run offline:check` gate | Cloud LLM on the dispatch path; startup connectivity check |
 | 0016 Plans and decision log | Every run stored with inputs, outputs, model version, git SHA; compare two plans | localStorage history (not auditable); full event sourcing (overkill) |
+| 0018 Nearest Bed & Ambulance | Control-room view linking real OSM hospital snapshot (ODbL, attribution) to synthetic wards at city level; client-side Haversine ranking (user GPS never sent to API); 3-tier ranking (fresh `free_beds ≥ 1` & age `≤ 6 h` → stale `free_beds ≥ 1` flagged → nearest city alternative); offline GeoJSON-only map + straight-line ETA "estimate"; verified OSM phones only + always-present Call 999; clearly labelled DEMO bed data; Alembic `0003` (`hospitals`, `bed_updates`, `ambulance_requests`, zero patient PII); manager-gated bed updates | Google Places API (terms prohibit offline storage); live hospital bed APIs (none exist publicly in Bangladesh); server-side GPS lookup (unnecessary privacy risk); inventing phone numbers or patient fields |
 | 0020 Early-action trigger | Auditable zero-model rule `2-week rain > R mm AND water_logging_risk_index ≥ W` tuned on 2016–2023 by max Peirce skill score for High (`cases ≥ 8`) at `h = 3` (reference: `R = 80`, `W = 0.3`; hold-out hit rate `0.94`, FAR `0.63`, Peirce `0.73`, median lead `4` wks); benchmarked vs Abhas model on locked 2024–25 hold-out; printed on commissioner briefs; served from precomputed JSON at `GET /api/v1/validation/trigger` | Black-box-only alerts (unusable when offline/power-out); tuning thresholds on 2024–25 (hold-out leakage); F1-maximising thresholds (distorted by class imbalance) |
 | 0021 Structural-fix planner | Annualised cases prevented per ward for `−0.1/−0.2` `water_logging_risk_index` and `+0.1/+0.2` `sanitation_score` via Poisson GLM (`rainfall_lag_2..4` + 3 ward traits) cross-checked by LightGBM partial dependence (single-trait shift), both with bootstrap 95 % CIs; paired with a "build vs send" comparison against simulator crew ROI; mandatory simulated-association disclaimer; served from precomputed JSON at `GET /api/v1/planning/structural?city=` | Claiming causal real-world drainage impact (no intervention labels; static ward traits); single-estimator reporting (hides functional-form sensitivity); on-request GLM/bootstrap fitting (too slow for interactive HTTP) |
+
+---
+
+### ADR-0018: Nearest Bed & Ambulance (control-room view)
+
+**Status:** Accepted · 2026-11-27 (Phase 2 extension)
+
+**Context.**
+During a dengue surge, emergency dispatchers and ward control rooms need to find the nearest hospital with an open dengue bed, call a verified facility desk (or national emergency 999), log an ambulance coordination request, and let hospital bed-board managers update available counts — even when internet connectivity drops or location permissions are denied.
+
+**Decision.**
+- **City-level link to synthetic wards.** Because the hackathon dataset's 60 wards are synthetic without official boundary polygons, real hospitals link to Abhas forecasts at the **city** level (`Dhaka North`, `Dhaka South`, `Chattogram`, `Gazipur`, `Narayanganj`), surfacing each city's current/peak risk tier badge alongside facility capacity.
+- **OpenStreetMap snapshot (ODbL, attribution).** Run `scripts/fetch_hospitals.py` once while online against Overpass (`amenity=hospital` / `healthcare=hospital` across the 5 cities) to commit `apps/api/data/hospitals.geojson` with `snapshot_date` and attribution (`© OpenStreetMap contributors · ODbL 1.0`). Keep a phone number **only** if present in OSM `phone` / `contact:phone` tags; never fabricate numbers.
+- **Client-side nearest ranking (location never sent).** Consented browser geolocation (5 s timeout, falling back cleanly to a city/ward centroid picker when denied or unavailable) stays strictly inside browser memory. All Haversine distances, straight-line ETA estimates, and facility rankings execute client-side; user coordinates are **never** sent to any API endpoint or written to server logs.
+- **Deterministic 3-tier ranking rule.** Rank hospitals against the user's chosen/detected `(lat, lon)` and city:
+  1. **Tier 1 (Fresh available):** `free_beds >= 1` AND bed-data age `<= 6 hours`, sorted by Haversine distance ascending (ties: higher `free_beds`, then `hospital_id`).
+  2. **Tier 2 (Stale available):** `free_beds >= 1` AND bed-data age `> 6 hours`, flagged visibly as **stale**, sorted by distance ascending.
+  3. **Tier 3 (City alternative / full):** `free_beds == 0`, preferring same-city alternatives first, then nearest overall, sorted by distance ascending.
+- **Offline operation.** Offline mode reads the committed local GeoJSON via the local API, renders a **GeoJSON-only MapLibre canvas with zero external map tiles**, and labels Haversine travel time explicitly as a **"straight-line estimate"** (`ceil(km / 18 * 60 + 5)` min).
+- **Verified phone numbers only + always-present Call 999.** Render `tel:` links only after strict sanitisation (`^[+0-9()\-\s]{6,24}$` → digits/`+` only) for OSM-verified numbers; display an always-accessible **Call 999** button on every card and header.
+- **Demo bed data clearly labelled.** Seeded bed counts carry `data_source = "demo"` in the API and a visible **"Demo bed data"** badge in the UI until updated by a hospital manager (`data_source = "board"`).
+- **Endpoints & persistence (Alembic `0003_facilities`).**
+  - `GET /api/v1/facilities/hospitals` (optional `?city=`, offline)
+  - `POST /api/v1/facilities/beds/{hospital_id}` (manager role required; `403` otherwise)
+  - `POST /api/v1/facilities/ambulance-requests` and `GET /api/v1/facilities/ambulance-requests` (control-room coordination log; **strictly zero patient personal data** — no names, phone numbers, NIDs, ages, addresses, or user GPS).
+  - Reversible Alembic migration `0003_facilities` creating `hospitals`, `bed_updates`, and `ambulance_requests`.
+
+**Rejected options.**
+- *Google Places API* — rejected: terms forbid storing/caching place snapshots offline and require billed API keys.
+- *Live government/hospital bed APIs* — rejected: no public real-time dengue bed API exists for Bangladesh hospitals.
+- *Server-side nearest-hospital lookup with user GPS* — rejected: exposes sensitive user location to backend logs when client-side Haversine over `< 200` hospitals takes `< 1 ms`.
+
+**Consequences.**
+Control rooms get an offline-capable, privacy-preserving hospital bed & ambulance directory grounded in real ODbL hospital coordinates, cleanly separated from synthetic ward forecasts and honest about seeded demo bed availability.
 
 ---
 

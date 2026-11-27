@@ -368,6 +368,75 @@ cases prevented/yr), and `build_vs_send` (`BuildVsSendRow`: `drainage_cases_per_
 (within `1e-6`); `city` filter returns only wards of that city and `null` returns all 60 wards; unknown `city` returns
 `422`; both endpoints succeed with the socket guard active (zero network calls).
 
+---
+
+## 2.10 Facilities — Nearest Bed & Ambulance (ADR-0018)
+
+Read/write vertical slice `apps/api/app/features/facilities/`. Links real OpenStreetMap hospital points
+(`apps/api/data/hospitals.geojson`, ODbL) to Abhas city-level forecast risk tiers. **Privacy rule:** user GPS
+coordinates are NEVER accepted on any facilities endpoint and NEVER logged.
+
+### `GET /api/v1/facilities/hospitals`
+
+Query: `city` (`City` or null, optional; invalid → `422`). No location query parameters permitted.
+
+**Response `HospitalsResponse`** = `RunMeta` +
+
+| Field | Type | Notes |
+|---|---|---|
+| `snapshot_date` | string (ISO date) | Snapshot date recorded in `hospitals.geojson` |
+| `attribution` | string | `"© OpenStreetMap contributors · ODbL 1.0"` |
+| `bed_data_disclaimer` | string | `"Demo bed data — replace with verified hospital bed-board feeds before clinical use."` |
+| `stale_after_hours` | float | `6.0` (ADR-0018 threshold) |
+| `emergency_number` | Literal `"999"` | Always-present national emergency fallback |
+| `city_filter` | `City` or null | Echo |
+| `city_forecast_tiers` | map `City` → `Tier` | Latest city peak forecast tier (`Low`/`Medium`/`High`/`Critical`) |
+| `hospitals` | list of `HospitalRecord` | Sorted by `city`, `name`, `id` |
+
+`HospitalRecord`: `id` (string, e.g. `osm-node-12345`), `name`, `city` (`City`), `lat` (float), `lon` (float),
+`address` (string or null), `phone` (verified OSM phone or null), `tel_href` (sanitised `tel:+...` or null),
+`total_beds` (int ≥ 1), `free_beds` (int ≥ 0, ≤ `total_beds`), `data_source` (`"demo"` | `"board"`),
+`updated_at` (UTC datetime), `age_hours` (float ≥ 0), `is_stale` (`age_hours > 6.0`), `forecast_tier` (`Tier`).
+
+### `POST /api/v1/facilities/beds/{hospital_id}` (manager role required)
+
+Headers: `X-Facility-Role: manager` (and `X-Facility-Token` when `FACILITY_MANAGER_TOKEN` env var is non-empty).
+Missing or non-manager role returns RFC 9457 **`403 forbidden`**. Unknown `hospital_id` returns **`404 unknown-hospital`**.
+
+**Request `BedUpdateRequest`** (`extra="forbid"`): `free_beds` (int 0–2000), `total_beds` (int 1–2000, `>= free_beds`),
+`note` (optional string ≤ 160 chars, control/bidi chars rejected).
+
+**Response `BedUpdateResponse`** (200) = `RunMeta` + `hospital` (`HospitalRecord`, now `data_source = "board"`,
+`age_hours = 0.0`, `is_stale = false`) + `update_id` (int).
+
+### `POST /api/v1/facilities/ambulance-requests` & `GET /api/v1/facilities/ambulance-requests`
+
+Control-room dispatch coordination log (**strictly ZERO patient personal data** — `extra="forbid"` rejects any extra
+fields such as `patient_name`, `patient_phone`, `nid`, `lat`, `lon`).
+
+**POST Request `AmbulanceRequestCreate`** (`extra="forbid"`):
+- `hospital_id` (string, must exist in `hospitals`, else `404 unknown-hospital`)
+- `city` (`City`, must match hospital's city, else `422`)
+- `severity` (`"Moderate"` | `"High"` | `"Critical"`)
+- `beds_requested` (int 1–10, default `1`)
+- `dispatcher_note` (optional string ≤ 200 chars, stripped of control/bidi chars; UI reminds dispatchers: no patient names/IDs)
+
+**POST Response `AmbulanceRequestRecord`** (201) = `RunMeta` + `id` (UUID), `hospital_id`, `hospital_name`, `city`,
+`severity`, `beds_requested`, `dispatcher_note`, `status` (`"logged"`), `created_at` (UTC datetime).
+
+**GET `/api/v1/facilities/ambulance-requests`** query: `city` (optional `City`), `limit` (1–100, default `20`).
+Returns `AmbulanceRequestList` = `RunMeta` + `requests: list[AmbulanceRequestRecord]` (newest first).
+
+### Alembic `0003_facilities` (reversible)
+
+| Table | Columns | Indexes / constraints |
+|---|---|---|
+| `hospitals` | `id` String(64) PK · `name` String(160) not null · `city` String(32) not null · `lat` Float not null · `lon` Float not null · `address` String(240) null · `phone` String(32) null · `total_beds` Integer not null · `free_beds` Integer not null · `data_source` String(16) not null (`'demo'`\|`'board'`) · `updated_at` DateTime(tz) not null | `ix_hospitals_city` (`city`); check `free_beds >= 0 AND free_beds <= total_beds`; check `data_source in ('demo','board')` |
+| `bed_updates` | `id` Integer PK autoincrement · `hospital_id` String(64) FK → `hospitals.id` ON DELETE CASCADE · `free_beds` Integer not null · `total_beds` Integer not null · `data_source` String(16) not null · `note` String(160) null · `updated_at` DateTime(tz) not null | `ix_bed_updates_hospital_time` (`hospital_id`, `updated_at`) |
+| `ambulance_requests` | `id` String(36) PK · `hospital_id` String(64) FK → `hospitals.id` ON DELETE CASCADE · `city` String(32) not null · `severity` String(16) not null · `beds_requested` Integer not null · `dispatcher_note` String(200) null · `status` String(16) not null · `created_at` DateTime(tz) not null | `ix_ambulance_requests_city_created` (`city`, `created_at`); check `severity in ('Moderate','High','Critical')`; check `beds_requested >= 1 AND beds_requested <= 10`; **zero patient PII columns** |
+
+`downgrade()` drops `ambulance_requests`, `bed_updates`, `hospitals` in reverse order. `npm run db:check` must pass `upgrade head → check → downgrade base → upgrade head`.
+
 ## 3. Config files (created in WP0 by `ml/fit_supply.py`, committed, read at startup)
 
 The script refuses to write unless the onsite file's SHA-256 is `24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0`.
