@@ -5,9 +5,11 @@ Pure, deterministic, offline algorithms using NumPy and SciPy HiGHS only.
 
 from __future__ import annotations
 
+import heapq
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from fractions import Fraction
 from typing import Any, cast
 
 import numpy as np
@@ -124,69 +126,32 @@ def _solve_stage1_min_max_util(
     d_def: Sequence[int],
     placed_star: int,
 ) -> tuple[list[int], float]:
-    """Stage 1 (HiGHS MILP): find exact integer min-max post-transfer utilisation u* for placed_star transfers.
+    """Stage 1: exact discrete min-max post-transfer utilisation u* for placed_star transfers.
 
     Because the deficit-to-headroom graph is complete bipartite, any integer outflow vector
     ``0 <= out_p <= D_p`` with ``sum(out_p) == placed_star`` admits an exact integer arc flow into
-    headroom wards. Solving Stage 1 directly over integer ``out_p`` and continuous ``u`` guarantees
-    Stage 2 is always integer-feasible and finds the exact discrete min-max utilisation.
+    headroom wards. Repeatedly relieving one patient from the ward with highest exact utilisation
+    ``Fraction(r_p - out_p, k_p)`` is provably optimal by exchange argument (any ward strictly
+    above the optimal ``u*`` must be decremented in every optimal solution) and avoids solver
+    presolve failures on degenerate instances.
     """
     m = len(r_def)
     if placed_star == sum(d_def):
         return list(d_def), 1.0
 
-    max_u = max(r_def[p] / k_def[p] for p in range(m))
-    # Variables: [out_0, ..., out_{m-1}, u]
-    n_vars = m + 1
-    c = np.zeros(n_vars, dtype=np.float64)
-    c[m] = 1.0
-    integrality = np.ones(n_vars, dtype=int)
-    integrality[m] = 0
+    out_sol = [0] * m
+    # Max-heap by exact rational utilisation (negated for heapq min-heap), tie-break by ward index.
+    heap: list[tuple[Fraction, int]] = [(-Fraction(r_def[p], k_def[p]), p) for p in range(m)]
+    heapq.heapify(heap)
 
-    lb_v = np.zeros(n_vars, dtype=np.float64)
-    ub_v = np.empty(n_vars, dtype=np.float64)
-    for p in range(m):
-        ub_v[p] = float(d_def[p])
-    lb_v[m] = 1.0
-    ub_v[m] = float(max_u)
+    for _ in range(placed_star):
+        _neg_u, p = heapq.heappop(heap)
+        out_sol[p] += 1
+        if out_sol[p] < d_def[p]:
+            heapq.heappush(heap, (-Fraction(r_def[p] - out_sol[p], k_def[p]), p))
 
-    # Row 0: sum(out_p) == placed_star
-    # Rows 1..m: -out_p - k_p * u <= -r_p  <=>  (r_p - out_p) / k_p <= u
-    rows: list[int] = []
-    cols: list[int] = []
-    vals: list[float] = []
-    lb_c: list[float] = []
-    ub_c: list[float] = []
-
-    for p in range(m):
-        rows.append(0)
-        cols.append(p)
-        vals.append(1.0)
-    lb_c.append(float(placed_star))
-    ub_c.append(float(placed_star))
-
-    for p in range(m):
-        row_idx = p + 1
-        rows.extend([row_idx, row_idx])
-        cols.extend([p, m])
-        vals.extend([-1.0, -float(k_def[p])])
-        lb_c.append(-np.inf)
-        ub_c.append(-float(r_def[p]))
-
-    a_mat = csc_matrix((vals, (rows, cols)), shape=(m + 1, n_vars))
-    res = milp(
-        c=c,
-        integrality=integrality,
-        bounds=Bounds(cast(Any, lb_v), cast(Any, ub_v)),
-        constraints=LinearConstraint(a_mat, cast(Any, lb_c), cast(Any, ub_c)),
-        options={"mip_rel_gap": 0.0},
-    )
-    if res.x is None or res.status not in (0, 1):
-        raise RuntimeError(f"Stage 1 overflow min-max solver failed (status={res.status}: {res.message})")
-
-    out_sol = [int(round(float(res.x[p]))) for p in range(m)]
-    u_star = max(1.0, max((r_def[p] - out_sol[p]) / k_def[p] for p in range(m)))
-    return out_sol, float(u_star)
+    u_exact = max(Fraction(1, 1), max(Fraction(r_def[p] - out_sol[p], k_def[p]) for p in range(m)))
+    return out_sol, float(u_exact)
 
 
 def _northwest_corner_fallback(
@@ -339,6 +304,14 @@ def _solve_stage2_min_arcs(
         constraints=LinearConstraint(a_mat, cast(Any, lb_c), cast(Any, ub_c)),
         options={"mip_rel_gap": 0.0, "node_limit": _STAGE2_NODE_LIMIT},
     )
+    if res.status == 4 or res.x is None:
+        res = milp(
+            c=c,
+            integrality=integrality,
+            bounds=Bounds(cast(Any, lb_v), cast(Any, ub_v)),
+            constraints=LinearConstraint(a_mat, cast(Any, lb_c), cast(Any, ub_c)),
+            options={"presolve": False, "node_limit": _STAGE2_NODE_LIMIT},
+        )
 
     if res.status == 2:
         raise RuntimeError(f"Stage 2 overflow MILP reported infeasibility ({res.message})")
