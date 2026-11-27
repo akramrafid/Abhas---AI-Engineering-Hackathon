@@ -292,6 +292,11 @@ def test_wp0_3_validation_422_problem_json_names_fields() -> None:
         assert r_extra.status_code == 422
         assert r_extra.headers["content-type"].startswith("application/problem+json")
 
+        # 405 on multi-method /api/v1/plans reports complete Allow header (GET, POST)
+        r_405 = client.options("/api/v1/plans")
+        assert r_405.status_code == 405
+        assert {m.strip() for m in r_405.headers["allow"].split(",")} == {"GET", "POST"}
+
 
 def test_monotone_rain_features_matches_ml_train() -> None:
     """MONOTONE_RAIN_FEATURES equals ml/train.py monotone_constraints_for_horizon for h = 2, 3, 4."""

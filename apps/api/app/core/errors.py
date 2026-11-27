@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -10,6 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.routing import Match
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.logging import request_id_var
@@ -79,6 +81,7 @@ def _p(desc: str) -> dict[str, Any]:
 
 
 PROBLEM_RESPONSES: dict[int | str, dict[str, Any]] = {
+    400: _p("Malformed request body or syntax error"),
     401: _p("Missing or invalid X-Ops-Token"),
     404: _p("Unknown ward, city or resource"),
     413: _p("Request body exceeds the 64 KB size limit"),
@@ -131,6 +134,25 @@ class UnhandledExceptionMiddleware:
             await response(scope, receive, send)
 
 
+def _collect_allowed_methods(routes: Sequence[Any], scope: Scope) -> set[str]:
+    allowed: set[str] = set()
+    for route in routes:
+        original = getattr(route, "original_router", None)
+        if original is not None and hasattr(original, "routes"):
+            allowed.update(_collect_allowed_methods(original.routes, scope))
+            continue
+        subroutes = getattr(route, "routes", None)
+        if subroutes is not None:
+            allowed.update(_collect_allowed_methods(subroutes, scope))
+            continue
+        match, _ = route.matches(scope)
+        if match in (Match.FULL, Match.PARTIAL):
+            methods = getattr(route, "methods", None)
+            if methods:
+                allowed.update(m for m in methods if m != "HEAD")
+    return allowed
+
+
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(request: Request, exc: AppError) -> JSONResponse:
@@ -146,10 +168,18 @@ def install_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
-        slug = {404: "not-found", 405: "method-not-allowed", 429: "rate-limited"}.get(
-            exc.status_code, "http-error"
-        )
+        slug = {
+            400: "bad-request",
+            404: "not-found",
+            405: "method-not-allowed",
+            429: "rate-limited",
+        }.get(exc.status_code, "http-error")
         headers = {str(k): str(v) for k, v in exc.headers.items()} if exc.headers else None
+        if exc.status_code == 405:
+            allowed = _collect_allowed_methods(request.app.routes, request.scope)
+            if allowed:
+                headers = {k: v for k, v in (headers or {}).items() if k.lower() != "allow"}
+                headers["Allow"] = ", ".join(sorted(allowed))
         return _problem(exc.status_code, slug, str(exc.detail), None, request, headers=headers)
 
     @app.exception_handler(Exception)

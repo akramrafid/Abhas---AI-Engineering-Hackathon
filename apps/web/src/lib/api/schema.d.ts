@@ -2124,6 +2124,16 @@ export interface operations {
                     "application/json": components["schemas"]["AdvisoryResponse"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -2216,6 +2226,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AllocationResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -2322,6 +2342,16 @@ export interface operations {
                     "application/json": components["schemas"]["ChatResponse"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -2413,6 +2443,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
             };
             /** @description Missing or invalid X-Ops-Token */
             401: {
@@ -2513,6 +2553,16 @@ export interface operations {
                     "text/html": string;
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -2605,6 +2655,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DispatchResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -2701,6 +2761,16 @@ export interface operations {
                     "application/json": components["schemas"]["ForecastResponse"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -2795,6 +2865,16 @@ export interface operations {
                     "application/json": components["schemas"]["HeatmapResponse"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -2885,6 +2965,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OpsResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -2979,6 +3069,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OverflowResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -3084,6 +3184,16 @@ export interface operations {
                     "application/json": components["schemas"]["PlanList"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -3176,6 +3286,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanRecord"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -3273,6 +3393,16 @@ export interface operations {
                     "application/json": components["schemas"]["PlanComparison"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -3365,6 +3495,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScenarioResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -3461,6 +3601,16 @@ export interface operations {
                     "application/json": components["schemas"]["SimulatorResponse"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -3549,6 +3699,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ValidationResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -3641,6 +3801,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WardList"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
@@ -3738,6 +3908,16 @@ export interface operations {
                     "application/json": components["schemas"]["WardHistory"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -3832,6 +4012,16 @@ export interface operations {
                     "application/json": components["schemas"]["LagResponse"];
                 };
             };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Missing or invalid X-Ops-Token */
             401: {
                 headers: {
@@ -3920,6 +4110,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WeatherStatus"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
