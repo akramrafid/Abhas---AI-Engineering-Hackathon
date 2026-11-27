@@ -15,10 +15,11 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { SelectField, type SelectOption } from "@/components/ui/Select";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import type { ApiError } from "@/lib/api/client";
-import type { Lang } from "@/lib/i18n";
-import type { OverflowResponse, Transfer } from "./api";
+import { UI_COPY, type Lang } from "@/lib/i18n";
+import type { CityBedSummary, OverflowResponse, Transfer } from "./api";
 
 export interface StepRouteProps {
+  originWeek: string;
   horizon: number;
   serviceLevel: number;
   capacityOverrides: Record<string, number>;
@@ -33,27 +34,19 @@ export interface StepRouteProps {
   onServiceLevelChange: (sl: number) => void;
   onCapacityOverrideChange: (wardId: string, capacity: number | null) => void;
   onResetOverrides: () => void;
+  onJumpShoulderWeek?: () => void;
 }
-
-const HORIZON_OPTIONS: readonly SelectOption[] = [
-  { value: "1", label: "+1w" },
-  { value: "2", label: "+2w" },
-  { value: "3", label: "+3w (Peak window)" },
-  { value: "4", label: "+4w" },
-];
-
-const SERVICE_LEVEL_OPTIONS: readonly SelectOption[] = [
-  { value: "0.8", label: "P80 (0.80)" },
-  { value: "0.9", label: "P90 (0.90 · Default)" },
-  { value: "0.95", label: "P95 (0.95 · Conservative)" },
-];
 
 interface SankeyDiagramProps {
   transfers: readonly Transfer[];
+  cities: readonly CityBedSummary[];
+  lang: Lang;
 }
 
-function OverflowSankey({ transfers }: SankeyDiagramProps) {
+function OverflowSankey({ transfers, cities, lang }: SankeyDiagramProps) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const s3 = UI_COPY[lang].command.step3;
+  const bn = lang === "bn";
 
   const layout = useMemo(() => {
     const senderTotals = new Map<string, { city: string; patients: number }>();
@@ -124,9 +117,35 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
     return (
       <div
         data-testid="overflow-sankey"
-        className="rounded-xl border border-mist bg-paper p-5 text-sm text-slate"
+        lang={lang}
+        className={clsx("space-y-2 rounded-xl border border-mist bg-paper p-4 text-sm", bn && "font-bangla")}
       >
-        No intra-city overflow transfers required for this horizon — all wards remain within bed capacity.
+        <ul className="space-y-1.5">
+          {cities.map((c) => {
+            const noFreeBeds = c.unroutable_patients > 0;
+            return (
+              <li
+                key={c.city}
+                data-testid={`route-empty-city-${c.city}`}
+                className={clsx(
+                  "flex items-start gap-2 rounded-lg px-3 py-2 text-xs font-medium",
+                  noFreeBeds
+                    ? "border border-risk-critical/25 bg-white text-risk-critical"
+                    : "border border-mist bg-white text-navy",
+                )}
+              >
+                {noFreeBeds ? (
+                  <AlertTriangle aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                ) : null}
+                <span>
+                  {noFreeBeds
+                    ? s3.cityNoFreeBeds(c.city, c.unroutable_patients)
+                    : s3.cityWithinCapacity(c.city)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     );
   }
@@ -140,23 +159,17 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
         className="overflow-x-auto rounded-xl border border-mist bg-white p-3"
         tabIndex={0}
         role="region"
-        aria-label="Interactive intra-city bed overflow flow diagram"
+        aria-label={s3.sankeyAria}
       >
         <svg
           viewBox={`0 0 ${layout.width} ${layout.height}`}
           className="h-auto w-full min-w-[540px]"
           role="img"
-          aria-label={`Intra-city bed overflow Sankey showing ${transfers.length} patient transfer routes`}
+          aria-label={s3.sankeyImgAria(transfers.length)}
         >
-          <title>Intra-city bed overflow transfers</title>
-          <text
-            x={24}
-            y={18}
-            fill="#4B5578"
-            fontSize="11"
-            fontWeight="600"
-          >
-            OVERFLOWING WARDS (SENDERS)
+          <title>{s3.sankeyTitle}</title>
+          <text x={24} y={18} fill="#4B5578" fontSize="11" fontWeight="600">
+            {s3.sankeySenders}
           </text>
           <text
             x={layout.width - layout.nodeW - 24}
@@ -165,7 +178,7 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
             fontSize="11"
             fontWeight="600"
           >
-            HEADROOM WARDS (RECEIVERS)
+            {s3.sankeyReceivers}
           </text>
 
           {/* Curved flow ribbons */}
@@ -231,13 +244,8 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
                 >
                   {wardId}
                 </text>
-                <text
-                  x={pos.x + 12}
-                  y={pos.y + 34}
-                  fill="#DDE3F3"
-                  fontSize="10"
-                >
-                  {info.city} · −{info.patients} out
+                <text x={pos.x + 12} y={pos.y + 34} fill="#DDE3F3" fontSize="10">
+                  {info.city} · {s3.sankeyOut(info.patients)}
                 </text>
               </g>
             );
@@ -267,13 +275,8 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
                 >
                   {wardId}
                 </text>
-                <text
-                  x={pos.x + 12}
-                  y={pos.y + 34}
-                  fill="#4B5578"
-                  fontSize="10"
-                >
-                  {info.city} · +{info.patients} in
+                <text x={pos.x + 12} y={pos.y + 34} fill="#4B5578" fontSize="10">
+                  {info.city} · {s3.sankeyIn(info.patients)}
                 </text>
               </g>
             );
@@ -304,9 +307,16 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
           ))}
         </div>
         {activeLink ? (
-          <p className="font-mono text-xs font-semibold text-navy tnum">
-            Selected route: {activeLink.transfer.from_ward} → {activeLink.transfer.to_ward} (
-            {activeLink.transfer.patients} patients · {activeLink.transfer.city})
+          <p
+            lang={lang}
+            className={clsx("font-mono text-xs font-semibold text-navy tnum", bn && "font-bangla")}
+          >
+            {s3.selectedRoute(
+              activeLink.transfer.from_ward,
+              activeLink.transfer.to_ward,
+              activeLink.transfer.patients,
+              activeLink.transfer.city,
+            )}
           </p>
         ) : null}
       </div>
@@ -315,6 +325,7 @@ function OverflowSankey({ transfers }: SankeyDiagramProps) {
 }
 
 export function StepRoute({
+  originWeek,
   horizon,
   serviceLevel,
   capacityOverrides,
@@ -329,9 +340,29 @@ export function StepRoute({
   onServiceLevelChange,
   onCapacityOverrideChange,
   onResetOverrides,
+  onJumpShoulderWeek,
 }: StepRouteProps) {
+  const s3 = UI_COPY[lang].command.step3;
   const bn = lang === "bn";
   const overrideCount = Object.keys(capacityOverrides).length;
+
+  const horizonOptions = useMemo<SelectOption[]>(
+    () =>
+      ([1, 2, 3, 4] as const).map((h) => ({
+        value: String(h),
+        label: s3.horizonOptions[h],
+      })),
+    [s3.horizonOptions],
+  );
+
+  const serviceLevelOptions = useMemo<SelectOption[]>(
+    () =>
+      (["0.8", "0.9", "0.95"] as const).map((sl) => ({
+        value: sl,
+        label: s3.serviceLevelOptions[sl],
+      })),
+    [s3.serviceLevelOptions],
+  );
 
   return (
     <div data-testid="command-panel-3" className="space-y-5">
@@ -339,33 +370,56 @@ export function StepRoute({
       <Card>
         <CardHeader className="gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <CardTitle className={bn ? "font-bangla" : undefined}>
-              {bn
-                ? "ধাপ ৩ · নগর-ভিত্তিক শয্যা ওভারফ্লো রাউটিং"
-                : "Step 3 · Intra-city hospital bed overflow routing"}
+            <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+              {s3.title}
             </CardTitle>
-            <CardDescription className={bn ? "font-bangla" : undefined}>
-              {bn
-                ? "প্রতিটি নগরের ভেতরে অতিরিক্ত রোগী পাশের খালি শয্যাযুক্ত ওয়ার্ডে স্থানান্তর করুন এবং প্রয়োজনে ওয়ার্ডের শয্যা-ক্ষমতা সম্পাদনা করুন।"
-                : "Balances peak hospital bed demand strictly inside each city corporation. Edit any ward capacity below to re-route transfers live."}
+            <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+              {s3.description}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span
               data-testid="capacity-method-badge"
-              className="inline-flex items-center rounded-md border border-navy bg-paper px-2.5 py-1 font-mono text-xs font-semibold text-navy"
+              lang={lang}
+              className={clsx(
+                "inline-flex items-center rounded-md border border-navy bg-paper px-2.5 py-1 font-mono text-xs font-semibold text-navy",
+                bn && "font-bangla",
+              )}
             >
-              Derived from history (2016–2022 P95 × 1.10)
+              {s3.capacityMethodBadge}
             </span>
+            {onJumpShoulderWeek ? (
+              <button
+                type="button"
+                data-testid="route-shoulder-week-btn"
+                title={s3.shoulderWeekTitle}
+                aria-pressed={originWeek === "2024-08-12" && horizon === 3}
+                onClick={onJumpShoulderWeek}
+                lang={lang}
+                className={clsx(
+                  "inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 text-xs font-semibold transition-colors",
+                  bn && "font-bangla",
+                  originWeek === "2024-08-12" && horizon === 3
+                    ? "border-royal bg-royal text-white"
+                    : "border-mist bg-white text-navy hover:border-royal hover:bg-paper",
+                )}
+              >
+                <span>{s3.shoulderWeekBtn}</span>
+              </button>
+            ) : null}
             {overrideCount > 0 ? (
               <button
                 type="button"
                 data-testid="reset-capacity-overrides"
                 onClick={onResetOverrides}
-                className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-2.5 text-xs font-semibold text-navy hover:border-royal hover:bg-paper"
+                lang={lang}
+                className={clsx(
+                  "inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-2.5 text-xs font-semibold text-navy hover:border-royal hover:bg-paper",
+                  bn && "font-bangla",
+                )}
               >
                 <RotateCcw aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-                <span>Reset overrides ({overrideCount})</span>
+                <span>{s3.resetOverrides(overrideCount)}</span>
               </button>
             ) : null}
           </div>
@@ -375,23 +429,25 @@ export function StepRoute({
             <SelectField
               id="route-horizon-select"
               testId="route-horizon-select"
-              label="Routing horizon"
+              label={s3.horizonLabel}
               mono
               value={String(horizon)}
-              options={HORIZON_OPTIONS}
+              options={horizonOptions}
               onChange={(e) => onHorizonChange(Number(e.target.value))}
             />
             <SelectField
               id="route-service-level"
               testId="route-service-level"
-              label="Planned bed quantile"
+              label={s3.serviceLevelLabel}
               mono
               value={String(serviceLevel)}
-              options={SERVICE_LEVEL_OPTIONS}
+              options={serviceLevelOptions}
               onChange={(e) => onServiceLevelChange(Number(e.target.value))}
             />
             <div className="flex flex-col justify-end rounded-xl border border-mist bg-paper/60 px-3.5 py-2.5 text-xs">
-              <span className="font-semibold text-navy">Method formula</span>
+              <span lang={lang} className={clsx("font-semibold text-navy", bn && "font-bangla")}>
+                {s3.methodFormulaLabel}
+              </span>
               <span className="mt-0.5 font-mono text-[11px] text-slate tnum">
                 {data?.capacity_method ??
                   "ceil(1.10 × P95 weekly hospital_beds_required, 2016–2022)"}
@@ -399,8 +455,13 @@ export function StepRoute({
             </div>
           </div>
           {isFetching ? (
-            <p role="status" aria-live="polite" className="font-mono text-xs font-semibold text-navy">
-              Re-routing bed transfers…
+            <p
+              role="status"
+              aria-live="polite"
+              lang={lang}
+              className={clsx("font-mono text-xs font-semibold text-navy", bn && "font-bangla")}
+            >
+              {s3.rerouting}
             </p>
           ) : null}
         </CardContent>
@@ -410,29 +471,23 @@ export function StepRoute({
         <ErrorBanner
           testId="step3-error-banner"
           retryTestId="step3-retry"
-          title="Bed overflow routing failed"
+          title={s3.errorTitle}
           error={error}
           onRetry={onRetry}
         />
       ) : null}
 
       {isPending && !data ? (
-        <PanelSkeleton
-          testId="step3-loading"
-          label="Solving intra-city hospital bed overflow routing…"
-        />
+        <PanelSkeleton testId="step3-loading" label={s3.loadingLabel} />
       ) : null}
 
       {!isError && data && data.cities.length === 0 ? (
-        <EmptyState
-          title="No cities in routing scope"
-          description="Choose a valid city or All cities scope to compute bed transfers."
-        />
+        <EmptyState title={s3.emptyTitle} description={s3.emptyDescription} />
       ) : null}
 
       {!isError && data && data.cities.length > 0 ? (
         <>
-          {/* Per-city utilisation before vs after cards */}
+          {/* Per-city utilisation & demand/capacity cards (QA Q5) */}
           <div
             data-testid="route-city-summaries"
             className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
@@ -440,38 +495,47 @@ export function StepRoute({
             {data.cities.map((c) => {
               const beforePct = c.utilisation_before * 100;
               const afterPct = c.utilisation_after * 100;
+              const demandCapPct =
+                c.capacity_total > 0 ? (c.required_total / c.capacity_total) * 100 : 0;
               return (
-                <Card
-                  key={c.city}
-                  data-testid={`route-city-card-${c.city}`}
-                >
+                <Card key={c.city} data-testid={`route-city-card-${c.city}`}>
                   <CardHeader className="flex-row items-start justify-between gap-2 py-3.5">
                     <div>
                       <CardTitle className="text-sm">{c.city}</CardTitle>
-                      <CardDescription className="font-mono text-xs tnum">
-                        {c.required_total} req / {c.capacity_total} beds · {c.transfers}{" "}
-                        transfer{c.transfers === 1 ? "" : "s"}
+                      <CardDescription
+                        lang={lang}
+                        className={clsx("font-mono text-xs tnum", bn && "font-bangla")}
+                      >
+                        {s3.reqCapTransfers(c.required_total, c.capacity_total, c.transfers)}
                       </CardDescription>
                     </div>
                     <span
                       data-testid={`unroutable-badge-${c.city}`}
+                      lang={lang}
                       className={clsx(
-                        "inline-flex items-center gap-1 rounded-md border px-2 py-1 font-mono text-xs font-semibold tnum whitespace-nowrap",
+                        "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold tnum whitespace-nowrap",
+                        bn ? "font-bangla" : "font-mono",
                         c.unroutable_patients > 0
-                          ? "border-ink bg-ink text-white"
+                          ? "border-risk-critical bg-risk-critical text-risk-critical-on"
                           : "border-mist bg-paper text-navy",
                       )}
                     >
                       {c.unroutable_patients > 0 ? (
                         <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5" />
                       ) : null}
-                      <span>{c.unroutable_patients} unroutable</span>
+                      <span>
+                        {c.unroutable_patients > 0
+                          ? s3.patientsWithoutBed(c.unroutable_patients)
+                          : s3.noUnroutable}
+                      </span>
                     </span>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium text-slate">Utilisation before</span>
+                        <span lang={lang} className={clsx("font-medium text-slate", bn && "font-bangla")}>
+                          {s3.utilBefore}
+                        </span>
                         <span className="font-mono font-semibold text-ink tnum">
                           {beforePct.toFixed(1)}%
                         </span>
@@ -486,7 +550,9 @@ export function StepRoute({
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium text-navy">Utilisation after</span>
+                        <span lang={lang} className={clsx("font-medium text-navy", bn && "font-bangla")}>
+                          {s3.bedsFilledAfter}
+                        </span>
                         <span className="font-mono font-bold text-navy tnum">
                           {afterPct.toFixed(1)}%
                         </span>
@@ -499,9 +565,28 @@ export function StepRoute({
                       </div>
                     </div>
 
-                    <p className="font-mono text-xs text-slate tnum">
-                      Headroom after routing: <strong className="text-navy">{c.headroom_after}</strong>{" "}
-                      beds
+                    <div
+                      data-testid={`demand-cap-${c.city}`}
+                      className="flex items-center justify-between rounded-lg border border-mist bg-paper/70 px-2.5 py-1.5 text-xs"
+                    >
+                      <span lang={lang} className={clsx("font-medium text-slate", bn && "font-bangla")}>
+                        {s3.demandVsCapacity}
+                      </span>
+                      <span
+                        className={clsx(
+                          "font-mono font-bold tnum",
+                          demandCapPct > 100 ? "text-risk-critical" : "text-navy",
+                        )}
+                      >
+                        {demandCapPct.toFixed(0)}%
+                      </span>
+                    </div>
+
+                    <p
+                      lang={lang}
+                      className={clsx("font-mono text-xs text-slate tnum", bn && "font-bangla")}
+                    >
+                      {s3.headroomAfter(c.headroom_after)}
                     </p>
                   </CardContent>
                 </Card>
@@ -512,38 +597,46 @@ export function StepRoute({
           {/* Interactive SVG Sankey flow diagram */}
           <Card>
             <CardHeader>
-              <CardTitle>Intra-city transfer flows ({data.transfers.length})</CardTitle>
-              <CardDescription>
-                Interactive flow diagram of patients routed from overflowing wards to same-city headroom wards.
+              <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s3.flowsTitle(data.transfers.length)}
+              </CardTitle>
+              <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s3.flowsDescription}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <OverflowSankey transfers={data.transfers} />
+              <OverflowSankey transfers={data.transfers} cities={data.cities} lang={lang} />
 
               {data.transfers.length > 0 ? (
                 <div
                   className="overflow-x-auto rounded-xl border border-mist"
                   tabIndex={0}
                   role="region"
-                  aria-label="Intra-city patient transfer table"
+                  aria-label={s3.transferTableAria}
                 >
                   <table
                     data-testid="overflow-transfer-table"
                     className="w-full border-collapse text-left text-xs"
                   >
                     <thead>
-                      <tr className="border-b border-mist bg-paper font-semibold text-slate">
+                      <tr
+                        lang={lang}
+                        className={clsx(
+                          "border-b border-mist bg-paper font-semibold text-slate",
+                          bn && "font-bangla",
+                        )}
+                      >
                         <th scope="col" className="px-3.5 py-2.5">
-                          City
+                          {s3.colCity}
                         </th>
                         <th scope="col" className="px-3.5 py-2.5">
-                          From Ward (Overflow)
+                          {s3.colFromWard}
                         </th>
                         <th scope="col" className="px-3.5 py-2.5">
-                          To Ward (Headroom)
+                          {s3.colToWard}
                         </th>
                         <th scope="col" className="px-3.5 py-2.5 text-right">
-                          Patients Routed
+                          {s3.colPatientsRouted}
                         </th>
                       </tr>
                     </thead>
@@ -575,46 +668,54 @@ export function StepRoute({
           {/* Per-ward bed capacity override & net deficits table */}
           <Card className="overflow-hidden">
             <CardHeader>
-              <CardTitle>Ward bed capacity, overrides & net deficits</CardTitle>
-              <CardDescription>
-                Override any ward capacity (1–500 beds) to test surge wards or real local hospital counts.
+              <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s3.wardTableTitle}
+              </CardTitle>
+              <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s3.wardTableDescription}
               </CardDescription>
             </CardHeader>
             <div
               className="overflow-x-auto"
               tabIndex={0}
               role="region"
-              aria-label="Per-ward hospital bed status and capacity overrides table"
+              aria-label={s3.wardTableAria}
             >
               <table
                 data-testid="overflow-ward-table"
                 className="w-full border-collapse text-left text-xs"
               >
                 <thead>
-                  <tr className="border-b border-mist bg-paper font-semibold text-slate">
+                  <tr
+                    lang={lang}
+                    className={clsx(
+                      "border-b border-mist bg-paper font-semibold text-slate",
+                      bn && "font-bangla",
+                    )}
+                  >
                     <th scope="col" className="px-3.5 py-2.5">
-                      Ward
+                      {s3.colWard}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Req. Beds
+                      {s3.colReqBeds}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Capacity (Editable)
+                      {s3.colCapacityEditable}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Source
+                      {s3.colSource}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Local Deficit
+                      {s3.colLocalDeficit}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Out / In
+                      {s3.colOutIn}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Net Deficit
+                      {s3.colNetDeficit}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Util. Before → After
+                      {s3.colUtilBeforeAfter}
                     </th>
                   </tr>
                 </thead>
@@ -622,6 +723,9 @@ export function StepRoute({
                   {data.wards.map((w) => {
                     const inputVal = capacityOverrides[w.ward_id] ?? w.capacity;
                     const inputId = `capacity-override-${w.ward_id}`;
+                    const isOverride =
+                      w.capacity_source === "override" ||
+                      capacityOverrides[w.ward_id] !== undefined;
                     return (
                       <tr
                         key={w.ward_id}
@@ -641,7 +745,7 @@ export function StepRoute({
                         </td>
                         <td className="px-3.5 py-2.5">
                           <label htmlFor={inputId} className="sr-only">
-                            Bed capacity for {w.ward_id}
+                            {s3.capacityInputAria(w.ward_id)}
                           </label>
                           <input
                             id={inputId}
@@ -661,17 +765,16 @@ export function StepRoute({
                         </td>
                         <td className="px-3.5 py-2.5">
                           <span
+                            lang={lang}
                             className={clsx(
-                              "inline-flex rounded px-2 py-0.5 font-mono text-[11px] font-semibold",
-                              w.capacity_source === "override" ||
-                                capacityOverrides[w.ward_id] !== undefined
+                              "inline-flex rounded px-2 py-0.5 text-[11px] font-semibold",
+                              bn ? "font-bangla" : "font-mono",
+                              isOverride
                                 ? "bg-navy text-white"
                                 : "border border-mist bg-paper text-slate",
                             )}
                           >
-                            {capacityOverrides[w.ward_id] !== undefined
-                              ? "override"
-                              : w.capacity_source}
+                            {isOverride ? s3.sourceOverride : s3.sourceDerived}
                           </span>
                         </td>
                         <td className="px-3.5 py-2.5 text-right font-mono text-ink tnum">
@@ -685,7 +788,7 @@ export function StepRoute({
                             className={clsx(
                               "inline-flex rounded px-1.5 py-0.5 font-bold",
                               w.net_deficit > 0
-                                ? "bg-ink text-white"
+                                ? "bg-risk-critical text-risk-critical-on"
                                 : "text-slate",
                             )}
                           >

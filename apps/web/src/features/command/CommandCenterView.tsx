@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "@/components/icons";
 import { clsx } from "clsx";
 import type { City, Ward } from "@/lib/api/client";
@@ -77,6 +78,32 @@ function pickInitialWards(wards: readonly Ward[], count: number): string[] {
   return preferred;
 }
 
+const VALID_SCOPES: ReadonlySet<string> = new Set<Scope>([
+  "all",
+  "Dhaka North",
+  "Dhaka South",
+  "Chattogram",
+  "Gazipur",
+  "Narayanganj",
+]);
+
+function parseScopeParam(raw: string | null): Scope {
+  if (raw && VALID_SCOPES.has(raw)) return raw as Scope;
+  return "all";
+}
+
+function parseIntParam(raw: string | null, min: number, max: number, fallback: number): number {
+  if (raw === null) return fallback;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(n)));
+}
+
+function parseEfficacyParam(raw: string | null): EfficacyPreset {
+  if (raw === "low" || raw === "base" || raw === "high") return raw;
+  return "base";
+}
+
 export function CommandCenterView({
   cities,
   wards,
@@ -90,23 +117,30 @@ export function CommandCenterView({
 }: CommandCenterViewProps) {
   const copy = UI_COPY[lang].command;
   const bn = lang === "bn";
+  const searchParams = useSearchParams();
   const stepButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  // Shared workflow state across steps 1–5
-  const [scope, setScope] = useState<Scope>("all");
+  // Shared workflow state across steps 1–5 (hydrated from URL query for reload persistence; L6)
+  const [scope, setScopeState] = useState<Scope>(() => parseScopeParam(searchParams.get("scope")));
   const [[hStart, hEnd], setWindowPair] = useState<[number, number]>(() =>
     windowBounds(windowKey),
   );
 
   // Step 2: Allocation state (debounced 150 ms for live slider re-solve)
-  const [stockPct, setStockPct] = useState<number>(100);
-  const [totalCrews, setTotalCrews] = useState<number>(10);
+  const [stockPct, setStockPct] = useState<number>(() =>
+    parseIntParam(searchParams.get("stock"), 30, 100, 100),
+  );
+  const [totalCrews, setTotalCrews] = useState<number>(() =>
+    parseIntParam(searchParams.get("crews"), 0, 60, 10),
+  );
   const equityFloorPct = 20;
   const debouncedStockPct = useDebouncedValue(stockPct, 150);
   const debouncedCrews = useDebouncedValue(totalCrews, 150);
 
   // Step 3: Overflow routing state
-  const [routeHorizon, setRouteHorizon] = useState<number>(3);
+  const [routeHorizon, setRouteHorizon] = useState<number>(() =>
+    parseIntParam(searchParams.get("routeHorizon"), 1, 4, 3),
+  );
   const [routeServiceLevel, setRouteServiceLevel] = useState<number>(0.9);
   const [capacityOverrides, setCapacityOverrides] = useState<Record<string, number>>({});
   const debouncedOverrides = useDebouncedValue(capacityOverrides, 200);
@@ -115,8 +149,31 @@ export function CommandCenterView({
   const [simMode, setSimMode] = useState<"manual" | "auto">("manual");
   const [customDeployments, setCustomDeployments] = useState<Deployment[] | null>(null);
   const [simAutoCrews, setSimAutoCrews] = useState<number>(10);
-  const [simEfficacy, setSimEfficacy] = useState<EfficacyPreset>("base");
+  const [simEfficacy, setSimEfficacy] = useState<EfficacyPreset>(() =>
+    parseEfficacyParam(searchParams.get("simEfficacy")),
+  );
   const debouncedAutoCrews = useDebouncedValue(simAutoCrews, 150);
+
+  // Sync Command Center scenario parameters into URL query string so reload preserves state (L6).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    params.set("step", String(step));
+    params.set("scope", scope);
+    params.set("stock", String(stockPct));
+    params.set("crews", String(totalCrews));
+    params.set("routeHorizon", String(routeHorizon));
+    params.set("simEfficacy", simEfficacy);
+    const nextSearch = `?${params.toString()}`;
+    if (window.location.search !== nextSearch) {
+      window.history.replaceState(null, "", `${window.location.pathname}${nextSearch}`);
+    }
+  }, [step, scope, stockPct, totalCrews, routeHorizon, simEfficacy]);
+
+  const scopeWards = useMemo(
+    () => (scope === "all" ? wards : wards.filter((w) => w.city === scope)),
+    [wards, scope],
+  );
 
   const defaultDeployments = useMemo<Deployment[]>(
     () => pickInitialWards(wards, 3).map((ward_id) => ({ ward_id, crews: 2 })),
@@ -124,7 +181,7 @@ export function CommandCenterView({
   );
   const simDeployments = customDeployments ?? defaultDeployments;
 
-  // Step 5: Dispatch state
+  // Step 5: Dispatch state (L10: default wards strictly from current scope)
   const [dispatchTargetMode, setDispatchTargetMode] = useState<"scope" | "wards">("wards");
   const [customDispatchWards, setCustomDispatchWards] = useState<string[] | null>(null);
   const [dispatchChannels, setDispatchChannels] = useState<DispatchChannel[]>([
@@ -136,8 +193,21 @@ export function CommandCenterView({
   const [savedAllocationPlanId, setSavedAllocationPlanId] = useState<string | null>(null);
   const [useSavedPlan, setUseSavedPlan] = useState<boolean>(false);
 
-  const defaultDispatchWards = useMemo(() => pickInitialWards(wards, 3), [wards]);
-  const dispatchWardIds = customDispatchWards ?? defaultDispatchWards;
+  const setScope = useCallback((next: Scope) => {
+    setScopeState(next);
+    // Reset manual dispatch ward picks and capacity overrides when scope changes (L10/L2).
+    setCustomDispatchWards(null);
+    setCapacityOverrides({});
+  }, []);
+
+  const defaultDispatchWards = useMemo(() => pickInitialWards(scopeWards, 3), [scopeWards]);
+  const dispatchWardIds = useMemo(() => {
+    if (!customDispatchWards) return defaultDispatchWards;
+    if (scope === "all") return customDispatchWards;
+    const allowed = new Set(scopeWards.map((w) => w.ward_id));
+    const filtered = customDispatchWards.filter((id) => allowed.has(id));
+    return filtered.length > 0 ? filtered : defaultDispatchWards;
+  }, [customDispatchWards, defaultDispatchWards, scope, scopeWards]);
   const noticeLang: Lang = noticeLangOverride ?? lang;
 
   // Plan save + compare drawer state
@@ -345,7 +415,7 @@ export function CommandCenterView({
           }
         },
         onError: (err) => {
-          setSaveError(err.detail ?? err.title ?? "Failed to save plan.");
+          setSaveError(err.detail ?? err.title ?? copy.provenance.saveFailedFallback);
         },
       });
     },
@@ -359,15 +429,16 @@ export function CommandCenterView({
       simulatorReq,
       dispatchReq,
       createPlanMutation,
+      copy.provenance.saveFailedFallback,
     ],
   );
 
   const steps: ReadonlyArray<{ num: CommandStep; label: string; subtitle: string }> = [
-    { num: 1, label: copy.steps.forecast, subtitle: "Demand" },
-    { num: 2, label: copy.steps.allocate, subtitle: "Supplies" },
-    { num: 3, label: copy.steps.route, subtitle: "Beds" },
-    { num: 4, label: copy.steps.simulate, subtitle: "ROI" },
-    { num: 5, label: copy.steps.dispatch, subtitle: "Notices" },
+    { num: 1, label: copy.steps.forecast, subtitle: copy.stepSubtitles.forecast },
+    { num: 2, label: copy.steps.allocate, subtitle: copy.stepSubtitles.allocate },
+    { num: 3, label: copy.steps.route, subtitle: copy.stepSubtitles.route },
+    { num: 4, label: copy.steps.simulate, subtitle: copy.stepSubtitles.simulate },
+    { num: 5, label: copy.steps.dispatch, subtitle: copy.stepSubtitles.dispatch },
   ];
 
   const handleStepperKeyDown = (
@@ -429,12 +500,12 @@ export function CommandCenterView({
     <div data-testid="command-center-view" className="space-y-4">
       {/* 5-step operational stepper */}
       <nav
-        aria-label="Command Center steps"
+        aria-label={copy.navAria}
         className="rounded-[16px] bg-white p-2 text-ink ring-1 ring-mist/90"
       >
         <div
           role="tablist"
-          aria-label="Command Center workflow steps"
+          aria-label={copy.tablistAria}
           className="grid grid-cols-2 gap-1.5 sm:grid-cols-5"
         >
           {steps.map((s, idx) => {
@@ -563,6 +634,7 @@ export function CommandCenterView({
 
         {step === 3 ? (
           <StepRoute
+            originWeek={originWeek}
             horizon={routeHorizon}
             serviceLevel={routeServiceLevel}
             capacityOverrides={capacityOverrides}
@@ -579,6 +651,10 @@ export function CommandCenterView({
             onServiceLevelChange={setRouteServiceLevel}
             onCapacityOverrideChange={handleCapacityOverrideChange}
             onResetOverrides={() => setCapacityOverrides({})}
+            onJumpShoulderWeek={() => {
+              onOriginWeekChange("2024-08-12");
+              setRouteHorizon(3);
+            }}
           />
         ) : null}
 
@@ -653,8 +729,11 @@ export function CommandCenterView({
           <span>{copy.previousStep}</span>
         </button>
 
-        <span className="font-mono text-xs font-semibold text-slate tnum">
-          Step {step} / 5 · {scope} · {originWeek}
+        <span
+          lang={lang}
+          className={clsx("font-mono text-xs font-semibold text-slate tnum", bn && "font-bangla")}
+        >
+          {copy.stepCounter(step, scope, originWeek)}
         </span>
 
         <button

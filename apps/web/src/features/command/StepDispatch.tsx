@@ -15,7 +15,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import type { ApiError, Ward } from "@/lib/api/client";
-import type { Lang } from "@/lib/i18n";
+import { UI_COPY, type Lang } from "@/lib/i18n";
 import {
   buildBriefHref,
   type DispatchChannel,
@@ -50,11 +50,7 @@ export interface StepDispatchProps {
   onUseSavedPlanChange: (use: boolean) => void;
 }
 
-const CHANNEL_OPTIONS: ReadonlyArray<{ id: DispatchChannel; label: string }> = [
-  { id: "sms", label: "SMS" },
-  { id: "whatsapp", label: "WhatsApp" },
-  { id: "brief", label: "Printable brief" },
-];
+const CHANNEL_IDS: readonly DispatchChannel[] = ["sms", "whatsapp", "brief"];
 
 export function StepDispatch({
   scope,
@@ -83,6 +79,7 @@ export function StepDispatch({
 }: StepDispatchProps) {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [showAllNotices, setShowAllNotices] = useState(false);
+  const s5 = UI_COPY[uiLang].command.step5;
   const bn = uiLang === "bn";
 
   const copyText = async (key: string, text: string) => {
@@ -109,27 +106,23 @@ export function StepDispatch({
       {/* Dispatch controls */}
       <Card>
         <CardHeader>
-          <CardTitle className={bn ? "font-bangla" : undefined}>
-            {bn
-              ? "ধাপ ৫ · বহু-চ্যানেল নির্দেশনা ও প্রিন্টযোগ্য ব্রিফ"
-              : "Step 5 · Multi-channel dispatch & printable commissioner brief"}
+          <CardTitle lang={uiLang} className={bn ? "font-bangla" : undefined}>
+            {s5.title}
           </CardTitle>
-          <CardDescription className={bn ? "font-bangla" : undefined}>
-            {bn
-              ? "প্রতিটি সংখ্যা নির্ধারিত ফ্যাক্টস থেকে তৈরি (কোনো বাহ্যিক নেটওয়ার্ক কল ছাড়া): SMS (GSM-7/UCS-2), WhatsApp এবং A4 প্রিন্টযোগ্য ব্রিফ।"
-              : "Deterministic, zero-network notices grounded strictly in NoticeFacts: SMS with GSM-7 / UCS-2 segment metering, WhatsApp brief, and printable A4 HTML."}
+          <CardDescription lang={uiLang} className={bn ? "font-bangla" : undefined}>
+            {s5.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid gap-5 lg:grid-cols-3">
             {/* Target mode */}
             <div className="space-y-2">
-              <span className="block text-xs font-semibold text-navy">
-                Target wards
+              <span lang={uiLang} className={clsx("block text-xs font-semibold text-navy", bn && "font-bangla")}>
+                {s5.targetWardsLabel}
               </span>
               <div
                 role="group"
-                aria-label="Dispatch target selection mode"
+                aria-label={s5.targetModeAria}
                 className="inline-flex rounded-lg border border-mist bg-paper p-1"
               >
                 <button
@@ -137,47 +130,55 @@ export function StepDispatch({
                   data-testid="dispatch-target-wards"
                   aria-pressed={targetMode === "wards"}
                   onClick={() => onTargetModeChange("wards")}
+                  lang={uiLang}
                   className={clsx(
                     "min-h-8 cursor-pointer rounded-md px-3 text-xs font-semibold",
+                    bn && "font-bangla",
                     targetMode === "wards"
                       ? "bg-royal text-white"
                       : "text-navy hover:bg-white",
                   )}
                 >
-                  Selected wards ({selectedWardIds.length})
+                  {s5.targetSelectedWards(selectedWardIds.length)}
                 </button>
                 <button
                   type="button"
                   data-testid="dispatch-target-scope"
                   aria-pressed={targetMode === "scope"}
                   onClick={() => onTargetModeChange("scope")}
+                  lang={uiLang}
                   className={clsx(
                     "min-h-8 cursor-pointer rounded-md px-3 text-xs font-semibold",
+                    bn && "font-bangla",
                     targetMode === "scope"
                       ? "bg-royal text-white"
                       : "text-navy hover:bg-white",
                   )}
                 >
-                  Entire scope ({scope})
+                  {s5.targetEntireScope(scope)}
                 </button>
               </div>
             </div>
 
             {/* Channels */}
             <fieldset className="space-y-2">
-              <legend className="text-xs font-semibold text-navy">
-                Dispatch channels
+              <legend lang={uiLang} className={clsx("text-xs font-semibold text-navy", bn && "font-bangla")}>
+                {s5.channelsLabel}
               </legend>
               <div className="flex flex-wrap items-center gap-3 pt-1">
-                {CHANNEL_OPTIONS.map((ch) => {
-                  const checked = channels.includes(ch.id);
+                {CHANNEL_IDS.map((chId) => {
+                  const checked = channels.includes(chId);
                   const onlyOneLeft = checked && channels.length === 1;
-                  const inputId = `dispatch-channel-${ch.id}`;
+                  const inputId = `dispatch-channel-${chId}`;
                   return (
                     <label
-                      key={ch.id}
+                      key={chId}
                       htmlFor={inputId}
-                      className="inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-lg border border-mist bg-paper/60 px-2.5 py-1 text-xs font-semibold text-navy"
+                      lang={uiLang}
+                      className={clsx(
+                        "inline-flex min-h-8 cursor-pointer items-center gap-2 rounded-lg border border-mist bg-paper/60 px-2.5 py-1 text-xs font-semibold text-navy",
+                        bn && "font-bangla",
+                      )}
                     >
                       <input
                         id={inputId}
@@ -185,10 +186,10 @@ export function StepDispatch({
                         type="checkbox"
                         checked={checked}
                         disabled={onlyOneLeft}
-                        onChange={() => onToggleChannel(ch.id)}
+                        onChange={() => onToggleChannel(chId)}
                         className="h-4 w-4 accent-royal"
                       />
-                      <span>{ch.label}</span>
+                      <span>{s5.channelLabels[chId]}</span>
                     </label>
                   );
                 })}
@@ -197,12 +198,12 @@ export function StepDispatch({
 
             {/* Notice language toggle */}
             <div className="space-y-2">
-              <span className="block text-xs font-semibold text-navy">
-                Notice language (EN / BN)
+              <span lang={uiLang} className={clsx("block text-xs font-semibold text-navy", bn && "font-bangla")}>
+                {s5.noticeLangLabel}
               </span>
               <div
                 role="group"
-                aria-label="Dispatch notice language"
+                aria-label={s5.noticeLangAria}
                 className="inline-flex rounded-lg border border-mist bg-paper p-1"
               >
                 <button
@@ -240,8 +241,8 @@ export function StepDispatch({
           {/* Selected wards picker */}
           {targetMode === "wards" && scopeWards.length > 0 ? (
             <div className="space-y-2 rounded-xl border border-mist bg-paper/50 p-3.5">
-              <p className="text-xs font-semibold text-navy">
-                Choose wards to dispatch ({selectedWardIds.length} selected)
+              <p lang={uiLang} className={clsx("text-xs font-semibold text-navy", bn && "font-bangla")}>
+                {s5.chooseWardsTitle(selectedWardIds.length)}
               </p>
               <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto">
                 {scopeWards.map((w) => {
@@ -272,28 +273,38 @@ export function StepDispatch({
 
           {/* Allocation basis summary */}
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-mist bg-paper px-3.5 py-2 text-xs text-navy">
-            <span className="font-mono tnum">
-              Basis: origin {originWeek} · stock {stockPct}% · crews {totalCrews}
-              {useSavedPlan && savedAllocationPlanId
-                ? ` · saved plan ${savedAllocationPlanId.slice(0, 8)}`
-                : " · live Step 2 inputs"}
+            <span lang={uiLang} className={clsx("font-mono tnum", bn && "font-bangla")}>
+              {s5.basisSummary(
+                originWeek,
+                stockPct,
+                totalCrews,
+                useSavedPlan ? savedAllocationPlanId : null,
+              )}
             </span>
             {savedAllocationPlanId ? (
-              <label className="inline-flex cursor-pointer items-center gap-2 font-semibold text-navy">
+              <label
+                lang={uiLang}
+                className={clsx("inline-flex cursor-pointer items-center gap-2 font-semibold text-navy", bn && "font-bangla")}
+              >
                 <input
                   type="checkbox"
                   checked={useSavedPlan}
                   onChange={(e) => onUseSavedPlanChange(e.target.checked)}
                   className="h-4 w-4 accent-royal"
                 />
-                <span>Use last saved allocation plan</span>
+                <span>{s5.useSavedPlanLabel}</span>
               </label>
             ) : null}
           </div>
 
           {isFetching ? (
-            <p role="status" aria-live="polite" className="font-mono text-xs font-semibold text-navy">
-              Rendering notices…
+            <p
+              role="status"
+              aria-live="polite"
+              lang={uiLang}
+              className={clsx("font-mono text-xs font-semibold text-navy", bn && "font-bangla")}
+            >
+              {s5.renderingNotices}
             </p>
           ) : null}
         </CardContent>
@@ -303,24 +314,18 @@ export function StepDispatch({
         <ErrorBanner
           testId="step5-error-banner"
           retryTestId="step5-retry"
-          title="Could not render dispatch notices"
+          title={s5.errorTitle}
           error={error}
           onRetry={onRetry}
         />
       ) : null}
 
       {isPending && !data ? (
-        <PanelSkeleton
-          testId="step5-loading"
-          label="Rendering bilingual SMS, WhatsApp, and printable commissioner briefs…"
-        />
+        <PanelSkeleton testId="step5-loading" label={s5.loadingLabel} />
       ) : null}
 
       {!isError && data && notices.length === 0 ? (
-        <EmptyState
-          title="No dispatch notices generated"
-          description="Select at least one ward and channel above."
-        />
+        <EmptyState title={s5.emptyTitle} description={s5.emptyDescription} />
       ) : null}
 
       {!isError && data && notices.length > 0 ? (
@@ -354,13 +359,20 @@ export function StepDispatch({
                       <RiskTierBadge tier={facts.tier} size="sm" lang={data.lang} />
                       <DeficitBadge level={facts.deficit_level} lang={data.lang} />
                     </div>
-                    <p className="font-mono text-xs text-slate tnum">
-                      {facts.city} · window {facts.window_start} to {facts.window_end} ·{" "}
-                      {facts.predicted_cases.toFixed(1)} cases · Saline{" "}
-                      {facts.saline_bags.allocated}/{facts.saline_bags.required} · Kits{" "}
-                      {facts.diagnostic_kits.allocated}/{facts.diagnostic_kits.required} · Beds{" "}
-                      {facts.hospital_beds.allocated}/{facts.hospital_beds.required} · Crews{" "}
-                      {facts.crews_assigned}
+                    <p
+                      lang={uiLang}
+                      className={clsx("font-mono text-xs text-slate tnum", bn && "font-bangla")}
+                    >
+                      {s5.noticeFactsLine(
+                        facts.city,
+                        facts.window_start,
+                        facts.window_end,
+                        facts.predicted_cases.toFixed(1),
+                        `${facts.saline_bags.allocated}/${facts.saline_bags.required}`,
+                        `${facts.diagnostic_kits.allocated}/${facts.diagnostic_kits.required}`,
+                        `${facts.hospital_beds.allocated}/${facts.hospital_beds.required}`,
+                        facts.crews_assigned,
+                      )}
                     </p>
                     <p
                       lang={data.lang}
@@ -379,10 +391,14 @@ export function StepDispatch({
                       target="_blank"
                       rel="noopener noreferrer"
                       data-testid={`open-brief-${facts.ward_id}`}
-                      className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg bg-royal px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-navy"
+                      lang={uiLang}
+                      className={clsx(
+                        "inline-flex min-h-10 shrink-0 items-center gap-2 rounded-lg bg-royal px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-navy",
+                        bn && "font-bangla",
+                      )}
                     >
                       <Printer aria-hidden="true" className="h-4 w-4" />
-                      <span>Open printable brief</span>
+                      <span>{s5.openPrintableBrief}</span>
                     </a>
                   ) : null}
                 </CardHeader>
@@ -396,12 +412,18 @@ export function StepDispatch({
                     >
                       <div className="space-y-2.5">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <h3 className="inline-flex items-center gap-1.5 text-xs font-bold text-navy">
+                          <h3
+                            lang={uiLang}
+                            className={clsx(
+                              "inline-flex items-center gap-1.5 text-xs font-bold text-navy",
+                              bn && "font-bangla",
+                            )}
+                          >
                             <MessageSquare
                               aria-hidden="true"
                               className="h-4 w-4 text-royal"
                             />
-                            <span>SMS Preview</span>
+                            <span>{s5.smsPreviewTitle}</span>
                           </h3>
                           <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px] font-semibold tnum">
                             <span
@@ -412,15 +434,23 @@ export function StepDispatch({
                             </span>
                             <span
                               data-testid="sms-characters"
-                              className="rounded border border-mist bg-white px-2 py-0.5 text-navy"
+                              lang={uiLang}
+                              className={clsx(
+                                "rounded border border-mist bg-white px-2 py-0.5 text-navy",
+                                bn && "font-bangla",
+                              )}
                             >
-                              {sms.characters} chars
+                              {s5.charsLabel(sms.characters)}
                             </span>
                             <span
                               data-testid="sms-segments"
-                              className="rounded border border-mist bg-white px-2 py-0.5 text-navy"
+                              lang={uiLang}
+                              className={clsx(
+                                "rounded border border-mist bg-white px-2 py-0.5 text-navy",
+                                bn && "font-bangla",
+                              )}
                             >
-                              {sms.segments} {sms.segments === 1 ? "segment" : "segments"}
+                              {s5.segmentsLabel(sms.segments)}
                             </span>
                           </div>
                         </div>
@@ -440,17 +470,21 @@ export function StepDispatch({
                         <button
                           type="button"
                           onClick={() => void copyText(smsCopyKey, sms.text)}
-                          className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-3 text-xs font-semibold text-navy hover:border-royal"
+                          lang={uiLang}
+                          className={clsx(
+                            "inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-3 text-xs font-semibold text-navy hover:border-royal",
+                            bn && "font-bangla",
+                          )}
                         >
                           {copiedKey === smsCopyKey ? (
                             <>
                               <Check aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-                              <span>Copied SMS</span>
+                              <span>{s5.copiedSms}</span>
                             </>
                           ) : (
                             <>
                               <Copy aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-                              <span>Copy SMS</span>
+                              <span>{s5.copySms}</span>
                             </>
                           )}
                         </button>
@@ -466,12 +500,18 @@ export function StepDispatch({
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between gap-2">
-                          <h3 className="inline-flex items-center gap-1.5 text-xs font-bold text-navy">
+                          <h3
+                            lang={uiLang}
+                            className={clsx(
+                              "inline-flex items-center gap-1.5 text-xs font-bold text-navy",
+                              bn && "font-bangla",
+                            )}
+                          >
                             <MessageCircle
                               aria-hidden="true"
                               className="h-4 w-4 text-royal"
                             />
-                            <span>WhatsApp Preview</span>
+                            <span>{s5.whatsappPreviewTitle}</span>
                           </h3>
                           <span className="font-mono text-[11px] text-slate tnum">
                             {data.lang.toUpperCase()}
@@ -494,17 +534,21 @@ export function StepDispatch({
                           type="button"
                           data-testid={`copy-whatsapp-${facts.ward_id}`}
                           onClick={() => void copyText(waCopyKey, whatsapp)}
-                          className="inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-3 text-xs font-semibold text-navy hover:border-royal"
+                          lang={uiLang}
+                          className={clsx(
+                            "inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-md border border-mist bg-white px-3 text-xs font-semibold text-navy hover:border-royal",
+                            bn && "font-bangla",
+                          )}
                         >
                           {copiedKey === waCopyKey ? (
                             <>
                               <Check aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-                              <span>Copied WhatsApp</span>
+                              <span>{s5.copiedWhatsapp}</span>
                             </>
                           ) : (
                             <>
                               <Copy aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-                              <span>Copy WhatsApp</span>
+                              <span>{s5.copyWhatsapp}</span>
                             </>
                           )}
                         </button>
@@ -521,9 +565,13 @@ export function StepDispatch({
               <button
                 type="button"
                 onClick={() => setShowAllNotices(true)}
-                className="min-h-10 cursor-pointer rounded-lg border border-mist bg-white px-4 text-xs font-semibold text-navy hover:border-royal hover:bg-paper"
+                lang={uiLang}
+                className={clsx(
+                  "min-h-10 cursor-pointer rounded-lg border border-mist bg-white px-4 text-xs font-semibold text-navy hover:border-royal hover:bg-paper",
+                  bn && "font-bangla",
+                )}
               >
-                Show all {notices.length} ward notices
+                {s5.showAllNotices(notices.length)}
               </button>
             </div>
           ) : null}

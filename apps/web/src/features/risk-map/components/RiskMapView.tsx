@@ -741,6 +741,7 @@ export function RiskMapView({
                           <button
                             key={item.id}
                             type="button"
+                            data-testid={`risk-map-layer-${item.id}`}
                             onClick={item.toggle}
                             aria-pressed={item.active}
                             className={clsx(
@@ -807,10 +808,10 @@ export function RiskMapView({
                         </span>
                       </div>
 
-                      {layerWeather && liveWeather.isFetching ? (
+                      {layerWeather && weatherStatus.isFetching && !connectivity.isOffline ? (
                         <p className="mt-1.5 flex items-center gap-1 text-[10px] text-royal">
                           <CloudRain className="h-3 w-3" aria-hidden="true" />
-                          <span>{bn ? "লাইভ আবহাওয়া লোড হচ্ছে…" : "Fetching Open-Meteo current…"}</span>
+                          <span>{bn ? "আবহাওয়া তথ্য লোড হচ্ছে…" : "Loading weather status…"}</span>
                         </p>
                       ) : null}
                     </div>

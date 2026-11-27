@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { CheckCircle2, Database, FileSpreadsheet, ShieldCheck } from "@/components/icons";
 import { clsx } from "clsx";
 import { UI_COPY, type Lang } from "@/lib/i18n";
+import { useConnectivity } from "@/lib/useConnectivity";
 import type { PlanRecord, RunMeta } from "./api";
 
 export interface ProvenanceStripProps {
@@ -35,7 +36,9 @@ export function ProvenanceStrip({
 }: ProvenanceStripProps) {
   const [labelInput, setLabelInput] = useState("");
   const copy = UI_COPY[lang].command;
+  const prov = copy.provenance;
   const bn = lang === "bn";
+  const connectivity = useConnectivity(meta?.offline);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,16 +50,16 @@ export function ProvenanceStrip({
 
   return (
     <section
-      aria-label="Run provenance and plan actions"
+      aria-label={prov.regionAria}
       data-testid="command-provenance-strip"
       className="rounded-[16px] bg-white px-4 py-3.5 text-ink ring-1 ring-mist/90"
     >
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         {/* Provenance tokens */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
-          <span className="inline-flex items-center gap-1.5 font-semibold text-navy">
+          <span className={clsx("inline-flex items-center gap-1.5 font-semibold text-navy", bn && "font-bangla")}>
             <Database aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-            <span>Model</span>
+            <span>{prov.modelLabel}</span>
             <span
               data-testid="provenance-model-version"
               className="rounded-md border border-mist bg-paper px-1.5 py-0.5 font-mono text-[11px] font-semibold text-navy tnum"
@@ -65,8 +68,8 @@ export function ProvenanceStrip({
             </span>
           </span>
 
-          <span className="inline-flex items-center gap-1.5 text-slate">
-            <span>SHA</span>
+          <span className={clsx("inline-flex items-center gap-1.5 text-slate", bn && "font-bangla")}>
+            <span>{prov.shaLabel}</span>
             <span
               data-testid="provenance-git-sha"
               className="rounded-md border border-mist bg-paper px-1.5 py-0.5 font-mono text-[11px] font-semibold text-navy tnum"
@@ -75,8 +78,8 @@ export function ProvenanceStrip({
             </span>
           </span>
 
-          <span className="inline-flex items-center gap-1.5 text-slate">
-            <span>Data as of</span>
+          <span className={clsx("inline-flex items-center gap-1.5 text-slate", bn && "font-bangla")}>
+            <span>{prov.dataAsOfLabel}</span>
             <span
               data-testid="provenance-data-as-of"
               className="rounded-md border border-mist bg-paper px-1.5 py-0.5 font-mono text-[11px] font-semibold text-navy tnum"
@@ -86,15 +89,15 @@ export function ProvenanceStrip({
           </span>
 
           {typeof solveMs === "number" ? (
-            <span className="inline-flex items-center gap-1 text-slate">
-              <span>Solve</span>
+            <span className={clsx("inline-flex items-center gap-1 text-slate", bn && "font-bangla")}>
+              <span>{prov.solveLabel}</span>
               <span className="font-mono text-[11px] font-semibold text-navy tnum">
                 {solveMs.toFixed(1)} ms
               </span>
             </span>
           ) : null}
 
-          {meta?.offline ? (
+          {connectivity.isOffline ? (
             <span
               data-testid="command-offline-badge"
               lang={lang}
@@ -104,7 +107,7 @@ export function ProvenanceStrip({
               )}
             >
               <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5" />
-              <span>{copy.offlineBadge}</span>
+              <span>{connectivity.label(lang)}</span>
             </span>
           ) : (
             <span
@@ -116,7 +119,7 @@ export function ProvenanceStrip({
               )}
             >
               <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-              <span>{copy.onlineBadge}</span>
+              <span>{connectivity.label(lang)}</span>
             </span>
           )}
 
@@ -124,9 +127,10 @@ export function ProvenanceStrip({
             <span
               role="status"
               aria-live="polite"
-              className="font-mono text-[11px] font-semibold text-navy tnum"
+              lang={lang}
+              className={clsx("font-mono text-[11px] font-semibold text-navy tnum", bn && "font-bangla")}
             >
-              Updating…
+              {prov.updating}
             </span>
           ) : null}
         </div>
@@ -192,10 +196,14 @@ export function ProvenanceStrip({
           role="status"
           aria-live="polite"
           data-testid="save-plan-status"
-          className="mt-2.5 flex flex-wrap items-center gap-2 border-t border-mist pt-2 text-xs text-navy"
+          lang={lang}
+          className={clsx(
+            "mt-2.5 flex flex-wrap items-center gap-2 border-t border-mist pt-2 text-xs text-navy",
+            bn && "font-bangla",
+          )}
         >
           <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-royal" />
-          <span className="font-semibold">Saved plan:</span>
+          <span className="font-semibold">{prov.savedPlanPrefix}</span>
           <span>{savedPlan.label}</span>
           <span className="font-mono text-[11px] text-slate tnum">
             ({savedPlan.kind} · {savedPlan.id.slice(0, 8)})
@@ -207,9 +215,13 @@ export function ProvenanceStrip({
         <p
           role="alert"
           data-testid="save-plan-error"
-          className="mt-2.5 border-t border-mist pt-2 text-xs font-semibold text-ink"
+          lang={lang}
+          className={clsx(
+            "mt-2.5 border-t border-mist pt-2 text-xs font-semibold text-ink",
+            bn && "font-bangla",
+          )}
         >
-          Could not save plan: {saveError}
+          {prov.saveErrorPrefix} {saveError}
         </p>
       ) : null}
     </section>

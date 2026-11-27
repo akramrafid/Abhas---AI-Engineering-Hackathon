@@ -24,7 +24,7 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import { SliderField } from "@/components/ui/Slider";
 import type { ApiError, Ward } from "@/lib/api/client";
-import type { Lang } from "@/lib/i18n";
+import { UI_COPY, type Lang } from "@/lib/i18n";
 import type { Deployment, EfficacyPreset, SimulatorResponse } from "./api";
 
 export interface StepSimulateProps {
@@ -46,14 +46,13 @@ export interface StepSimulateProps {
   onEfficacyChange: (preset: EfficacyPreset) => void;
 }
 
-const EFFICACY_OPTIONS: ReadonlyArray<{
+const EFFICACY_PARAMS: ReadonlyArray<{
   id: EfficacyPreset;
-  label: string;
   params: string;
 }> = [
-  { id: "low", label: "Low", params: "Emax 0.25 · k 0.35" },
-  { id: "base", label: "Base", params: "Emax 0.40 · k 0.50" },
-  { id: "high", label: "High", params: "Emax 0.55 · k 0.70" },
+  { id: "low", params: "Emax 0.25 · k 0.35" },
+  { id: "base", params: "Emax 0.40 · k 0.50" },
+  { id: "high", params: "Emax 0.55 · k 0.70" },
 ];
 
 export function StepSimulate({
@@ -74,6 +73,7 @@ export function StepSimulate({
   onAutoCrewsChange,
   onEfficacyChange,
 }: StepSimulateProps) {
+  const s4 = UI_COPY[lang].command.step4;
   const bn = lang === "bn";
   const deployedIds = useMemo(
     () => new Set(deployments.map((d) => d.ward_id)),
@@ -98,7 +98,7 @@ export function StepSimulate({
     for (const h of [2, 3, 4]) {
       byHorizon.set(h, {
         horizon: h,
-        label: `Horizon +${h}w`,
+        label: s4.horizonTick(h),
         baseline: 0,
         counterfactual: 0,
       });
@@ -115,7 +115,7 @@ export function StepSimulate({
       }
     }
     return [2, 3, 4].map((h) => byHorizon.get(h)!);
-  }, [data?.wards]);
+  }, [data?.wards, s4]);
 
   const handleAddWard = () => {
     if (!effectiveWardToAdd || deployedIds.has(effectiveWardToAdd)) return;
@@ -139,27 +139,23 @@ export function StepSimulate({
       {/* Deployment mode & efficacy controls */}
       <Card>
         <CardHeader>
-          <CardTitle className={bn ? "font-bangla" : undefined}>
-            {bn
-              ? "ধাপ ৪ · ভেক্টর নিয়ন্ত্রণ কাউন্টারফ্যাকচুয়াল সিমুলেটর"
-              : "Step 4 · Vector-control counterfactual simulator & ROI ranking"}
+          <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+            {s4.title}
           </CardTitle>
-          <CardDescription className={bn ? "font-bangla" : undefined}>
-            {bn
-              ? "ম্যানুয়ালি ওয়ার্ডে দল দিন অথবা স্বয়ংক্রিয়ভাবে Nটি দল বসিয়ে প্রতিরোধযোগ্য রোগী ও সংবেদনশীলতা পরিসর দেখুন।"
-              : "Compare manual ward crew deployments against greedy auto-placement. Counterfactual cases are re-predicted at feature level across horizons h = 2, 3, 4."}
+          <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+            {s4.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             {/* Mode toggle */}
             <div className="space-y-1.5">
-              <span className="block text-xs font-semibold text-navy">
-                Placement mode
+              <span lang={lang} className={clsx("block text-xs font-semibold text-navy", bn && "font-bangla")}>
+                {s4.placementModeLabel}
               </span>
               <div
                 role="group"
-                aria-label="Crew placement mode"
+                aria-label={s4.placementModeAria}
                 className="inline-flex rounded-lg border border-mist bg-paper p-1"
               >
                 <button
@@ -167,57 +163,63 @@ export function StepSimulate({
                   data-testid="sim-mode-manual"
                   aria-pressed={mode === "manual"}
                   onClick={() => onModeChange("manual")}
+                  lang={lang}
                   className={clsx(
                     "min-h-8 cursor-pointer rounded-md px-3 text-xs font-semibold transition-colors",
+                    bn && "font-bangla",
                     mode === "manual"
                       ? "bg-royal text-white"
                       : "text-navy hover:bg-white",
                   )}
                 >
-                  Manual ward deployments
+                  {s4.modeManual}
                 </button>
                 <button
                   type="button"
                   data-testid="sim-mode-auto"
                   aria-pressed={mode === "auto"}
                   onClick={() => onModeChange("auto")}
+                  lang={lang}
                   className={clsx(
                     "min-h-8 cursor-pointer rounded-md px-3 text-xs font-semibold transition-colors",
+                    bn && "font-bangla",
                     mode === "auto"
                       ? "bg-royal text-white"
                       : "text-navy hover:bg-white",
                   )}
                 >
-                  Auto-place N crews
+                  {s4.modeAuto}
                 </button>
               </div>
             </div>
 
             {/* Efficacy preset selector */}
             <div className="space-y-1.5">
-              <span className="block text-xs font-semibold text-navy">
-                Efficacy preset
+              <span lang={lang} className={clsx("block text-xs font-semibold text-navy", bn && "font-bangla")}>
+                {s4.efficacyPresetLabel}
               </span>
               <div
                 role="group"
-                aria-label="Vector-control efficacy preset"
+                aria-label={s4.efficacyPresetAria}
                 className="inline-flex flex-wrap gap-1.5"
               >
-                {EFFICACY_OPTIONS.map((opt) => (
+                {EFFICACY_PARAMS.map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
                     data-testid={`sim-efficacy-${opt.id}`}
                     aria-pressed={efficacy === opt.id}
                     onClick={() => onEfficacyChange(opt.id)}
+                    lang={lang}
                     className={clsx(
                       "min-h-9 cursor-pointer rounded-lg border px-3 py-1 text-xs font-semibold transition-colors",
+                      bn && "font-bangla",
                       efficacy === opt.id
                         ? "border-royal bg-royal text-white"
                         : "border-mist bg-white text-navy hover:border-royal",
                     )}
                   >
-                    {opt.label}{" "}
+                    {s4.efficacyLabels[opt.id]}{" "}
                     <span className="font-mono text-[11px] font-normal tnum">
                       ({opt.params})
                     </span>
@@ -232,11 +234,11 @@ export function StepSimulate({
             <div className="space-y-3 rounded-xl border border-mist bg-paper/50 p-4">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <h3 className="text-xs font-bold text-navy">
-                    Treated wards ({deployments.length})
+                  <h3 lang={lang} className={clsx("text-xs font-bold text-navy", bn && "font-bangla")}>
+                    {s4.treatedWardsTitle(deployments.length)}
                   </h3>
-                  <p className="text-xs text-slate">
-                    Adjust 1–5 crews per ward (up to 20 max) to inspect marginal ROI.
+                  <p lang={lang} className={clsx("text-xs text-slate", bn && "font-bangla")}>
+                    {s4.treatedWardsHint}
                   </p>
                 </div>
                 {availableToAdd.length > 0 ? (
@@ -244,9 +246,10 @@ export function StepSimulate({
                     <div className="flex flex-col gap-1">
                       <label
                         htmlFor="sim-add-ward-select"
-                        className="text-[11px] font-semibold text-slate"
+                        lang={lang}
+                        className={clsx("text-[11px] font-semibold text-slate", bn && "font-bangla")}
                       >
-                        Add ward
+                        {s4.addWardLabel}
                       </label>
                       <select
                         id="sim-add-ward-select"
@@ -266,10 +269,14 @@ export function StepSimulate({
                       type="button"
                       data-testid="sim-add-ward-btn"
                       onClick={handleAddWard}
-                      className="inline-flex min-h-9 cursor-pointer items-center gap-1 rounded-lg bg-royal px-3 text-xs font-semibold text-white hover:bg-navy"
+                      lang={lang}
+                      className={clsx(
+                        "inline-flex min-h-9 cursor-pointer items-center gap-1 rounded-lg bg-royal px-3 text-xs font-semibold text-white hover:bg-navy",
+                        bn && "font-bangla",
+                      )}
                     >
                       <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-                      <span>Add ward</span>
+                      <span>{s4.addWardBtn}</span>
                     </button>
                   </div>
                 ) : null}
@@ -289,13 +296,13 @@ export function StepSimulate({
                           {d.ward_id}
                         </p>
                         <p className="truncate text-[11px] text-slate">
-                          {wardMeta?.city ?? "Selected ward"}
+                          {wardMeta?.city ?? s4.selectedWardFallback}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
                         <button
                           type="button"
-                          aria-label={`Decrease crews for ${d.ward_id}`}
+                          aria-label={s4.decreaseCrewsAria(d.ward_id)}
                           onClick={() => handleUpdateCrews(d.ward_id, d.crews - 1)}
                           disabled={d.crews <= 1}
                           className="grid h-8 w-8 cursor-pointer place-items-center rounded-md border border-mist bg-paper text-navy hover:border-royal disabled:cursor-not-allowed disabled:opacity-40"
@@ -303,7 +310,7 @@ export function StepSimulate({
                           <Minus aria-hidden="true" className="h-3.5 w-3.5" />
                         </button>
                         <label htmlFor={`sim-crews-${d.ward_id}`} className="sr-only">
-                          Crews for {d.ward_id}
+                          {s4.crewsForWardAria(d.ward_id)}
                         </label>
                         <input
                           id={`sim-crews-${d.ward_id}`}
@@ -320,7 +327,7 @@ export function StepSimulate({
                         />
                         <button
                           type="button"
-                          aria-label={`Increase crews for ${d.ward_id}`}
+                          aria-label={s4.increaseCrewsAria(d.ward_id)}
                           onClick={() => handleUpdateCrews(d.ward_id, d.crews + 1)}
                           disabled={d.crews >= 20}
                           className="grid h-8 w-8 cursor-pointer place-items-center rounded-md border border-mist bg-paper text-navy hover:border-royal disabled:cursor-not-allowed disabled:opacity-40"
@@ -330,7 +337,7 @@ export function StepSimulate({
                         {deployments.length > 1 ? (
                           <button
                             type="button"
-                            aria-label={`Remove ${d.ward_id} from simulation`}
+                            aria-label={s4.removeWardAria(d.ward_id)}
                             onClick={() => handleRemoveWard(d.ward_id)}
                             className="ml-1 grid h-8 w-8 cursor-pointer place-items-center rounded-md border border-mist bg-white text-slate hover:border-navy hover:text-navy"
                           >
@@ -350,24 +357,25 @@ export function StepSimulate({
                   <SliderField
                     id="sim-auto-crews-slider"
                     testId="sim-auto-crews-slider"
-                    label="Auto-place spraying crews (greedy marginal ROI)"
+                    label={s4.autoCrewsSliderLabel}
                     min={1}
-                    max={60}
+                    max={300}
                     step={1}
-                    value={Math.min(60, autoCrews)}
-                    valueLabel={`${autoCrews} crews`}
-                    ariaValueText={`${autoCrews} crews auto-placed`}
-                    minLabel="1 crew"
-                    maxLabel="60 crews"
+                    value={Math.max(1, Math.min(300, autoCrews))}
+                    valueLabel={s4.autoCrewsValueLabel(autoCrews)}
+                    ariaValueText={s4.autoCrewsAriaText(autoCrews)}
+                    minLabel={s4.autoCrewsMinLabel}
+                    maxLabel={s4.autoCrewsMaxLabel}
                     onChange={onAutoCrewsChange}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label
                     htmlFor="sim-auto-crews-input"
-                    className="text-xs font-semibold text-navy"
+                    lang={lang}
+                    className={clsx("text-xs font-semibold text-navy", bn && "font-bangla")}
                   >
-                    Crews (1–300)
+                    {s4.autoCrewsInputLabel}
                   </label>
                   <input
                     id="sim-auto-crews-input"
@@ -392,18 +400,21 @@ export function StepSimulate({
           {/* Explicit assumption note (ADR-0013) */}
           <div
             data-testid="sim-assumption-note"
-            className="flex items-start gap-2.5 rounded-xl border border-mist bg-paper px-3.5 py-2.5 text-xs text-navy"
+            lang={lang}
+            className={clsx(
+              "flex items-start gap-2.5 rounded-xl border border-mist bg-paper px-3.5 py-2.5 text-xs text-navy",
+              bn && "font-bangla",
+            )}
           >
             <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-royal" />
             <div>
-              <span className="font-semibold">Model assumption: </span>
+              <span className="font-semibold">{s4.assumptionPrefix}</span>
               <span>
-                {data?.efficacy.assumption_note ??
-                  "Assumed, not fitted: no intervention labels in the data. See ADR-0013."}
+                {bn ? s4.assumptionFallback : (data?.efficacy.assumption_note ?? s4.assumptionFallback)}
               </span>{" "}
               {data ? (
                 <span className="font-mono text-[11px] text-slate tnum">
-                  (preset={data.efficacy.preset}, Emax={data.efficacy.e_max.toFixed(2)}, k=
+                  ({s4.efficacyLabels[data.efficacy.preset]}, Emax={data.efficacy.e_max.toFixed(2)}, k=
                   {data.efficacy.k.toFixed(2)})
                 </span>
               ) : null}
@@ -411,8 +422,13 @@ export function StepSimulate({
           </div>
 
           {isFetching ? (
-            <p role="status" aria-live="polite" className="font-mono text-xs font-semibold text-navy">
-              Running counterfactual simulation…
+            <p
+              role="status"
+              aria-live="polite"
+              lang={lang}
+              className={clsx("font-mono text-xs font-semibold text-navy", bn && "font-bangla")}
+            >
+              {s4.runningSim}
             </p>
           ) : null}
         </CardContent>
@@ -422,70 +438,74 @@ export function StepSimulate({
         <ErrorBanner
           testId="step4-error-banner"
           retryTestId="step4-retry"
-          title="Counterfactual simulation failed"
+          title={s4.errorTitle}
           error={error}
           onRetry={onRetry}
         />
       ) : null}
 
       {isPending && !data ? (
-        <PanelSkeleton
-          testId="step4-loading"
-          label="Evaluating counterfactual case reductions across treated wards…"
-        />
+        <PanelSkeleton testId="step4-loading" label={s4.loadingLabel} />
       ) : null}
 
       {!isError && data && data.wards.length === 0 ? (
-        <EmptyState
-          title="No treated wards simulated"
-          description="Add at least one ward or enable Auto-place crews above to run the simulation."
-        />
+        <EmptyState title={s4.emptyTitle} description={s4.emptyDescription} />
       ) : null}
 
       {!isError && data && data.wards.length > 0 ? (
         <>
           {/* Totals KPIs + sensitivity band */}
-          <div
-            data-testid="sim-totals"
-            className="grid grid-cols-2 gap-3 lg:grid-cols-4"
-          >
+          <div data-testid="sim-totals" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Crews deployed</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s4.kpiCrewsDeployed}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-navy tnum">
                 {data.totals.crews}
               </p>
-              <p className="mt-1 text-xs text-slate">
-                Across {data.wards.length} treated ward{data.wards.length === 1 ? "" : "s"}
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s4.kpiCrewsNote(data.wards.length)}
               </p>
             </div>
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-royal/40">
-              <p className="text-xs font-semibold text-slate">
-                Cases prevented (h = 2–4)
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s4.kpiCasesPrevented}
               </p>
               <p className="mt-2 font-mono text-2xl font-bold text-royal tnum">
                 {data.totals.cases_prevented.toFixed(1)}
               </p>
               <p
                 data-testid="sim-sensitivity-band"
-                className="mt-1 font-mono text-xs font-semibold text-navy tnum"
+                lang={lang}
+                className={clsx("mt-1 font-mono text-xs font-semibold text-navy tnum", bn && "font-bangla")}
               >
-                Band: [{data.totals.cases_prevented_low.toFixed(1)} –{" "}
-                {data.totals.cases_prevented_high.toFixed(1)}]
+                {s4.kpiBandLabel(
+                  data.totals.cases_prevented_low.toFixed(1),
+                  data.totals.cases_prevented_high.toFixed(1),
+                )}
               </p>
             </div>
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Hospital beds avoided</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s4.kpiBedsAvoided}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-navy tnum">
                 {data.totals.beds_avoided.toFixed(2)}
               </p>
-              <p className="mt-1 text-xs text-slate">At 0.298 beds / case</p>
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s4.kpiBedsNote}
+              </p>
             </div>
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Saline bags avoided</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s4.kpiSalineAvoided}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-navy tnum">
                 {data.totals.saline_avoided.toFixed(1)}
               </p>
-              <p className="mt-1 text-xs text-slate">At 2.385 bags / case</p>
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s4.kpiSalineNote}
+              </p>
             </div>
           </div>
 
@@ -493,25 +513,21 @@ export function StepSimulate({
           <Card>
             <CardHeader className="sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CardTitle>Baseline vs counterfactual cases (h = 2, 3, 4)</CardTitle>
-                <CardDescription>
-                  Pooled expected cases across treated wards before and after vector-control deployment.
+                <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+                  {s4.chartTitle}
+                </CardTitle>
+                <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+                  {s4.chartDescription}
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-4 text-xs text-slate">
+              <div className={clsx("flex items-center gap-4 text-xs text-slate", bn && "font-bangla")}>
                 <span className="inline-flex items-center gap-1.5">
-                  <span
-                    className="h-3 w-3 rounded-sm bg-slate"
-                    aria-hidden="true"
-                  />
-                  Baseline
+                  <span className="h-3 w-3 rounded-sm bg-slate" aria-hidden="true" />
+                  {s4.legendBaseline}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span
-                    className="h-3 w-3 rounded-sm bg-royal"
-                    aria-hidden="true"
-                  />
-                  Counterfactual
+                  <span className="h-3 w-3 rounded-sm bg-royal" aria-hidden="true" />
+                  {s4.legendCounterfactual}
                 </span>
               </div>
             </CardHeader>
@@ -520,7 +536,7 @@ export function StepSimulate({
                 data-testid="sim-chart"
                 className="h-64 w-full"
                 role="region"
-                aria-label="Baseline versus counterfactual dengue cases chart across horizons 2, 3, and 4"
+                aria-label={s4.chartAria}
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
@@ -537,7 +553,7 @@ export function StepSimulate({
                       tick={{
                         fill: "var(--color-slate)",
                         fontSize: 12,
-                        fontFamily: "var(--font-mono)",
+                        fontFamily: bn ? "var(--font-bangla)" : "var(--font-mono)",
                       }}
                       axisLine={{ stroke: "var(--color-mist)" }}
                       tickLine={false}
@@ -555,14 +571,14 @@ export function StepSimulate({
                     <Tooltip />
                     <Bar
                       dataKey="baseline"
-                      name="Baseline cases"
+                      name={s4.barBaselineName}
                       fill="var(--color-slate)"
                       radius={[4, 4, 0, 0]}
                       isAnimationActive={false}
                     />
                     <Bar
                       dataKey="counterfactual"
-                      name="Counterfactual cases"
+                      name={s4.barCounterfactualName}
                       fill="var(--color-royal)"
                       radius={[4, 4, 0, 0]}
                       isAnimationActive={false}
@@ -576,49 +592,57 @@ export function StepSimulate({
           {/* ROI ranking table */}
           <Card className="overflow-hidden">
             <CardHeader>
-              <CardTitle>Intervention ROI ranking</CardTitle>
-              <CardDescription>
-                Ranked by cases prevented per crew deployed, with low–high efficacy sensitivity bounds.
+              <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s4.roiTitle}
+              </CardTitle>
+              <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s4.roiDescription}
               </CardDescription>
             </CardHeader>
             <div
               className="overflow-x-auto"
               tabIndex={0}
               role="region"
-              aria-label="Counterfactual intervention ROI ranking table"
+              aria-label={s4.roiTableAria}
             >
               <table
                 data-testid="sim-roi-table"
                 className="w-full border-collapse text-left text-xs"
               >
                 <thead>
-                  <tr className="border-b border-mist bg-paper font-semibold text-slate">
+                  <tr
+                    lang={lang}
+                    className={clsx(
+                      "border-b border-mist bg-paper font-semibold text-slate",
+                      bn && "font-bangla",
+                    )}
+                  >
                     <th scope="col" className="px-3.5 py-2.5">
-                      Rank
+                      {s4.colRank}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Ward
+                      {s4.colWard}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Crews
+                      {s4.colCrews}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Reduction
+                      {s4.colReduction}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Cases Prevented
+                      {s4.colCasesPrevented}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Sensitivity [Low – High]
+                      {s4.colSensitivity}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Beds Avoided
+                      {s4.colBedsAvoided}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Saline Avoided
+                      {s4.colSalineAvoided}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      ROI / Crew
+                      {s4.colRoiPerCrew}
                     </th>
                   </tr>
                 </thead>

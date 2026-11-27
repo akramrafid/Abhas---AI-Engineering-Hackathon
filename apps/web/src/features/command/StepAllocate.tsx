@@ -14,7 +14,7 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import { SliderField } from "@/components/ui/Slider";
 import type { ApiError } from "@/lib/api/client";
-import type { Lang } from "@/lib/i18n";
+import { UI_COPY, type Lang } from "@/lib/i18n";
 import type { AllocationResponse, ResourceLine } from "./api";
 import { DeficitBadge } from "./DeficitBadge";
 
@@ -35,24 +35,19 @@ export interface StepAllocateProps {
 
 const STOCK_PRESETS = [100, 80, 60, 45, 30] as const;
 
-const RESOURCE_LABELS: Record<
-  "saline_bags" | "diagnostic_kits" | "hospital_beds",
-  string
-> = {
-  saline_bags: "Saline bags",
-  diagnostic_kits: "Diagnostic kits",
-  hospital_beds: "Hospital beds",
-};
-
 function ResourceBarCell({
   label,
   wardId,
   line,
+  lang,
 }: {
   label: string;
   wardId: string;
   line: ResourceLine;
+  lang: Lang;
 }) {
+  const s2 = UI_COPY[lang].command.step2;
+  const bn = lang === "bn";
   const pct = Math.max(0, Math.min(100, line.fulfilment_pct));
   const hasDeficit = line.deficit > 0;
   return (
@@ -67,7 +62,7 @@ function ResourceBarCell({
       </div>
       <div
         role="progressbar"
-        aria-label={`${wardId} ${label} fulfilment`}
+        aria-label={s2.fulfilmentAria(wardId, label)}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(pct)}
@@ -82,8 +77,8 @@ function ResourceBarCell({
         />
       </div>
       {hasDeficit ? (
-        <p className="font-mono text-[11px] font-semibold text-ink tnum">
-          −{line.deficit} short
+        <p className={clsx("font-mono text-[11px] font-semibold text-ink tnum", bn && "font-bangla")}>
+          {s2.shortSuffix(line.deficit)}
         </p>
       ) : null}
     </div>
@@ -104,6 +99,7 @@ export function StepAllocate({
   onStockPctChange,
   onTotalCrewsChange,
 }: StepAllocateProps) {
+  const s2 = UI_COPY[lang].command.step2;
   const bn = lang === "bn";
   const totalCritical = data
     ? data.cities.reduce((sum, c) => sum + c.critical_wards, 0)
@@ -118,27 +114,33 @@ export function StepAllocate({
       <Card>
         <CardHeader className="sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className={bn ? "font-bangla" : undefined}>
-              {bn
-                ? "ধাপ ২ · সীমিত সরবরাহ ও স্প্রে দল বণ্টন"
-                : "Step 2 · Constrained supply allocation & spraying crews"}
+            <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+              {s2.title}
             </CardTitle>
-            <CardDescription className={bn ? "font-bangla" : undefined}>
-              {bn
-                ? "আঞ্চলিক মজুত (৩০–১০০%) এবং স্প্রে দলের সংখ্যা পরিবর্তন করলে ১৫০ মিলিসেকেন্ডে লাইভ অপ্টিমাইজার পুনরায় হিসাব করে।"
-                : "Adjust Available Regional Stock (30–100%) and spraying crews. The HiGHS LP solver re-optimizes within each city pool live (150 ms debounce) with a guaranteed equity floor."}
+            <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+              {s2.description}
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span
               data-testid="equity-floor-badge"
-              className="inline-flex items-center rounded-md border border-mist bg-paper px-2.5 py-1 font-mono text-xs font-semibold text-navy tnum"
+              lang={lang}
+              className={clsx(
+                "inline-flex items-center rounded-md border border-mist bg-paper px-2.5 py-1 font-mono text-xs font-semibold text-navy tnum",
+                bn && "font-bangla",
+              )}
             >
-              Equity floor: {equityFloorPct}%
+              {s2.equityFloorBadge(equityFloorPct)}
             </span>
             {data ? (
-              <span className="inline-flex items-center rounded-md border border-mist bg-paper px-2.5 py-1 font-mono text-xs font-medium text-slate tnum">
-                Crews: {data.crew_method}
+              <span
+                lang={lang}
+                className={clsx(
+                  "inline-flex items-center rounded-md border border-mist bg-paper px-2.5 py-1 font-mono text-xs font-medium text-slate tnum",
+                  bn && "font-bangla",
+                )}
+              >
+                {s2.crewsMethodBadge(data.crew_method)}
               </span>
             ) : null}
           </div>
@@ -150,21 +152,21 @@ export function StepAllocate({
               <SliderField
                 id="command-stock-slider"
                 testId="stock-slider"
-                label="Available Regional Stock"
+                label={s2.stockSliderLabel}
                 min={30}
                 max={100}
                 step={1}
                 value={stockPct}
                 valueLabel={`${stockPct}%`}
-                ariaValueText={`${stockPct} percent available regional stock`}
-                minLabel="30% severe shortage"
-                maxLabel="100% full stock"
+                ariaValueText={s2.stockAriaText(stockPct)}
+                minLabel={s2.stockMinLabel}
+                maxLabel={s2.stockMaxLabel}
                 onChange={onStockPctChange}
               />
               <div
                 className="flex flex-wrap items-center gap-1.5"
                 role="group"
-                aria-label="Stock percentage quick presets"
+                aria-label={s2.stockPresetsAria}
               >
                 {STOCK_PRESETS.map((preset) => (
                   <button
@@ -193,24 +195,25 @@ export function StepAllocate({
                   <SliderField
                     id="command-crews-slider"
                     testId="crews-slider"
-                    label="Total Spraying Crews"
+                    label={s2.crewsSliderLabel}
                     min={0}
                     max={60}
                     step={1}
                     value={Math.min(60, totalCrews)}
-                    valueLabel={`${totalCrews} crews`}
-                    ariaValueText={`${totalCrews} spraying crews`}
-                    minLabel="0 crews"
-                    maxLabel="60 crews"
+                    valueLabel={s2.crewsValueLabel(totalCrews)}
+                    ariaValueText={s2.crewsAriaText(totalCrews)}
+                    minLabel={s2.crewsMinLabel}
+                    maxLabel={s2.crewsMaxLabel}
                     onChange={onTotalCrewsChange}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
                   <label
                     htmlFor="command-crews-input"
-                    className="text-xs font-semibold text-navy"
+                    lang={lang}
+                    className={clsx("text-xs font-semibold text-navy", bn && "font-bangla")}
                   >
-                    Exact crews
+                    {s2.exactCrewsLabel}
                   </label>
                   <input
                     id="command-crews-input"
@@ -231,12 +234,14 @@ export function StepAllocate({
                 </div>
               </div>
               {data ? (
-                <p className="font-mono text-xs text-slate tnum">
-                  Ratios/case: saline {data.supply_ratios.saline_bags ?? 2.385} · kits{" "}
-                  {data.supply_ratios.diagnostic_kits ?? 1.164} · beds{" "}
-                  {data.supply_ratios.hospital_beds ?? 0.298} · P
-                  {Math.round((data.service_levels.saline_bags ?? 0.8) * 100)}/P
-                  {Math.round((data.service_levels.hospital_beds ?? 0.9) * 100)}
+                <p lang={lang} className={clsx("font-mono text-xs text-slate tnum", bn && "font-bangla")}>
+                  {s2.ratiosSummary(
+                    data.supply_ratios.saline_bags ?? 2.385,
+                    data.supply_ratios.diagnostic_kits ?? 1.164,
+                    data.supply_ratios.hospital_beds ?? 0.298,
+                    Math.round((data.service_levels.saline_bags ?? 0.8) * 100),
+                    Math.round((data.service_levels.hospital_beds ?? 0.9) * 100),
+                  )}
                 </p>
               ) : null}
             </div>
@@ -246,15 +251,22 @@ export function StepAllocate({
             role="status"
             aria-live="polite"
             data-testid="allocation-live-status"
-            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-mist bg-paper px-3.5 py-2 text-xs text-navy"
+            lang={lang}
+            className={clsx(
+              "flex flex-wrap items-center justify-between gap-2 rounded-lg border border-mist bg-paper px-3.5 py-2 text-xs text-navy",
+              bn && "font-bangla",
+            )}
           >
             <span className="font-mono font-semibold tnum">
-              Active solution: stock {data?.request.stock_pct ?? stockPct}% · crews{" "}
-              {data?.request.total_crews ?? totalCrews} · {totalCritical} critical deficit ·{" "}
-              {totalDeficit} deficit wards
+              {s2.activeStatus(
+                data?.request.stock_pct ?? stockPct,
+                data?.request.total_crews ?? totalCrews,
+                totalCritical,
+                totalDeficit,
+              )}
             </span>
             {isFetching ? (
-              <span className="font-mono font-semibold text-navy">Re-solving…</span>
+              <span className="font-mono font-semibold text-navy">{s2.resolving}</span>
             ) : null}
           </div>
         </CardContent>
@@ -264,24 +276,18 @@ export function StepAllocate({
         <ErrorBanner
           testId="step2-error-banner"
           retryTestId="step2-retry"
-          title="Allocation optimization failed"
+          title={s2.errorTitle}
           error={error}
           onRetry={onRetry}
         />
       ) : null}
 
       {isPending && !data ? (
-        <PanelSkeleton
-          testId="step2-loading"
-          label="Solving constrained intra-city supply allocation…"
-        />
+        <PanelSkeleton testId="step2-loading" label={s2.loadingLabel} />
       ) : null}
 
       {!isError && data && data.wards.length === 0 ? (
-        <EmptyState
-          title="No wards in allocation scope"
-          description="Select a valid scope and origin week in Step 1."
-        />
+        <EmptyState title={s2.emptyTitle} description={s2.emptyDescription} />
       ) : null}
 
       {!isError && data && data.wards.length > 0 ? (
@@ -300,33 +306,41 @@ export function StepAllocate({
                 <CardHeader className="bg-paper/60 py-3">
                   <div className="flex items-center justify-between gap-2">
                     <CardTitle className="text-sm">{citySummary.city}</CardTitle>
-                    <span className="font-mono text-xs font-semibold text-navy tnum">
-                      {citySummary.crews_assigned} crews
+                    <span
+                      lang={lang}
+                      className={clsx("font-mono text-xs font-semibold text-navy tnum", bn && "font-bangla")}
+                    >
+                      {s2.cityCrewsCount(citySummary.crews_assigned)}
                     </span>
                   </div>
-                  <p className="font-mono text-xs text-slate tnum">
-                    {citySummary.critical_wards} critical · {citySummary.deficit_wards} deficit
-                    wards
+                  <p lang={lang} className={clsx("font-mono text-xs text-slate tnum", bn && "font-bangla")}>
+                    {s2.cityDeficitSummary(citySummary.critical_wards, citySummary.deficit_wards)}
                   </p>
                 </CardHeader>
                 <CardContent className="p-3.5">
                   <table className="w-full border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-mist text-left text-[11px] font-semibold text-slate">
+                      <tr
+                        lang={lang}
+                        className={clsx(
+                          "border-b border-mist text-left text-[11px] font-semibold text-slate",
+                          bn && "font-bangla",
+                        )}
+                      >
                         <th scope="col" className="pb-1.5">
-                          Resource
+                          {s2.colResource}
                         </th>
                         <th scope="col" className="pb-1.5 text-right">
-                          Req.
+                          {s2.colReq}
                         </th>
                         <th scope="col" className="pb-1.5 text-right">
-                          Avail.
+                          {s2.colAvail}
                         </th>
                         <th scope="col" className="pb-1.5 text-right">
-                          Alloc.
+                          {s2.colAlloc}
                         </th>
                         <th scope="col" className="pb-1.5 text-right">
-                          Floor
+                          {s2.colFloor}
                         </th>
                       </tr>
                     </thead>
@@ -335,9 +349,10 @@ export function StepAllocate({
                         <tr key={r.resource}>
                           <th
                             scope="row"
-                            className="py-1.5 text-left font-sans font-medium text-ink"
+                            lang={lang}
+                            className={clsx("py-1.5 text-left font-sans font-medium text-ink", bn && "font-bangla")}
                           >
-                            {RESOURCE_LABELS[r.resource]}
+                            {s2.resources[r.resource]}
                           </th>
                           <td className="py-1.5 text-right text-slate">{r.required}</td>
                           <td className="py-1.5 text-right text-slate">{r.available}</td>
@@ -346,11 +361,22 @@ export function StepAllocate({
                           </td>
                           <td className="py-1.5 text-right">
                             {r.floors_scaled ? (
-                              <span className="rounded bg-ink px-1.5 py-0.5 font-sans text-[10px] font-semibold text-white">
-                                Scaled
+                              <span
+                                lang={lang}
+                                className={clsx(
+                                  "rounded bg-ink px-1.5 py-0.5 font-sans text-[10px] font-semibold text-white",
+                                  bn && "font-bangla",
+                                )}
+                              >
+                                {s2.floorScaled}
                               </span>
                             ) : (
-                              <span className="font-sans text-[11px] text-slate">20% OK</span>
+                              <span
+                                lang={lang}
+                                className={clsx("font-sans text-[11px] text-slate", bn && "font-bangla")}
+                              >
+                                {s2.floorOk(equityFloorPct)}
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -365,43 +391,51 @@ export function StepAllocate({
           {/* Per-ward required vs allocated table */}
           <Card className="overflow-hidden">
             <CardHeader>
-              <CardTitle>Per-ward supply allocations & deficit alerts</CardTitle>
-              <CardDescription>
-                Allocated / required progress bars per resource, greedy crew placement, and explicit deficit reasons.
+              <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s2.wardTableTitle}
+              </CardTitle>
+              <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+                {s2.wardTableDescription}
               </CardDescription>
             </CardHeader>
             <div
               className="overflow-x-auto"
               tabIndex={0}
               role="region"
-              aria-label="Per-ward supply allocation table"
+              aria-label={s2.wardTableAria}
             >
               <table
                 data-testid="allocation-ward-table"
                 className="w-full border-collapse text-left text-sm"
               >
                 <thead>
-                  <tr className="border-b border-mist bg-paper text-xs font-semibold text-slate">
+                  <tr
+                    lang={lang}
+                    className={clsx(
+                      "border-b border-mist bg-paper text-xs font-semibold text-slate",
+                      bn && "font-bangla",
+                    )}
+                  >
                     <th scope="col" className="px-3.5 py-2.5">
-                      Ward
+                      {s2.colWard}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Risk Tier
+                      {s2.colRiskTier}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Saline Bags
+                      {s2.colSaline}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Diagnostic Kits
+                      {s2.colKits}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Hospital Beds
+                      {s2.colBeds}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Crews
+                      {s2.colCrews}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Deficit Status & Reasons
+                      {s2.colDeficit}
                     </th>
                   </tr>
                 </thead>
@@ -416,8 +450,8 @@ export function StepAllocate({
                         <p className="font-mono text-xs font-bold text-navy tnum">
                           {ward.ward_id}
                         </p>
-                        <p className="text-[11px] font-normal text-slate">
-                          {ward.city} · wt {ward.priority_weight.toFixed(1)}
+                        <p className={clsx("text-[11px] font-normal text-slate", bn && "font-bangla")}>
+                          {ward.city} · {s2.weightPrefix} {ward.priority_weight.toFixed(1)}
                         </p>
                       </th>
                       <td className="px-3.5 py-3">
@@ -425,23 +459,26 @@ export function StepAllocate({
                       </td>
                       <td className="px-3.5 py-3">
                         <ResourceBarCell
-                          label="saline bags"
+                          label={s2.resources.saline_bags}
                           wardId={ward.ward_id}
                           line={ward.saline_bags}
+                          lang={lang}
                         />
                       </td>
                       <td className="px-3.5 py-3">
                         <ResourceBarCell
-                          label="diagnostic kits"
+                          label={s2.resources.diagnostic_kits}
                           wardId={ward.ward_id}
                           line={ward.diagnostic_kits}
+                          lang={lang}
                         />
                       </td>
                       <td className="px-3.5 py-3">
                         <ResourceBarCell
-                          label="hospital beds"
+                          label={s2.resources.hospital_beds}
                           wardId={ward.ward_id}
                           line={ward.hospital_beds}
+                          lang={lang}
                         />
                       </td>
                       <td className="px-3.5 py-3 text-right font-mono text-sm font-bold text-navy tnum">

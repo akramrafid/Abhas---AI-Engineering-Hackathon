@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { clsx } from "clsx";
-import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
+import { RiskTierBadge, TIER_META, TIER_ORDER } from "@/components/brand/RiskTierBadge";
 import {
   Card,
   CardContent,
@@ -38,13 +38,6 @@ export interface StepForecastProps {
   onProceed: () => void;
 }
 
-const HORIZON_OPTIONS: readonly SelectOption[] = [
-  { value: "1", label: "+1w (Next week)" },
-  { value: "2", label: "+2w (2 weeks ahead)" },
-  { value: "3", label: "+3w (3 weeks ahead)" },
-  { value: "4", label: "+4w (4 weeks ahead)" },
-];
-
 export function StepForecast({
   cities,
   mondayWeeks,
@@ -65,7 +58,17 @@ export function StepForecast({
 }: StepForecastProps) {
   const [tierFilter, setTierFilter] = useState<RiskTier | "ALL">("ALL");
   const copy = UI_COPY[lang].command;
+  const s1 = copy.step1;
   const bn = lang === "bn";
+
+  const horizonOptions = useMemo<SelectOption[]>(
+    () =>
+      ([1, 2, 3, 4] as const).map((h) => ({
+        value: String(h),
+        label: s1.horizonOptions[h],
+      })),
+    [s1.horizonOptions],
+  );
 
   const scopeOptions = useMemo<SelectOption[]>(
     () => [
@@ -112,15 +115,11 @@ export function StepForecast({
       {/* Scope, origin week, and window controls */}
       <Card>
         <CardHeader>
-          <CardTitle className={bn ? "font-bangla" : undefined}>
-            {bn
-              ? "ধাপ ১ · পূর্বাভাস ও চাহিদা নির্ধারণ"
-              : "Step 1 · Forecast scope & demand window"}
+          <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+            {s1.title}
           </CardTitle>
-          <CardDescription className={bn ? "font-bangla" : undefined}>
-            {bn
-              ? "নগর বা সকল ৬০ ওয়ার্ডের জন্য সূচনা সপ্তাহ এবং পূর্বাভাস সময়কাল নির্বাচন করুন।"
-              : "Choose city scope, Monday origin week, and planning horizons (h_start–h_end). Window quantiles size saline, kits, and hospital bed demand."}
+          <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+            {s1.description}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -148,7 +147,7 @@ export function StepForecast({
               label={copy.windowStartLabel}
               mono
               value={String(hStart)}
-              options={HORIZON_OPTIONS}
+              options={horizonOptions}
               onChange={(e) => {
                 const nextStart = Number(e.target.value);
                 onWindowChange(nextStart, Math.max(nextStart, hEnd));
@@ -160,7 +159,7 @@ export function StepForecast({
               label={copy.windowEndLabel}
               mono
               value={String(hEnd)}
-              options={HORIZON_OPTIONS.filter((o) => Number(o.value) >= hStart)}
+              options={horizonOptions.filter((o) => Number(o.value) >= hStart)}
               onChange={(e) => {
                 const nextEnd = Number(e.target.value);
                 onWindowChange(hStart, Math.max(hStart, nextEnd));
@@ -174,63 +173,71 @@ export function StepForecast({
         <ErrorBanner
           testId="step1-error-banner"
           retryTestId="step1-retry"
-          title="Could not load forecast demand window"
+          title={s1.errorTitle}
           error={error}
           onRetry={onRetry}
         />
       ) : null}
 
       {isPending && !data ? (
-        <PanelSkeleton
-          testId="step1-loading"
-          label="Computing ward forecast demand across planning window…"
-        />
+        <PanelSkeleton testId="step1-loading" label={s1.loadingLabel} />
       ) : null}
 
       {!isError && data && wards.length === 0 ? (
         <EmptyState
           testId="step1-empty"
-          title="No wards returned for this scope"
-          description="Select another city or origin week to review ward forecasts."
+          title={s1.emptyTitle}
+          description={s1.emptyDescription}
         />
       ) : null}
 
       {!isError && data && wards.length > 0 ? (
         <>
           {/* Summary KPI strip */}
-          <div
-            data-testid="step1-kpis"
-            className="grid grid-cols-2 gap-3 lg:grid-cols-4"
-          >
+          <div data-testid="step1-kpis" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Wards in scope</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s1.kpiWards}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-navy tnum">
                 {summary.wardCount}
               </p>
-              <p className="mt-1 text-xs text-slate">
-                Window +{hStart}w to +{hEnd}w
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s1.kpiWindowNote(hStart, hEnd)}
               </p>
             </div>
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Critical tier wards</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s1.kpiCritical}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-ink tnum">
                 {summary.criticalCount}
               </p>
-              <p className="mt-1 text-xs text-slate">Peak tier across window</p>
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s1.kpiCriticalNote}
+              </p>
             </div>
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Expected cases</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s1.kpiExpected}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-navy tnum">
                 {summary.expectedTotal.toFixed(1)}
               </p>
-              <p className="mt-1 text-xs text-slate">Sum of horizon means</p>
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s1.kpiExpectedNote}
+              </p>
             </div>
             <div className="rounded-[16px] bg-white p-4 ring-1 ring-mist/90">
-              <p className="text-xs font-semibold text-slate">Planned cases</p>
+              <p lang={lang} className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
+                {s1.kpiPlanned}
+              </p>
               <p className="mt-2 font-mono text-2xl font-bold text-royal tnum">
                 {summary.plannedTotal.toFixed(1)}
               </p>
-              <p className="mt-1 text-xs text-slate">Window quantile sizing basis</p>
+              <p lang={lang} className={clsx("mt-1 text-xs text-slate", bn && "font-bangla")}>
+                {s1.kpiPlannedNote}
+              </p>
             </div>
           </div>
 
@@ -238,20 +245,24 @@ export function StepForecast({
           <Card className="overflow-hidden">
             <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CardTitle>
-                  Ward demand forecast ({visibleWards.length} of {wards.length})
+                <CardTitle lang={lang} className={bn ? "font-bangla" : undefined}>
+                  {s1.tableTitle(visibleWards.length, wards.length)}
                 </CardTitle>
-                <CardDescription>
-                  Sorted by city and priority weight. Proceed to Step 2 to allocate limited supplies.
+                <CardDescription lang={lang} className={bn ? "font-bangla" : undefined}>
+                  {s1.tableDescription}
                 </CardDescription>
               </div>
               <button
                 type="button"
                 data-testid="step1-next-btn"
                 onClick={onProceed}
-                className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg bg-royal px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-navy"
+                lang={lang}
+                className={clsx(
+                  "inline-flex min-h-10 cursor-pointer items-center justify-center rounded-lg bg-royal px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-navy",
+                  bn && "font-bangla",
+                )}
               >
-                {bn ? "বণ্টন ধাপে যান →" : "Proceed to Allocate →"}
+                {s1.proceedBtn}
               </button>
             </CardHeader>
 
@@ -259,20 +270,22 @@ export function StepForecast({
               <div
                 className="flex flex-wrap items-center gap-1.5"
                 role="group"
-                aria-label="Filter forecast wards by risk tier"
+                aria-label={s1.filterAria}
               >
                 <button
                   type="button"
                   aria-pressed={tierFilter === "ALL"}
                   onClick={() => setTierFilter("ALL")}
+                  lang={lang}
                   className={clsx(
                     "min-h-8 cursor-pointer rounded-md border px-2.5 text-xs font-semibold",
+                    bn && "font-bangla",
                     tierFilter === "ALL"
                       ? "border-royal bg-royal text-white"
                       : "border-mist bg-white text-navy hover:bg-paper",
                   )}
                 >
-                  All ({wards.length})
+                  {s1.filterAll(wards.length)}
                 </button>
                 {([...TIER_ORDER].reverse() as RiskTier[]).map((tier) => {
                   const count = wards.filter((w) => w.tier === tier).length;
@@ -282,14 +295,16 @@ export function StepForecast({
                       type="button"
                       aria-pressed={tierFilter === tier}
                       onClick={() => setTierFilter(tier)}
+                      lang={lang}
                       className={clsx(
-                        "min-h-8 cursor-pointer rounded-md border px-2.5 font-mono text-xs font-semibold tnum",
+                        "min-h-8 cursor-pointer rounded-md border px-2.5 text-xs font-semibold tnum",
+                        bn ? "font-bangla" : "font-mono",
                         tierFilter === tier
                           ? "border-royal bg-royal text-white"
                           : "border-mist bg-white text-navy hover:bg-paper",
                       )}
                     >
-                      {tier} ({count})
+                      {bn ? TIER_META[tier].labelBn : tier} ({count})
                     </button>
                   );
                 })}
@@ -300,34 +315,40 @@ export function StepForecast({
               className="overflow-x-auto"
               tabIndex={0}
               role="region"
-              aria-label="Command Center Step 1 ward forecast table"
+              aria-label={s1.tableAria}
             >
               <table
                 data-testid="step1-forecast-table"
                 className="w-full border-collapse text-left text-sm"
               >
                 <thead>
-                  <tr className="border-b border-mist bg-paper text-xs font-semibold text-slate">
+                  <tr
+                    lang={lang}
+                    className={clsx(
+                      "border-b border-mist bg-paper text-xs font-semibold text-slate",
+                      bn && "font-bangla",
+                    )}
+                  >
                     <th scope="col" className="px-3.5 py-2.5">
-                      Ward
+                      {s1.colWard}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      City
+                      {s1.colCity}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5">
-                      Peak Risk Tier
+                      {s1.colTier}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Expected Cases
+                      {s1.colExpected}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Planned Cases
+                      {s1.colPlanned}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Priority Wt
+                      {s1.colPriority}
                     </th>
                     <th scope="col" className="px-3.5 py-2.5 text-right">
-                      Saline / Kits / Beds Req.
+                      {s1.colSupplies}
                     </th>
                   </tr>
                 </thead>
