@@ -21,6 +21,16 @@ export default defineConfig({
     screenshot: "only-on-failure",
     viewport: { width: 1280, height: 800 },
   },
+  projects: [
+    {
+      name: "default",
+      testIgnore: /offline\.spec\.ts/,
+    },
+    {
+      name: "offline",
+      testMatch: /offline\.spec\.ts/,
+    },
+  ],
   webServer: [
     {
       command: `node ../../scripts/py.mjs -m app --env test --port ${API_PORT} --no-reload`,
@@ -39,7 +49,7 @@ export default defineConfig({
     {
       command: `npx next dev -p ${WEB_PORT} -H 127.0.0.1`,
       url: WEB_URL,
-      timeout: 120_000,
+      timeout: 180_000,
       reuseExistingServer: false,
       env: {
         ...process.env,

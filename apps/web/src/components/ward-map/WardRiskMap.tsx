@@ -214,13 +214,12 @@ export function WardRiskMap({
   const hoverFacilityIdRef = useRef<string | null>(null);
   const appliedThemeRef = useRef<MapTheme>(theme);
   const lastFlyNonceRef = useRef<number>(0);
-  const initialOffline =
-    isOfflineMapEnv() || (typeof navigator !== "undefined" && navigator.onLine === false);
-  const offlineModeRef = useRef<boolean>(initialOffline);
+  const initialOfflineEnv = isOfflineMapEnv();
+  const offlineModeRef = useRef<boolean>(initialOfflineEnv);
 
   const [shouldLoad, setShouldLoad] = useState(interactive);
   const [isReady, setIsReady] = useState(false);
-  const [isOfflineMap, setIsOfflineMap] = useState<boolean>(initialOffline);
+  const [isOfflineMap, setIsOfflineMap] = useState<boolean>(initialOfflineEnv);
   const [styleVersion, setStyleVersion] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
   const [hover, setHover] = useState<ProjectedAnchor | null>(null);
