@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import date
 from threading import RLock
-from time import monotonic
 from typing import cast
 
 from app.core.errors import AppError
@@ -26,7 +25,6 @@ class LagsService:
         self._repo = repo
         self._lock = RLock()
         self._cache_key: tuple[date, date] | None = None
-        self._sig_checked_at: float = 0.0
         self._dataset_corrs: list[float] = []
         self._ward_corrs: dict[str, list[float]] = {}
         self._ward_series: dict[str, list[LagPoint]] = {}
@@ -55,7 +53,6 @@ class LagsService:
         ward_cities: dict[str, City] = {w.ward_id: cast(City, w.city) for w in self._repo.wards()}
 
         self._cache_key = sig
-        self._sig_checked_at = monotonic()
         self._dataset_corrs = dataset_corrs
         self._ward_corrs = dict(ward_corrs)
         self._ward_series = series_by_ward
@@ -69,18 +66,12 @@ class LagsService:
         with self._lock:
             if self._cache_key != sig:
                 return self._refresh_locked(sig)
-            self._sig_checked_at = monotonic()
             return len(self._ward_corrs)
 
     def _ensure_cache_locked(self) -> None:
-        now = monotonic()
-        if self._cache_key is not None and (now - self._sig_checked_at) < 2.0:
-            return
         sig = self._repo.date_range()
         if self._cache_key != sig:
             self._refresh_locked(sig)
-        else:
-            self._sig_checked_at = now
 
     def ward_lags(self, ward_id: str, weeks: int = 156) -> LagResponse:
         with self._lock:
