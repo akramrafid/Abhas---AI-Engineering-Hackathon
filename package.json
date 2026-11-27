@@ -18,6 +18,8 @@
     "db:check": "node scripts/py.mjs -m scripts.db_check",
     "seed": "node scripts/py.mjs -m scripts.seed",
     "fit:supply": "node scripts/py.mjs -m ml.fit_supply",
+    "trigger": "node scripts/py.mjs -m ml.trigger",
+    "structural": "node scripts/py.mjs -m ml.structural",
     "exports": "node scripts/export_samples.mjs",
     "train": "node scripts/py.mjs -m ml.train",
     "backtest": "node scripts/py.mjs -m ml.backtest",

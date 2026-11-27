@@ -27,6 +27,10 @@ export type MetricRow = components["schemas"]["MetricRow"];
 export type CoverageRow = components["schemas"]["CoverageRow"];
 export type ConfusionMatrix = components["schemas"]["ConfusionMatrix"];
 export type ValidationResponse = components["schemas"]["ValidationResponse"];
+export type TriggerValidationResponse =
+  components["schemas"]["TriggerValidationResponse"];
+export type StructuralPlannerResponse =
+  components["schemas"]["StructuralPlannerResponse"];
 export type CallStats = components["schemas"]["CallStats"];
 export type PredictionStats = components["schemas"]["PredictionStats"];
 export type LLMStats = components["schemas"]["LLMStats"];
@@ -320,6 +324,22 @@ export function fetchHeatmap(
 
 export function fetchValidation(signal?: AbortSignal): Promise<ValidationResponse> {
   return apiRequest<ValidationResponse>("/api/v1/validation", { signal });
+}
+
+export function fetchTriggerValidation(
+  signal?: AbortSignal,
+): Promise<TriggerValidationResponse> {
+  return apiRequest<TriggerValidationResponse>("/api/v1/validation/trigger", { signal });
+}
+
+export function fetchStructuralPlanner(
+  city?: City | null,
+  signal?: AbortSignal,
+): Promise<StructuralPlannerResponse> {
+  const qs = city ? `?city=${encodeURIComponent(city)}` : "";
+  return apiRequest<StructuralPlannerResponse>(`/api/v1/planning/structural${qs}`, {
+    signal,
+  });
 }
 
 export function fetchWeatherStatus(signal?: AbortSignal): Promise<WeatherStatus> {

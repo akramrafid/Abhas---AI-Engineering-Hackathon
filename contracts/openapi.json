@@ -402,6 +402,53 @@
         "title": "AllocationResponse",
         "type": "object"
       },
+      "BuildVsSendRow": {
+        "properties": {
+          "crew_deployments_equiv": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crew Deployments Equiv"
+          },
+          "drainage_cases_per_yr_glm": {
+            "title": "Drainage Cases Per Yr Glm",
+            "type": "number"
+          },
+          "drainage_cases_per_yr_pd": {
+            "title": "Drainage Cases Per Yr Pd",
+            "type": "number"
+          },
+          "priority_signal": {
+            "enum": [
+              "build_and_send",
+              "build_priority",
+              "send_priority",
+              "monitor"
+            ],
+            "title": "Priority Signal",
+            "type": "string"
+          },
+          "sim_roi_cases_per_crew": {
+            "minimum": 0.0,
+            "title": "Sim Roi Cases Per Crew",
+            "type": "number"
+          }
+        },
+        "required": [
+          "drainage_cases_per_yr_glm",
+          "drainage_cases_per_yr_pd",
+          "sim_roi_cases_per_crew",
+          "priority_signal"
+        ],
+        "title": "BuildVsSendRow",
+        "type": "object"
+      },
       "CallStats": {
         "properties": {
           "cache_hits": {
@@ -1194,6 +1241,27 @@
         "title": "Driver",
         "type": "object"
       },
+      "DualAnnualEffect": {
+        "properties": {
+          "effective_delta": {
+            "title": "Effective Delta",
+            "type": "number"
+          },
+          "glm": {
+            "$ref": "#/components/schemas/EstimateWithCI"
+          },
+          "lgbm_pd": {
+            "$ref": "#/components/schemas/EstimateWithCI"
+          }
+        },
+        "required": [
+          "effective_delta",
+          "glm",
+          "lgbm_pd"
+        ],
+        "title": "DualAnnualEffect",
+        "type": "object"
+      },
       "EfficacyParams": {
         "properties": {
           "assumption_note": {
@@ -1228,6 +1296,29 @@
           "assumption_note"
         ],
         "title": "EfficacyParams",
+        "type": "object"
+      },
+      "EstimateWithCI": {
+        "properties": {
+          "ci_high": {
+            "title": "Ci High",
+            "type": "number"
+          },
+          "ci_low": {
+            "title": "Ci Low",
+            "type": "number"
+          },
+          "estimate": {
+            "title": "Estimate",
+            "type": "number"
+          }
+        },
+        "required": [
+          "estimate",
+          "ci_low",
+          "ci_high"
+        ],
+        "title": "EstimateWithCI",
         "type": "object"
       },
       "FieldError": {
@@ -1367,6 +1458,24 @@
           "forecasts"
         ],
         "title": "ForecastResponse",
+        "type": "object"
+      },
+      "GlmCoefficients": {
+        "properties": {
+          "sanitation_score": {
+            "title": "Sanitation Score",
+            "type": "number"
+          },
+          "water_logging_risk_index": {
+            "title": "Water Logging Risk Index",
+            "type": "number"
+          }
+        },
+        "required": [
+          "water_logging_risk_index",
+          "sanitation_score"
+        ],
+        "title": "GlmCoefficients",
         "type": "object"
       },
       "HeatmapCell": {
@@ -1779,6 +1888,62 @@
           "series"
         ],
         "title": "LagResponse",
+        "type": "object"
+      },
+      "LeadTimeStatsSchema": {
+        "properties": {
+          "median": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
+          },
+          "q25": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q25"
+          },
+          "q75": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Q75"
+          },
+          "spells_covered": {
+            "minimum": 0.0,
+            "title": "Spells Covered",
+            "type": "integer"
+          },
+          "total_spells": {
+            "minimum": 0.0,
+            "title": "Total Spells",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "spells_covered",
+          "total_spells"
+        ],
+        "title": "LeadTimeStatsSchema",
         "type": "object"
       },
       "MetricRow": {
@@ -3168,6 +3333,175 @@
         "title": "SmsMessage",
         "type": "object"
       },
+      "StructuralPlannerResponse": {
+        "properties": {
+          "bootstrap_resamples": {
+            "minimum": 100.0,
+            "title": "Bootstrap Resamples",
+            "type": "integer"
+          },
+          "build_vs_send_origin_week": {
+            "format": "date",
+            "title": "Build Vs Send Origin Week",
+            "type": "string"
+          },
+          "city_filter": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Dhaka North",
+                  "Dhaka South",
+                  "Chattogram",
+                  "Gazipur",
+                  "Narayanganj"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City Filter"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "dataset_sha256": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Dataset Sha256",
+            "type": "string"
+          },
+          "disclaimer": {
+            "const": "associations in simulated data, not causal real-world estimates",
+            "default": "associations in simulated data, not causal real-world estimates",
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "fit_years": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Fit Years",
+            "type": "array"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "glm_coefficients": {
+            "$ref": "#/components/schemas/GlmCoefficients"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/StructuralSummary"
+          },
+          "wards": {
+            "items": {
+              "$ref": "#/components/schemas/WardStructuralImpact"
+            },
+            "title": "Wards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "dataset_sha256",
+          "fit_years",
+          "bootstrap_resamples",
+          "seed",
+          "build_vs_send_origin_week",
+          "glm_coefficients",
+          "summary",
+          "wards"
+        ],
+        "title": "StructuralPlannerResponse",
+        "type": "object"
+      },
+      "StructuralSummary": {
+        "properties": {
+          "sanitation_plus_01": {
+            "$ref": "#/components/schemas/SummaryEffect"
+          },
+          "sanitation_plus_02": {
+            "$ref": "#/components/schemas/SummaryEffect"
+          },
+          "water_logging_minus_01": {
+            "$ref": "#/components/schemas/SummaryEffect"
+          },
+          "water_logging_minus_02": {
+            "$ref": "#/components/schemas/SummaryEffect"
+          }
+        },
+        "required": [
+          "water_logging_minus_01",
+          "water_logging_minus_02",
+          "sanitation_plus_01",
+          "sanitation_plus_02"
+        ],
+        "title": "StructuralSummary",
+        "type": "object"
+      },
+      "SummaryEffect": {
+        "properties": {
+          "glm": {
+            "$ref": "#/components/schemas/EstimateWithCI"
+          },
+          "lgbm_pd": {
+            "$ref": "#/components/schemas/EstimateWithCI"
+          },
+          "unclamped_glm_pct": {
+            "title": "Unclamped Glm Pct",
+            "type": "number"
+          }
+        },
+        "required": [
+          "glm",
+          "lgbm_pd",
+          "unclamped_glm_pct"
+        ],
+        "title": "SummaryEffect",
+        "type": "object"
+      },
       "SupplyPair": {
         "properties": {
           "allocated": {
@@ -3232,6 +3566,428 @@
           "patients"
         ],
         "title": "Transfer",
+        "type": "object"
+      },
+      "TriggerComparisonSchema": {
+        "properties": {
+          "false_alarms_avoided": {
+            "title": "False Alarms Avoided",
+            "type": "integer"
+          },
+          "far_delta": {
+            "title": "Far Delta",
+            "type": "number"
+          },
+          "hit_rate_delta": {
+            "title": "Hit Rate Delta",
+            "type": "number"
+          },
+          "model_meets_hit_rate": {
+            "title": "Model Meets Hit Rate",
+            "type": "boolean"
+          },
+          "model_reduces_far": {
+            "title": "Model Reduces Far",
+            "type": "boolean"
+          },
+          "pss_delta": {
+            "title": "Pss Delta",
+            "type": "number"
+          },
+          "summary_note": {
+            "title": "Summary Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hit_rate_delta",
+          "far_delta",
+          "pss_delta",
+          "false_alarms_avoided",
+          "model_meets_hit_rate",
+          "model_reduces_far",
+          "summary_note"
+        ],
+        "title": "TriggerComparisonSchema",
+        "type": "object"
+      },
+      "TriggerGridPointSchema": {
+        "properties": {
+          "rain_2w_gt_mm": {
+            "title": "Rain 2W Gt Mm",
+            "type": "number"
+          },
+          "train_far": {
+            "title": "Train Far",
+            "type": "number"
+          },
+          "train_hit_rate": {
+            "title": "Train Hit Rate",
+            "type": "number"
+          },
+          "train_pss": {
+            "title": "Train Pss",
+            "type": "number"
+          },
+          "water_logging_gte": {
+            "title": "Water Logging Gte",
+            "type": "number"
+          }
+        },
+        "required": [
+          "rain_2w_gt_mm",
+          "water_logging_gte",
+          "train_pss",
+          "train_hit_rate",
+          "train_far"
+        ],
+        "title": "TriggerGridPointSchema",
+        "type": "object"
+      },
+      "TriggerMetricsSchema": {
+        "properties": {
+          "alerts": {
+            "minimum": 0.0,
+            "title": "Alerts",
+            "type": "integer"
+          },
+          "false_alarm_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "False Alarm Rate",
+            "type": "number"
+          },
+          "false_alarm_ratio": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "False Alarm Ratio",
+            "type": "number"
+          },
+          "fn": {
+            "minimum": 0.0,
+            "title": "Fn",
+            "type": "integer"
+          },
+          "fp": {
+            "minimum": 0.0,
+            "title": "Fp",
+            "type": "integer"
+          },
+          "high_weeks": {
+            "minimum": 0.0,
+            "title": "High Weeks",
+            "type": "integer"
+          },
+          "hit_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Hit Rate",
+            "type": "number"
+          },
+          "lead_time_weeks": {
+            "$ref": "#/components/schemas/LeadTimeStatsSchema"
+          },
+          "peirce_skill_score": {
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Peirce Skill Score",
+            "type": "number"
+          },
+          "tn": {
+            "minimum": 0.0,
+            "title": "Tn",
+            "type": "integer"
+          },
+          "total_ward_weeks": {
+            "minimum": 1.0,
+            "title": "Total Ward Weeks",
+            "type": "integer"
+          },
+          "tp": {
+            "minimum": 0.0,
+            "title": "Tp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hit_rate",
+          "false_alarm_ratio",
+          "false_alarm_rate",
+          "peirce_skill_score",
+          "alerts",
+          "high_weeks",
+          "total_ward_weeks",
+          "tp",
+          "fp",
+          "fn",
+          "tn",
+          "lead_time_weeks"
+        ],
+        "title": "TriggerMetricsSchema",
+        "type": "object"
+      },
+      "TriggerModelMetricsSchema": {
+        "properties": {
+          "alert_mode": {
+            "title": "Alert Mode",
+            "type": "string"
+          },
+          "alerts": {
+            "minimum": 0.0,
+            "title": "Alerts",
+            "type": "integer"
+          },
+          "calibrated_tier_far": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Calibrated Tier Far",
+            "type": "number"
+          },
+          "calibrated_tier_hit_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Calibrated Tier Hit Rate",
+            "type": "number"
+          },
+          "calibrated_tier_pss": {
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Calibrated Tier Pss",
+            "type": "number"
+          },
+          "false_alarm_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "False Alarm Rate",
+            "type": "number"
+          },
+          "false_alarm_ratio": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "False Alarm Ratio",
+            "type": "number"
+          },
+          "fn": {
+            "minimum": 0.0,
+            "title": "Fn",
+            "type": "integer"
+          },
+          "fp": {
+            "minimum": 0.0,
+            "title": "Fp",
+            "type": "integer"
+          },
+          "high_weeks": {
+            "minimum": 0.0,
+            "title": "High Weeks",
+            "type": "integer"
+          },
+          "hit_rate": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Hit Rate",
+            "type": "number"
+          },
+          "lead_time_weeks": {
+            "$ref": "#/components/schemas/LeadTimeStatsSchema"
+          },
+          "peirce_skill_score": {
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Peirce Skill Score",
+            "type": "number"
+          },
+          "threshold_cases": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Cases"
+          },
+          "tn": {
+            "minimum": 0.0,
+            "title": "Tn",
+            "type": "integer"
+          },
+          "total_ward_weeks": {
+            "minimum": 1.0,
+            "title": "Total Ward Weeks",
+            "type": "integer"
+          },
+          "tp": {
+            "minimum": 0.0,
+            "title": "Tp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hit_rate",
+          "false_alarm_ratio",
+          "false_alarm_rate",
+          "peirce_skill_score",
+          "alerts",
+          "high_weeks",
+          "total_ward_weeks",
+          "tp",
+          "fp",
+          "fn",
+          "tn",
+          "lead_time_weeks",
+          "alert_mode",
+          "calibrated_tier_hit_rate",
+          "calibrated_tier_far",
+          "calibrated_tier_pss"
+        ],
+        "title": "TriggerModelMetricsSchema",
+        "type": "object"
+      },
+      "TriggerRuleSpec": {
+        "properties": {
+          "fit_years": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Fit Years",
+            "type": "array"
+          },
+          "high_case_threshold": {
+            "minimum": 1.0,
+            "title": "High Case Threshold",
+            "type": "integer"
+          },
+          "holdout_years": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Holdout Years",
+            "type": "array"
+          },
+          "rain_2w_gt_mm": {
+            "minimum": 0.0,
+            "title": "Rain 2W Gt Mm",
+            "type": "number"
+          },
+          "rule_text_bn": {
+            "title": "Rule Text Bn",
+            "type": "string"
+          },
+          "rule_text_en": {
+            "title": "Rule Text En",
+            "type": "string"
+          },
+          "target_horizon": {
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Target Horizon",
+            "type": "integer"
+          },
+          "water_logging_gte": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Water Logging Gte",
+            "type": "number"
+          }
+        },
+        "required": [
+          "rain_2w_gt_mm",
+          "water_logging_gte",
+          "target_horizon",
+          "high_case_threshold",
+          "fit_years",
+          "holdout_years",
+          "rule_text_en",
+          "rule_text_bn"
+        ],
+        "title": "TriggerRuleSpec",
+        "type": "object"
+      },
+      "TriggerValidationResponse": {
+        "properties": {
+          "comparison": {
+            "$ref": "#/components/schemas/TriggerComparisonSchema"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "dataset_sha256": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Dataset Sha256",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "grid_top": {
+            "items": {
+              "$ref": "#/components/schemas/TriggerGridPointSchema"
+            },
+            "title": "Grid Top",
+            "type": "array"
+          },
+          "holdout_model": {
+            "$ref": "#/components/schemas/TriggerModelMetricsSchema"
+          },
+          "holdout_rule": {
+            "$ref": "#/components/schemas/TriggerMetricsSchema"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/TriggerRuleSpec"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "dataset_sha256",
+          "rule",
+          "holdout_rule",
+          "holdout_model",
+          "comparison",
+          "grid_top"
+        ],
+        "title": "TriggerValidationResponse",
         "type": "object"
       },
       "ValidationResponse": {
@@ -3753,6 +4509,82 @@
           "first_forecast_origin"
         ],
         "title": "WardList",
+        "type": "object"
+      },
+      "WardStructuralImpact": {
+        "properties": {
+          "baseline_cases_per_yr": {
+            "minimum": 0.0,
+            "title": "Baseline Cases Per Yr",
+            "type": "number"
+          },
+          "build_vs_send": {
+            "$ref": "#/components/schemas/BuildVsSendRow"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "population_density_sqkm": {
+            "minimum": 0.0,
+            "title": "Population Density Sqkm",
+            "type": "number"
+          },
+          "sanitation_plus_01": {
+            "$ref": "#/components/schemas/DualAnnualEffect"
+          },
+          "sanitation_plus_02": {
+            "$ref": "#/components/schemas/DualAnnualEffect"
+          },
+          "sanitation_score": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Sanitation Score",
+            "type": "number"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          },
+          "water_logging_minus_01": {
+            "$ref": "#/components/schemas/DualAnnualEffect"
+          },
+          "water_logging_minus_02": {
+            "$ref": "#/components/schemas/DualAnnualEffect"
+          },
+          "water_logging_risk_index": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Water Logging Risk Index",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ward_id",
+          "city",
+          "water_logging_risk_index",
+          "sanitation_score",
+          "population_density_sqkm",
+          "baseline_cases_per_yr",
+          "water_logging_minus_01",
+          "water_logging_minus_02",
+          "sanitation_plus_01",
+          "sanitation_plus_02",
+          "build_vs_send"
+        ],
+        "title": "WardStructuralImpact",
         "type": "object"
       },
       "WeatherOverride": {
@@ -5693,6 +6525,189 @@
         ]
       }
     },
+    "/api/v1/planning/structural": {
+      "get": {
+        "operationId": "planning_structural_api_v1_planning_structural_get",
+        "parameters": [
+          {
+            "description": "Optional city filter",
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Dhaka North",
+                    "Dhaka South",
+                    "Chattogram",
+                    "Gazipur",
+                    "Narayanganj"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional city filter",
+              "title": "City"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructuralPlannerResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Structural-fix planner (Poisson GLM + LightGBM PD + Build vs Send)",
+        "tags": [
+          "planning"
+        ]
+      }
+    },
     "/api/v1/plans": {
       "get": {
         "operationId": "list_plans_api_v1_plans_get",
@@ -6743,6 +7758,162 @@
           }
         },
         "summary": "Backtest metrics vs baselines",
+        "tags": [
+          "validation"
+        ]
+      }
+    },
+    "/api/v1/validation/trigger": {
+      "get": {
+        "operationId": "validation_trigger_api_v1_validation_trigger_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriggerValidationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Auditable early-action trigger rule vs Abhas model on locked 2024-25 hold-out",
         "tags": [
           "validation"
         ]

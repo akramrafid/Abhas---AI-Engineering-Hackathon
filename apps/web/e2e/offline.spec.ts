@@ -298,13 +298,24 @@ test.describe("WP6-2 Offline resilience (all non-localhost requests aborted)", (
       expect(cmpJson.offline).toBe(true);
     }
 
-    // Open printable A4 commissioner HTML brief in browser while offline + verify CSP & inline styling (L4)
+    // WP10 Offline: Verify Build vs send panel on Step 4 & Validation Early-action trigger card offline
+    await page.getByTestId("command-step-4").click();
+    await expect(page.getByTestId("build-vs-send-panel")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("structural-disclaimer")).toContainText(
+      "associations in simulated data, not causal real-world estimates",
+    );
+    await page.getByTestId("tab-validation").click();
+    await expect(page.getByTestId("early-action-trigger-card")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("trigger-rule-sentence")).toContainText("80 mm");
+
+    // Open printable A4 commissioner HTML brief in browser while offline + verify CSP, trigger rule & inline styling (L4 / ADR-0020)
     const briefResp = await page.goto(
       `${API_URL}/api/v1/dispatch/brief/DSCC_Ward_04.html?origin_week=2024-08-05&lang=en`,
     );
     expect(briefResp).toBeTruthy();
     expect(briefResp!.headers()["content-security-policy"] ?? "").toContain("default-src 'none'");
     await expect(page.locator("body")).toContainText("DSCC_Ward_04");
+    await expect(page.locator("body")).toContainText("2-week rainfall > 80 mm");
     const briefStyled = await page.evaluate(() => {
       const kpi = document.querySelector(".kpi-value") ?? document.body;
       return window.getComputedStyle(kpi).fontWeight;

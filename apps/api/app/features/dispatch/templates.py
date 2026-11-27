@@ -220,6 +220,44 @@ def _fmt_num_for_lang(raw: int | float | str, lang: Lang) -> str:
     return to_bangla_digits(text) if lang == "bn" else text
 
 
+def _fmt_trigger_rule_line(rain_mm: float, wl_min: float, lang: Lang) -> str:
+    r_str = str(int(rain_mm)) if float(rain_mm).is_integer() else f"{rain_mm:.1f}"
+    w_str = f"{wl_min:.2f}"
+    if lang == "bn":
+        return (
+            f"নিয়ম: ২ সপ্তাহের মোট বৃষ্টিপাত > {to_bangla_digits(r_str)} মিমি এবং "
+            f"জলাবদ্ধতা সূচক >= {to_bangla_digits(w_str)} হলে ৩ সপ্তাহ আগেই মাঠপর্যায়ে ব্যবস্থা নিন।"
+        )
+    return (
+        f"Rule: Act 3 weeks ahead when 2-week rainfall > {r_str} mm AND "
+        f"water-logging risk index >= {w_str} (works with no model or server)."
+    )
+
+
+def _fmt_trigger_ward_note(ward_wl: float | None, wl_min: float, lang: Lang) -> str:
+    w_str = f"{wl_min:.2f}"
+    if ward_wl is None:
+        return (
+            "এই ওয়ার্ডের জলাবদ্ধতা সূচক স্থানীয় বৃষ্টির রেকর্ডের সাথে মিলিয়ে যাচাই করুন।"
+            if lang == "bn"
+            else "Check this ward's drainage risk index against local 2-week rainfall gauge totals."
+        )
+    v_str = f"{ward_wl:.2f}"
+    qualifies = ward_wl >= wl_min
+    if lang == "bn":
+        status = (
+            f"এই ওয়ার্ড যোগ্য (সূচক {to_bangla_digits(v_str)} >= {to_bangla_digits(w_str)}) — ২ সপ্তাহের বৃষ্টি > সীমা হলেই অ্যালার্ট।"
+            if qualifies
+            else f"এই ওয়ার্ডের জলাবদ্ধতা সূচক ({to_bangla_digits(v_str)}) সীমার নিচে (< {to_bangla_digits(w_str)})।"
+        )
+        return status
+    return (
+        f"This ward qualifies (water-logging index {v_str} >= {w_str}) — trigger fires whenever 2-week rain exceeds threshold."
+        if qualifies
+        else f"This ward's water-logging index ({v_str}) is below the trigger floor (< {w_str})."
+    )
+
+
 def _deficits(facts: NoticeFacts) -> tuple[int, int, int]:
     saline_def = max(0, facts.saline_bags.required - facts.saline_bags.allocated)
     kits_def = max(0, facts.diagnostic_kits.required - facts.diagnostic_kits.allocated)
@@ -491,6 +529,9 @@ def render_brief_html(
     plan_id: str | None = None,
     stock_pct: int = 100,
     total_crews: int = 0,
+    trigger_rain_mm: float = 80.0,
+    trigger_wl_min: float = 0.30,
+    ward_wl_index: float | None = None,
 ) -> str:
     """Render a self-contained A4 portrait HTML commissioner brief (ADR-0014, DESIGN.md).
 
@@ -855,6 +896,26 @@ def render_brief_html(
       font-weight: 600;
       font-size: 12px;
     }}
+    aside.trigger-box {{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #F8FAFF;
+      border: 1px dashed #2F5BFF;
+      color: #0B0F14;
+      font-size: 12.5px;
+    }}
+    aside.trigger-box h3 {{
+      margin: 0 0 4px 0;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0B1A5C;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }}
+    aside.trigger-box p {{
+      margin: 2px 0;
+    }}
     footer.provenance {{
       margin-top: 18px;
       padding-top: 10px;
@@ -949,6 +1010,12 @@ def render_brief_html(
         <div class="crew-pill mono">{crew_note}</div>
       </section>
     </main>
+
+    <aside class="trigger-box" aria-label="{html.escape("অফলাইন পূর্ব-সতর্কতা নিয়ম" if is_bn else "Zero-model early-action trigger", quote=True)}">
+      <h3>{html.escape("অফলাইন পূর্ব-সতর্কতা নিয়ম (কোনো মডেল ছাড়াই কার্যকর · ADR-0020)" if is_bn else "Zero-Model Early-Action Trigger (Clipboard Rule · ADR-0020)", quote=True)}</h3>
+      <p><strong>{html.escape(_fmt_trigger_rule_line(trigger_rain_mm, trigger_wl_min, lang), quote=True)}</strong></p>
+      <p>{html.escape(_fmt_trigger_ward_note(ward_wl_index, trigger_wl_min, lang), quote=True)}</p>
+    </aside>
 
     <footer class="provenance mono">
       model_version={safe_model} · git_sha={safe_sha} · data_as_of={meta.data_as_of.isoformat()} · offline={str(meta.offline).lower()} · generated_at={meta.generated_at.isoformat()}

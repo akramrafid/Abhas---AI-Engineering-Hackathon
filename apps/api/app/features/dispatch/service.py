@@ -377,4 +377,5 @@ class DispatchService:
             plan_id=plan_id,
             stock_pct=eff_stock,
             total_crews=eff_crews,
+            ward_wl_index=float(ward.water_logging_risk_index),
         )

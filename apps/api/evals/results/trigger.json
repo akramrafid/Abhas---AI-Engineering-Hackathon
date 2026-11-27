@@ -1,0 +1,114 @@
+{
+  "model_version": "abhas-lgbm-1.1.2",
+  "git_sha": "aae827e",
+  "data_as_of": "2025-12-29",
+  "generated_at": "2026-11-27T11:43:08.615617+00:00",
+  "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
+  "rule": {
+    "rain_2w_gt_mm": 80.0,
+    "water_logging_gte": 0.3,
+    "target_horizon": 3,
+    "high_case_threshold": 8,
+    "fit_years": [
+      2016,
+      2023
+    ],
+    "holdout_years": [
+      2024,
+      2025
+    ],
+    "rule_text_en": "Act when 2-week rain > 80 mm AND water_logging_risk_index >= 0.30 (3-week early warning for High risk, >= 8 cases).",
+    "rule_text_bn": "২ সপ্তাহের বৃষ্টিপাত > ৮০ মিমি এবং জলাবদ্ধতা সূচক >= ০.৩০ হলে ৩ সপ্তাহ আগেই ব্যবস্থা নিন (উচ্চ ঝুঁকি >= ৮ রোগী)।"
+  },
+  "holdout_rule": {
+    "hit_rate": 0.9411,
+    "false_alarm_ratio": 0.6343,
+    "false_alarm_rate": 0.2083,
+    "peirce_skill_score": 0.7328,
+    "alerts": 1835,
+    "high_weeks": 713,
+    "total_ward_weeks": 6300,
+    "tp": 671,
+    "fp": 1164,
+    "fn": 42,
+    "tn": 4423,
+    "lead_time_weeks": {
+      "q25": 3.0,
+      "median": 6.0,
+      "q75": 8.0,
+      "spells_covered": 136,
+      "total_spells": 158
+    }
+  },
+  "holdout_model": {
+    "hit_rate": 0.9201,
+    "false_alarm_ratio": 0.5045,
+    "false_alarm_rate": 0.1196,
+    "peirce_skill_score": 0.8005,
+    "alerts": 1324,
+    "high_weeks": 713,
+    "total_ward_weeks": 6300,
+    "tp": 656,
+    "fp": 668,
+    "fn": 57,
+    "tn": 4919,
+    "lead_time_weeks": {
+      "q25": 3.0,
+      "median": 3.0,
+      "q75": 4.0,
+      "spells_covered": 156,
+      "total_spells": 158
+    },
+    "alert_mode": "h3_mean_gte_5.75_tuned_on_2023",
+    "threshold_cases": 5.75,
+    "calibrated_tier_hit_rate": 0.8373,
+    "calibrated_tier_far": 0.5347,
+    "calibrated_tier_pss": 0.7145
+  },
+  "comparison": {
+    "hit_rate_delta": -0.021,
+    "far_delta": -0.1298,
+    "pss_delta": 0.0677,
+    "false_alarms_avoided": 496,
+    "model_meets_hit_rate": false,
+    "model_reduces_far": true,
+    "summary_note": "On the locked 2024–2025 hold-out (6,300 ward-weeks), the zero-model rule achieves 94.1% hit rate (FAR 63.4%, PSS 0.733), while Abhas LightGBM achieves 92.0% hit rate (FAR 50.5%, PSS 0.800) — cutting false alarms by 496 ward-weeks."
+  },
+  "grid_top": [
+    {
+      "rain_2w_gt_mm": 80.0,
+      "water_logging_gte": 0.3,
+      "train_pss": 0.7304,
+      "train_hit_rate": 0.918,
+      "train_far": 0.5362
+    },
+    {
+      "rain_2w_gt_mm": 90.0,
+      "water_logging_gte": 0.3,
+      "train_pss": 0.7289,
+      "train_hit_rate": 0.9115,
+      "train_far": 0.5312
+    },
+    {
+      "rain_2w_gt_mm": 70.0,
+      "water_logging_gte": 0.3,
+      "train_pss": 0.7257,
+      "train_hit_rate": 0.9216,
+      "train_far": 0.5459
+    },
+    {
+      "rain_2w_gt_mm": 100.0,
+      "water_logging_gte": 0.3,
+      "train_pss": 0.723,
+      "train_hit_rate": 0.8953,
+      "train_far": 0.5213
+    },
+    {
+      "rain_2w_gt_mm": 110.0,
+      "water_logging_gte": 0.3,
+      "train_pss": 0.7206,
+      "train_hit_rate": 0.8781,
+      "train_far": 0.5036
+    }
+  ]
+}

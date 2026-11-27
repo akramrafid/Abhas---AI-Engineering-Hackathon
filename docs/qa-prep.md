@@ -108,3 +108,24 @@ Because Abhas uses **Hexagonal Ports & Adapters (ADR-0001)** enforced by `gates.
 
 ### 25. How is every operational decision audited after an outbreak?
 Every saved plan writes an **append-only** record (`plans` + `plan_runs`, Alembic `0002`, no `PUT`/`DELETE`) capturing validated `inputs_json`, full `outputs_json`, `headline_json`, `solve_ms`, `model_version`, `git_sha`, `data_as_of`, and `offline` flag. Officers can compare any two historical runs side-by-side via `GET /api/v1/plans/compare` (even across different plan kinds) and trace every number in a printed A4 commissioner brief back to the exact commit SHA and model version.
+
+---
+
+### 26. Why include a two-number early-action trigger if Abhas already runs LightGBM? (ADR-0020)
+Field resilience and honest benchmarking. The clipboard rule — **"act when 2-week rain > 80 mm AND `water_logging_risk_index` ≥ 0.30"** — is fitted strictly on **2016–2023** (zero hold-out peeking) by maximising the Peirce skill score for predicting High risk (`≥ 8` cases) 3 weeks ahead, and is printed directly on every commissioner brief (EN & BN) so officers can act even with no laptop or server. On the locked **2024–2025 hold-out** (`6,300` ward-weeks, `713` High weeks), the zero-model rule achieves **94.1% hit rate**, **63.4% FAR**, **0.733 Peirce skill score**, and **6.0-week median wave lead time** (Q25 = 3w, Q75 = 8w, covering 136/158 waves). Scoring Abhas LightGBM (`h = 3`) on the exact same hold-out achieves **0.800 Peirce skill score** (`+0.068`), slashes FAR from **63.4% → 50.5%** (`−13.0` percentage points), and cuts **496 false-alarm ward-weeks** (1,324 vs 1,835 alerts) while covering **156/158** outbreak waves — proving what the full ML model earns over a strong zero-compute baseline.
+
+### 27. Why choose the trigger cut-offs with Peirce skill score instead of F1 or accuracy? (ADR-0020)
+Outbreak weeks (`≥ 8` cases) are a minority (`713 / 6,300 = 11.3%` on 2024–2025). Accuracy rewards never alerting (`88.7%` by doing nothing), and F1 shifts with base-rate prevalence. The **Peirce skill score** ($\text{PSS} = \text{Hit Rate} - \text{False-Alarm Rate}$) is base-rate invariant and standard in meteorological early warning: random or always-on rules score `0.0`, while our frozen `(80 mm, 0.30)` rule scores **`0.733`** and Abhas LightGBM scores **`0.800`** on unseen years. We also restrict `W` to non-vacuous drainage cutoffs (`≥ 0.30`, above the minimum ward index `~0.22`) so both clauses of the rule actively screen wards.
+
+### 28. Are the structural-fix numbers ("8.5% fewer cases", "34 cases/yr") real causal estimates? (ADR-0021)
+**No — and both `GET /api/v1/planning/structural` and the Command Center UI display the mandatory disclaimer verbatim:** *"associations in simulated data, not causal real-world estimates."* In this dataset, `water_logging_risk_index` and `sanitation_score` are static per-ward attributes with no capital-project intervention labels. To expose functional-form uncertainty honestly, we report **both** a log-link Poisson GLM (`rainfall_lag_2..4` + the three ward traits, fit on 2016–2023) **and** a LightGBM partial-dependence cross-check (shifting only the target trait), each with **500-resample ward-year cluster bootstrap 95% CIs**:
+- **`−0.1` water-logging:** GLM **`8.48%` `[7.86, 9.13]%`** vs LightGBM PD **`6.54%` `[6.07, 6.96]%`** fewer cases/season (`−0.2`: GLM **`16.24%`** vs PD **`13.05%`**).
+- **`+0.1` sanitation:** GLM **`3.37%` `[2.56, 4.15]%`** vs LightGBM PD **`1.74%` `[1.57, 1.91]%`** fewer cases/season (`+0.2`: GLM **`6.45%`** vs PD **`3.12%`**).
+Both estimators agree in direction across every trait; real municipal capital planning would replace these simulated associations with longitudinal DGHS surveillance and pre/post drainage audit data.
+
+### 29. How does a City Corporation Mayor use the "Build vs Send" table? (ADR-0021)
+It pairs **permanent capital drainage fixes ("build")** against **recurring monsoon spraying crews ("send")** on the same scale: cases prevented per year vs simulator 1-crew peak-season ROI (`2024-08-05`, base preset). The top three drainage-leverage wards for a `−0.2` water-logging reduction are:
+1. **`CCC_Ward_03` (Chattogram):** **`34.2` cases/yr** (GLM `[31.9, 36.8]`; PD `30.8`) vs **`9.68` cases/crew** → equivalent to **`3.54×`** peak crew deployments *every year*.
+2. **`DNCC_Ward_12` (Dhaka North):** **`33.7` cases/yr** (GLM `[31.4, 36.2]`; PD `26.1`) vs **`7.61` cases/crew** → **`4.43×`** peak crew deployments/yr.
+3. **`DSCC_Ward_04` (Dhaka South):** **`32.9` cases/yr** (GLM `[30.6, 35.3]`; PD `39.1`) vs **`9.61` cases/crew** → **`3.42×`** peak crew deployments/yr.
+Planners direct multi-year drainage budgets to chronic `Build + Send` hotspots while deploying mobile crews to acute rainfall spikes citywide.

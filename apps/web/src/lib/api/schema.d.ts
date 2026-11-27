@@ -174,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/planning/structural": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Structural-fix planner (Poisson GLM + LightGBM PD + Build vs Send) */
+        get: operations["planning_structural_api_v1_planning_structural_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/plans": {
         parameters: {
             query?: never;
@@ -252,6 +269,23 @@ export interface paths {
         };
         /** Backtest metrics vs baselines */
         get: operations["validation_api_v1_validation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/validation/trigger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Auditable early-action trigger rule vs Abhas model on locked 2024-25 hold-out */
+        get: operations["validation_trigger_api_v1_validation_trigger_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -571,6 +605,22 @@ export interface components {
             };
             /** Wards */
             wards: components["schemas"]["WardAllocation"][];
+        };
+        /** BuildVsSendRow */
+        BuildVsSendRow: {
+            /** Crew Deployments Equiv */
+            crew_deployments_equiv?: number | null;
+            /** Drainage Cases Per Yr Glm */
+            drainage_cases_per_yr_glm: number;
+            /** Drainage Cases Per Yr Pd */
+            drainage_cases_per_yr_pd: number;
+            /**
+             * Priority Signal
+             * @enum {string}
+             */
+            priority_signal: "build_and_send" | "build_priority" | "send_priority" | "monitor";
+            /** Sim Roi Cases Per Crew */
+            sim_roi_cases_per_crew: number;
         };
         /** CallStats */
         CallStats: {
@@ -901,6 +951,13 @@ export interface components {
              */
             label: string;
         };
+        /** DualAnnualEffect */
+        DualAnnualEffect: {
+            /** Effective Delta */
+            effective_delta: number;
+            glm: components["schemas"]["EstimateWithCI"];
+            lgbm_pd: components["schemas"]["EstimateWithCI"];
+        };
         /** EfficacyParams */
         EfficacyParams: {
             /** Assumption Note */
@@ -914,6 +971,15 @@ export interface components {
              * @enum {string}
              */
             preset: "low" | "base" | "high";
+        };
+        /** EstimateWithCI */
+        EstimateWithCI: {
+            /** Ci High */
+            ci_high: number;
+            /** Ci Low */
+            ci_low: number;
+            /** Estimate */
+            estimate: number;
         };
         /** FieldError */
         FieldError: {
@@ -982,6 +1048,13 @@ export interface components {
              * @enum {string}
              */
             weather_source: "dataset" | "live" | "cache" | "climatology";
+        };
+        /** GlmCoefficients */
+        GlmCoefficients: {
+            /** Sanitation Score */
+            sanitation_score: number;
+            /** Water Logging Risk Index */
+            water_logging_risk_index: number;
         };
         /** HeatmapCell */
         HeatmapCell: {
@@ -1168,6 +1241,19 @@ export interface components {
              * @example DSCC_Ward_07
              */
             ward_id: string;
+        };
+        /** LeadTimeStatsSchema */
+        LeadTimeStatsSchema: {
+            /** Median */
+            median?: number | null;
+            /** Q25 */
+            q25?: number | null;
+            /** Q75 */
+            q75?: number | null;
+            /** Spells Covered */
+            spells_covered: number;
+            /** Total Spells */
+            total_spells: number;
         };
         /** MetricRow */
         MetricRow: {
@@ -1797,6 +1883,78 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** StructuralPlannerResponse */
+        StructuralPlannerResponse: {
+            /** Bootstrap Resamples */
+            bootstrap_resamples: number;
+            /**
+             * Build Vs Send Origin Week
+             * Format: date
+             */
+            build_vs_send_origin_week: string;
+            /** City Filter */
+            city_filter?: ("Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj") | null;
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /** Dataset Sha256 */
+            dataset_sha256: string;
+            /**
+             * Disclaimer
+             * @default associations in simulated data, not causal real-world estimates
+             * @constant
+             */
+            disclaimer: "associations in simulated data, not causal real-world estimates";
+            /** Fit Years */
+            fit_years: number[];
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            glm_coefficients: components["schemas"]["GlmCoefficients"];
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /** Seed */
+            seed: number;
+            summary: components["schemas"]["StructuralSummary"];
+            /** Wards */
+            wards: components["schemas"]["WardStructuralImpact"][];
+        };
+        /** StructuralSummary */
+        StructuralSummary: {
+            sanitation_plus_01: components["schemas"]["SummaryEffect"];
+            sanitation_plus_02: components["schemas"]["SummaryEffect"];
+            water_logging_minus_01: components["schemas"]["SummaryEffect"];
+            water_logging_minus_02: components["schemas"]["SummaryEffect"];
+        };
+        /** SummaryEffect */
+        SummaryEffect: {
+            glm: components["schemas"]["EstimateWithCI"];
+            lgbm_pd: components["schemas"]["EstimateWithCI"];
+            /** Unclamped Glm Pct */
+            unclamped_glm_pct: number;
+        };
         /** SupplyPair */
         SupplyPair: {
             /** Allocated */
@@ -1823,6 +1981,158 @@ export interface components {
              * @example DSCC_Ward_07
              */
             to_ward: string;
+        };
+        /** TriggerComparisonSchema */
+        TriggerComparisonSchema: {
+            /** False Alarms Avoided */
+            false_alarms_avoided: number;
+            /** Far Delta */
+            far_delta: number;
+            /** Hit Rate Delta */
+            hit_rate_delta: number;
+            /** Model Meets Hit Rate */
+            model_meets_hit_rate: boolean;
+            /** Model Reduces Far */
+            model_reduces_far: boolean;
+            /** Pss Delta */
+            pss_delta: number;
+            /** Summary Note */
+            summary_note: string;
+        };
+        /** TriggerGridPointSchema */
+        TriggerGridPointSchema: {
+            /** Rain 2W Gt Mm */
+            rain_2w_gt_mm: number;
+            /** Train Far */
+            train_far: number;
+            /** Train Hit Rate */
+            train_hit_rate: number;
+            /** Train Pss */
+            train_pss: number;
+            /** Water Logging Gte */
+            water_logging_gte: number;
+        };
+        /** TriggerMetricsSchema */
+        TriggerMetricsSchema: {
+            /** Alerts */
+            alerts: number;
+            /** False Alarm Rate */
+            false_alarm_rate: number;
+            /** False Alarm Ratio */
+            false_alarm_ratio: number;
+            /** Fn */
+            fn: number;
+            /** Fp */
+            fp: number;
+            /** High Weeks */
+            high_weeks: number;
+            /** Hit Rate */
+            hit_rate: number;
+            lead_time_weeks: components["schemas"]["LeadTimeStatsSchema"];
+            /** Peirce Skill Score */
+            peirce_skill_score: number;
+            /** Tn */
+            tn: number;
+            /** Total Ward Weeks */
+            total_ward_weeks: number;
+            /** Tp */
+            tp: number;
+        };
+        /** TriggerModelMetricsSchema */
+        TriggerModelMetricsSchema: {
+            /** Alert Mode */
+            alert_mode: string;
+            /** Alerts */
+            alerts: number;
+            /** Calibrated Tier Far */
+            calibrated_tier_far: number;
+            /** Calibrated Tier Hit Rate */
+            calibrated_tier_hit_rate: number;
+            /** Calibrated Tier Pss */
+            calibrated_tier_pss: number;
+            /** False Alarm Rate */
+            false_alarm_rate: number;
+            /** False Alarm Ratio */
+            false_alarm_ratio: number;
+            /** Fn */
+            fn: number;
+            /** Fp */
+            fp: number;
+            /** High Weeks */
+            high_weeks: number;
+            /** Hit Rate */
+            hit_rate: number;
+            lead_time_weeks: components["schemas"]["LeadTimeStatsSchema"];
+            /** Peirce Skill Score */
+            peirce_skill_score: number;
+            /** Threshold Cases */
+            threshold_cases?: number | null;
+            /** Tn */
+            tn: number;
+            /** Total Ward Weeks */
+            total_ward_weeks: number;
+            /** Tp */
+            tp: number;
+        };
+        /** TriggerRuleSpec */
+        TriggerRuleSpec: {
+            /** Fit Years */
+            fit_years: number[];
+            /** High Case Threshold */
+            high_case_threshold: number;
+            /** Holdout Years */
+            holdout_years: number[];
+            /** Rain 2W Gt Mm */
+            rain_2w_gt_mm: number;
+            /** Rule Text Bn */
+            rule_text_bn: string;
+            /** Rule Text En */
+            rule_text_en: string;
+            /** Target Horizon */
+            target_horizon: number;
+            /** Water Logging Gte */
+            water_logging_gte: number;
+        };
+        /** TriggerValidationResponse */
+        TriggerValidationResponse: {
+            comparison: components["schemas"]["TriggerComparisonSchema"];
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /** Dataset Sha256 */
+            dataset_sha256: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /** Grid Top */
+            grid_top: components["schemas"]["TriggerGridPointSchema"][];
+            holdout_model: components["schemas"]["TriggerModelMetricsSchema"];
+            holdout_rule: components["schemas"]["TriggerMetricsSchema"];
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            rule: components["schemas"]["TriggerRuleSpec"];
         };
         /** ValidationResponse */
         ValidationResponse: {
@@ -2036,6 +2346,32 @@ export interface components {
             first_forecast_origin: string;
             /** Wards */
             wards: components["schemas"]["Ward"][];
+        };
+        /** WardStructuralImpact */
+        WardStructuralImpact: {
+            /** Baseline Cases Per Yr */
+            baseline_cases_per_yr: number;
+            build_vs_send: components["schemas"]["BuildVsSendRow"];
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Population Density Sqkm */
+            population_density_sqkm: number;
+            sanitation_plus_01: components["schemas"]["DualAnnualEffect"];
+            sanitation_plus_02: components["schemas"]["DualAnnualEffect"];
+            /** Sanitation Score */
+            sanitation_score: number;
+            /**
+             * Ward Id
+             * @example DSCC_Ward_07
+             */
+            ward_id: string;
+            water_logging_minus_01: components["schemas"]["DualAnnualEffect"];
+            water_logging_minus_02: components["schemas"]["DualAnnualEffect"];
+            /** Water Logging Risk Index */
+            water_logging_risk_index: number;
         };
         /**
          * WeatherOverride
@@ -3245,6 +3581,119 @@ export interface operations {
             };
         };
     };
+    planning_structural_api_v1_planning_structural_get: {
+        parameters: {
+            query?: {
+                /** @description Optional city filter */
+                city?: ("Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StructuralPlannerResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     list_plans_api_v1_plans_get: {
         parameters: {
             query?: {
@@ -3831,6 +4280,116 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ValidationResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    validation_trigger_api_v1_validation_trigger_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TriggerValidationResponse"];
                 };
             };
             /** @description Malformed request body or syntax error */

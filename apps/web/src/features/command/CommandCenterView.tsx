@@ -14,6 +14,7 @@ import {
   useOverflowRouteQuery,
   usePlansListQuery,
   useSimulatorRunQuery,
+  useStructuralPlannerQuery,
   type AllocationRequest,
   type Deployment,
   type DispatchChannel,
@@ -26,6 +27,7 @@ import {
   type Scope,
   type SimulatorRequest,
 } from "./api";
+import { BuildVsSendPanel } from "./BuildVsSendPanel";
 import { PlanCompareDrawer } from "./PlanCompareDrawer";
 import { ProvenanceStrip } from "./ProvenanceStrip";
 import { StepAllocate } from "./StepAllocate";
@@ -301,6 +303,7 @@ export function CommandCenterView({
   const allocationQuery = useAllocationPlanQuery(allocationReq, step === 1 || step === 2);
   const overflowQuery = useOverflowRouteQuery(overflowReq, step === 3);
   const simulatorQuery = useSimulatorRunQuery(simulatorReq, step === 4);
+  const structuralQuery = useStructuralPlannerQuery(scope, step === 4);
   const dispatchQuery = useDispatchNoticesQuery(dispatchReq, step === 5);
   const plansCountQuery = usePlansListQuery(undefined, true);
   const createPlanMutation = useCreatePlanMutation();
@@ -659,26 +662,34 @@ export function CommandCenterView({
         ) : null}
 
         {step === 4 ? (
-          <StepSimulate
-            wards={wards}
-            mode={simMode}
-            deployments={simDeployments}
-            autoCrews={simAutoCrews}
-            efficacy={simEfficacy}
-            lang={lang}
-            data={simulatorQuery.data}
-            isPending={simulatorQuery.isPending}
-            isFetching={simulatorQuery.isFetching}
-            isError={simulatorQuery.isError}
-            error={simulatorQuery.error}
-            onRetry={() => {
-              void simulatorQuery.refetch();
-            }}
-            onModeChange={setSimMode}
-            onDeploymentsChange={(next) => setCustomDeployments(next)}
-            onAutoCrewsChange={setSimAutoCrews}
-            onEfficacyChange={setSimEfficacy}
-          />
+          <>
+            <StepSimulate
+              wards={wards}
+              mode={simMode}
+              deployments={simDeployments}
+              autoCrews={simAutoCrews}
+              efficacy={simEfficacy}
+              lang={lang}
+              data={simulatorQuery.data}
+              isPending={simulatorQuery.isPending}
+              isFetching={simulatorQuery.isFetching}
+              isError={simulatorQuery.isError}
+              error={simulatorQuery.error}
+              onRetry={() => {
+                void simulatorQuery.refetch();
+              }}
+              onModeChange={setSimMode}
+              onDeploymentsChange={(next) => setCustomDeployments(next)}
+              onAutoCrewsChange={setSimAutoCrews}
+              onEfficacyChange={setSimEfficacy}
+            />
+            <BuildVsSendPanel
+              data={structuralQuery.data}
+              isPending={structuralQuery.isPending}
+              isError={structuralQuery.isError}
+              lang={lang}
+            />
+          </>
         ) : null}
 
         {step === 5 ? (

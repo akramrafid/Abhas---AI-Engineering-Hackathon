@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from app.core.errors import PROBLEM_RESPONSES
 
 from .deps import get_validation_service
-from .schemas import ValidationResponse
+from .schemas import TriggerValidationResponse, ValidationResponse
 from .service import ValidationService
 
 router = APIRouter(prefix="/api/v1", tags=["validation"], responses=PROBLEM_RESPONSES)
@@ -24,6 +24,26 @@ def validation(
     svc: ValidationService = Depends(get_validation_service),
 ) -> ValidationResponse | Response:
     result = svc.get_validation()
+    digest = hashlib.sha256(result.model_dump_json().encode("utf-8")).hexdigest()[:16]
+    etag = f'W/"{digest}"'
+    response.headers["ETag"] = etag
+    response.headers["Cache-Control"] = CACHE_CONTROL_VALIDATION
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers={"ETag": etag, "Cache-Control": CACHE_CONTROL_VALIDATION})
+    return result
+
+
+@router.get(
+    "/validation/trigger",
+    response_model=TriggerValidationResponse,
+    summary="Auditable early-action trigger rule vs Abhas model on locked 2024-25 hold-out",
+)
+def validation_trigger(
+    request: Request,
+    response: Response,
+    svc: ValidationService = Depends(get_validation_service),
+) -> TriggerValidationResponse | Response:
+    result = svc.get_trigger()
     digest = hashlib.sha256(result.model_dump_json().encode("utf-8")).hexdigest()[:16]
     etag = f'W/"{digest}"'
     response.headers["ETag"] = etag

@@ -6,9 +6,14 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { PanelSkeleton } from "@/components/ui/Skeleton";
 import { StubDataBanner } from "@/components/ui/StubDataBanner";
 import type { Lang } from "@/lib/i18n";
-import { useOpsQuery, useValidationQuery } from "../hooks";
+import {
+  useOpsQuery,
+  useTriggerValidationQuery,
+  useValidationQuery,
+} from "../hooks";
 import { ChronologicalTimeline } from "./ChronologicalTimeline";
 import { CoverageAndConfusion } from "./CoverageAndConfusion";
+import { EarlyActionTriggerCard } from "./EarlyActionTriggerCard";
 import { MetricsComparisonCard } from "./MetricsComparisonCard";
 
 export interface ValidationViewProps {
@@ -17,6 +22,7 @@ export interface ValidationViewProps {
 
 export function ValidationView({ lang = "en" }: ValidationViewProps) {
   const validationQuery = useValidationQuery(true);
+  const triggerQuery = useTriggerValidationQuery(true);
   const opsQuery = useOpsQuery(true);
 
   if (validationQuery.isError) {
@@ -69,6 +75,13 @@ export function ValidationView({ lang = "en" }: ValidationViewProps) {
       <CoverageAndConfusion
         coverage={data.coverage}
         confusion={data.confusion}
+      />
+
+      <EarlyActionTriggerCard
+        data={triggerQuery.data}
+        isPending={triggerQuery.isPending}
+        isError={triggerQuery.isError}
+        lang={lang}
       />
 
       <OpsTelemetryCard

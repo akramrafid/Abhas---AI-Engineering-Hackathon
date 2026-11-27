@@ -9,6 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, inspect, select
 
 from app.adapters.config_capacity import check_ward_capacity_ready
+from app.adapters.config_planning import (
+    check_structural_planner_ready,
+    check_trigger_evaluation_ready,
+)
 from app.adapters.config_supply import check_supply_ratios_ready
 from app.adapters.db.factory import ensure_database_ready, get_engine
 from app.adapters.db.models import WardRow
@@ -39,6 +43,7 @@ from app.features.lags.router import router as lags_router
 from app.features.ops.router import router as ops_router
 from app.features.overflow.router import router as overflow_router
 from app.features.overflow.router import stub_overflow_runner
+from app.features.planning.router import router as planning_router
 from app.features.plans.router import router as plans_router
 from app.features.simulator.router import router as simulator_router
 from app.features.simulator.router import stub_simulator_runner
@@ -90,6 +95,8 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
         "model": _model_is_ready,
         "supply_ratios": check_supply_ratios_ready,
         "ward_capacity": check_ward_capacity_ready,
+        "trigger_evaluation": check_trigger_evaluation_ready,
+        "structural_planner": check_structural_planner_ready,
     }
     checks.update(get_readiness_checks())
     checks.update(getattr(app.state, "checks", {}))
@@ -199,6 +206,7 @@ def create_app() -> FastAPI:
         simulator_router,
         dispatch_router,
         plans_router,
+        planning_router,
     ):
         app.include_router(r)
     return app

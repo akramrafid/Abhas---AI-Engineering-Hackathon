@@ -6,7 +6,14 @@ import {
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
-import { API_BASE_URL, ApiError, type Problem } from "@/lib/api/client";
+import {
+  API_BASE_URL,
+  ApiError,
+  fetchStructuralPlanner,
+  type City,
+  type Problem,
+  type StructuralPlannerResponse,
+} from "@/lib/api/client";
 import type { components } from "@/lib/api/schema";
 
 // --- Phase 2 Command Center Types (strictly derived from generated OpenAPI schema) ---
@@ -416,5 +423,19 @@ export function useCreatePlanMutation(): UseMutationResult<
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["command-plans"] });
     },
+  });
+}
+
+export function useStructuralPlannerQuery(
+  scope: Scope,
+  enabled = true,
+): UseQueryResult<StructuralPlannerResponse, ApiError> {
+  const cityParam: City | null = scope === "all" ? null : scope;
+  return useQuery<StructuralPlannerResponse, ApiError>({
+    queryKey: ["planning-structural", cityParam ?? "all"],
+    queryFn: ({ signal }) => fetchStructuralPlanner(cityParam, signal),
+    enabled,
+    staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 }

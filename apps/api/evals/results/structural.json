@@ -1,0 +1,4095 @@
+{
+  "model_version": "abhas-lgbm-1.1.2",
+  "git_sha": "aae827e",
+  "data_as_of": "2025-12-29",
+  "generated_at": "2026-11-27T11:33:33.667495+00:00",
+  "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
+  "disclaimer": "associations in simulated data, not causal real-world estimates",
+  "fit_years": [
+    2016,
+    2023
+  ],
+  "bootstrap_resamples": 500,
+  "seed": 20261127,
+  "build_vs_send_origin_week": "2024-08-05",
+  "glm_coefficients": {
+    "water_logging_risk_index": 0.8859,
+    "sanitation_score": -0.3427
+  },
+  "summary": {
+    "water_logging_minus_01": {
+      "glm": {
+        "estimate": 8.48,
+        "ci_low": 7.86,
+        "ci_high": 9.13
+      },
+      "lgbm_pd": {
+        "estimate": 6.54,
+        "ci_low": 6.07,
+        "ci_high": 6.96
+      },
+      "unclamped_glm_pct": 8.48
+    },
+    "water_logging_minus_02": {
+      "glm": {
+        "estimate": 16.24,
+        "ci_low": 15.11,
+        "ci_high": 17.43
+      },
+      "lgbm_pd": {
+        "estimate": 13.05,
+        "ci_low": 12.6,
+        "ci_high": 13.48
+      },
+      "unclamped_glm_pct": 16.24
+    },
+    "sanitation_plus_01": {
+      "glm": {
+        "estimate": 3.37,
+        "ci_low": 2.56,
+        "ci_high": 4.15
+      },
+      "lgbm_pd": {
+        "estimate": 1.74,
+        "ci_low": 1.57,
+        "ci_high": 1.91
+      },
+      "unclamped_glm_pct": 3.37
+    },
+    "sanitation_plus_02": {
+      "glm": {
+        "estimate": 6.45,
+        "ci_low": 4.93,
+        "ci_high": 7.91
+      },
+      "lgbm_pd": {
+        "estimate": 3.12,
+        "ci_low": 2.92,
+        "ci_high": 3.33
+      },
+      "unclamped_glm_pct": 6.62
+    }
+  },
+  "wards": [
+    {
+      "ward_id": "CCC_Ward_03",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.85,
+      "sanitation_score": 0.25,
+      "population_density_sqkm": 64626.0,
+      "baseline_cases_per_yr": 210.89,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 17.88,
+          "ci_low": 16.58,
+          "ci_high": 19.26
+        },
+        "lgbm_pd": {
+          "estimate": 23.35,
+          "ci_low": 20.03,
+          "ci_high": 27.2
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 34.24,
+          "ci_low": 31.86,
+          "ci_high": 36.76
+        },
+        "lgbm_pd": {
+          "estimate": 30.76,
+          "ci_low": 26.35,
+          "ci_high": 35.98
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 7.1,
+          "ci_low": 5.41,
+          "ci_high": 8.75
+        },
+        "lgbm_pd": {
+          "estimate": 0.4,
+          "ci_low": 0.34,
+          "ci_high": 0.47
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 13.97,
+          "ci_low": 10.68,
+          "ci_high": 17.13
+        },
+        "lgbm_pd": {
+          "estimate": 5.55,
+          "ci_low": 4.42,
+          "ci_high": 6.81
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 34.24,
+        "drainage_cases_per_yr_pd": 30.76,
+        "sim_roi_cases_per_crew": 9.68,
+        "crew_deployments_equiv": 3.54,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_12",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.92,
+      "sanitation_score": 0.78,
+      "population_density_sqkm": 72086.0,
+      "baseline_cases_per_yr": 207.7,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 17.61,
+          "ci_low": 16.33,
+          "ci_high": 18.97
+        },
+        "lgbm_pd": {
+          "estimate": 2.66,
+          "ci_low": 2.42,
+          "ci_high": 2.99
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 33.73,
+          "ci_low": 31.38,
+          "ci_high": 36.21
+        },
+        "lgbm_pd": {
+          "estimate": 26.09,
+          "ci_low": 23.31,
+          "ci_high": 30.17
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 7.0,
+          "ci_low": 5.33,
+          "ci_high": 8.62
+        },
+        "lgbm_pd": {
+          "estimate": 2.91,
+          "ci_low": 2.69,
+          "ci_high": 3.21
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 13.76,
+          "ci_low": 10.51,
+          "ci_high": 16.88
+        },
+        "lgbm_pd": {
+          "estimate": 2.91,
+          "ci_low": 2.69,
+          "ci_high": 3.21
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 33.73,
+        "drainage_cases_per_yr_pd": 26.09,
+        "sim_roi_cases_per_crew": 7.61,
+        "crew_deployments_equiv": 4.43,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_04",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.78,
+      "sanitation_score": 0.38,
+      "population_density_sqkm": 74252.0,
+      "baseline_cases_per_yr": 202.42,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 17.16,
+          "ci_low": 15.92,
+          "ci_high": 18.49
+        },
+        "lgbm_pd": {
+          "estimate": 30.31,
+          "ci_low": 25.72,
+          "ci_high": 35.38
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 32.87,
+          "ci_low": 30.58,
+          "ci_high": 35.29
+        },
+        "lgbm_pd": {
+          "estimate": 39.13,
+          "ci_low": 32.51,
+          "ci_high": 46.14
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.82,
+          "ci_low": 5.19,
+          "ci_high": 8.4
+        },
+        "lgbm_pd": {
+          "estimate": 5.62,
+          "ci_low": 4.38,
+          "ci_high": 6.82
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 13.41,
+          "ci_low": 10.25,
+          "ci_high": 16.45
+        },
+        "lgbm_pd": {
+          "estimate": 6.78,
+          "ci_low": 5.36,
+          "ci_high": 8.17
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 32.87,
+        "drainage_cases_per_yr_pd": 39.13,
+        "sim_roi_cases_per_crew": 9.61,
+        "crew_deployments_equiv": 3.42,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_19",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.89,
+      "sanitation_score": 0.31,
+      "population_density_sqkm": 52080.0,
+      "baseline_cases_per_yr": 195.35,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 16.56,
+          "ci_low": 15.36,
+          "ci_high": 17.84
+        },
+        "lgbm_pd": {
+          "estimate": 1.15,
+          "ci_low": 0.97,
+          "ci_high": 1.31
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 31.72,
+          "ci_low": 29.51,
+          "ci_high": 34.05
+        },
+        "lgbm_pd": {
+          "estimate": 21.58,
+          "ci_low": 18.86,
+          "ci_high": 24.6
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.58,
+          "ci_low": 5.01,
+          "ci_high": 8.1
+        },
+        "lgbm_pd": {
+          "estimate": 0.42,
+          "ci_low": 0.36,
+          "ci_high": 0.46
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 12.94,
+          "ci_low": 9.89,
+          "ci_high": 15.87
+        },
+        "lgbm_pd": {
+          "estimate": 6.81,
+          "ci_low": 5.72,
+          "ci_high": 8.04
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 31.72,
+        "drainage_cases_per_yr_pd": 21.58,
+        "sim_roi_cases_per_crew": 8.81,
+        "crew_deployments_equiv": 3.6,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_06",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.78,
+      "sanitation_score": 0.3,
+      "population_density_sqkm": 59553.0,
+      "baseline_cases_per_yr": 191.86,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 16.27,
+          "ci_low": 15.09,
+          "ci_high": 17.52
+        },
+        "lgbm_pd": {
+          "estimate": 28.79,
+          "ci_low": 24.63,
+          "ci_high": 33.45
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 31.15,
+          "ci_low": 28.99,
+          "ci_high": 33.45
+        },
+        "lgbm_pd": {
+          "estimate": 37.18,
+          "ci_low": 31.24,
+          "ci_high": 43.67
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.46,
+          "ci_low": 4.92,
+          "ci_high": 7.96
+        },
+        "lgbm_pd": {
+          "estimate": 0.42,
+          "ci_low": 0.35,
+          "ci_high": 0.48
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 12.71,
+          "ci_low": 9.71,
+          "ci_high": 15.59
+        },
+        "lgbm_pd": {
+          "estimate": 6.34,
+          "ci_low": 5.18,
+          "ci_high": 7.59
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 31.15,
+        "drainage_cases_per_yr_pd": 37.18,
+        "sim_roi_cases_per_crew": 8.8,
+        "crew_deployments_equiv": 3.54,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_01",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.87,
+      "sanitation_score": 0.46,
+      "population_density_sqkm": 64024.0,
+      "baseline_cases_per_yr": 190.77,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 16.17,
+          "ci_low": 15.0,
+          "ci_high": 17.42
+        },
+        "lgbm_pd": {
+          "estimate": 1.05,
+          "ci_low": 0.93,
+          "ci_high": 1.2
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 30.98,
+          "ci_low": 28.82,
+          "ci_high": 33.26
+        },
+        "lgbm_pd": {
+          "estimate": 32.46,
+          "ci_low": 28.17,
+          "ci_high": 38.07
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.43,
+          "ci_low": 4.89,
+          "ci_high": 7.91
+        },
+        "lgbm_pd": {
+          "estimate": 1.84,
+          "ci_low": 1.67,
+          "ci_high": 2.06
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 12.64,
+          "ci_low": 9.66,
+          "ci_high": 15.5
+        },
+        "lgbm_pd": {
+          "estimate": 4.05,
+          "ci_low": 3.79,
+          "ci_high": 4.38
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 30.98,
+        "drainage_cases_per_yr_pd": 32.46,
+        "sim_roi_cases_per_crew": 9.24,
+        "crew_deployments_equiv": 3.35,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "GCC_Ward_02",
+      "city": "Gazipur",
+      "water_logging_risk_index": 0.94,
+      "sanitation_score": 0.41,
+      "population_density_sqkm": 45898.0,
+      "baseline_cases_per_yr": 188.38,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 15.97,
+          "ci_low": 14.81,
+          "ci_high": 17.2
+        },
+        "lgbm_pd": {
+          "estimate": 0.66,
+          "ci_low": 0.57,
+          "ci_high": 0.77
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 30.59,
+          "ci_low": 28.46,
+          "ci_high": 32.84
+        },
+        "lgbm_pd": {
+          "estimate": 23.87,
+          "ci_low": 20.87,
+          "ci_high": 27.55
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.35,
+          "ci_low": 4.83,
+          "ci_high": 7.81
+        },
+        "lgbm_pd": {
+          "estimate": 6.29,
+          "ci_low": 5.17,
+          "ci_high": 7.73
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 12.48,
+          "ci_low": 9.54,
+          "ci_high": 15.31
+        },
+        "lgbm_pd": {
+          "estimate": 8.02,
+          "ci_low": 6.76,
+          "ci_high": 9.58
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 30.59,
+        "drainage_cases_per_yr_pd": 23.87,
+        "sim_roi_cases_per_crew": 5.84,
+        "crew_deployments_equiv": 5.24,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "GCC_Ward_03",
+      "city": "Gazipur",
+      "water_logging_risk_index": 0.77,
+      "sanitation_score": 0.4,
+      "population_density_sqkm": 56311.0,
+      "baseline_cases_per_yr": 184.99,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 15.68,
+          "ci_low": 14.55,
+          "ci_high": 16.9
+        },
+        "lgbm_pd": {
+          "estimate": 30.12,
+          "ci_low": 25.64,
+          "ci_high": 34.86
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 30.04,
+          "ci_low": 27.95,
+          "ci_high": 32.25
+        },
+        "lgbm_pd": {
+          "estimate": 38.6,
+          "ci_low": 32.26,
+          "ci_high": 45.01
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.23,
+          "ci_low": 4.74,
+          "ci_high": 7.67
+        },
+        "lgbm_pd": {
+          "estimate": 6.44,
+          "ci_low": 5.17,
+          "ci_high": 7.74
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 12.25,
+          "ci_low": 9.36,
+          "ci_high": 15.03
+        },
+        "lgbm_pd": {
+          "estimate": 8.79,
+          "ci_low": 7.27,
+          "ci_high": 10.31
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 30.04,
+        "drainage_cases_per_yr_pd": 38.6,
+        "sim_roi_cases_per_crew": 9.82,
+        "crew_deployments_equiv": 3.06,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "NCC_Ward_05",
+      "city": "Narayanganj",
+      "water_logging_risk_index": 0.9,
+      "sanitation_score": 0.34,
+      "population_density_sqkm": 40043.0,
+      "baseline_cases_per_yr": 182.6,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 15.48,
+          "ci_low": 14.36,
+          "ci_high": 16.68
+        },
+        "lgbm_pd": {
+          "estimate": 1.08,
+          "ci_low": 0.95,
+          "ci_high": 1.26
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 29.65,
+          "ci_low": 27.59,
+          "ci_high": 31.83
+        },
+        "lgbm_pd": {
+          "estimate": 20.41,
+          "ci_low": 17.69,
+          "ci_high": 23.82
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.15,
+          "ci_low": 4.68,
+          "ci_high": 7.58
+        },
+        "lgbm_pd": {
+          "estimate": 5.51,
+          "ci_low": 4.52,
+          "ci_high": 6.71
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 12.1,
+          "ci_low": 9.24,
+          "ci_high": 14.84
+        },
+        "lgbm_pd": {
+          "estimate": 7.39,
+          "ci_low": 6.19,
+          "ci_high": 8.8
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 29.65,
+        "drainage_cases_per_yr_pd": 20.41,
+        "sim_roi_cases_per_crew": 6.96,
+        "crew_deployments_equiv": 4.26,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_18",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.9,
+      "sanitation_score": 0.83,
+      "population_density_sqkm": 62182.0,
+      "baseline_cases_per_yr": 181.5,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 15.39,
+          "ci_low": 14.27,
+          "ci_high": 16.58
+        },
+        "lgbm_pd": {
+          "estimate": 2.0,
+          "ci_low": 1.8,
+          "ci_high": 2.26
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 29.47,
+          "ci_low": 27.42,
+          "ci_high": 31.64
+        },
+        "lgbm_pd": {
+          "estimate": 24.86,
+          "ci_low": 21.82,
+          "ci_high": 28.49
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 6.11,
+          "ci_low": 4.65,
+          "ci_high": 7.53
+        },
+        "lgbm_pd": {
+          "estimate": 0.85,
+          "ci_low": 0.77,
+          "ci_high": 0.95
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.17,
+        "glm": {
+          "estimate": 10.27,
+          "ci_low": 7.84,
+          "ci_high": 12.61
+        },
+        "lgbm_pd": {
+          "estimate": 0.85,
+          "ci_low": 0.77,
+          "ci_high": 0.95
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 29.47,
+        "drainage_cases_per_yr_pd": 24.86,
+        "sim_roi_cases_per_crew": 8.0,
+        "crew_deployments_equiv": 3.68,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_12",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.78,
+      "sanitation_score": 0.57,
+      "population_density_sqkm": 49992.0,
+      "baseline_cases_per_yr": 177.02,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 15.01,
+          "ci_low": 13.92,
+          "ci_high": 16.17
+        },
+        "lgbm_pd": {
+          "estimate": 29.48,
+          "ci_low": 25.96,
+          "ci_high": 33.75
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 28.74,
+          "ci_low": 26.74,
+          "ci_high": 30.86
+        },
+        "lgbm_pd": {
+          "estimate": 37.4,
+          "ci_low": 32.44,
+          "ci_high": 43.4
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.96,
+          "ci_low": 4.54,
+          "ci_high": 7.34
+        },
+        "lgbm_pd": {
+          "estimate": 2.89,
+          "ci_low": 2.75,
+          "ci_high": 3.06
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 11.73,
+          "ci_low": 8.96,
+          "ci_high": 14.38
+        },
+        "lgbm_pd": {
+          "estimate": 2.89,
+          "ci_low": 2.75,
+          "ci_high": 3.06
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 28.74,
+        "drainage_cases_per_yr_pd": 37.4,
+        "sim_roi_cases_per_crew": 7.73,
+        "crew_deployments_equiv": 3.72,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_10",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.87,
+      "sanitation_score": 0.56,
+      "population_density_sqkm": 54340.0,
+      "baseline_cases_per_yr": 176.32,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 14.95,
+          "ci_low": 13.86,
+          "ci_high": 16.1
+        },
+        "lgbm_pd": {
+          "estimate": 1.31,
+          "ci_low": 1.16,
+          "ci_high": 1.5
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 28.63,
+          "ci_low": 26.64,
+          "ci_high": 30.74
+        },
+        "lgbm_pd": {
+          "estimate": 30.81,
+          "ci_low": 26.52,
+          "ci_high": 35.31
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.94,
+          "ci_low": 4.52,
+          "ci_high": 7.31
+        },
+        "lgbm_pd": {
+          "estimate": 2.93,
+          "ci_low": 2.75,
+          "ci_high": 3.12
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 11.68,
+          "ci_low": 8.93,
+          "ci_high": 14.33
+        },
+        "lgbm_pd": {
+          "estimate": 2.93,
+          "ci_low": 2.75,
+          "ci_high": 3.12
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 28.63,
+        "drainage_cases_per_yr_pd": 30.81,
+        "sim_roi_cases_per_crew": 5.86,
+        "crew_deployments_equiv": 4.89,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_19",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.85,
+      "sanitation_score": 0.77,
+      "population_density_sqkm": 54104.0,
+      "baseline_cases_per_yr": 175.52,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 14.88,
+          "ci_low": 13.8,
+          "ci_high": 16.03
+        },
+        "lgbm_pd": {
+          "estimate": 23.25,
+          "ci_low": 19.74,
+          "ci_high": 26.69
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 28.5,
+          "ci_low": 26.52,
+          "ci_high": 30.6
+        },
+        "lgbm_pd": {
+          "estimate": 31.38,
+          "ci_low": 26.9,
+          "ci_high": 36.01
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.91,
+          "ci_low": 4.5,
+          "ci_high": 7.28
+        },
+        "lgbm_pd": {
+          "estimate": 1.75,
+          "ci_low": 1.57,
+          "ci_high": 1.93
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 11.63,
+          "ci_low": 8.89,
+          "ci_high": 14.26
+        },
+        "lgbm_pd": {
+          "estimate": 2.49,
+          "ci_low": 2.25,
+          "ci_high": 2.72
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 28.5,
+        "drainage_cases_per_yr_pd": 31.38,
+        "sim_roi_cases_per_crew": 9.37,
+        "crew_deployments_equiv": 3.04,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_09",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.79,
+      "sanitation_score": 0.38,
+      "population_density_sqkm": 43995.0,
+      "baseline_cases_per_yr": 173.23,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 14.69,
+          "ci_low": 13.62,
+          "ci_high": 15.82
+        },
+        "lgbm_pd": {
+          "estimate": 20.25,
+          "ci_low": 17.61,
+          "ci_high": 23.28
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 28.13,
+          "ci_low": 26.17,
+          "ci_high": 30.2
+        },
+        "lgbm_pd": {
+          "estimate": 32.67,
+          "ci_low": 28.29,
+          "ci_high": 37.7
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.84,
+          "ci_low": 4.44,
+          "ci_high": 7.19
+        },
+        "lgbm_pd": {
+          "estimate": 6.31,
+          "ci_low": 5.1,
+          "ci_high": 7.67
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 11.48,
+          "ci_low": 8.77,
+          "ci_high": 14.08
+        },
+        "lgbm_pd": {
+          "estimate": 8.02,
+          "ci_low": 6.64,
+          "ci_high": 9.56
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 28.13,
+        "drainage_cases_per_yr_pd": 32.67,
+        "sim_roi_cases_per_crew": 9.74,
+        "crew_deployments_equiv": 2.89,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_07",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.93,
+      "sanitation_score": 0.88,
+      "population_density_sqkm": 38726.0,
+      "baseline_cases_per_yr": 166.56,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 14.12,
+          "ci_low": 13.1,
+          "ci_high": 15.21
+        },
+        "lgbm_pd": {
+          "estimate": 2.03,
+          "ci_low": 1.86,
+          "ci_high": 2.25
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 27.05,
+          "ci_low": 25.16,
+          "ci_high": 29.04
+        },
+        "lgbm_pd": {
+          "estimate": 22.12,
+          "ci_low": 19.1,
+          "ci_high": 25.36
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.61,
+          "ci_low": 4.27,
+          "ci_high": 6.91
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.12,
+        "glm": {
+          "estimate": 6.71,
+          "ci_low": 5.11,
+          "ci_high": 8.26
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 27.05,
+        "drainage_cases_per_yr_pd": 22.12,
+        "sim_roi_cases_per_crew": 5.31,
+        "crew_deployments_equiv": 5.09,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_01",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.91,
+      "sanitation_score": 0.73,
+      "population_density_sqkm": 39348.0,
+      "baseline_cases_per_yr": 160.98,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 13.65,
+          "ci_low": 12.66,
+          "ci_high": 14.7
+        },
+        "lgbm_pd": {
+          "estimate": 1.48,
+          "ci_low": 1.31,
+          "ci_high": 1.71
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 26.14,
+          "ci_low": 24.32,
+          "ci_high": 28.06
+        },
+        "lgbm_pd": {
+          "estimate": 21.35,
+          "ci_low": 18.4,
+          "ci_high": 24.62
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.42,
+          "ci_low": 4.13,
+          "ci_high": 6.68
+        },
+        "lgbm_pd": {
+          "estimate": 1.31,
+          "ci_low": 1.19,
+          "ci_high": 1.47
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 10.66,
+          "ci_low": 8.15,
+          "ci_high": 13.08
+        },
+        "lgbm_pd": {
+          "estimate": 1.39,
+          "ci_low": 1.26,
+          "ci_high": 1.55
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 26.14,
+        "drainage_cases_per_yr_pd": 21.35,
+        "sim_roi_cases_per_crew": 6.25,
+        "crew_deployments_equiv": 4.18,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_03",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.8,
+      "sanitation_score": 0.3,
+      "population_density_sqkm": 26032.0,
+      "baseline_cases_per_yr": 158.69,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 13.45,
+          "ci_low": 12.48,
+          "ci_high": 14.49
+        },
+        "lgbm_pd": {
+          "estimate": 17.35,
+          "ci_low": 15.03,
+          "ci_high": 20.11
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 25.77,
+          "ci_low": 23.97,
+          "ci_high": 27.66
+        },
+        "lgbm_pd": {
+          "estimate": 23.1,
+          "ci_low": 19.98,
+          "ci_high": 26.81
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.35,
+          "ci_low": 4.07,
+          "ci_high": 6.58
+        },
+        "lgbm_pd": {
+          "estimate": 0.38,
+          "ci_low": 0.35,
+          "ci_high": 0.42
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 10.51,
+          "ci_low": 8.03,
+          "ci_high": 12.89
+        },
+        "lgbm_pd": {
+          "estimate": 5.76,
+          "ci_low": 4.75,
+          "ci_high": 6.89
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 25.77,
+        "drainage_cases_per_yr_pd": 23.1,
+        "sim_roi_cases_per_crew": 7.57,
+        "crew_deployments_equiv": 3.4,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "GCC_Ward_05",
+      "city": "Gazipur",
+      "water_logging_risk_index": 0.6,
+      "sanitation_score": 0.31,
+      "population_density_sqkm": 54111.0,
+      "baseline_cases_per_yr": 157.49,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 13.35,
+          "ci_low": 12.38,
+          "ci_high": 14.38
+        },
+        "lgbm_pd": {
+          "estimate": 15.51,
+          "ci_low": 13.18,
+          "ci_high": 18.15
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 25.57,
+          "ci_low": 23.79,
+          "ci_high": 27.46
+        },
+        "lgbm_pd": {
+          "estimate": 19.83,
+          "ci_low": 17.08,
+          "ci_high": 23.01
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.31,
+          "ci_low": 4.04,
+          "ci_high": 6.53
+        },
+        "lgbm_pd": {
+          "estimate": 2.86,
+          "ci_low": 2.58,
+          "ci_high": 3.15
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 10.43,
+          "ci_low": 7.97,
+          "ci_high": 12.8
+        },
+        "lgbm_pd": {
+          "estimate": 8.44,
+          "ci_low": 7.18,
+          "ci_high": 9.85
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 25.57,
+        "drainage_cases_per_yr_pd": 19.83,
+        "sim_roi_cases_per_crew": 7.37,
+        "crew_deployments_equiv": 3.47,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_10",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.64,
+      "sanitation_score": 0.28,
+      "population_density_sqkm": 47311.0,
+      "baseline_cases_per_yr": 155.2,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 13.16,
+          "ci_low": 12.2,
+          "ci_high": 14.18
+        },
+        "lgbm_pd": {
+          "estimate": 8.3,
+          "ci_low": 6.6,
+          "ci_high": 10.17
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 25.2,
+          "ci_low": 23.45,
+          "ci_high": 27.06
+        },
+        "lgbm_pd": {
+          "estimate": 19.17,
+          "ci_low": 16.51,
+          "ci_high": 22.09
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.23,
+          "ci_low": 3.98,
+          "ci_high": 6.44
+        },
+        "lgbm_pd": {
+          "estimate": 0.31,
+          "ci_low": 0.25,
+          "ci_high": 0.37
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 10.28,
+          "ci_low": 7.86,
+          "ci_high": 12.61
+        },
+        "lgbm_pd": {
+          "estimate": 8.45,
+          "ci_low": 7.33,
+          "ci_high": 9.83
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 25.2,
+        "drainage_cases_per_yr_pd": 19.17,
+        "sim_roi_cases_per_crew": 6.18,
+        "crew_deployments_equiv": 4.08,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "GCC_Ward_01",
+      "city": "Gazipur",
+      "water_logging_risk_index": 0.38,
+      "sanitation_score": 0.34,
+      "population_density_sqkm": 69771.0,
+      "baseline_cases_per_yr": 155.2,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 13.16,
+          "ci_low": 12.2,
+          "ci_high": 14.18
+        },
+        "lgbm_pd": {
+          "estimate": 17.91,
+          "ci_low": 16.11,
+          "ci_high": 20.24
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 25.2,
+          "ci_low": 23.45,
+          "ci_high": 27.06
+        },
+        "lgbm_pd": {
+          "estimate": 21.1,
+          "ci_low": 19.12,
+          "ci_high": 23.65
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.23,
+          "ci_low": 3.98,
+          "ci_high": 6.44
+        },
+        "lgbm_pd": {
+          "estimate": 9.53,
+          "ci_low": 8.12,
+          "ci_high": 11.24
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 10.28,
+          "ci_low": 7.86,
+          "ci_high": 12.61
+        },
+        "lgbm_pd": {
+          "estimate": 12.06,
+          "ci_low": 10.42,
+          "ci_high": 14.03
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 25.2,
+        "drainage_cases_per_yr_pd": 21.1,
+        "sim_roi_cases_per_crew": 5.3,
+        "crew_deployments_equiv": 4.75,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_15",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.88,
+      "sanitation_score": 0.42,
+      "population_density_sqkm": 19960.0,
+      "baseline_cases_per_yr": 151.72,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.86,
+          "ci_low": 11.93,
+          "ci_high": 13.86
+        },
+        "lgbm_pd": {
+          "estimate": 1.51,
+          "ci_low": 1.29,
+          "ci_high": 1.73
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 24.64,
+          "ci_low": 22.92,
+          "ci_high": 26.45
+        },
+        "lgbm_pd": {
+          "estimate": 26.47,
+          "ci_low": 22.67,
+          "ci_high": 30.19
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.11,
+          "ci_low": 3.89,
+          "ci_high": 6.29
+        },
+        "lgbm_pd": {
+          "estimate": 5.04,
+          "ci_low": 4.16,
+          "ci_high": 5.85
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 10.05,
+          "ci_low": 7.68,
+          "ci_high": 12.33
+        },
+        "lgbm_pd": {
+          "estimate": 5.86,
+          "ci_low": 4.9,
+          "ci_high": 6.77
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 24.64,
+        "drainage_cases_per_yr_pd": 26.47,
+        "sim_roi_cases_per_crew": 5.36,
+        "crew_deployments_equiv": 4.6,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_20",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.87,
+      "sanitation_score": 0.6,
+      "population_density_sqkm": 28634.0,
+      "baseline_cases_per_yr": 150.02,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.72,
+          "ci_low": 11.8,
+          "ci_high": 13.7
+        },
+        "lgbm_pd": {
+          "estimate": 1.14,
+          "ci_low": 1.03,
+          "ci_high": 1.3
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 24.36,
+          "ci_low": 22.66,
+          "ci_high": 26.15
+        },
+        "lgbm_pd": {
+          "estimate": 25.81,
+          "ci_low": 22.79,
+          "ci_high": 29.54
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.05,
+          "ci_low": 3.85,
+          "ci_high": 6.22
+        },
+        "lgbm_pd": {
+          "estimate": 2.06,
+          "ci_low": 1.95,
+          "ci_high": 2.21
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.94,
+          "ci_low": 7.59,
+          "ci_high": 12.19
+        },
+        "lgbm_pd": {
+          "estimate": 3.59,
+          "ci_low": 3.39,
+          "ci_high": 3.85
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 24.36,
+        "drainage_cases_per_yr_pd": 25.81,
+        "sim_roi_cases_per_crew": 4.95,
+        "crew_deployments_equiv": 4.92,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_18",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.9,
+      "sanitation_score": 0.78,
+      "population_density_sqkm": 27189.0,
+      "baseline_cases_per_yr": 149.23,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.65,
+          "ci_low": 11.73,
+          "ci_high": 13.63
+        },
+        "lgbm_pd": {
+          "estimate": 1.39,
+          "ci_low": 1.25,
+          "ci_high": 1.52
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 24.23,
+          "ci_low": 22.54,
+          "ci_high": 26.01
+        },
+        "lgbm_pd": {
+          "estimate": 19.38,
+          "ci_low": 16.74,
+          "ci_high": 22.28
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.03,
+          "ci_low": 3.83,
+          "ci_high": 6.19
+        },
+        "lgbm_pd": {
+          "estimate": 1.36,
+          "ci_low": 1.22,
+          "ci_high": 1.51
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.89,
+          "ci_low": 7.55,
+          "ci_high": 12.12
+        },
+        "lgbm_pd": {
+          "estimate": 1.36,
+          "ci_low": 1.22,
+          "ci_high": 1.51
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 24.23,
+        "drainage_cases_per_yr_pd": 19.38,
+        "sim_roi_cases_per_crew": 4.8,
+        "crew_deployments_equiv": 5.05,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_13",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.52,
+      "sanitation_score": 0.27,
+      "population_density_sqkm": 47795.0,
+      "baseline_cases_per_yr": 148.43,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.58,
+          "ci_low": 11.67,
+          "ci_high": 13.56
+        },
+        "lgbm_pd": {
+          "estimate": 11.34,
+          "ci_low": 10.42,
+          "ci_high": 12.48
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 24.1,
+          "ci_low": 22.42,
+          "ci_high": 25.88
+        },
+        "lgbm_pd": {
+          "estimate": 21.04,
+          "ci_low": 19.0,
+          "ci_high": 23.47
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 5.0,
+          "ci_low": 3.81,
+          "ci_high": 6.16
+        },
+        "lgbm_pd": {
+          "estimate": 0.31,
+          "ci_low": 0.28,
+          "ci_high": 0.35
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.83,
+          "ci_low": 7.51,
+          "ci_high": 12.06
+        },
+        "lgbm_pd": {
+          "estimate": 7.92,
+          "ci_low": 6.73,
+          "ci_high": 9.35
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 24.1,
+        "drainage_cases_per_yr_pd": 21.04,
+        "sim_roi_cases_per_crew": 6.25,
+        "crew_deployments_equiv": 3.86,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "NCC_Ward_01",
+      "city": "Narayanganj",
+      "water_logging_risk_index": 0.44,
+      "sanitation_score": 0.37,
+      "population_density_sqkm": 65612.0,
+      "baseline_cases_per_yr": 147.33,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.49,
+          "ci_low": 11.58,
+          "ci_high": 13.46
+        },
+        "lgbm_pd": {
+          "estimate": 10.91,
+          "ci_low": 9.82,
+          "ci_high": 12.3
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 23.92,
+          "ci_low": 22.26,
+          "ci_high": 25.68
+        },
+        "lgbm_pd": {
+          "estimate": 18.47,
+          "ci_low": 16.71,
+          "ci_high": 20.7
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.96,
+          "ci_low": 3.78,
+          "ci_high": 6.11
+        },
+        "lgbm_pd": {
+          "estimate": 9.05,
+          "ci_low": 7.6,
+          "ci_high": 10.7
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.76,
+          "ci_low": 7.46,
+          "ci_high": 11.97
+        },
+        "lgbm_pd": {
+          "estimate": 11.43,
+          "ci_low": 9.75,
+          "ci_high": 13.37
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 23.92,
+        "drainage_cases_per_yr_pd": 18.47,
+        "sim_roi_cases_per_crew": 3.84,
+        "crew_deployments_equiv": 6.23,
+        "priority_signal": "build_priority"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_05",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.36,
+      "sanitation_score": 0.37,
+      "population_density_sqkm": 65449.0,
+      "baseline_cases_per_yr": 143.65,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.18,
+          "ci_low": 11.29,
+          "ci_high": 13.12
+        },
+        "lgbm_pd": {
+          "estimate": 14.4,
+          "ci_low": 13.07,
+          "ci_high": 15.98
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 23.32,
+          "ci_low": 21.7,
+          "ci_high": 25.04
+        },
+        "lgbm_pd": {
+          "estimate": 17.55,
+          "ci_low": 16.06,
+          "ci_high": 19.25
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.84,
+          "ci_low": 3.68,
+          "ci_high": 5.96
+        },
+        "lgbm_pd": {
+          "estimate": 10.75,
+          "ci_low": 9.4,
+          "ci_high": 12.34
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.52,
+          "ci_low": 7.27,
+          "ci_high": 11.67
+        },
+        "lgbm_pd": {
+          "estimate": 12.98,
+          "ci_low": 11.45,
+          "ci_high": 14.77
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 23.32,
+        "drainage_cases_per_yr_pd": 17.55,
+        "sim_roi_cases_per_crew": 3.57,
+        "crew_deployments_equiv": 6.53,
+        "priority_signal": "build_priority"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_08",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.45,
+      "sanitation_score": 0.29,
+      "population_density_sqkm": 53527.0,
+      "baseline_cases_per_yr": 141.85,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 12.03,
+          "ci_low": 11.15,
+          "ci_high": 12.96
+        },
+        "lgbm_pd": {
+          "estimate": 10.4,
+          "ci_low": 9.25,
+          "ci_high": 11.74
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 23.03,
+          "ci_low": 21.43,
+          "ci_high": 24.73
+        },
+        "lgbm_pd": {
+          "estimate": 17.56,
+          "ci_low": 15.79,
+          "ci_high": 19.71
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.78,
+          "ci_low": 3.64,
+          "ci_high": 5.88
+        },
+        "lgbm_pd": {
+          "estimate": 0.32,
+          "ci_low": 0.28,
+          "ci_high": 0.36
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.4,
+          "ci_low": 7.18,
+          "ci_high": 11.53
+        },
+        "lgbm_pd": {
+          "estimate": 9.93,
+          "ci_low": 8.52,
+          "ci_high": 11.65
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 23.03,
+        "drainage_cases_per_yr_pd": 17.56,
+        "sim_roi_cases_per_crew": 3.82,
+        "crew_deployments_equiv": 6.03,
+        "priority_signal": "build_priority"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_04",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.51,
+      "sanitation_score": 0.39,
+      "population_density_sqkm": 47112.0,
+      "baseline_cases_per_yr": 140.46,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 11.91,
+          "ci_low": 11.04,
+          "ci_high": 12.83
+        },
+        "lgbm_pd": {
+          "estimate": 3.92,
+          "ci_low": 3.45,
+          "ci_high": 4.45
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 22.81,
+          "ci_low": 21.22,
+          "ci_high": 24.49
+        },
+        "lgbm_pd": {
+          "estimate": 13.89,
+          "ci_low": 12.21,
+          "ci_high": 15.75
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.73,
+          "ci_low": 3.6,
+          "ci_high": 5.83
+        },
+        "lgbm_pd": {
+          "estimate": 8.48,
+          "ci_low": 7.15,
+          "ci_high": 9.96
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.3,
+          "ci_low": 7.11,
+          "ci_high": 11.41
+        },
+        "lgbm_pd": {
+          "estimate": 10.77,
+          "ci_low": 9.22,
+          "ci_high": 12.51
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 22.81,
+        "drainage_cases_per_yr_pd": 13.89,
+        "sim_roi_cases_per_crew": 5.07,
+        "crew_deployments_equiv": 4.5,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "GCC_Ward_04",
+      "city": "Gazipur",
+      "water_logging_risk_index": 0.48,
+      "sanitation_score": 0.66,
+      "population_density_sqkm": 59508.0,
+      "baseline_cases_per_yr": 140.26,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 11.89,
+          "ci_low": 11.03,
+          "ci_high": 12.81
+        },
+        "lgbm_pd": {
+          "estimate": 5.99,
+          "ci_low": 5.39,
+          "ci_high": 6.63
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 22.77,
+          "ci_low": 21.19,
+          "ci_high": 24.45
+        },
+        "lgbm_pd": {
+          "estimate": 24.69,
+          "ci_low": 22.25,
+          "ci_high": 27.34
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.73,
+          "ci_low": 3.6,
+          "ci_high": 5.82
+        },
+        "lgbm_pd": {
+          "estimate": 0.07,
+          "ci_low": 0.05,
+          "ci_high": 0.09
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.29,
+          "ci_low": 7.1,
+          "ci_high": 11.4
+        },
+        "lgbm_pd": {
+          "estimate": 1.58,
+          "ci_low": 1.47,
+          "ci_high": 1.73
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 22.77,
+        "drainage_cases_per_yr_pd": 24.69,
+        "sim_roi_cases_per_crew": 3.85,
+        "crew_deployments_equiv": 5.91,
+        "priority_signal": "build_priority"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_03",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.85,
+      "sanitation_score": 0.64,
+      "population_density_sqkm": 21310.0,
+      "baseline_cases_per_yr": 138.37,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 11.73,
+          "ci_low": 10.88,
+          "ci_high": 12.64
+        },
+        "lgbm_pd": {
+          "estimate": 18.44,
+          "ci_low": 16.27,
+          "ci_high": 21.01
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 22.47,
+          "ci_low": 20.9,
+          "ci_high": 24.12
+        },
+        "lgbm_pd": {
+          "estimate": 25.77,
+          "ci_low": 22.81,
+          "ci_high": 29.34
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.66,
+          "ci_low": 3.55,
+          "ci_high": 5.74
+        },
+        "lgbm_pd": {
+          "estimate": 1.73,
+          "ci_low": 1.57,
+          "ci_high": 1.92
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 9.17,
+          "ci_low": 7.0,
+          "ci_high": 11.24
+        },
+        "lgbm_pd": {
+          "estimate": 2.75,
+          "ci_low": 2.54,
+          "ci_high": 3.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 22.47,
+        "drainage_cases_per_yr_pd": 25.77,
+        "sim_roi_cases_per_crew": 6.89,
+        "crew_deployments_equiv": 3.26,
+        "priority_signal": "build_and_send"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_08",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.57,
+      "sanitation_score": 0.45,
+      "population_density_sqkm": 32351.0,
+      "baseline_cases_per_yr": 133.59,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 11.33,
+          "ci_low": 10.5,
+          "ci_high": 12.2
+        },
+        "lgbm_pd": {
+          "estimate": 7.69,
+          "ci_low": 7.02,
+          "ci_high": 8.34
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 21.69,
+          "ci_low": 20.18,
+          "ci_high": 23.29
+        },
+        "lgbm_pd": {
+          "estimate": 16.55,
+          "ci_low": 14.86,
+          "ci_high": 18.18
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.5,
+          "ci_low": 3.42,
+          "ci_high": 5.54
+        },
+        "lgbm_pd": {
+          "estimate": 2.53,
+          "ci_low": 2.27,
+          "ci_high": 2.8
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.85,
+          "ci_low": 6.76,
+          "ci_high": 10.85
+        },
+        "lgbm_pd": {
+          "estimate": 5.13,
+          "ci_low": 4.72,
+          "ci_high": 5.56
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 21.69,
+        "drainage_cases_per_yr_pd": 16.55,
+        "sim_roi_cases_per_crew": 4.05,
+        "crew_deployments_equiv": 5.36,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_11",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.73,
+      "sanitation_score": 0.74,
+      "population_density_sqkm": 24816.0,
+      "baseline_cases_per_yr": 131.39,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 11.14,
+          "ci_low": 10.33,
+          "ci_high": 12.0
+        },
+        "lgbm_pd": {
+          "estimate": 7.7,
+          "ci_low": 6.76,
+          "ci_high": 8.92
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 21.34,
+          "ci_low": 19.85,
+          "ci_high": 22.91
+        },
+        "lgbm_pd": {
+          "estimate": 15.74,
+          "ci_low": 13.37,
+          "ci_high": 18.59
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.43,
+          "ci_low": 3.37,
+          "ci_high": 5.45
+        },
+        "lgbm_pd": {
+          "estimate": 1.44,
+          "ci_low": 1.3,
+          "ci_high": 1.63
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.7,
+          "ci_low": 6.65,
+          "ci_high": 10.68
+        },
+        "lgbm_pd": {
+          "estimate": 1.44,
+          "ci_low": 1.3,
+          "ci_high": 1.63
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 21.34,
+        "drainage_cases_per_yr_pd": 15.74,
+        "sim_roi_cases_per_crew": 3.94,
+        "crew_deployments_equiv": 5.42,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_16",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.43,
+      "sanitation_score": 0.59,
+      "population_density_sqkm": 55763.0,
+      "baseline_cases_per_yr": 130.1,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 11.03,
+          "ci_low": 10.23,
+          "ci_high": 11.88
+        },
+        "lgbm_pd": {
+          "estimate": 11.94,
+          "ci_low": 10.73,
+          "ci_high": 13.27
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 21.12,
+          "ci_low": 19.65,
+          "ci_high": 22.68
+        },
+        "lgbm_pd": {
+          "estimate": 20.39,
+          "ci_low": 18.54,
+          "ci_high": 22.45
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.38,
+          "ci_low": 3.34,
+          "ci_high": 5.4
+        },
+        "lgbm_pd": {
+          "estimate": 2.27,
+          "ci_low": 2.17,
+          "ci_high": 2.39
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.62,
+          "ci_low": 6.59,
+          "ci_high": 10.57
+        },
+        "lgbm_pd": {
+          "estimate": 3.74,
+          "ci_low": 3.59,
+          "ci_high": 3.96
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 21.12,
+        "drainage_cases_per_yr_pd": 20.39,
+        "sim_roi_cases_per_crew": 4.31,
+        "crew_deployments_equiv": 4.9,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_11",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.33,
+      "sanitation_score": 0.29,
+      "population_density_sqkm": 52630.0,
+      "baseline_cases_per_yr": 129.1,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 10.95,
+          "ci_low": 10.15,
+          "ci_high": 11.79
+        },
+        "lgbm_pd": {
+          "estimate": 9.43,
+          "ci_low": 8.78,
+          "ci_high": 10.2
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 20.96,
+          "ci_low": 19.5,
+          "ci_high": 22.51
+        },
+        "lgbm_pd": {
+          "estimate": 10.18,
+          "ci_low": 9.41,
+          "ci_high": 11.07
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.35,
+          "ci_low": 3.31,
+          "ci_high": 5.36
+        },
+        "lgbm_pd": {
+          "estimate": 0.58,
+          "ci_low": 0.54,
+          "ci_high": 0.62
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.55,
+          "ci_low": 6.54,
+          "ci_high": 10.49
+        },
+        "lgbm_pd": {
+          "estimate": 11.89,
+          "ci_low": 10.46,
+          "ci_high": 13.57
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 20.96,
+        "drainage_cases_per_yr_pd": 10.18,
+        "sim_roi_cases_per_crew": 6.0,
+        "crew_deployments_equiv": 3.49,
+        "priority_signal": "send_priority"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_06",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.59,
+      "sanitation_score": 0.71,
+      "population_density_sqkm": 36422.0,
+      "baseline_cases_per_yr": 126.91,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 10.76,
+          "ci_low": 9.98,
+          "ci_high": 11.59
+        },
+        "lgbm_pd": {
+          "estimate": 9.14,
+          "ci_low": 7.98,
+          "ci_high": 10.3
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 20.61,
+          "ci_low": 19.17,
+          "ci_high": 22.12
+        },
+        "lgbm_pd": {
+          "estimate": 14.93,
+          "ci_low": 13.3,
+          "ci_high": 16.66
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.28,
+          "ci_low": 3.25,
+          "ci_high": 5.26
+        },
+        "lgbm_pd": {
+          "estimate": 1.18,
+          "ci_low": 1.07,
+          "ci_high": 1.31
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.41,
+          "ci_low": 6.42,
+          "ci_high": 10.31
+        },
+        "lgbm_pd": {
+          "estimate": 1.25,
+          "ci_low": 1.13,
+          "ci_high": 1.38
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 20.61,
+        "drainage_cases_per_yr_pd": 14.93,
+        "sim_roi_cases_per_crew": 4.79,
+        "crew_deployments_equiv": 4.3,
+        "priority_signal": "send_priority"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_02",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.32,
+      "sanitation_score": 0.35,
+      "population_density_sqkm": 52123.0,
+      "baseline_cases_per_yr": 126.31,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 10.71,
+          "ci_low": 9.93,
+          "ci_high": 11.54
+        },
+        "lgbm_pd": {
+          "estimate": 10.03,
+          "ci_low": 9.1,
+          "ci_high": 11.15
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 20.51,
+          "ci_low": 19.08,
+          "ci_high": 22.02
+        },
+        "lgbm_pd": {
+          "estimate": 10.03,
+          "ci_low": 9.1,
+          "ci_high": 11.15
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.26,
+          "ci_low": 3.24,
+          "ci_high": 5.24
+        },
+        "lgbm_pd": {
+          "estimate": 10.67,
+          "ci_low": 9.13,
+          "ci_high": 12.51
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.37,
+          "ci_low": 6.39,
+          "ci_high": 10.26
+        },
+        "lgbm_pd": {
+          "estimate": 13.04,
+          "ci_low": 11.21,
+          "ci_high": 15.13
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 20.51,
+        "drainage_cases_per_yr_pd": 10.03,
+        "sim_roi_cases_per_crew": 3.57,
+        "crew_deployments_equiv": 5.75,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_05",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.81,
+      "sanitation_score": 0.71,
+      "population_density_sqkm": 18314.0,
+      "baseline_cases_per_yr": 125.62,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 10.65,
+          "ci_low": 9.88,
+          "ci_high": 11.47
+        },
+        "lgbm_pd": {
+          "estimate": 16.94,
+          "ci_low": 14.64,
+          "ci_high": 19.04
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 20.4,
+          "ci_low": 18.98,
+          "ci_high": 21.9
+        },
+        "lgbm_pd": {
+          "estimate": 24.4,
+          "ci_low": 21.24,
+          "ci_high": 27.36
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 4.23,
+          "ci_low": 3.22,
+          "ci_high": 5.21
+        },
+        "lgbm_pd": {
+          "estimate": 1.0,
+          "ci_low": 0.9,
+          "ci_high": 1.06
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 8.32,
+          "ci_low": 6.36,
+          "ci_high": 10.21
+        },
+        "lgbm_pd": {
+          "estimate": 1.07,
+          "ci_low": 0.96,
+          "ci_high": 1.15
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 20.4,
+        "drainage_cases_per_yr_pd": 24.4,
+        "sim_roi_cases_per_crew": 6.08,
+        "crew_deployments_equiv": 3.36,
+        "priority_signal": "send_priority"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_07",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.42,
+      "sanitation_score": 0.65,
+      "population_density_sqkm": 42620.0,
+      "baseline_cases_per_yr": 117.45,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.96,
+          "ci_low": 9.23,
+          "ci_high": 10.73
+        },
+        "lgbm_pd": {
+          "estimate": 11.74,
+          "ci_low": 10.51,
+          "ci_high": 13.17
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 19.07,
+          "ci_low": 17.74,
+          "ci_high": 20.47
+        },
+        "lgbm_pd": {
+          "estimate": 20.21,
+          "ci_low": 18.19,
+          "ci_high": 22.54
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.96,
+          "ci_low": 3.01,
+          "ci_high": 4.87
+        },
+        "lgbm_pd": {
+          "estimate": 0.16,
+          "ci_low": 0.12,
+          "ci_high": 0.21
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 7.78,
+          "ci_low": 5.95,
+          "ci_high": 9.54
+        },
+        "lgbm_pd": {
+          "estimate": 1.51,
+          "ci_low": 1.39,
+          "ci_high": 1.67
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 19.07,
+        "drainage_cases_per_yr_pd": 20.21,
+        "sim_roi_cases_per_crew": 5.23,
+        "crew_deployments_equiv": 3.65,
+        "priority_signal": "send_priority"
+      }
+    },
+    {
+      "ward_id": "NCC_Ward_03",
+      "city": "Narayanganj",
+      "water_logging_risk_index": 0.58,
+      "sanitation_score": 0.4,
+      "population_density_sqkm": 18945.0,
+      "baseline_cases_per_yr": 115.26,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.77,
+          "ci_low": 9.06,
+          "ci_high": 10.53
+        },
+        "lgbm_pd": {
+          "estimate": 6.88,
+          "ci_low": 6.43,
+          "ci_high": 7.45
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 18.71,
+          "ci_low": 17.41,
+          "ci_high": 20.09
+        },
+        "lgbm_pd": {
+          "estimate": 11.46,
+          "ci_low": 10.6,
+          "ci_high": 12.47
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.88,
+          "ci_low": 2.96,
+          "ci_high": 4.78
+        },
+        "lgbm_pd": {
+          "estimate": 4.35,
+          "ci_low": 3.73,
+          "ci_high": 5.08
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 7.64,
+          "ci_low": 5.83,
+          "ci_high": 9.36
+        },
+        "lgbm_pd": {
+          "estimate": 6.58,
+          "ci_low": 5.77,
+          "ci_high": 7.52
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 18.71,
+        "drainage_cases_per_yr_pd": 11.46,
+        "sim_roi_cases_per_crew": 4.44,
+        "crew_deployments_equiv": 4.21,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_15",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.58,
+      "sanitation_score": 0.84,
+      "population_density_sqkm": 35918.0,
+      "baseline_cases_per_yr": 112.67,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.55,
+          "ci_low": 8.86,
+          "ci_high": 10.29
+        },
+        "lgbm_pd": {
+          "estimate": 7.57,
+          "ci_low": 6.97,
+          "ci_high": 8.35
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 18.29,
+          "ci_low": 17.02,
+          "ci_high": 19.64
+        },
+        "lgbm_pd": {
+          "estimate": 13.18,
+          "ci_low": 12.03,
+          "ci_high": 14.65
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.8,
+          "ci_low": 2.89,
+          "ci_high": 4.67
+        },
+        "lgbm_pd": {
+          "estimate": -0.0,
+          "ci_low": -0.0,
+          "ci_high": -0.0
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.16,
+        "glm": {
+          "estimate": 6.01,
+          "ci_low": 4.59,
+          "ci_high": 7.38
+        },
+        "lgbm_pd": {
+          "estimate": -0.0,
+          "ci_low": -0.0,
+          "ci_high": -0.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 18.29,
+        "drainage_cases_per_yr_pd": 13.18,
+        "sim_roi_cases_per_crew": 2.87,
+        "crew_deployments_equiv": 6.37,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_02",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.41,
+      "sanitation_score": 0.6,
+      "population_density_sqkm": 38334.0,
+      "baseline_cases_per_yr": 111.97,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.49,
+          "ci_low": 8.8,
+          "ci_high": 10.23
+        },
+        "lgbm_pd": {
+          "estimate": 9.6,
+          "ci_low": 8.72,
+          "ci_high": 10.68
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 18.18,
+          "ci_low": 16.92,
+          "ci_high": 19.52
+        },
+        "lgbm_pd": {
+          "estimate": 17.72,
+          "ci_low": 16.27,
+          "ci_high": 19.56
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.77,
+          "ci_low": 2.87,
+          "ci_high": 4.65
+        },
+        "lgbm_pd": {
+          "estimate": 2.22,
+          "ci_low": 2.12,
+          "ci_high": 2.36
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 7.42,
+          "ci_low": 5.67,
+          "ci_high": 9.1
+        },
+        "lgbm_pd": {
+          "estimate": 3.44,
+          "ci_low": 3.28,
+          "ci_high": 3.69
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 18.18,
+        "drainage_cases_per_yr_pd": 17.72,
+        "sim_roi_cases_per_crew": 2.92,
+        "crew_deployments_equiv": 6.23,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_10",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.24,
+      "sanitation_score": 0.43,
+      "population_density_sqkm": 46652.0,
+      "baseline_cases_per_yr": 110.38,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.36,
+          "ci_low": 8.68,
+          "ci_high": 10.08
+        },
+        "lgbm_pd": {
+          "estimate": 2.74,
+          "ci_low": 2.57,
+          "ci_high": 2.9
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 17.92,
+          "ci_low": 16.68,
+          "ci_high": 19.24
+        },
+        "lgbm_pd": {
+          "estimate": 2.74,
+          "ci_low": 2.57,
+          "ci_high": 2.9
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.72,
+          "ci_low": 2.83,
+          "ci_high": 4.58
+        },
+        "lgbm_pd": {
+          "estimate": 2.98,
+          "ci_low": 2.71,
+          "ci_high": 3.27
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 7.31,
+          "ci_low": 5.59,
+          "ci_high": 8.97
+        },
+        "lgbm_pd": {
+          "estimate": 4.96,
+          "ci_low": 4.62,
+          "ci_high": 5.35
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 17.92,
+        "drainage_cases_per_yr_pd": 2.74,
+        "sim_roi_cases_per_crew": 4.71,
+        "crew_deployments_equiv": 3.8,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_08",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.42,
+      "sanitation_score": 0.49,
+      "population_density_sqkm": 25951.0,
+      "baseline_cases_per_yr": 109.38,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.27,
+          "ci_low": 8.6,
+          "ci_high": 9.99
+        },
+        "lgbm_pd": {
+          "estimate": 9.67,
+          "ci_low": 8.68,
+          "ci_high": 10.86
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 17.76,
+          "ci_low": 16.52,
+          "ci_high": 19.07
+        },
+        "lgbm_pd": {
+          "estimate": 20.14,
+          "ci_low": 18.35,
+          "ci_high": 22.34
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.69,
+          "ci_low": 2.8,
+          "ci_high": 4.54
+        },
+        "lgbm_pd": {
+          "estimate": 2.14,
+          "ci_low": 1.92,
+          "ci_high": 2.39
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 7.25,
+          "ci_low": 5.54,
+          "ci_high": 8.89
+        },
+        "lgbm_pd": {
+          "estimate": 4.28,
+          "ci_low": 3.99,
+          "ci_high": 4.62
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 17.76,
+        "drainage_cases_per_yr_pd": 20.14,
+        "sim_roi_cases_per_crew": 3.69,
+        "crew_deployments_equiv": 4.81,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "NCC_Ward_04",
+      "city": "Narayanganj",
+      "water_logging_risk_index": 0.33,
+      "sanitation_score": 0.7,
+      "population_density_sqkm": 54774.0,
+      "baseline_cases_per_yr": 108.38,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 9.19,
+          "ci_low": 8.52,
+          "ci_high": 9.9
+        },
+        "lgbm_pd": {
+          "estimate": 8.34,
+          "ci_low": 7.69,
+          "ci_high": 9.15
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 17.6,
+          "ci_low": 16.37,
+          "ci_high": 18.89
+        },
+        "lgbm_pd": {
+          "estimate": 8.95,
+          "ci_low": 8.19,
+          "ci_high": 9.88
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.65,
+          "ci_low": 2.78,
+          "ci_high": 4.5
+        },
+        "lgbm_pd": {
+          "estimate": 1.26,
+          "ci_low": 1.19,
+          "ci_high": 1.38
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 7.18,
+          "ci_low": 5.49,
+          "ci_high": 8.81
+        },
+        "lgbm_pd": {
+          "estimate": 1.8,
+          "ci_low": 1.7,
+          "ci_high": 1.93
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 17.6,
+        "drainage_cases_per_yr_pd": 8.95,
+        "sim_roi_cases_per_crew": 4.27,
+        "crew_deployments_equiv": 4.12,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "NCC_Ward_02",
+      "city": "Narayanganj",
+      "water_logging_risk_index": 0.64,
+      "sanitation_score": 0.69,
+      "population_density_sqkm": 20324.0,
+      "baseline_cases_per_yr": 105.2,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.92,
+          "ci_low": 8.27,
+          "ci_high": 9.61
+        },
+        "lgbm_pd": {
+          "estimate": 7.16,
+          "ci_low": 5.76,
+          "ci_high": 8.6
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 17.08,
+          "ci_low": 15.89,
+          "ci_high": 18.34
+        },
+        "lgbm_pd": {
+          "estimate": 16.84,
+          "ci_low": 14.62,
+          "ci_high": 19.13
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.54,
+          "ci_low": 2.7,
+          "ci_high": 4.36
+        },
+        "lgbm_pd": {
+          "estimate": 0.9,
+          "ci_low": 0.8,
+          "ci_high": 1.0
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.97,
+          "ci_low": 5.33,
+          "ci_high": 8.55
+        },
+        "lgbm_pd": {
+          "estimate": 0.95,
+          "ci_low": 0.84,
+          "ci_high": 1.06
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 17.08,
+        "drainage_cases_per_yr_pd": 16.84,
+        "sim_roi_cases_per_crew": 3.57,
+        "crew_deployments_equiv": 4.78,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_09",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.44,
+      "sanitation_score": 0.72,
+      "population_density_sqkm": 35725.0,
+      "baseline_cases_per_yr": 105.1,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.91,
+          "ci_low": 8.26,
+          "ci_high": 9.6
+        },
+        "lgbm_pd": {
+          "estimate": 10.81,
+          "ci_low": 9.74,
+          "ci_high": 12.03
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 17.07,
+          "ci_low": 15.88,
+          "ci_high": 18.32
+        },
+        "lgbm_pd": {
+          "estimate": 16.27,
+          "ci_low": 14.69,
+          "ci_high": 18.13
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.54,
+          "ci_low": 2.69,
+          "ci_high": 4.36
+        },
+        "lgbm_pd": {
+          "estimate": 1.34,
+          "ci_low": 1.27,
+          "ci_high": 1.42
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.96,
+          "ci_low": 5.32,
+          "ci_high": 8.54
+        },
+        "lgbm_pd": {
+          "estimate": 1.4,
+          "ci_low": 1.32,
+          "ci_high": 1.49
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 17.07,
+        "drainage_cases_per_yr_pd": 16.27,
+        "sim_roi_cases_per_crew": 3.24,
+        "crew_deployments_equiv": 5.27,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_01",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.4,
+      "sanitation_score": 0.79,
+      "population_density_sqkm": 40154.0,
+      "baseline_cases_per_yr": 102.41,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.68,
+          "ci_low": 8.05,
+          "ci_high": 9.35
+        },
+        "lgbm_pd": {
+          "estimate": 15.43,
+          "ci_low": 13.5,
+          "ci_high": 17.23
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 16.63,
+          "ci_low": 15.47,
+          "ci_high": 17.85
+        },
+        "lgbm_pd": {
+          "estimate": 18.08,
+          "ci_low": 15.97,
+          "ci_high": 20.11
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.45,
+          "ci_low": 2.63,
+          "ci_high": 4.25
+        },
+        "lgbm_pd": {
+          "estimate": 0.06,
+          "ci_low": 0.04,
+          "ci_high": 0.07
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.78,
+          "ci_low": 5.18,
+          "ci_high": 8.32
+        },
+        "lgbm_pd": {
+          "estimate": 0.06,
+          "ci_low": 0.04,
+          "ci_high": 0.07
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 16.63,
+        "drainage_cases_per_yr_pd": 18.08,
+        "sim_roi_cases_per_crew": 3.73,
+        "crew_deployments_equiv": 4.46,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_14",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.29,
+      "sanitation_score": 0.57,
+      "population_density_sqkm": 43088.0,
+      "baseline_cases_per_yr": 101.11,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.57,
+          "ci_low": 7.95,
+          "ci_high": 9.23
+        },
+        "lgbm_pd": {
+          "estimate": 2.92,
+          "ci_low": 2.73,
+          "ci_high": 3.17
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 16.42,
+          "ci_low": 15.28,
+          "ci_high": 17.63
+        },
+        "lgbm_pd": {
+          "estimate": 2.92,
+          "ci_low": 2.73,
+          "ci_high": 3.17
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.41,
+          "ci_low": 2.59,
+          "ci_high": 4.19
+        },
+        "lgbm_pd": {
+          "estimate": 3.72,
+          "ci_low": 3.54,
+          "ci_high": 3.99
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.7,
+          "ci_low": 5.12,
+          "ci_high": 8.22
+        },
+        "lgbm_pd": {
+          "estimate": 3.8,
+          "ci_low": 3.61,
+          "ci_high": 4.07
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 16.42,
+        "drainage_cases_per_yr_pd": 2.92,
+        "sim_roi_cases_per_crew": 3.82,
+        "crew_deployments_equiv": 4.3,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_16",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.51,
+      "sanitation_score": 0.74,
+      "population_density_sqkm": 32209.0,
+      "baseline_cases_per_yr": 100.61,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.53,
+          "ci_low": 7.91,
+          "ci_high": 9.19
+        },
+        "lgbm_pd": {
+          "estimate": 4.2,
+          "ci_low": 3.67,
+          "ci_high": 4.71
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 16.34,
+          "ci_low": 15.2,
+          "ci_high": 17.54
+        },
+        "lgbm_pd": {
+          "estimate": 14.52,
+          "ci_low": 12.88,
+          "ci_high": 16.22
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.39,
+          "ci_low": 2.58,
+          "ci_high": 4.17
+        },
+        "lgbm_pd": {
+          "estimate": 1.38,
+          "ci_low": 1.29,
+          "ci_high": 1.5
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.67,
+          "ci_low": 5.09,
+          "ci_high": 8.17
+        },
+        "lgbm_pd": {
+          "estimate": 1.38,
+          "ci_low": 1.29,
+          "ci_high": 1.5
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 16.34,
+        "drainage_cases_per_yr_pd": 14.52,
+        "sim_roi_cases_per_crew": 4.05,
+        "crew_deployments_equiv": 4.03,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_06",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.43,
+      "sanitation_score": 0.59,
+      "population_density_sqkm": 28454.0,
+      "baseline_cases_per_yr": 99.22,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.41,
+          "ci_low": 7.8,
+          "ci_high": 9.06
+        },
+        "lgbm_pd": {
+          "estimate": 9.64,
+          "ci_low": 8.66,
+          "ci_high": 10.77
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 16.11,
+          "ci_low": 14.99,
+          "ci_high": 17.3
+        },
+        "lgbm_pd": {
+          "estimate": 18.85,
+          "ci_low": 17.2,
+          "ci_high": 20.82
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.34,
+          "ci_low": 2.54,
+          "ci_high": 4.12
+        },
+        "lgbm_pd": {
+          "estimate": 2.14,
+          "ci_low": 2.02,
+          "ci_high": 2.28
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.57,
+          "ci_low": 5.02,
+          "ci_high": 8.06
+        },
+        "lgbm_pd": {
+          "estimate": 3.48,
+          "ci_low": 3.3,
+          "ci_high": 3.69
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 16.11,
+        "drainage_cases_per_yr_pd": 18.85,
+        "sim_roi_cases_per_crew": 3.42,
+        "crew_deployments_equiv": 4.71,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_04",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.22,
+      "sanitation_score": 0.88,
+      "population_density_sqkm": 58360.0,
+      "baseline_cases_per_yr": 98.02,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.31,
+          "ci_low": 7.71,
+          "ci_high": 8.95
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 15.92,
+          "ci_low": 14.81,
+          "ci_high": 17.09
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.3,
+          "ci_low": 2.51,
+          "ci_high": 4.07
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.12,
+        "glm": {
+          "estimate": 3.95,
+          "ci_low": 3.01,
+          "ci_high": 4.86
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 15.92,
+        "drainage_cases_per_yr_pd": 0.0,
+        "sim_roi_cases_per_crew": 3.38,
+        "crew_deployments_equiv": 4.71,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_17",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.34,
+      "sanitation_score": 0.88,
+      "population_density_sqkm": 49162.0,
+      "baseline_cases_per_yr": 97.52,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.27,
+          "ci_low": 7.67,
+          "ci_high": 8.91
+        },
+        "lgbm_pd": {
+          "estimate": 6.26,
+          "ci_low": 5.7,
+          "ci_high": 6.97
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 15.84,
+          "ci_low": 14.73,
+          "ci_high": 17.0
+        },
+        "lgbm_pd": {
+          "estimate": 8.56,
+          "ci_low": 7.86,
+          "ci_high": 9.42
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.29,
+          "ci_low": 2.5,
+          "ci_high": 4.05
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.12,
+        "glm": {
+          "estimate": 3.93,
+          "ci_low": 2.99,
+          "ci_high": 4.83
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 15.84,
+        "drainage_cases_per_yr_pd": 8.56,
+        "sim_roi_cases_per_crew": 4.78,
+        "crew_deployments_equiv": 3.31,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_02",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.37,
+      "sanitation_score": 0.53,
+      "population_density_sqkm": 24272.0,
+      "baseline_cases_per_yr": 95.23,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 8.07,
+          "ci_low": 7.49,
+          "ci_high": 8.7
+        },
+        "lgbm_pd": {
+          "estimate": 11.87,
+          "ci_low": 10.69,
+          "ci_high": 13.15
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 15.46,
+          "ci_low": 14.39,
+          "ci_high": 16.6
+        },
+        "lgbm_pd": {
+          "estimate": 14.81,
+          "ci_low": 13.45,
+          "ci_high": 16.32
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.21,
+          "ci_low": 2.44,
+          "ci_high": 3.95
+        },
+        "lgbm_pd": {
+          "estimate": 1.78,
+          "ci_low": 1.67,
+          "ci_high": 1.93
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.31,
+          "ci_low": 4.82,
+          "ci_high": 7.74
+        },
+        "lgbm_pd": {
+          "estimate": 3.69,
+          "ci_low": 3.46,
+          "ci_high": 4.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 15.46,
+        "drainage_cases_per_yr_pd": 14.81,
+        "sim_roi_cases_per_crew": 3.24,
+        "crew_deployments_equiv": 4.77,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_17",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.26,
+      "sanitation_score": 0.44,
+      "population_density_sqkm": 31041.0,
+      "baseline_cases_per_yr": 91.85,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 7.79,
+          "ci_low": 7.22,
+          "ci_high": 8.39
+        },
+        "lgbm_pd": {
+          "estimate": 2.92,
+          "ci_low": 2.73,
+          "ci_high": 3.15
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 14.91,
+          "ci_low": 13.88,
+          "ci_high": 16.01
+        },
+        "lgbm_pd": {
+          "estimate": 2.92,
+          "ci_low": 2.73,
+          "ci_high": 3.15
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.09,
+          "ci_low": 2.35,
+          "ci_high": 3.81
+        },
+        "lgbm_pd": {
+          "estimate": 2.17,
+          "ci_low": 2.0,
+          "ci_high": 2.38
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 6.08,
+          "ci_low": 4.65,
+          "ci_high": 7.46
+        },
+        "lgbm_pd": {
+          "estimate": 3.88,
+          "ci_low": 3.63,
+          "ci_high": 4.18
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 14.91,
+        "drainage_cases_per_yr_pd": 2.92,
+        "sim_roi_cases_per_crew": 3.96,
+        "crew_deployments_equiv": 3.77,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_20",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.23,
+      "sanitation_score": 0.46,
+      "population_density_sqkm": 29171.0,
+      "baseline_cases_per_yr": 89.85,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 7.62,
+          "ci_low": 7.07,
+          "ci_high": 8.21
+        },
+        "lgbm_pd": {
+          "estimate": 0.97,
+          "ci_low": 0.85,
+          "ci_high": 1.11
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 14.59,
+          "ci_low": 13.57,
+          "ci_high": 15.66
+        },
+        "lgbm_pd": {
+          "estimate": 0.97,
+          "ci_low": 0.85,
+          "ci_high": 1.11
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 3.03,
+          "ci_low": 2.3,
+          "ci_high": 3.73
+        },
+        "lgbm_pd": {
+          "estimate": 1.82,
+          "ci_low": 1.65,
+          "ci_high": 2.01
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 5.95,
+          "ci_low": 4.55,
+          "ci_high": 7.3
+        },
+        "lgbm_pd": {
+          "estimate": 5.46,
+          "ci_low": 5.08,
+          "ci_high": 5.95
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 14.59,
+        "drainage_cases_per_yr_pd": 0.97,
+        "sim_roi_cases_per_crew": 2.76,
+        "crew_deployments_equiv": 5.29,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_07",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.29,
+      "sanitation_score": 0.81,
+      "population_density_sqkm": 38432.0,
+      "baseline_cases_per_yr": 87.86,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 7.45,
+          "ci_low": 6.91,
+          "ci_high": 8.02
+        },
+        "lgbm_pd": {
+          "estimate": 2.85,
+          "ci_low": 2.64,
+          "ci_high": 3.1
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 14.27,
+          "ci_low": 13.27,
+          "ci_high": 15.32
+        },
+        "lgbm_pd": {
+          "estimate": 2.85,
+          "ci_low": 2.64,
+          "ci_high": 3.1
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 2.96,
+          "ci_low": 2.25,
+          "ci_high": 3.65
+        },
+        "lgbm_pd": {
+          "estimate": 0.05,
+          "ci_low": 0.04,
+          "ci_high": 0.06
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.19,
+        "glm": {
+          "estimate": 5.54,
+          "ci_low": 4.23,
+          "ci_high": 6.8
+        },
+        "lgbm_pd": {
+          "estimate": 0.05,
+          "ci_low": 0.04,
+          "ci_high": 0.06
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 14.27,
+        "drainage_cases_per_yr_pd": 2.85,
+        "sim_roi_cases_per_crew": 2.64,
+        "crew_deployments_equiv": 5.41,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_05",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.45,
+      "sanitation_score": 0.86,
+      "population_density_sqkm": 24832.0,
+      "baseline_cases_per_yr": 85.57,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 7.25,
+          "ci_low": 6.73,
+          "ci_high": 7.82
+        },
+        "lgbm_pd": {
+          "estimate": 10.19,
+          "ci_low": 9.15,
+          "ci_high": 11.24
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 13.89,
+          "ci_low": 12.93,
+          "ci_high": 14.92
+        },
+        "lgbm_pd": {
+          "estimate": 16.62,
+          "ci_low": 15.01,
+          "ci_high": 18.28
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 2.88,
+          "ci_low": 2.19,
+          "ci_high": 3.55
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.14,
+        "glm": {
+          "estimate": 4.01,
+          "ci_low": 3.06,
+          "ci_high": 4.93
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 13.89,
+        "drainage_cases_per_yr_pd": 16.62,
+        "sim_roi_cases_per_crew": 4.56,
+        "crew_deployments_equiv": 3.05,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DNCC_Ward_13",
+      "city": "Dhaka North",
+      "water_logging_risk_index": 0.27,
+      "sanitation_score": 0.69,
+      "population_density_sqkm": 35362.0,
+      "baseline_cases_per_yr": 83.98,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 7.12,
+          "ci_low": 6.6,
+          "ci_high": 7.67
+        },
+        "lgbm_pd": {
+          "estimate": 2.71,
+          "ci_low": 2.51,
+          "ci_high": 2.93
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 13.64,
+          "ci_low": 12.69,
+          "ci_high": 14.64
+        },
+        "lgbm_pd": {
+          "estimate": 2.71,
+          "ci_low": 2.51,
+          "ci_high": 2.93
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 2.83,
+          "ci_low": 2.15,
+          "ci_high": 3.48
+        },
+        "lgbm_pd": {
+          "estimate": 1.16,
+          "ci_low": 1.07,
+          "ci_high": 1.26
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 5.56,
+          "ci_low": 4.25,
+          "ci_high": 6.82
+        },
+        "lgbm_pd": {
+          "estimate": 1.21,
+          "ci_low": 1.11,
+          "ci_high": 1.32
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 13.64,
+        "drainage_cases_per_yr_pd": 2.71,
+        "sim_roi_cases_per_crew": 3.6,
+        "crew_deployments_equiv": 3.79,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "CCC_Ward_09",
+      "city": "Chattogram",
+      "water_logging_risk_index": 0.23,
+      "sanitation_score": 0.65,
+      "population_density_sqkm": 34235.0,
+      "baseline_cases_per_yr": 81.49,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 6.91,
+          "ci_low": 6.41,
+          "ci_high": 7.44
+        },
+        "lgbm_pd": {
+          "estimate": 0.9,
+          "ci_low": 0.77,
+          "ci_high": 1.03
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 13.23,
+          "ci_low": 12.31,
+          "ci_high": 14.21
+        },
+        "lgbm_pd": {
+          "estimate": 0.9,
+          "ci_low": 0.77,
+          "ci_high": 1.03
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 2.75,
+          "ci_low": 2.09,
+          "ci_high": 3.38
+        },
+        "lgbm_pd": {
+          "estimate": 0.1,
+          "ci_low": 0.08,
+          "ci_high": 0.12
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 5.4,
+          "ci_low": 4.12,
+          "ci_high": 6.62
+        },
+        "lgbm_pd": {
+          "estimate": 1.06,
+          "ci_low": 0.97,
+          "ci_high": 1.16
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 13.23,
+        "drainage_cases_per_yr_pd": 0.9,
+        "sim_roi_cases_per_crew": 3.62,
+        "crew_deployments_equiv": 3.65,
+        "priority_signal": "monitor"
+      }
+    },
+    {
+      "ward_id": "DSCC_Ward_14",
+      "city": "Dhaka South",
+      "water_logging_risk_index": 0.22,
+      "sanitation_score": 0.66,
+      "population_density_sqkm": 24149.0,
+      "baseline_cases_per_yr": 68.04,
+      "water_logging_minus_01": {
+        "effective_delta": -0.1,
+        "glm": {
+          "estimate": 5.77,
+          "ci_low": 5.35,
+          "ci_high": 6.21
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "water_logging_minus_02": {
+        "effective_delta": -0.2,
+        "glm": {
+          "estimate": 11.05,
+          "ci_low": 10.28,
+          "ci_high": 11.86
+        },
+        "lgbm_pd": {
+          "estimate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0
+        }
+      },
+      "sanitation_plus_01": {
+        "effective_delta": 0.1,
+        "glm": {
+          "estimate": 2.29,
+          "ci_low": 1.74,
+          "ci_high": 2.82
+        },
+        "lgbm_pd": {
+          "estimate": 0.06,
+          "ci_low": 0.03,
+          "ci_high": 0.09
+        }
+      },
+      "sanitation_plus_02": {
+        "effective_delta": 0.2,
+        "glm": {
+          "estimate": 4.51,
+          "ci_low": 3.44,
+          "ci_high": 5.53
+        },
+        "lgbm_pd": {
+          "estimate": 0.65,
+          "ci_low": 0.58,
+          "ci_high": 0.73
+        }
+      },
+      "build_vs_send": {
+        "drainage_cases_per_yr_glm": 11.05,
+        "drainage_cases_per_yr_pd": 0.0,
+        "sim_roi_cases_per_crew": 2.57,
+        "crew_deployments_equiv": 4.3,
+        "priority_signal": "monitor"
+      }
+    }
+  ]
+}
