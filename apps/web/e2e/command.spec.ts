@@ -113,6 +113,9 @@ test.describe("Phase 2 Command Center (WP5-1..WP5-6)", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/dashboard?demo=1&tab=command&lang=bn");
     await expect(page.getByTestId("command-center-view")).toBeVisible({ timeout: 25_000 });
+    await expect(page.getByTestId("provenance-model-version")).not.toHaveText("—", {
+      timeout: 20_000,
+    });
 
     const englishDenyList = [
       "Routing horizon",
@@ -159,6 +162,9 @@ test.describe("Phase 2 Command Center (WP5-1..WP5-6)", () => {
   }) => {
     await page.goto("/dashboard?demo=1&tab=command&lang=en");
     await expect(page.getByTestId("command-center-view")).toBeVisible({ timeout: 25_000 });
+    await expect(page.getByTestId("provenance-model-version")).not.toHaveText("—", {
+      timeout: 20_000,
+    });
 
     // L6: Set stock 30% in Step 2, move to Step 3, reload -> Step 3 active and stock slider stays 30
     await page.getByTestId("command-step-2").click();
@@ -175,6 +181,9 @@ test.describe("Phase 2 Command Center (WP5-1..WP5-6)", () => {
 
     await page.reload();
     await expect(page.getByTestId("command-panel-3")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("provenance-model-version")).not.toHaveText("—", {
+      timeout: 20_000,
+    });
     await page.getByTestId("command-step-2").click();
     await expect(page.getByTestId("stock-slider")).toHaveValue("30");
 
