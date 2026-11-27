@@ -5,8 +5,15 @@ import { clsx } from "clsx";
 import { NumberTicker } from "@/components/ui/NumberTicker";
 import { wardLabel } from "@/components/ward-map/geo";
 import type { City } from "@/lib/api/client";
+import type { HorizonWindow } from "@/lib/demo-config";
 import type { Lang } from "@/lib/i18n";
 import type { WorkspaceSignals } from "./useWorkspaceSignals";
+
+const WINDOW_MEASURE: Record<HorizonWindow, Record<Lang, string>> = {
+  "1w": { en: "peak week, h1", bn: "শীর্ষ সপ্তাহ, h1" },
+  "2-4w": { en: "peak week, h2–4", bn: "শীর্ষ সপ্তাহ, h2–4" },
+  "1-4w": { en: "peak week, h1–4", bn: "শীর্ষ সপ্তাহ, h1–4" },
+};
 
 const COPY = {
   en: {
@@ -32,18 +39,21 @@ const COPY = {
 export interface StatTilesProps {
   signals: WorkspaceSignals;
   city: City;
+  windowKey?: HorizonWindow;
   lang: Lang;
 }
 
 /** Four executive KPI tiles above forecast views. Every figure comes from the live API. */
-export function StatTiles({ signals, city, lang }: StatTilesProps) {
+export function StatTiles({ signals, city, windowKey = "2-4w", lang }: StatTilesProps) {
   const copy = COPY[lang];
   const bn = lang === "bn";
   const top = signals.topWard;
+  const measureNote = WINDOW_MEASURE[windowKey][lang];
   const criticalPct = signals.criticalCount !== null ? Math.min(100, Math.round((signals.criticalCount / 60) * 100)) : 0;
 
   const tiles = [
     {
+      testId: "stat-tile-critical",
       icon: AlertTriangle,
       label: copy.critical,
       value: signals.criticalCount,
@@ -52,6 +62,7 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
       progressPct: criticalPct,
     },
     {
+      testId: "stat-tile-city-alerts",
       icon: MapPin,
       label: copy.city(city),
       value: signals.cityAlertCount,
@@ -60,14 +71,16 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
       progressPct: null,
     },
     {
+      testId: "stat-tile-top-ward",
       icon: LineChart,
       label: copy.top,
       value: top?.expected_cases ?? null,
       decimals: 1,
-      note: top ? `${wardLabel(top.ward_id)} · ${top.city}` : "—",
+      note: top ? `${wardLabel(top.ward_id, lang)} · ${top.city} · ${measureNote}` : measureNote,
       progressPct: null,
     },
     {
+      testId: "stat-tile-mae",
       icon: ShieldCheck,
       label: copy.mae,
       value: signals.holdoutMae,
@@ -87,7 +100,8 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
         const Icon = tile.icon;
         return (
           <div
-            key={tile.label}
+            key={tile.testId}
+            data-testid={tile.testId}
             data-enter
             className="group flex flex-col justify-between rounded-[16px] bg-white p-4 ring-1 ring-mist/90 transition-colors duration-200 hover:ring-royal/35 sm:p-4.5"
           >
@@ -104,7 +118,10 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
             </div>
 
             <div className="mt-3">
-              <span className="block font-sans text-[1.9rem] font-extrabold leading-none tracking-[-0.03em] text-navy tnum">
+              <span
+                data-testid={`${tile.testId}-value`}
+                className="block font-sans text-[1.9rem] font-extrabold leading-none tracking-[-0.03em] text-navy tnum"
+              >
                 {tile.value === null ? "…" : <NumberTicker value={tile.value} decimalPlaces={tile.decimals} />}
               </span>
               {tile.progressPct !== null ? (
@@ -119,6 +136,7 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
                 </div>
               ) : null}
               <span
+                data-testid={`${tile.testId}-note`}
                 lang={lang}
                 className={clsx(
                   "mt-2 block truncate text-[11px] font-medium text-slate",

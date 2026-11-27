@@ -326,6 +326,18 @@ export function fetchWeatherStatus(signal?: AbortSignal): Promise<WeatherStatus>
   return apiRequest<WeatherStatus>("/api/v1/weather/status", { signal });
 }
 
+export interface ReadyzStatus {
+  status: string;
+  offline: boolean;
+  git_sha?: string;
+  model_version?: string;
+  data_as_of?: string;
+}
+
+export function fetchReadyz(signal?: AbortSignal): Promise<ReadyzStatus> {
+  return apiRequest<ReadyzStatus>("/readyz", { signal, timeoutMs: 5_000 });
+}
+
 /**
  * Ops telemetry goes through the server-only route app/api/ops/route.ts, which adds the
  * X-Ops-Token from OPS_TOKEN on the server. The token is never sent to the browser.
@@ -361,5 +373,14 @@ export function useWeatherStatusQuery(): UseQueryResult<WeatherStatus, ApiError>
     queryKey: ["weather-status"],
     queryFn: ({ signal }) => fetchWeatherStatus(signal),
     staleTime: 30 * 1000,
+  });
+}
+
+export function useReadyzQuery(): UseQueryResult<ReadyzStatus, ApiError> {
+  return useQuery<ReadyzStatus, ApiError>({
+    queryKey: ["readyz"],
+    queryFn: ({ signal }) => fetchReadyz(signal),
+    staleTime: 30 * 1000,
+    retry: false,
   });
 }

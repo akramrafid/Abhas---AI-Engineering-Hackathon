@@ -41,9 +41,14 @@ export function useWorkspaceSignals(
 
   return useMemo(() => {
     const peaks = buildMapWards(wards, heatmaps.cellsByWard, "peak", horizons);
+    const compareByCases = (a: MapWard, b: MapWard) =>
+      (b.expected_cases ?? 0) - (a.expected_cases ?? 0) || a.ward_id.localeCompare(b.ward_id);
     const alerts = peaks
       .filter((w) => w.tier && ALERT_TIERS.has(w.tier))
-      .sort((a, b) => (b.expected_cases ?? 0) - (a.expected_cases ?? 0));
+      .sort(compareByCases);
+    const topByCases = [...peaks]
+      .filter((w) => w.expected_cases !== null)
+      .sort(compareByCases);
     const exportRows: (string | number)[][] = [
       ["ward_id", "city", "horizon_weeks", "target_week", "expected_cases", "tier", "origin_week", "source"],
     ];
@@ -70,7 +75,7 @@ export function useWorkspaceSignals(
       alerts,
       criticalCount: peaks.filter((w) => w.tier === "Critical").length,
       cityAlertCount: alerts.filter((w) => w.city === city).length,
-      topWard: alerts[0] ?? null,
+      topWard: alerts[0] ?? topByCases[0] ?? null,
       holdoutMae: mae,
       isPending: heatmaps.isPending,
       isError: heatmaps.isError,

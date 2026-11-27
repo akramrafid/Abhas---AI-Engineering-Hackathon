@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bell, CloudRain, Moon, Search, Sun } from "@/components/icons";
+import { Bell, CloudRain, Moon, Search, ShieldCheck, Sun } from "@/components/icons";
 import { clsx } from "clsx";
 import { LogoutConfirmDialog } from "@/components/auth/LogoutConfirmDialog";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { AbhasLogo } from "@/components/brand/AbhasLogo";
 import type { City, WeatherMode } from "@/lib/api/client";
 import { UI_COPY, type Lang } from "@/lib/i18n";
+import { useConnectivity } from "@/lib/useConnectivity";
 
 export interface DashboardHeaderProps {
   selectedCity: City;
   isDemoMode: boolean;
+  apiOffline?: boolean;
   weatherMode?: WeatherMode;
   onChangeWeatherMode?: (mode: WeatherMode) => void;
   weatherBadgeText: string;
@@ -29,6 +31,7 @@ export interface DashboardHeaderProps {
 export function DashboardHeader({
   selectedCity,
   isDemoMode,
+  apiOffline = false,
   weatherMode = "dataset",
   onChangeWeatherMode,
   weatherBadgeText,
@@ -43,6 +46,8 @@ export function DashboardHeader({
   const [confirmLogout, setConfirmLogout] = useState(false);
   const copy = UI_COPY[lang];
   const bn = lang === "bn";
+  const connectivity = useConnectivity(apiOffline);
+  const offlineWeatherTooltip = bn ? "অফলাইন — ডেটাসেট আবহাওয়া" : "Offline — dataset weather";
   const chip = clsx(
     "inline-flex min-h-9 items-center rounded-full px-3 text-xs ring-1",
     dark ? "bg-white/5 text-mist ring-white/15" : "bg-paper text-slate ring-mist",
@@ -114,12 +119,31 @@ export function DashboardHeader({
             {copy.demoBadge}
           </span>
         ) : null}
+        <span
+          data-testid={connectivity.isOffline ? "header-offline-badge" : "header-connectivity-badge"}
+          lang={lang}
+          className={clsx(
+            "inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-xs font-semibold ring-1",
+            bn && "font-bangla",
+            connectivity.isOffline
+              ? "bg-ink text-white ring-ink"
+              : dark
+                ? "bg-white/5 text-white ring-white/15"
+                : "bg-paper text-navy ring-mist",
+          )}
+        >
+          <ShieldCheck
+            aria-hidden="true"
+            className={clsx("h-3.5 w-3.5", connectivity.isOffline ? "text-white" : "text-royal")}
+          />
+          <span>{connectivity.label(lang)}</span>
+        </span>
         {onChangeWeatherMode ? (
           <div
             data-testid="weather-source-badge"
             role="group"
             aria-label="Weather data source"
-            title={weatherBadgeText}
+            title={connectivity.isOffline ? offlineWeatherTooltip : weatherBadgeText}
             className={clsx(
               "inline-flex min-h-9 items-center rounded-full p-0.5 ring-1 sm:min-h-10",
               dark ? "bg-white/5 ring-white/15" : "bg-paper ring-mist",
@@ -128,12 +152,12 @@ export function DashboardHeader({
             <button
               type="button"
               data-testid="weather-mode-dataset"
-              aria-pressed={weatherMode === "dataset"}
+              aria-pressed={weatherMode === "dataset" || connectivity.isOffline}
               onClick={() => onChangeWeatherMode("dataset")}
               className={clsx(
                 "min-h-8 cursor-pointer rounded-full px-2.5 text-[11px] font-semibold transition-colors sm:min-h-9 sm:px-3 sm:text-xs",
                 bn && "font-bangla",
-                weatherMode === "dataset"
+                weatherMode === "dataset" || connectivity.isOffline
                   ? "bg-navy text-white"
                   : dark
                     ? "text-mist hover:text-white"
@@ -149,16 +173,22 @@ export function DashboardHeader({
             <button
               type="button"
               data-testid="weather-mode-live"
-              aria-pressed={weatherMode === "live"}
-              onClick={() => onChangeWeatherMode("live")}
+              disabled={connectivity.isOffline}
+              aria-pressed={weatherMode === "live" && !connectivity.isOffline}
+              title={connectivity.isOffline ? offlineWeatherTooltip : weatherBadgeText}
+              onClick={() => {
+                if (!connectivity.isOffline) onChangeWeatherMode("live");
+              }}
               className={clsx(
-                "inline-flex min-h-8 cursor-pointer items-center gap-1 rounded-full px-2.5 text-[11px] font-semibold transition-colors sm:min-h-9 sm:gap-1.5 sm:px-3 sm:text-xs",
+                "inline-flex min-h-8 items-center gap-1 rounded-full px-2.5 text-[11px] font-semibold transition-colors sm:min-h-9 sm:gap-1.5 sm:px-3 sm:text-xs",
                 bn && "font-bangla",
-                weatherMode === "live"
-                  ? "bg-royal text-white"
-                  : dark
-                    ? "text-mist hover:text-white"
-                    : "text-slate hover:text-navy",
+                connectivity.isOffline
+                  ? "cursor-not-allowed text-slate opacity-60"
+                  : weatherMode === "live"
+                    ? "cursor-pointer bg-royal text-white"
+                    : dark
+                      ? "cursor-pointer text-mist hover:text-white"
+                      : "cursor-pointer text-slate hover:text-navy",
               )}
             >
               <CloudRain aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />

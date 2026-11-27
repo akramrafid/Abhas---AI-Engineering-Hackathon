@@ -76,13 +76,25 @@ export function useAllCityHeatmaps(
 /** "peak" = the highest-risk horizon among the given ones. */
 export type HorizonPick = number | "peak";
 
+const TIER_RANK: Record<HeatmapCell["tier"], number> = {
+  Low: 0,
+  Medium: 1,
+  High: 2,
+  Critical: 3,
+};
+
 function pickCell(cells: HeatmapCell[] | undefined, pick: HorizonPick, horizons: readonly number[]) {
   const pool = (cells ?? []).filter((c) => horizons.includes(c.horizon));
   if (pick === "peak") {
-    return pool.reduce<HeatmapCell | undefined>(
-      (best, c) => (!best || c.risk_score > best.risk_score ? c : best),
-      undefined,
-    );
+    return pool.reduce<HeatmapCell | undefined>((best, c) => {
+      if (!best) return c;
+      const tierDiff = TIER_RANK[c.tier] - TIER_RANK[best.tier];
+      if (tierDiff !== 0) return tierDiff > 0 ? c : best;
+      if (c.expected_cases !== best.expected_cases) {
+        return c.expected_cases > best.expected_cases ? c : best;
+      }
+      return c.horizon < best.horizon ? c : best;
+    }, undefined);
   }
   return pool.find((c) => c.horizon === pick);
 }

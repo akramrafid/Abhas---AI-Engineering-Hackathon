@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import { RiskTierBadge, TIER_ORDER } from "@/components/brand/RiskTierBadge";
 import {
@@ -42,10 +41,17 @@ import {
   type MapWard,
   type WeatherBadgeOverlay,
 } from "@/components/ward-map/WardRiskMap";
-import { useWeatherStatusQuery, type City, type Ward, type WeatherMode } from "@/lib/api/client";
+import {
+  useReadyzQuery,
+  useWeatherStatusQuery,
+  type City,
+  type Ward,
+  type WeatherMode,
+} from "@/lib/api/client";
 import { formatShortDate } from "@/lib/dates";
 import { WINDOW_HORIZONS, type HorizonWindow } from "@/lib/demo-config";
 import type { Lang } from "@/lib/i18n";
+import { useConnectivity } from "@/lib/useConnectivity";
 import { FacilityDirectory } from "./FacilityDirectory";
 import { RoutingDrawer, type InspectorTab } from "./RoutingDrawer";
 import { WardRiskMatrix } from "./WardRiskMatrix";
@@ -89,16 +95,6 @@ const CITY_ORDER: readonly City[] = [
 
 const EMPTY_FACILITIES: readonly HealthFacility[] = [];
 const EMPTY_WEATHER_OVERLAYS: readonly WeatherBadgeOverlay[] = [];
-
-interface OpenMeteoCurrentResponse {
-  latitude: number;
-  longitude: number;
-  current?: {
-    temperature_2m?: number;
-    precipitation?: number;
-    relative_humidity_2m?: number;
-  };
-}
 
 export interface RiskMapViewProps {
   wards: readonly Ward[];
@@ -167,47 +163,41 @@ export function RiskMapView({
 
   const heatmaps = useAllCityHeatmaps(originWeek, source);
   const weatherStatus = useWeatherStatusQuery();
+  const readyzQuery = useReadyzQuery();
+  const connectivity = useConnectivity(readyzQuery.data?.offline);
 
-  // Fetch live Open-Meteo surface readings for the 5 city centroids only when "Weather now" layer is toggled ON.
-  const liveWeather = useQuery({
-    queryKey: ["open-meteo-centroids-current"],
-    enabled: layerWeather,
-    staleTime: 5 * 60 * 1000,
-    queryFn: async ({ signal }): Promise<WeatherBadgeOverlay[]> => {
-      const lats = CITY_ORDER.map((c) => CITY_CENTROIDS[c][1].toFixed(4)).join(",");
-      const lons = CITY_ORDER.map((c) => CITY_CENTROIDS[c][0].toFixed(4)).join(",");
-      const res = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,precipitation,relative_humidity_2m&timezone=Asia%2FDhaka`,
-        { signal },
-      );
-      if (!res.ok) throw new Error("Weather unavailable");
-      const raw = (await res.json()) as OpenMeteoCurrentResponse[] | OpenMeteoCurrentResponse;
-      const list = Array.isArray(raw) ? raw : [raw];
-      return CITY_ORDER.map((city, idx) => {
-        const cur = list[idx]?.current;
-        if (!cur || typeof cur.temperature_2m !== "number") {
-          return { city, label: bn ? "তথ্য পাওয়া যায়নি" : "No live feed", detail: "" };
-        }
-        const temp = `${cur.temperature_2m.toFixed(1)}°C`;
-        const rain = typeof cur.precipitation === "number" ? `${cur.precipitation.toFixed(1)} mm` : "0 mm";
-        return {
-          city,
-          label: `${temp} · ${rain}`,
-          detail: `${cur.relative_humidity_2m ?? "—"}% RH`,
-        };
-      });
-    },
-  });
-
+  // Weather layer reads strictly from the local API weather status + offline state (never calls third-party hosts from browser; M2).
   const weatherOverlays: readonly WeatherBadgeOverlay[] = useMemo(() => {
     if (!layerWeather) return EMPTY_WEATHER_OVERLAYS;
-    if (liveWeather.data?.length) return liveWeather.data;
-    return (weatherStatus.data?.cities ?? []).map((c) => ({
-      city: c.city,
-      label: c.source === "live" ? "Live cache" : "Dataset weather",
+    if (connectivity.isOffline) {
+      const offlineLabel = bn ? "অফলাইন — ডেটাসেট আবহাওয়া" : "Offline — dataset weather";
+      return CITY_ORDER.map((city) => ({
+        city,
+        label: offlineLabel,
+        detail: "",
+      }));
+    }
+    const apiCities = weatherStatus.data?.cities ?? [];
+    if (apiCities.length > 0) {
+      return apiCities.map((c) => ({
+        city: c.city,
+        label:
+          c.source === "live"
+            ? bn
+              ? "লাইভ ক্যাশ"
+              : "Live cache"
+            : bn
+              ? "ডেটাসেট আবহাওয়া"
+              : "Dataset weather",
+        detail: "",
+      }));
+    }
+    return CITY_ORDER.map((city) => ({
+      city,
+      label: bn ? "ডেটাসেট আবহাওয়া" : "Dataset weather",
       detail: "",
     }));
-  }, [layerWeather, liveWeather.data, weatherStatus.data]);
+  }, [layerWeather, connectivity.isOffline, weatherStatus.data, bn]);
 
   const effectivePick: HorizonPick =
     pick !== "peak" && !horizons.includes(pick) ? (horizons[0] ?? "peak") : pick;

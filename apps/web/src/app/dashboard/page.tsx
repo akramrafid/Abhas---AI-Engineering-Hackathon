@@ -61,6 +61,7 @@ const AlertsDialog = dynamic(
   { ssr: false },
 );
 import {
+  useReadyzQuery,
   useWardsQuery,
   useWeatherStatusQuery,
   type City,
@@ -160,6 +161,7 @@ function DashboardWorkspace() {
 
   const wardsQuery = useWardsQuery();
   const weatherStatusQuery = useWeatherStatusQuery();
+  const readyzQuery = useReadyzQuery();
 
   const wardsData = wardsQuery.data;
   const allWards = useMemo(() => wardsData?.wards ?? [], [wardsData?.wards]);
@@ -258,6 +260,7 @@ function DashboardWorkspace() {
     if (typeof window === "undefined") return;
     if (!wardsData) return;
 
+    const existing = new URLSearchParams(window.location.search);
     const params = new URLSearchParams();
     if (isDemoMode) params.set("demo", "1");
     const effectiveWard = unknownWardId ?? selectedWardId;
@@ -265,7 +268,14 @@ function DashboardWorkspace() {
     if (selectedOriginWeek) params.set("origin", selectedOriginWeek);
     params.set("window", windowKey);
     params.set("tab", activeTab);
-    if (activeTab === "command") params.set("step", String(commandStep));
+    if (activeTab === "command") {
+      params.set("step", String(commandStep));
+      // Preserve Command Center URL scenario params synced by CommandCenterView (L6).
+      for (const k of ["scope", "stock", "crews", "routeHorizon", "simEfficacy"] as const) {
+        const val = existing.get(k);
+        if (val !== null) params.set(k, val);
+      }
+    }
     params.set("lang", lang);
 
     const nextSearch = `?${params.toString()}`;
@@ -397,6 +407,7 @@ function DashboardWorkspace() {
       <DashboardHeader
         selectedCity={selectedCity}
         isDemoMode={isDemoMode}
+        apiOffline={readyzQuery.data?.offline ?? false}
         weatherMode={activeSource}
         onChangeWeatherMode={(nextMode) => {
           setWeatherModeOverride(nextMode);
@@ -456,7 +467,7 @@ function DashboardWorkspace() {
         </header>
 
         {meta.showStats && !wardsQuery.isError ? (
-          <StatTiles signals={signals} city={selectedCity} lang={lang} />
+          <StatTiles signals={signals} city={selectedCity} windowKey={windowKey} lang={lang} />
         ) : null}
 
         {showSelectionBar ? (
