@@ -282,8 +282,8 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     await expect(page.getByTestId("heatmap-schematic-label")).toContainText(
       "schematic, ward geometry not in the dataset",
     );
-    expect(await page.locator('[data-testid^="heatmap-cell-"]').count()).toBeGreaterThan(0);
-    expect(await page.locator('[data-testid^="heatmap-tile-"]').count()).toBeGreaterThan(0);
+    await expect(page.locator('[data-testid^="heatmap-cell-"]').first()).toBeVisible();
+    await expect(page.locator('[data-testid^="heatmap-tile-"]').first()).toBeVisible();
   });
 
   test("ac_14: validation tab renders baseline comparison, 80% coverage, confusion matrix, and /api/v1/ops metrics", async ({
@@ -456,11 +456,37 @@ test.describe("Abhas Dashboard E2E & Accessibility", () => {
     expect(styles.borderBottomWidth).toBeLessThanOrEqual(1);
 
     const unselectedRow = list.locator("button:not([aria-current])").first();
-    if ((await unselectedRow.count()) > 0) {
-      const unselectedBg = await unselectedRow.evaluate(
-        (el) => window.getComputedStyle(el).backgroundColor,
-      );
-      expect(styles.backgroundColor).not.toBe(unselectedBg);
+    await expect(unselectedRow).toBeVisible();
+    const unselectedBg = await unselectedRow.evaluate(
+      (el) => window.getComputedStyle(el).backgroundColor,
+    );
+    expect(styles.backgroundColor).not.toBe(unselectedBg);
+  });
+
+  test("dashboard top ward equals list max (QA Q6)", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    for (const origin of ["2024-08-05", "2024-06-17"] as const) {
+      await page.goto(`/dashboard?demo=1&origin=${origin}&lang=en`);
+      const list = page.getByTestId("ward-priority-list");
+      await expect(list).toBeVisible({ timeout: 20_000 });
+      const topValueEl = page.getByTestId("stat-tile-top-ward-value");
+      const topNoteEl = page.getByTestId("stat-tile-top-ward-note");
+      await expect(topValueEl).toHaveText(/^\d+\.\d$/, { timeout: 20_000 });
+      await expect(topNoteEl).toContainText("peak week, h2–4");
+
+      const firstRow = list.locator('button[data-testid^="ward-row-"]').first();
+      await expect(firstRow).toBeVisible();
+      const firstRowText = await firstRow.innerText();
+      const listCasesMatch = firstRowText.match(/(\d+\.\d)\s+cases/);
+      expect(listCasesMatch, `Expected cases value in first ward row: ${firstRowText}`).toBeTruthy();
+      const firstWardId = (await firstRow.getAttribute("data-testid"))?.replace("ward-row-", "") ?? "";
+      const wardNumMatch = firstWardId.match(/_Ward_0*(\d+)$/);
+      expect(wardNumMatch).toBeTruthy();
+
+      const tileValue = (await topValueEl.innerText()).trim();
+      const tileNote = (await topNoteEl.innerText()).trim();
+      expect(tileValue, `Top tile mismatch on ${origin}`).toBe(listCasesMatch![1]);
+      expect(tileNote, `Top ward mismatch on ${origin}`).toContain(`Ward ${wardNumMatch![1]}`);
     }
   });
 });

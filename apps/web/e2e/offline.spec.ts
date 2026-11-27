@@ -140,6 +140,12 @@ test.describe("WP6-2 Offline resilience (all non-localhost requests aborted)", (
     await expect(map).toBeVisible();
     await expect(map).toHaveAttribute("data-map-offline", "true", { timeout: 15_000 });
 
+    // Toggle "Weather now" layer ON while offline — must read local API/dataset only with zero external fetches (M2)
+    const weatherLayerBtn = page.getByTestId("risk-map-layer-weather");
+    await expect(weatherLayerBtn).toBeVisible();
+    await weatherLayerBtn.click();
+    await expect(weatherLayerBtn).toHaveAttribute("aria-pressed", "true");
+
     // Interactive view switches and ward selection still work completely offline
     await page.getByTestId("risk-map-view-chattogram").click();
     await expect(page.getByTestId("risk-map-ledger")).toContainText("Chattogram");
@@ -160,21 +166,38 @@ test.describe("WP6-2 Offline resilience (all non-localhost requests aborted)", (
   }) => {
     const tracker = await installOfflineNetworkAbort(page);
 
-    // 0. Dashboard loads cleanly offline without Clerk redirect
+    // 0. Dashboard loads cleanly offline without Clerk redirect; ?demo=1 shows "Demo data" (Q7)
     await page.goto("/dashboard?demo=1");
     await expect(page.getByTestId("peak-tier-card")).toBeVisible();
+    await expect(page.getByTestId("demo-mode-badge")).toHaveText("Demo data");
+    if (STRICT_OFFLINE_ENV) {
+      await expect(page.getByTestId("header-offline-badge")).toBeVisible();
+      await expect(page.getByTestId("weather-mode-live")).toBeDisabled();
+    }
 
-    // If WP5 Command Center tab is mounted, walk all 5 UI steps offline too
+    // M3: Unconditional walk of ALL 5 Command Center steps verifying live data and zero alert errors
     const commandTab = page.getByTestId("tab-command");
-    if ((await commandTab.count()) > 0) {
-      await commandTab.click();
-      for (const stepNum of [1, 2, 3, 4, 5]) {
-        const stepBtn = page.getByTestId(`command-step-${stepNum}`);
-        if ((await stepBtn.count()) > 0) {
-          await stepBtn.click();
-          await page.waitForTimeout(200);
-        }
-      }
+    await expect(commandTab).toBeVisible();
+    await commandTab.click();
+    await expect(page.getByTestId("command-center-view")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("command-provenance-strip")).toBeVisible();
+    if (STRICT_OFFLINE_ENV) {
+      await expect(page.getByTestId("command-offline-badge")).toBeVisible();
+    }
+
+    const stepExpectations: ReadonlyArray<[number, string]> = [
+      [1, "step1-forecast-table"],
+      [2, "allocation-ward-table"],
+      [3, "route-city-summaries"],
+      [4, "sim-roi-table"],
+      [5, "dispatch-notices-list"],
+    ];
+    for (const [stepNum, dataTestId] of stepExpectations) {
+      const stepBtn = page.getByTestId(`command-step-${stepNum}`);
+      await expect(stepBtn).toBeVisible();
+      await stepBtn.click();
+      await expect(page.getByTestId(dataTestId)).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator('#command-step-panel [role="alert"]')).toHaveCount(0);
     }
 
     // Exercise all 5 Command Center operational flows + Plans decision log against localhost API
@@ -275,11 +298,18 @@ test.describe("WP6-2 Offline resilience (all non-localhost requests aborted)", (
       expect(cmpJson.offline).toBe(true);
     }
 
-    // Open printable A4 commissioner HTML brief in browser while offline
-    await page.goto(
+    // Open printable A4 commissioner HTML brief in browser while offline + verify CSP & inline styling (L4)
+    const briefResp = await page.goto(
       `${API_URL}/api/v1/dispatch/brief/DSCC_Ward_04.html?origin_week=2024-08-05&lang=en`,
     );
+    expect(briefResp).toBeTruthy();
+    expect(briefResp!.headers()["content-security-policy"] ?? "").toContain("default-src 'none'");
     await expect(page.locator("body")).toContainText("DSCC_Ward_04");
+    const briefStyled = await page.evaluate(() => {
+      const kpi = document.querySelector(".kpi-value") ?? document.body;
+      return window.getComputedStyle(kpi).fontWeight;
+    });
+    expect(briefStyled).toBeTruthy();
 
     expect(tracker.pageErrors, "Zero uncaught page errors across Command Center offline flow").toEqual(
       [],

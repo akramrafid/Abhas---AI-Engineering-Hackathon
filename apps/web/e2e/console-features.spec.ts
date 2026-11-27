@@ -87,8 +87,12 @@ test.describe("Abhas §11 Operations Console Features", () => {
       baseline: Array<{ horizon: number; expected_cases: number }>;
       scenario: Array<{ horizon: number; expected_cases: number }>;
     };
-    const baseH3 = res120.baseline.find((h) => h.horizon === 3)!.expected_cases;
-    const scen120H3 = res120.scenario.find((h) => h.horizon === 3)!.expected_cases;
+    const baseH3Row = res120.baseline.find((h) => h.horizon === 3);
+    const scen120H3Row = res120.scenario.find((h) => h.horizon === 3);
+    expect(baseH3Row).toBeTruthy();
+    expect(scen120H3Row).toBeTruthy();
+    const baseH3 = baseH3Row!.expected_cases;
+    const scen120H3 = scen120H3Row!.expected_cases;
     expect(scen120H3).toBeGreaterThan(baseH3);
 
     const p250 = waitScenario();
@@ -96,7 +100,9 @@ test.describe("Abhas §11 Operations Console Features", () => {
     const res250 = (await (await p250).json()) as {
       scenario: Array<{ horizon: number; expected_cases: number }>;
     };
-    const scen250H3 = res250.scenario.find((h) => h.horizon === 3)!.expected_cases;
+    const scen250H3Row = res250.scenario.find((h) => h.horizon === 3);
+    expect(scen250H3Row).toBeTruthy();
+    const scen250H3 = scen250H3Row!.expected_cases;
     expect(scen250H3).toBeGreaterThanOrEqual(scen120H3);
     await expect(page.getByTestId("scenario-tier-change")).toBeVisible();
   });
