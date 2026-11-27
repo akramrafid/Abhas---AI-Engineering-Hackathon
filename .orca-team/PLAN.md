@@ -1,5 +1,32 @@
 # PLAN.md — Abhas (আভাস): Ward-Level Dengue Early Warning
 
+## Phase 2 — onsite final (branch `version-onsite-final`, 10 hours)
+_LEAD (Claude Opus) writes architecture and specs only; every code change is Neon's (Gemini 4 Neon XHigh,
+Antigravity). Claude Opus returns for code review before freeze._
+
+Inputs: TASK.md "Phase 2" · docs/contracts-phase2.md · docs/algorithms-phase2.md · ADR-0009..0016 (docs/architecture.md,
+docs/adr/). Golden path for the 7:00 video: Command tab → Forecast → Allocate (slide stock 100 → 40 %, watch critical
+deficits appear) → Route (Dhaka South overflow, transfers, unroutable) → Simulate (auto 10 crews, ROI ranking, band) →
+Dispatch (Bangla SMS 2 segments, printable brief) → save plan, compare → pull the network cable → everything still works.
+
+| WP | Spec | Rubric | Depends on | Merge order | Gate |
+|---|---|---|---|---|---|
+| WP0 contracts + skeleton | .orca-team/specs/p2-wp0.md | all | — | 1 | contracts slices migrations ci |
+| WP1 supply + allocation | p2-wp1.md | P1 (15) | WP0 | 2 | ci contract slices |
+| WP2 overflow routing | p2-wp2.md | P2 (10) | WP0 | 2 | ci contract slices |
+| WP4 dispatch + /exports | p2-wp4.md | P5 (10), P4 | WP0 (WP1 for live numbers) | 2 | ci contract slices |
+| WP3 simulator + crews | p2-wp3.md | P3 (10), P1 crews | WP0, WP1 | 3 | ci contract slices eval |
+| WP5 Command Center UI | p2-wp5.md | P1–P4 live, P6 | WP0 (fixtures), WP1–WP4 live | 4 | ci e2e |
+| WP6 offline + plans + docs | p2-wp6.md | P4 (15), P5, bonus | WP0 | 5 (re-run after each merge) | offline migrations ci e2e |
+
+Waves (Antigravity ≤ 4 workers): **Wave A** WP0 alone (~45 min) → **Wave B** WP1 · WP2 · WP4 · WP6 in parallel →
+**Wave C** WP3 · WP5 → Claude Opus review (r-p2) → fixes → freeze T+8:00 → `npm run exports`, video by T+9:15.
+Every merge: `node .orca-team/tools/gates.mjs merge <branch>`; push `version-onsite-final` after each green merge.
+
+---
+
+## Phase 1 plan (kept for history)
+
 _Last updated by LEAD: 2026-11-21 16:05 BST · LEAD_BRANCH: `lead` · Deadline: 2026-11-22 14:00 BST (Feature freeze 08:00 BST)_
 
 Requirements live in `docs/PRD.md` (role 1, status: locked). This file is the execution plan: who builds what, when, and which gate proves it.
