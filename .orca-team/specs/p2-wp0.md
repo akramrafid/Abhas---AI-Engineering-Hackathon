@@ -17,6 +17,11 @@ OWNED PATHS
 - apps/api/app/main.py (mount the 5 routers; register plan runners; readyz adds git_sha and offline — read the env
   var ABHAS_GIT_SHA or "unknown" for now, offline from ABHAS_OFFLINE)
 - apps/api/migrations/versions/0002_phase2_plans.py (contracts §6, reversible) · apps/api/app/adapters/db/models.py
+- apps/api/ml/fit_supply.py (new; `npm run fit:supply`): reads data/raw/bangladesh_dengue_large_dataset_onsite.xlsx
+  read-only, checks its SHA-256 (24fac543…), verifies the constants 2.385 / 1.164 / 0.298 reproduce 100 % of rows with
+  round-half-up, computes capacity = max(1, ceil(1.10 × P95 weekly hospital_beds_required, 2016–2022)), and writes
+  apps/api/config/supply_ratios.json and apps/api/config/ward_capacity.json exactly as contracts §3 (both committed).
+  Human decision: capacity is a documented assumption, 3–7 per ward, 284 in total.
 - contracts/openapi.json and apps/web/src/lib/api/schema.d.ts (regenerated only via `npm run contracts && npm run web:types`)
 - apps/api/tests/test_p2_contracts.py (new)
 - .orca-team/gates.json (`offline` command) · package.json (`offline:check` placeholder that runs the socket-guard
@@ -34,8 +39,12 @@ ACCEPTANCE CRITERIA (Given/When/Then)
   feature (plans uses core/command_requests and shared/plan_registry).
 - WP0-5 Given migration 0002, when db:check runs up → down → up, then it passes and the three tables exist with the
   indexes and check constraint of contracts §6.
+- WP0-6 (P1, P2 data) Given `npm run fit:supply`, then supply_ratios.json holds 2.385 / 1.164 / 0.298 with row_match
+  1.0 for all three, and ward_capacity.json holds 60 wards, each 3–7 beds, 284 in total, with the method and
+  assumption text. A changed dataset SHA makes the script exit non-zero without writing.
 
 TESTS: tests/test_p2_contracts.py — one schema-valid fixture round-trip per endpoint; the four 422 cases above;
+tests/test_fit_supply.py — S0 (the exact mapping, 100 % of rows) and the capacity totals (min 3, max 7, sum 284);
 MONOTONE_RAIN_FEATURES equals ml/train.py monotone_constraints_for_horizon for h = 2, 3, 4 (the sets);
 contract drift test stays green.
 GATE TO PASS: node .orca-team/tools/gates.mjs contracts slices migrations · npm run ci

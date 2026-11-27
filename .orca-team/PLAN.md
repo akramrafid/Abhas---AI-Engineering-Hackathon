@@ -11,7 +11,8 @@ Dispatch (Bangla SMS 2 segments, printable brief) → save plan, compare → pul
 
 | WP | Spec | Rubric | Depends on | Merge order | Gate |
 |---|---|---|---|---|---|
-| WP0 contracts + skeleton | .orca-team/specs/p2-wp0.md | all | — | 1 | contracts slices migrations ci |
+| WP0 contracts + skeleton | .orca-team/specs/p2-wp0.md | all | — | 1 (merged 2511268) | contracts slices migrations ci |
+| WP0b supply constants + capacity config | p2-wp0b.md | P1, P2 data | WP0 | 1b, before WP1/WP2 merge | ci contracts slices |
 | WP1 supply + allocation | p2-wp1.md | P1 (15) | WP0 | 2 | ci contract slices |
 | WP2 overflow routing | p2-wp2.md | P2 (10) | WP0 | 2 | ci contract slices |
 | WP4 dispatch + /exports | p2-wp4.md | P5 (10), P4 | WP0 (WP1 for live numbers) | 2 | ci contract slices |

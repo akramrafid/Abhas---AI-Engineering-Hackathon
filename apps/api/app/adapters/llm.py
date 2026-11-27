@@ -15,7 +15,7 @@ import logging
 import re
 import secrets
 import time
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from datetime import date
 from typing import Any
 
@@ -25,6 +25,13 @@ from anthropic.types import MessageParam
 
 from app.core.config import Settings, active_faults, get_settings
 from app.core.logging import request_id_var
+from app.core.offline import (
+    DEFAULT_BREAKER_COOLDOWN_S,
+    DEFAULT_BREAKER_THRESHOLD,
+    DEFAULT_CONNECT_TIMEOUT_S,
+    CircuitBreaker,
+    is_offline,
+)
 from app.observability.metrics import OpsMetrics, get_ops_metrics
 from app.observability.pricing import estimate_cost_usd
 from app.observability.traces import LLMCallRecord, TraceSink
@@ -95,6 +102,9 @@ class AnthropicLLM:
         retry_base_s: float | None = None,
         prompt_name: str = "advisory",
         prompt_version: str = "v1",
+        clock: Callable[[], float] | None = None,
+        breaker_threshold: int = DEFAULT_BREAKER_THRESHOLD,
+        breaker_cooldown_s: float = DEFAULT_BREAKER_COOLDOWN_S,
     ) -> None:
         cfg = settings or get_settings()
         self._settings = cfg
@@ -115,6 +125,11 @@ class AnthropicLLM:
         )
         self._prompt_name = prompt_name
         self._prompt_version = prompt_version
+        self._breaker = CircuitBreaker(
+            threshold=breaker_threshold,
+            cooldown_s=breaker_cooldown_s,
+            clock=clock,
+        )
 
         key_val = (
             api_key
@@ -125,7 +140,9 @@ class AnthropicLLM:
             self._client = client
             self._owns_client = False
         else:
-            http_timeout = anthropic.Timeout(connect=3.0, read=self._timeout_s, write=5.0, pool=5.0)
+            http_timeout = anthropic.Timeout(
+                connect=DEFAULT_CONNECT_TIMEOUT_S, read=self._timeout_s, write=5.0, pool=5.0
+            )
             self._client = anthropic.Anthropic(
                 api_key=key_val or "disabled",
                 timeout=http_timeout,
@@ -317,10 +334,16 @@ class AnthropicLLM:
         attempt_offset: int = 0,
     ) -> tuple[str, int, int, float, float]:
         last_exc: Exception | None = None
+        if is_offline():
+            raise LLMUnavailableError("Offline mode active; skipping Anthropic API call")
+        if not self._breaker.allow_request():
+            raise LLMUnavailableError("Anthropic circuit breaker is open")
         for idx in range(3):  # initial attempt + max 2 retries
             attempt_no = attempt_offset + idx + 1
             try:
-                return self._invoke_once(system, messages, max_tokens, attempt_no, ctx)
+                result = self._invoke_once(system, messages, max_tokens, attempt_no, ctx)
+                self._breaker.record_success()
+                return result
             except (httpx.TimeoutException, anthropic.APITimeoutError, anthropic.APIConnectionError) as exc:
                 last_exc = exc
                 if idx < 2:
@@ -340,6 +363,7 @@ class AnthropicLLM:
                 last_exc = exc
                 break
 
+        self._breaker.record_failure()
         raise LLMUnavailableError(f"Anthropic call failed: {type(last_exc).__name__}") from last_exc
 
     def complete_json(

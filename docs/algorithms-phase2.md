@@ -4,8 +4,8 @@ _Owner: LEAD. Every example below was solved by hand and checked numerically wit
 Neon turns each example into a test named after its ID (e.g. `test_alg_A1_priority_fill`). The team uses the plain-
 words paragraphs in Q&A._
 
-Constants used in the examples (from the onsite fit, ADR-0009): saline 2.384 bags/case, kits 1.158 kits/case,
-beds 0.295 beds/case. Efficacy presets (ADR-0013): low E_max 0.25, k 0.35 · base 0.40, 0.50 · high 0.55, 0.70.
+Constants used in the examples (the dataset's exact rule, ADR-0009): saline 2.385 bags/case, kits 1.164 kits/case,
+beds 0.298 beds/case, applied as round_half_up(c × cases). Efficacy presets (ADR-0013): low E_max 0.25, k 0.35 · base 0.40, 0.50 · high 0.55, 0.70.
 
 ---
 
@@ -15,17 +15,19 @@ beds 0.295 beds/case. Efficacy presets (ADR-0013): low E_max 0.25, k 0.35 · bas
 negative-binomial size r_h (from the horizon's calibration, variance μ + μ²/r). Window cases N = Σ_h N_h.
 Moment matching: M = Σ μ_h, V = Σ (μ_h + μ_h²/r_h). If V > M, N ≈ NB(r_W, p) with r_W = M²/(V − M) and
 p = r_W/(r_W + M); otherwise N ≈ Poisson(M). Planned cases Q_s = the s-quantile of N (s = 0.8 for saline and
-kits, 0.9 for beds). Planned supply = ⌈ratio × Q_s⌉.
+kits, 0.9 for beds). Planned supply = round_half_up(c × Q_s) = ⌊c·Q_s + 0.5⌋ — the same rule that generated the
+dataset's supply columns.
 
 **Plain words.** We forecast a range, not a point. To order supplies we take the number of cases we will not exceed
 four weeks in five (beds: nine in ten), then multiply by how many bags, kits and beds each case has needed
-historically. The ratios are measured from 2016–2022 and explain more than 98 % of the variation.
+historically. In this dataset that relation is exact: every one of the 31,320 rows equals round(c × cases).
 
 | ID | Input | Working | Expected output |
 |---|---|---|---|
-| **S1** | One week, μ = 10, r = 2 | V = 10 + 100/2 = 60 > M; r_W = 100/50 = 2. Q₀.₈ = 15, Q₀.₉ = 20 | saline ⌈2.384×15⌉ = **36**, kits ⌈1.158×15⌉ = **18**, beds ⌈0.295×20⌉ = **6** |
-| **S2** | Window h=2..4, μ = (4, 6, 8), r = 3 each | M = 18, V = 18 + (16+36+64)/3 = 56.667, r_W = 324/38.667 = 8.3793. Q₀.₈ = 24, Q₀.₉ = 28 | saline ⌈2.384×24⌉ = **58**, kits ⌈1.158×24⌉ = **28**, beds ⌈0.295×28⌉ = **9** |
-| **S3** | Window μ = (2, 3), r very large (V ≤ M) | Poisson(5); Q₀.₈ = 7 | saline ⌈16.688⌉ = **17**, kits ⌈8.106⌉ = **9** |
+| **S0** | Dataset rule, cases k = 0, 1, 2, 5, 10, 15, 20 | round_half_up(c·k) | (saline, kits, beds) = **(0,0,0), (2,1,0), (5,2,1), (12,6,1), (24,12,3), (36,17,4), (48,23,6)** — and 100 % of the 31,320 rows |
+| **S1** | One week, μ = 10, r = 2 | V = 10 + 100/2 = 60 > M; r_W = 100/50 = 2. Q₀.₈ = 15, Q₀.₉ = 20 | saline round(2.385×15 = 35.775) = **36**, kits round(17.46) = **17**, beds round(0.298×20 = 5.96) = **6** |
+| **S2** | Window h=2..4, μ = (4, 6, 8), r = 3 each | M = 18, V = 18 + (16+36+64)/3 = 56.667, r_W = 324/38.667 = 8.3793. Q₀.₈ = 24, Q₀.₉ = 28 | saline round(57.24) = **57**, kits round(27.936) = **28**, beds round(8.344) = **8** |
+| **S3** | Window μ = (2, 3), r very large (V ≤ M) | Poisson(5); Q₀.₈ = 7 | saline round(16.695) = **17**, kits round(8.148) = **8** |
 | **S4** | All μ = 0 | M = 0 | Q = **0** and every supply **0** (no division by zero) |
 
 Property tests: Q_s is non-decreasing in s and in every μ_h; supplies are non-decreasing in Q.
@@ -107,7 +109,8 @@ max(Σ D − Σ H, 0) per city; deterministic.
 (h = 2: `rainfall_lag_0/1/2`, `rain_sum_0_3`, `rain_anomaly`; h = 3: `rainfall_lag_0/1`, `rain_sum_0_3`,
 `rain_anomaly`; h = 4: `rainfall_lag_0`, `rain_sum_0_3`, `rain_anomaly`). Counterfactual row: each rain feature in
 F_h × (1 − E(c)); `rain_anomaly` − E(c) × the rain it is built on. Cases prevented_h = μ_h(baseline) − μ_h(counterfactual)
-≥ 0. Beds avoided = Σ_h prevented × 0.295; saline avoided = Σ_h prevented × 2.384. ROI = Σ_h prevented / c.
+≥ 0. Beds avoided = Σ_h prevented × 0.298; saline avoided = Σ_h prevented × 2.385 (unrounded: these are expected
+savings, not orders). ROI = Σ_h prevented / c.
 
 **Plain words.** Spraying removes breeding water. In the model, breeding water is the recent rain that turns into
 cases two to four weeks later. We shrink exactly that rain signal in the treated ward by an amount that grows with
@@ -117,7 +120,7 @@ never mean more cases, so spraying can never look harmful. Efficacy is an assump
 | ID | Input | Working | Expected output |
 |---|---|---|---|
 | **E1** | Effect curve, c = 0..3 | E = E_max(1 − e^(−kc)) | low (0, 0.0738, 0.1259, 0.1625); base (0, **0.1574, 0.2528**, 0.3107); high (0, 0.2769, 0.4144, 0.4826) |
-| **T1** | Toy model cases = 2 + 0.05 × rain_sum_0_3, baseline rain_sum = 200, 2 crews, base | baseline 12.0; counterfactual 2 + 10 × (1 − 0.2528) = 9.4715 | prevented **2.5285**, beds **0.7459**, saline **6.0279**, ROI **1.2642** per crew |
+| **T1** | Toy model cases = 2 + 0.05 × rain_sum_0_3, baseline rain_sum = 200, 2 crews, base | baseline 12.0; counterfactual 2 + 10 × (1 − 0.2528) = 9.4715 | prevented **2.5285**, beds **0.7535**, saline **6.0305**, ROI **1.2642** per crew |
 | **T2** | Same toy, low / high presets | E(2) = 0.1259 / 0.4144 | prevented **1.2585 / 4.1437** (the sensitivity band) |
 | **T3** | Real model, every ward and horizon, all presets, origin 2024-08-05 | — | counterfactual ≤ baseline **everywhere** (property test) |
 

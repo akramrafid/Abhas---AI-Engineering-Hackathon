@@ -154,9 +154,14 @@ intervention-simulation and dispatch command system for ward commissioners and h
 - **Identical to the Phase 1 dataset in every Phase 1 column** (31,320/31,320 rows match), plus three integer columns:
   `saline_bags_needed` (mean 6.27, max 98), `diagnostic_kits_needed` (mean 3.02, max 48),
   `hospital_beds_required` (mean 0.76, max 12). All three are 0 whenever `dengue_cases` is 0.
-- The supplies are near-linear in cases (training years 2016–2022, ratio through the origin):
-  saline 2.384 per case (R² 0.9997), kits 1.158 (R² 0.9988), beds 0.295 (R² 0.981). Per-case ratios do not differ
-  by city (saline 2.32–2.33, kits 1.10–1.11, beds 0.25–0.26 across all five).
-- **No bed-capacity column and no ward coordinates.** Capacity is derived (ADR-0012, decided by the human):
-  `capacity_i = ceil(1.10 × P95 of weekly hospital_beds_required, 2016–2022)`; P95 per ward ranges 2–6 beds.
+- **The supplies are deterministic, not noisy:** each is `round(c × dengue_cases)` with one constant per supply, the
+  same in every city, ward and year (std of supply given cases = 0). Constants that reproduce **100 % of the 31,320
+  rows** with no rounding ties: saline **2.385**, kits **1.164**, beds **0.298** (valid intervals (2.38333, 2.38636),
+  (1.16176, 1.16667), (0.29688, 0.30000)). Examples: 1 case → (2, 1, 0); 10 → (24, 12, 3); 20 → (48, 23, 6).
+  Source: `docs/data-profile-onsite.md` on branch `akramrafid/p2-data-profile` (Neon, Prompt B).
+- **No bed-capacity, health-centre, crew, stock or coordinate columns.** Human decisions (2026-11-27):
+  capacity_i = max(1, ceil(1.10 × P95 of weekly hospital_beds_required, 2016–2022)) → 3–7 beds per ward, **284** in
+  total, labelled as a documented assumption with a UI override; stock = slider % × planned demand; crews = the
+  slider total; no distances.
+- Keep model `abhas-lgbm-1.1.2`: no retrain, no re-seed (every Phase 1 cell is identical).
 - Static ward features (density, water-logging, sanitation) are constant per ward; density 18,314–74,252 /km².

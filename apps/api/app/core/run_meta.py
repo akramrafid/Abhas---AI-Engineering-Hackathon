@@ -12,6 +12,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field, StringConstraints
 
 from app.core.config import REPO_ROOT
+from app.core.offline import is_offline
 from app.core.types import DATA_END
 
 DEFAULT_MODEL_VERSION = "abhas-lgbm-1.1.2"
@@ -19,7 +20,6 @@ DEFAULT_MODEL_VERSION = "abhas-lgbm-1.1.2"
 GIT_SHA_PATTERN = r"^([0-9a-f]{7,40}|unknown)$"
 _GIT_SHA_RE = re.compile(GIT_SHA_PATTERN)
 _FULL_HEX_RE = re.compile(r"^[0-9a-f]{7,40}$")
-_TRUTHY_OFFLINE = frozenset({"1", "true", "yes", "on"})
 
 GitSha = Annotated[
     str,
@@ -120,11 +120,6 @@ def resolve_git_sha() -> str:
     if env_val:
         return env_val if _GIT_SHA_RE.fullmatch(env_val) else "unknown"
     return _read_repo_git_sha()
-
-
-def is_offline() -> bool:
-    """Return True when the ABHAS_OFFLINE kill switch is active (ADR-0015)."""
-    return os.environ.get("ABHAS_OFFLINE", "").strip().lower() in _TRUTHY_OFFLINE
 
 
 class RunMeta(BaseModel):
