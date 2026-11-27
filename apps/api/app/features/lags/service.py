@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 from threading import RLock
+from time import monotonic
 from typing import cast
 
 from app.core.errors import AppError
@@ -25,8 +26,11 @@ class LagsService:
         self._repo = repo
         self._lock = RLock()
         self._cache_key: tuple[date, date] | None = None
+        self._sig_checked_at: float = 0.0
         self._dataset_corrs: list[float] = []
         self._ward_corrs: dict[str, list[float]] = {}
+        self._ward_series: dict[str, list[LagPoint]] = {}
+        self._ward_city: dict[str, City] = {}
         self._missing_wards: set[str] = set()
 
     def _refresh_locked(self, sig: tuple[date, date]) -> int:
@@ -35,13 +39,27 @@ class LagsService:
             self._cache_key = None
             self._dataset_corrs = []
             self._ward_corrs = {}
+            self._ward_series = {}
+            self._ward_city = {}
             self._missing_wards = set()
             return 0
         obs_df = observations_to_dataframe(obs)
         dataset_corrs, ward_corrs = compute_all_lag_correlations(obs_df, max_lag=MAX_RAIN_LAG)
+        series_by_ward: dict[str, list[LagPoint]] = {}
+        for o in obs:
+            series_by_ward.setdefault(o.ward_id, []).append(
+                LagPoint(week=o.week, rainfall_mm=o.rainfall_mm, dengue_cases=o.dengue_cases)
+            )
+        for pts in series_by_ward.values():
+            pts.sort(key=lambda p: p.week)
+        ward_cities: dict[str, City] = {w.ward_id: cast(City, w.city) for w in self._repo.wards()}
+
         self._cache_key = sig
+        self._sig_checked_at = monotonic()
         self._dataset_corrs = dataset_corrs
         self._ward_corrs = dict(ward_corrs)
+        self._ward_series = series_by_ward
+        self._ward_city = ward_cities
         self._missing_wards = set()
         return len(self._ward_corrs)
 
@@ -51,58 +69,56 @@ class LagsService:
         with self._lock:
             if self._cache_key != sig:
                 return self._refresh_locked(sig)
+            self._sig_checked_at = monotonic()
             return len(self._ward_corrs)
 
-    def _get_correlations(self, ward_id: str) -> tuple[list[float], list[float]]:
+    def _ensure_cache_locked(self) -> None:
+        now = monotonic()
+        if self._cache_key is not None and (now - self._sig_checked_at) < 2.0:
+            return
         sig = self._repo.date_range()
-        with self._lock:
-            if self._cache_key != sig:
-                self._refresh_locked(sig)
-            if ward_id in self._missing_wards:
-                raise AppError(404, "unknown-ward", "Unknown ward", f"No observations for ward {ward_id}")
-            w_corrs = self._ward_corrs.get(ward_id)
-            if w_corrs is None:
-                if self._cache_key is not None:
-                    self._missing_wards.add(ward_id)
-                raise AppError(404, "unknown-ward", "Unknown ward", f"No observations for ward {ward_id}")
-            return list(self._dataset_corrs), list(w_corrs)
+        if self._cache_key != sig:
+            self._refresh_locked(sig)
+        else:
+            self._sig_checked_at = now
 
     def ward_lags(self, ward_id: str, weeks: int = 156) -> LagResponse:
-        ward_rec = self._repo.ward(ward_id)
-        if ward_rec is None:
-            raise AppError(404, "unknown-ward", "Unknown ward", f"No ward with id {ward_id}")
+        with self._lock:
+            self._ensure_cache_locked()
+            city = self._ward_city.get(ward_id)
+            w_corrs = self._ward_corrs.get(ward_id)
+            series_all = self._ward_series.get(ward_id)
+            dataset_corrs = list(self._dataset_corrs) if w_corrs is not None else None
 
-        dataset_corrs, ward_corrs = self._get_correlations(ward_id)
+        if city is None:
+            ward_rec = self._repo.ward(ward_id)
+            if ward_rec is None:
+                raise AppError(404, "unknown-ward", "Unknown ward", f"No ward with id {ward_id}")
+            city = cast(City, ward_rec.city)
+
+        if w_corrs is None or dataset_corrs is None or series_all is None:
+            raise AppError(404, "unknown-ward", "Unknown ward", f"No observations for ward {ward_id}")
+
         correlations = [
             LagCorrelation(
                 lag_weeks=k,
-                ward_corr=ward_corrs[k],
+                ward_corr=w_corrs[k],
                 dataset_corr=dataset_corrs[k],
             )
             for k in range(MAX_RAIN_LAG + 1)
         ]
-        peak_ward = max(range(len(ward_corrs)), key=lambda i: ward_corrs[i])
+        peak_ward = max(range(len(w_corrs)), key=lambda i: w_corrs[i])
         peak_dataset = max(range(len(dataset_corrs)), key=lambda i: dataset_corrs[i])
-
-        history = self._repo.history(ward_id)
-        tail = history[-weeks:] if weeks < len(history) else history
-        series = [
-            LagPoint(
-                week=o.week,
-                rainfall_mm=o.rainfall_mm,
-                dengue_cases=o.dengue_cases,
-            )
-            for o in tail
-        ]
+        tail = series_all[-weeks:] if weeks < len(series_all) else list(series_all)
 
         return LagResponse(
-            ward_id=ward_rec.ward_id,
-            city=cast(City, ward_rec.city),
+            ward_id=ward_id,
+            city=city,
             max_lag=MAX_RAIN_LAG,
             peak_lag_ward=peak_ward,
             peak_lag_dataset=peak_dataset,
             correlations=correlations,
-            series=series,
+            series=tail,
         )
 
 

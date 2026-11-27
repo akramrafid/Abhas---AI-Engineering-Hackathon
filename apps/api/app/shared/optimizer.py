@@ -416,7 +416,7 @@ def greedy_crews(
     prev_marginal: dict[str, float] = {}
     approximate = False
 
-    for _ in range(steps):
+    for step_idx in range(steps):
         eligible = [w for w in unique_wards if crews[w] < cap]
         best_w = min(
             eligible,
@@ -428,7 +428,7 @@ def greedy_crews(
         prev_marginal[best_w] = chosen_m
         crews[best_w] += 1
 
-        if crews[best_w] < cap:
+        if crews[best_w] < cap and (step_idx + 1) < steps:
             nxt_m = float(marginal_fn(best_w, crews[best_w] + 1))
             if nxt_m > chosen_m + 1e-9:
                 approximate = True

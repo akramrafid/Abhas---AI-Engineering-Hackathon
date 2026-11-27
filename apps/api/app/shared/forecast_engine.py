@@ -621,7 +621,29 @@ class ForecastEngine:
         wards = self._resolve_wards([ward_id])
 
         obs_df, _, _ = self._load_window_dataframe(wards, origin_week, source="dataset")
-        baseline_map, base_ms = self._predict_horizons_for_df(obs_df, wards, origin_week, sorted_horizons)
+        baseline_map: dict[tuple[str, int], EngineHorizonForecast] = {}
+        missing_base_h: list[int] = []
+        for h in sorted_horizons:
+            key = _forecast_cache_key(ward_id, origin_week, h, self._model.version, "dataset")
+            raw_cached: str | None = None
+            try:
+                raw_cached = self._cache.get(key)
+            except Exception:  # noqa: BLE001
+                raw_cached = None
+            if raw_cached is not None:
+                try:
+                    baseline_map[(ward_id, h)] = _deserialize_horizon(raw_cached)
+                    continue
+                except (ValueError, KeyError, TypeError):
+                    pass
+            missing_base_h.append(h)
+
+        if missing_base_h:
+            computed_base, base_ms = self._predict_horizons_for_df(obs_df, wards, origin_week, missing_base_h)
+            baseline_map.update(computed_base)
+        else:
+            base_ms = 0.0
+
         scenario_map, scen_ms = self._predict_horizons_for_df(
             obs_df,
             wards,
@@ -715,6 +737,7 @@ class ForecastEngine:
                     horizon,
                     ward_ids=ordered_wids,
                     target_iso_weeks=[target_iso] * len(ordered_wids),
+                    include_contributions=False,
                 )
             )
         return list(self._model.predict(feature_rows, horizon))

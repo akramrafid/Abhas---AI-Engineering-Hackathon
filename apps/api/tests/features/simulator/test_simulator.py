@@ -138,6 +138,30 @@ def test_wp3_6_ten_ward_latency_under_800ms_and_cache_not_polluted() -> None:
 def test_wp3_unknown_ward_404_and_plan_save() -> None:
     """Unknown ward in deployments returns 404 problem+json; POST /api/v1/plans stores live simulation."""
     with TestClient(create_app()) as client:
+        # Regression (Schemathesis S4kgeD / 8y8nuI): total_crews=1 and auto_crews=1 must succeed cleanly.
+        r_alloc1 = client.post(
+            "/api/v1/allocation/plan",
+            json={
+                "scope": "all",
+                "origin_week": "2025-08-04",
+                "h_start": 2,
+                "h_end": 4,
+                "stock_pct": 100,
+                "total_crews": 1,
+                "service_level": 0.5,
+                "equity_floor_pct": 20,
+            },
+        )
+        assert r_alloc1.status_code == 200, r_alloc1.text
+        assert sum(w["crews"] for w in r_alloc1.json()["wards"]) == 1
+
+        r_sim1 = client.post(
+            "/api/v1/simulator/run",
+            json={"origin_week": "2025-08-04", "auto_crews": 1, "efficacy": "base"},
+        )
+        assert r_sim1.status_code == 200, r_sim1.text
+        assert r_sim1.json()["totals"]["crews"] == 1
+
         bad = client.post(
             "/api/v1/simulator/run",
             json={
