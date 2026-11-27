@@ -18,6 +18,7 @@
     "db:check": "node scripts/py.mjs -m scripts.db_check",
     "seed": "node scripts/py.mjs -m scripts.seed",
     "fit:supply": "node scripts/py.mjs -m ml.fit_supply",
+    "exports": "node scripts/export_samples.mjs",
     "train": "node scripts/py.mjs -m ml.train",
     "backtest": "node scripts/py.mjs -m ml.backtest",
     "lint": "cd apps/api && uv run ruff check . && uv run ruff format --check . && cd ../.. && npm --prefix apps/web run lint --if-present",

@@ -40,11 +40,7 @@ from app.shared.features import FEATURE_COLUMNS
 from app.shared.intervention import (
     EFFICACY_PRESETS,
     MONOTONE_RAIN_FEATURES,
-    apply_reduction,
-    reduction,
-    roi,
 )
-from app.shared.optimizer import greedy_crews
 from app.shared.plan_registry import registered_kinds
 from ml.train import monotone_constraints_for_horizon
 
@@ -103,6 +99,8 @@ def test_wp0_2_fixture_roundtrip_and_provenance_all_endpoints(monkeypatch: pytes
         assert ready_body["git_sha"] == "075e81b"
         assert ready_body["offline"] is False
         assert ready_body["data_as_of"] == "2025-12-29"
+        assert ready_body["checks"]["supply_ratios"] is True
+        assert ready_body["checks"]["ward_capacity"] is True
 
         # 2.1 POST /api/v1/allocation/plan
         alloc_req = {
@@ -306,18 +304,9 @@ def test_monotone_rain_features_matches_ml_train() -> None:
 
 
 def test_wp0_shared_and_service_stubs_raise_not_implemented() -> None:
-    """Remaining WP3/WP4 stubs raise NotImplementedError until their WPs merge."""
+    """All four plan runners are registered and unconfigured services fail closed without injected dependencies."""
     create_app()
     assert registered_kinds() >= {"allocation", "overflow", "simulation", "dispatch"}
-
-    with pytest.raises(NotImplementedError):
-        greedy_crews(lambda _w, _c: 1.0, ["DSCC_Ward_04"], 2)
-    with pytest.raises(NotImplementedError):
-        reduction(2, 0.40, 0.50)
-    with pytest.raises(NotImplementedError):
-        apply_reduction({}, 2, 0.25, 100.0)
-    with pytest.raises(NotImplementedError):
-        roi(6.0, 2)
 
     with pytest.raises(NotImplementedError):
         AllocationService().plan(AllocationRequest(origin_week=date(2024, 8, 5)))
