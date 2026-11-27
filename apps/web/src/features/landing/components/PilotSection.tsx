@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Check,
@@ -96,6 +97,7 @@ interface SubmissionReceipt {
 }
 
 export function PilotSection() {
+  const router = useRouter();
   const { lang } = useLandingLang();
   const bn = lang === "bn";
 
@@ -148,6 +150,8 @@ export function PilotSection() {
       topics: [...selectedTopics],
       notes: notes.trim(),
     });
+    const qs = new URLSearchParams({ ref: refId, org, name: cleanName });
+    router.push(`/thank-you?${qs.toString()}`);
   };
 
   const handleCopyRef = async () => {

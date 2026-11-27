@@ -11,6 +11,8 @@ export interface MapPalette {
   tier: Record<RiskTier, string>;
 }
 
+export type MapTheme = "night" | "street";
+
 function cssVar(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
@@ -31,39 +33,113 @@ export function readMapPalette(): MapPalette {
   };
 }
 
-// OpenStreetMap's standard tiles need no key (tile usage policy: attribution, light use, no bulk download).
+// OpenStreetMap standard tiles + OpenFreeMap vector 3D building footprint tiles (no API key required).
 const OSM_TILES = ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"];
+const OPENFREEMAP_VECTOR = "https://tiles.openfreemap.org/planet";
 
 export const MAP_ATTRIBUTION =
   '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 /**
- * Raster-only style: no glyph or sprite downloads, so the map still draws (Ink ground + wards)
- * when the tile CDN is unreachable.
+ * 3D-capable MapLibre style: OSM base raster + OpenFreeMap 3D extruded building masses +
+ * 3D extruded hexagonal ward risk towers + OSRM road route lines + hospital/clinic layers.
+ * Fault-tolerant: renders cleanly on the brand Ink/Street ground even when external tile CDNs are offline.
  */
-export function buildMapStyle(palette: MapPalette): StyleSpecification {
+export function buildMapStyle(palette: MapPalette, theme: MapTheme = "night"): StyleSpecification {
+  const isNight = theme === "night";
+
   return {
     version: 8,
+    light: {
+      anchor: "viewport",
+      color: "#ffffff",
+      intensity: isNight ? 0.42 : 0.35,
+      position: [1.4, 210, 42],
+    },
     sources: {
-      base: { type: "raster", tiles: OSM_TILES, tileSize: 256, attribution: MAP_ATTRIBUTION, maxzoom: 19 },
+      base: {
+        type: "raster",
+        tiles: OSM_TILES,
+        tileSize: 256,
+        attribution: MAP_ATTRIBUTION,
+        maxzoom: 19,
+      },
+      openmaptiles: {
+        type: "vector",
+        url: OPENFREEMAP_VECTOR,
+      },
       ripples: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+      "ward-columns": { type: "geojson", data: { type: "FeatureCollection", features: [] } },
       wards: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+      routes: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+      facilities: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+      "start-point": { type: "geojson", data: { type: "FeatureCollection", features: [] } },
     },
     layers: [
-      { id: "ground", type: "background", paint: { "background-color": palette.ink } },
       {
-        // Light OSM tiles turned into an Ink night map: brightness inverted, hue turned back, colour drained,
-        // then laid over the Ink ground at partial opacity so the brand ground tints it.
+        id: "ground",
+        type: "background",
+        paint: { "background-color": isNight ? palette.ink : "#eef2f7" },
+      },
+      {
         id: "base",
         type: "raster",
         source: "base",
+        paint: isNight
+          ? {
+              "raster-brightness-min": 1,
+              "raster-brightness-max": 0,
+              "raster-hue-rotate": 180,
+              "raster-saturation": -0.75,
+              "raster-contrast": 0.15,
+              "raster-opacity": 0.55,
+            }
+          : {
+              "raster-brightness-min": 0.02,
+              "raster-brightness-max": 1,
+              "raster-saturation": -0.12,
+              "raster-contrast": 0.04,
+              "raster-opacity": 0.96,
+            },
+      },
+      {
+        id: "buildings-3d",
+        type: "fill-extrusion",
+        source: "openmaptiles",
+        "source-layer": "building",
+        minzoom: 13,
+        filter: ["!", ["has", "hide_3d"]],
+        layout: {
+          visibility: "none",
+        },
         paint: {
-          "raster-brightness-min": 1,
-          "raster-brightness-max": 0,
-          "raster-hue-rotate": 180,
-          "raster-saturation": -0.75,
-          "raster-contrast": 0.15,
-          "raster-opacity": 0.5,
+          "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+          "fill-extrusion-height": ["coalesce", ["get", "render_height"], 12],
+          "fill-extrusion-color": isNight
+            ? [
+                "interpolate",
+                ["linear"],
+                ["coalesce", ["get", "render_height"], 12],
+                0,
+                "#131e3d",
+                25,
+                "#1d2f66",
+                65,
+                "#294596",
+              ]
+            : [
+                "interpolate",
+                ["linear"],
+                ["coalesce", ["get", "render_height"], 12],
+                0,
+                "#dce2ed",
+                25,
+                "#c5d0e3",
+                65,
+                "#aebcd4",
+              ],
+          "fill-extrusion-opacity": isNight ? 0.82 : 0.78,
+          "fill-extrusion-vertical-gradient": true,
         },
       },
       {
@@ -90,20 +166,34 @@ export function buildMapStyle(palette: MapPalette): StyleSpecification {
         },
       },
       {
+        id: "ward-columns-3d",
+        type: "fill-extrusion",
+        source: "ward-columns",
+        maxzoom: 14.3,
+        layout: {
+          visibility: "none",
+        },
+        paint: {
+          "fill-extrusion-base": 0,
+          "fill-extrusion-height": ["get", "height"],
+          "fill-extrusion-color": ["get", "color"],
+          "fill-extrusion-opacity": 0.76,
+          "fill-extrusion-vertical-gradient": true,
+        },
+      },
+      {
         id: "wards",
         type: "circle",
         source: "wards",
         paint: {
           "circle-radius": ["get", "radius"],
           "circle-color": ["get", "color"],
-          // A faint light rim keeps dark tiers (Critical) legible on the night map.
           "circle-stroke-color": palette.white,
-          "circle-stroke-opacity": 0.45,
-          "circle-stroke-width": 1,
+          "circle-stroke-opacity": isNight ? 0.45 : 0.85,
+          "circle-stroke-width": isNight ? 1 : 1.5,
         },
       },
       {
-        // Royal halo outside the white ring: brand colour for the focused ward, white for contrast on Critical.
         id: "ward-focus-halo",
         type: "circle",
         source: "wards",
@@ -124,6 +214,97 @@ export function buildMapStyle(palette: MapPalette): StyleSpecification {
           "circle-radius": ["+", ["get", "radius"], 7],
           "circle-color": "rgba(0,0,0,0)",
           "circle-stroke-width": 2,
+          "circle-stroke-color": isNight ? palette.white : palette.ink,
+        },
+      },
+      {
+        id: "route-shortest",
+        type: "line",
+        source: "routes",
+        filter: ["==", ["get", "variant"], "shortest"],
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": isNight ? "#94a3b8" : "#334155",
+          "line-width": 4,
+          "line-dasharray": [2, 1.5],
+          "line-opacity": 0.9,
+        },
+      },
+      {
+        id: "route-fastest-casing",
+        type: "line",
+        source: "routes",
+        filter: ["==", ["get", "variant"], "fastest"],
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": palette.white,
+          "line-width": 8.5,
+          "line-opacity": 0.92,
+        },
+      },
+      {
+        id: "route-fastest",
+        type: "line",
+        source: "routes",
+        filter: ["==", ["get", "variant"], "fastest"],
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": palette.royal,
+          "line-width": 4.5,
+          "line-opacity": 1,
+        },
+      },
+      {
+        id: "facilities-halo",
+        type: "circle",
+        source: "facilities",
+        filter: ["==", ["get", "selected"], true],
+        paint: {
+          "circle-radius": 14,
+          "circle-color": palette.royal,
+          "circle-opacity": 0.25,
+          "circle-stroke-width": 2,
+          "circle-stroke-color": palette.royal,
+        },
+      },
+      {
+        id: "facilities",
+        type: "circle",
+        source: "facilities",
+        paint: {
+          "circle-radius": ["case", ["==", ["get", "selected"], true], 8, 5.5],
+          "circle-color": ["match", ["get", "ftype"], "hospital", palette.royal, "clinic", "#0D9488", palette.royal],
+          "circle-stroke-width": 2,
+          "circle-stroke-color": palette.white,
+        },
+      },
+      {
+        id: "start-point-pulse",
+        type: "circle",
+        source: "start-point",
+        paint: {
+          "circle-radius": 13,
+          "circle-color": "#059669",
+          "circle-opacity": 0.26,
+        },
+      },
+      {
+        id: "start-point",
+        type: "circle",
+        source: "start-point",
+        paint: {
+          "circle-radius": 6.5,
+          "circle-color": "#059669",
+          "circle-stroke-width": 2.5,
           "circle-stroke-color": palette.white,
         },
       },

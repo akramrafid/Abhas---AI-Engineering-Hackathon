@@ -19,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
   ];
 
-  const lastModified = new Date("2026-11-22T00:00:00Z");
+  const lastModified = new Date("2026-11-26T00:00:00Z");
   return routes.map(({ path, changeFrequency, priority }) => ({
     url: `${SITE_URL}${path}`,
     lastModified,
