@@ -200,12 +200,14 @@ def test_wp0_2_fixture_roundtrip_and_provenance_all_endpoints(monkeypatch: pytes
                 "request": {"origin_week": "2024-08-05", "scope": "Dhaka South", "lang": "en"},
             },
         ]
+        created_plan_ids: list[str] = []
         for body in plan_payloads:
             r_plan = client.post("/api/v1/plans", json=body)
             assert r_plan.status_code == 201, r_plan.text
             plan_json = r_plan.json()
             _assert_run_meta(plan_json, expected_offline=False)
             PlanRecord.model_validate(plan_json)
+            created_plan_ids.append(plan_json["id"])
 
         # GET /api/v1/plans
         r_list = client.get("/api/v1/plans", params={"kind": "allocation", "limit": 10})
@@ -218,8 +220,8 @@ def test_wp0_2_fixture_roundtrip_and_provenance_all_endpoints(monkeypatch: pytes
         r_cmp = client.get(
             "/api/v1/plans/compare",
             params={
-                "a": "550e8400-e29b-41d4-a716-446655440001",
-                "b": "550e8400-e29b-41d4-a716-446655440002",
+                "a": created_plan_ids[0],
+                "b": created_plan_ids[1],
             },
         )
         assert r_cmp.status_code == 200
@@ -468,6 +470,7 @@ def test_offline_socket_guard_phase2_stubs(monkeypatch: pytest.MonkeyPatch) -> N
         assert ready.status_code == 200
         assert ready.json()["offline"] is True
 
+        offline_plan_ids: list[str] = []
         for endpoint, payload in (
             ("/api/v1/allocation/plan", {"origin_week": "2024-08-05"}),
             ("/api/v1/overflow/route", {"origin_week": "2024-08-05"}),
@@ -477,22 +480,33 @@ def test_offline_socket_guard_phase2_stubs(monkeypatch: pytest.MonkeyPatch) -> N
                 "/api/v1/plans",
                 {
                     "kind": "allocation",
-                    "label": "Offline plan",
+                    "label": "Offline plan A",
+                    "request": {"origin_week": "2024-08-05"},
+                },
+            ),
+            (
+                "/api/v1/plans",
+                {
+                    "kind": "overflow",
+                    "label": "Offline plan B",
                     "request": {"origin_week": "2024-08-05"},
                 },
             ),
         ):
             r = client.post(endpoint, json=payload)
             assert r.status_code in (200, 201)
-            assert r.json()["offline"] is True
+            body = r.json()
+            assert body["offline"] is True
+            if endpoint == "/api/v1/plans":
+                offline_plan_ids.append(body["id"])
 
         assert client.get("/api/v1/plans").json()["offline"] is True
         assert (
             client.get(
                 "/api/v1/plans/compare",
                 params={
-                    "a": "550e8400-e29b-41d4-a716-446655440001",
-                    "b": "550e8400-e29b-41d4-a716-446655440002",
+                    "a": offline_plan_ids[0],
+                    "b": offline_plan_ids[1],
                 },
             ).json()["offline"]
             is True

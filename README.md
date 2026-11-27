@@ -56,9 +56,9 @@
 | **Backend API** | FastAPI, Uvicorn, Pydantic v2 (`extra="forbid"`), SQLAlchemy `2.0`, Alembic, `httpx` |
 | **ML & Data Pipeline** | LightGBM (Poisson multi-horizon + monotonic constraints), `scikit-learn`, `pandas`, `NumPy`, `SciPy`, `statsmodels`, Optuna, TreeSHAP, `joblib`, `openpyxl` |
 | **Frontend Console** | Next.js `16` (App Router, Turbopack, Cache Components), React `19`, Tailwind CSS `v4`, TanStack React Query, Recharts, MapLibre GL JS, GSAP |
-| **Database & Caching** | SQLite WAL (zero-key local Stage 1) / PostgreSQL-ready via Alembic (`0001_initial`), single-flight lock + L1 LRU + L2 SQLite `predictions_cache` & `weather_cache` |
-| **External Services (All Optional)** | Open-Meteo Forecast & ERA5 Archive API (CC BY 4.0, no key), Google Gemini 2.5 Flash API (AI chat), Anthropic Claude Haiku API (officer advisory), Clerk (`@clerk/nextjs` auth) |
-| **Quality, Security & Testing** | `pytest` (139 tests), `ruff`, `pyright`, `eslint`, `tsc`, Schemathesis (767 checks), Playwright + `axe-core` (WCAG 2.2 AA), `k6`, custom 30-attack AI/API red-team suite |
+| **Database & Caching** | SQLite WAL (zero-key local Stage 1) / PostgreSQL-ready via Alembic (`0001_initial`, `0002_phase2_plans`), single-flight lock + L1 LRU + L2 SQLite `predictions_cache` & `weather_cache` + append-only `plans` decision log |
+| **External Services (All Optional)** | Open-Meteo Forecast & ERA5 Archive API (CC BY 4.0, no key), OpenStreetMap raster tiles / OpenFreeMap vector tiles / OSRM road routing (all auto-fall back to bundled GeoJSON/SVG schematic & corridor estimates), Google Gemini 2.5 Flash API (optional AI chat), Anthropic Claude Haiku API (optional officer advisory), Clerk (`@clerk/nextjs` optional auth) |
+| **Quality, Security & Testing** | `pytest` (156+ tests + offline socket guard), `ruff`, `pyright`, `eslint`, `tsc`, Schemathesis, Playwright (`default` + `offline` projects) + `axe-core` (WCAG 2.2 AA), `k6`, custom 30-attack AI/API red-team suite |
 
 ---
 
@@ -125,6 +125,26 @@ npm run dev
 ### Measured Fresh-Clone Setup Times
 - **Clean temporary clone verification (`gates.mjs fresh-clone` on `lead@590fd8d`):** `npm run setup` (Python `uv` venv + 53 packages, Web `npm ci` + 469 packages, Alembic migration, 31,320-row SQLite seed, SHA-256 LightGBM verification) completes in **129 s** (≤ 180 s ceiling), followed by 100% green `npm run ci` (`139/139 pytest`, `6/6 smoke`).
 - **Docker alternative (zero local Python/Node version issues):** `docker compose up --build` launches both API (`:8000`) and Web (`:3000`) via [docker-compose.yml](docker-compose.yml).
+
+### Running 100% Offline & Offline Guarantee (ADR-0015)
+
+Every core capability — LightGBM forecasting (`1–4w`), supply allocation, hospital bed overflow routing, counterfactual intervention simulation, bilingual SMS/WhatsApp/HTML dispatch templates, and the append-only plans decision log — runs **100% locally on CPU** with zero external network calls, zero remote fonts/icons/images, and zero API keys.
+
+```bash
+# Force full offline mode across API and Web (macOS/Linux)
+ABHAS_OFFLINE=1 NEXT_PUBLIC_ABHAS_OFFLINE=1 npm run dev
+
+# Windows PowerShell
+$env:ABHAS_OFFLINE="1"; $env:NEXT_PUBLIC_ABHAS_OFFLINE="1"; npm run dev
+
+# Reproducible offline proof: API pytest socket guard + Playwright with all non-localhost requests aborted
+npm run offline:check
+```
+
+- **Kill switch (`ABHAS_OFFLINE=1` / `NEXT_PUBLIC_ABHAS_OFFLINE=1`):** Immediately short-circuits Open-Meteo, Anthropic, Gemini, Clerk, OpenStreetMap/OpenFreeMap tiles, and OSRM routing; `/readyz` and every Phase 2 JSON response report `"offline": true`.
+- **Automatic live-outage detection:** When running without the kill switch, a background daemon probe (2 s TCP connect timeout, never run at startup and never on the HTTP request path) detects a lost connection within ≤ 30 s and flips `"offline": true` while every endpoint keeps serving locally.
+- **Adapter resilience:** Every optional external client enforces a 2 s connect timeout and a 3-failure / 60 s half-open circuit breaker before falling back to cache → climatology or deterministic templates.
+- **Zero remote web assets:** All fonts (`@fontsource`), icons (`@iconify-json/solar`), and testimonial/officer portraits (`apps/web/public/images/`) are self-hosted; `apps/web/next.config.ts` permits zero remote image hosts; maps automatically switch to a bundled GeoJSON/SVG schematic layer when tiles fail or offline.
 
 ### Optional Enhancements (Zero Keys Required by Default)
 
@@ -363,6 +383,11 @@ Contract specification exported at [contracts/openapi.json](contracts/openapi.js
 | `POST /api/v1/advisory` | `advisory` | Bilingual EN/বাংলা structured officer briefing (`$1/day` capped LLM + offline template fallback) |
 | `POST /api/v1/chat`, `POST /api/v1/chat/stream` | `chat` | Grounded Abhas AI assistant (Gemini 2.5 Flash SSE streaming + dual-key failover + offline fallback) |
 | `GET /api/v1/ops` | `ops` | Live model load telemetry, cache hit ratios, inference latency, and LLM/weather budget usage |
+| `POST /api/v1/allocation/plan` | `allocation` | Supply demand conversion (`P80`/`P90`) + HiGHS constrained city allocation + deficit alerts |
+| `POST /api/v1/overflow/route` | `overflow` | Two-stage LP/MILP intra-city hospital bed overflow routing + unroutable patient count |
+| `POST /api/v1/simulator/run` | `simulator` | Monotonic rainfall counterfactual intervention simulator + crew ROI & low/base/high sensitivity band |
+| `POST /api/v1/dispatch/notices`, `GET /api/v1/dispatch/brief/{ward_id}.html` | `dispatch` | Bilingual EN/বাংলা GSM-7/UCS-2 SMS, WhatsApp, and printable A4 self-contained HTML briefs |
+| `POST /api/v1/plans`, `GET /api/v1/plans`, `GET /api/v1/plans/compare` | `plans` | Append-only SQLite/Postgres decision log with run provenance (`model_version`, `git_sha`, `offline`) and KPI diff comparison |
 
 ---
 
@@ -433,6 +458,7 @@ npm run eval            # Locked 2024–2025 hold-out evaluation (11/11 AC-5 qua
 npm run eval:retrieval  # Hotspot ranking Recall@15 & MRR check
 npm run redteam         # 30 automated API & AI prompt-injection security attack vectors
 npm run check:traces    # SQLite llm_traces persistence & $1/day budget enforcement
+npm run offline:check   # Pytest non-loopback socket guard (API) + Playwright non-localhost abort (Web)
 npm run gates           # Runs the complete release-gate matrix
 ```
 
@@ -459,13 +485,14 @@ In full compliance with hackathon transparency rules, every AI assistant, model 
 | **Claude Code** | Anthropic Claude Opus | Lead architecture framing, PRD & OpenAPI contract design, vertical-slice integration, and independent code & security review. |
 | **Antigravity CLI** | Google Gemini 4 Neon & Hydrogen | Parallel vertical-slice implementation, LightGBM Optuna tuning, bilingual responsive Next.js console engineering, animated SVG architecture diagrams, SEO/performance optimization, and test hardening. |
 
-### Runtime AI Model Endpoints & External APIs
-| Service / Endpoint | Purpose | Fallback / Cost Guard |
+### Runtime AI Model Endpoints & External Services (All Optional)
+| Service / Endpoint | Purpose | Offline Guarantee & Cost Guard |
 |---|---|---|
-| **Google Gemini 2.5 Flash API** (`generativelanguage.googleapis.com`) | Streaming Abhas AI assistant (`apps/api/app/adapters/gemini_chat.py`, `POST /api/v1/chat/stream`) grounded in live ward forecasts. | Optional. Dual-key `429` failover, `thinkingBudget: 0`, 512-token cap, response TTL cache, `llm_traces` auditing, and grounded offline fallback when no key is set. |
-| **Anthropic Claude Haiku API** (`api.anthropic.com`) | Optional bilingual EN/বাংলা officer action briefing phrasing (`apps/api/app/adapters/claude_advisory.py`, `POST /api/v1/advisory`). | Optional. Capped at 400 output tokens, post-validated against forecast numbers, hard-capped at `$1.00/day` in SQLite, with free deterministic template fallback. |
-| **Open-Meteo Forecast & ERA5 Archive API** (`api.open-meteo.com`) | Live and historical multi-location daily weather ingestion for the 5 Bangladesh city centroids (`apps/api/app/adapters/openmeteo.py`). | Free, zero API key, CC BY 4.0. Batched into 1 call / 6h (`≤ 4 calls/day`), circuit breaker + climatology fallback, and offline dataset default mode. |
-| **Clerk** (`@clerk/nextjs`) | Optional sign-in protection for `/dashboard` (`apps/web/src/proxy.ts`). | Optional. Completely bypassed when Clerk keys are omitted (`AUTH_ENABLED=false`). |
+| **Open-Meteo Forecast & ERA5 Archive API** (`api.open-meteo.com`) | Optional live and historical multi-location daily weather ingestion for the 5 Bangladesh city centroids (`apps/api/app/adapters/openmeteo.py`). | Free, zero API key, CC BY 4.0. 2 s connect timeout, 3-failure / 60 s circuit breaker, batched 1 call / 6 h (`≤ 4 calls/day`), short-circuits on `ABHAS_OFFLINE=1` to cache → climatology; offline dataset default mode. |
+| **OpenStreetMap Tiles, OpenFreeMap Vector Tiles & OSRM Routing** (`tile.openstreetmap.org`, `tiles.openfreemap.org`, `router.project-osrm.org`) | Optional map basemap tiles, 3D building footprints, and road-network hospital travel routes (`apps/web/src/components/ward-map/`). | Free, zero API key. Automatically switches to a bundled GeoJSON/SVG schematic basemap on tile failure or `NEXT_PUBLIC_ABHAS_OFFLINE=1`, and OSRM falls back immediately to deterministic urban corridor estimates. |
+| **Clerk** (`@clerk/nextjs`) | Optional sign-in protection for `/dashboard` (`apps/web/src/lib/auth-config.ts`, `apps/web/src/proxy.ts`). | Optional. Completely bypassed when `NEXT_PUBLIC_ABHAS_OFFLINE=1`, `NEXT_PUBLIC_AUTH_DISABLED=1`, or Clerk keys are omitted (`AUTH_ENABLED=false`). |
+| **Anthropic Claude Haiku API** (`api.anthropic.com`) | Optional bilingual EN/বাংলা officer action briefing phrasing (`apps/api/app/adapters/llm.py`, `POST /api/v1/advisory`). | Optional. 2 s connect timeout, 3-failure / 60 s circuit breaker, 400-token cap, post-validated against forecast numbers, `$1.00/day` SQLite cap, short-circuits offline to free deterministic bilingual templates. |
+| **Google Gemini 2.5 Flash API** (`generativelanguage.googleapis.com`) | Optional streaming Abhas AI assistant (`apps/api/app/adapters/gemini_chat.py`, `POST /api/v1/chat/stream`) grounded in live ward forecasts. | Optional. 2 s connect timeout, 3-failure / 60 s circuit breaker, dual-key `429` failover, `thinkingBudget: 0`, 512-token cap, `llm_traces` auditing, short-circuits offline to deterministic grounded answers. |
 
 ---
 

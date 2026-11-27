@@ -13,13 +13,20 @@ import asyncio
 import json
 import logging
 import time
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncIterator, Callable, Sequence
 from typing import Any
 
 import httpx
 
 from app.core.config import Settings, get_settings
 from app.core.logging import request_id_var
+from app.core.offline import (
+    DEFAULT_BREAKER_COOLDOWN_S,
+    DEFAULT_BREAKER_THRESHOLD,
+    DEFAULT_CONNECT_TIMEOUT_S,
+    CircuitBreaker,
+    is_offline,
+)
 from app.observability.metrics import OpsMetrics, get_ops_metrics
 from app.observability.pricing import estimate_cost_usd
 from app.observability.traces import LLMCallRecord, TraceSink
@@ -87,6 +94,9 @@ class GeminiChatAdapter:
         ops_metrics: OpsMetrics | None = None,
         settings: Settings | None = None,
         client: httpx.AsyncClient | None = None,
+        clock: Callable[[], float] | None = None,
+        breaker_threshold: int = DEFAULT_BREAKER_THRESHOLD,
+        breaker_cooldown_s: float = DEFAULT_BREAKER_COOLDOWN_S,
     ) -> None:
         cfg = settings or get_settings()
         self._settings = cfg
@@ -117,13 +127,20 @@ class GeminiChatAdapter:
         self._external_client = client
         self._client: httpx.AsyncClient | None = client
         self._client_loop: asyncio.AbstractEventLoop | None = None
+        self._breaker = CircuitBreaker(
+            threshold=breaker_threshold,
+            cooldown_s=breaker_cooldown_s,
+            clock=clock,
+        )
 
     def _get_client(self) -> httpx.AsyncClient:
         if self._external_client is not None:
             return self._external_client
         loop = asyncio.get_running_loop()
         if self._client is None or self._client.is_closed or self._client_loop is not loop:
-            timeout = httpx.Timeout(connect=3.0, read=self._timeout_s, write=5.0, pool=5.0)
+            timeout = httpx.Timeout(
+                connect=DEFAULT_CONNECT_TIMEOUT_S, read=self._timeout_s, write=5.0, pool=5.0
+            )
             self._client = httpx.AsyncClient(
                 timeout=timeout,
                 limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
@@ -241,6 +258,10 @@ class GeminiChatAdapter:
     ) -> ChatLLMResult:
         if not self._api_key:
             raise ChatLLMUnavailableError("GEMINI_API_KEY not configured")
+        if is_offline():
+            raise ChatLLMUnavailableError("Offline mode active; skipping Gemini API call")
+        if not self._breaker.allow_request():
+            raise ChatLLMUnavailableError("Gemini circuit breaker is open")
 
         est_in = (len(system) + sum(len(m.content) for m in messages)) // 4
         self._check_budget(est_in, max_output_tokens, language, ward_id)
@@ -267,6 +288,7 @@ class GeminiChatAdapter:
                     if resp.status_code != 200:
                         if key_idx + 1 < len(keys_to_try):
                             break
+                        self._breaker.record_failure()
                         self._ops.record_llm_event(call=True, error=True)
                         self._emit_trace(
                             status="error",
@@ -284,8 +306,10 @@ class GeminiChatAdapter:
                     data = resp.json()
                     text = _extract_gemini_text(data).strip()
                     if not text:
+                        self._breaker.record_failure()
                         raise ChatLLMUnavailableError("Gemini returned empty text")
 
+                    self._breaker.record_success()
                     in_tok, out_tok = _extract_gemini_usage(data)
                     cost = estimate_cost_usd(self.model, in_tok, out_tok) or 0.0
                     self._ops.record_llm_event(call=True, error=False)
@@ -323,6 +347,7 @@ class GeminiChatAdapter:
                         continue
                     if key_idx + 1 < len(keys_to_try):
                         break
+                    self._breaker.record_failure()
                     self._ops.record_llm_event(call=True, error=True)
                     self._emit_trace(
                         status="timeout" if isinstance(exc, httpx.TimeoutException) else "error",
@@ -337,6 +362,7 @@ class GeminiChatAdapter:
                     )
                     raise ChatLLMUnavailableError(f"Gemini request failed: {type(exc).__name__}") from exc
 
+        self._breaker.record_failure()
         raise ChatLLMUnavailableError(f"Gemini request failed: {type(last_err).__name__}")
 
     async def stream(
@@ -350,6 +376,10 @@ class GeminiChatAdapter:
     ) -> AsyncIterator[str]:
         if not self._api_key:
             raise ChatLLMUnavailableError("GEMINI_API_KEY not configured")
+        if is_offline():
+            raise ChatLLMUnavailableError("Offline mode active; skipping Gemini stream call")
+        if not self._breaker.allow_request():
+            raise ChatLLMUnavailableError("Gemini circuit breaker is open")
 
         est_in = (len(system) + sum(len(m.content) for m in messages)) // 4
         self._check_budget(est_in, max_output_tokens, language, ward_id)
@@ -377,6 +407,7 @@ class GeminiChatAdapter:
                         last_status = resp.status_code
                         if key_idx + 1 < len(keys_to_try):
                             continue
+                        self._breaker.record_failure()
                         self._ops.record_llm_event(call=True, error=True)
                         raise ChatLLMUnavailableError(f"Gemini stream HTTP {resp.status_code}")
 
@@ -403,7 +434,9 @@ class GeminiChatAdapter:
 
             latency_ms = (time.perf_counter() - t0) * 1000.0
             if not emitted_any:
+                self._breaker.record_failure()
                 raise ChatLLMUnavailableError(f"Gemini stream produced no text (status={last_status})")
+            self._breaker.record_success()
             cost = estimate_cost_usd(self.model, in_tok, out_tok) or 0.0
             self._ops.record_llm_event(call=True, error=False)
             if self._call_log is not None:
@@ -425,6 +458,7 @@ class GeminiChatAdapter:
                 ward_id=ward_id,
             )
         except (httpx.TimeoutException, httpx.HTTPError) as exc:
+            self._breaker.record_failure()
             latency_ms = (time.perf_counter() - t0) * 1000.0
             self._ops.record_llm_event(call=True, error=True)
             self._emit_trace(

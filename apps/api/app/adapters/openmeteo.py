@@ -28,6 +28,13 @@ import httpx
 
 from app.adapters.db.repositories import SqlWeatherCache, WeatherCacheEntry
 from app.core.config import API_DIR, get_settings
+from app.core.offline import (
+    DEFAULT_BREAKER_COOLDOWN_S,
+    DEFAULT_BREAKER_THRESHOLD,
+    DEFAULT_CONNECT_TIMEOUT_S,
+    CircuitBreaker,
+    is_offline,
+)
 from app.core.types import CITIES, WeatherMode, WeatherSourceUsed
 from app.ports.repositories import CallLog, ObservationRepository
 from app.ports.weather import WeekWeather
@@ -170,8 +177,8 @@ class OpenMeteoWeatherSource:
         client: httpx.Client | None = None,
         clock: Callable[[], datetime] | None = None,
         retry_base_s: float = 0.25,
-        breaker_threshold: int = 3,
-        breaker_cooldown_s: float = 300.0,
+        breaker_threshold: int = DEFAULT_BREAKER_THRESHOLD,
+        breaker_cooldown_s: float = DEFAULT_BREAKER_COOLDOWN_S,
         centroids_path: Path | None = None,
         max_normal_year: int = DEFAULT_TRAIN_MAX_YEAR,
     ) -> None:
@@ -201,7 +208,9 @@ class OpenMeteoWeatherSource:
         self._centroid_by_city: dict[str, dict[str, Any]] = {c["city"]: c for c in self._centroids}
 
         conn_to = float(
-            connect_timeout_s if connect_timeout_s is not None else settings.weather_connect_timeout_s
+            connect_timeout_s
+            if connect_timeout_s is not None
+            else min(DEFAULT_CONNECT_TIMEOUT_S, settings.weather_connect_timeout_s)
         )
         read_to = float(read_timeout_s if read_timeout_s is not None else settings.weather_read_timeout_s)
         self._owns_client = client is None
@@ -211,8 +220,11 @@ class OpenMeteoWeatherSource:
 
         self._lock = RLock()
         self._mem_cache: dict[str, dict[date, WeatherCacheEntry]] = defaultdict(dict)
-        self._consecutive_failures = 0
-        self._circuit_open_until: datetime | None = None
+        self._breaker = CircuitBreaker(
+            threshold=breaker_threshold,
+            cooldown_s=breaker_cooldown_s,
+            clock=lambda: self._now().timestamp(),
+        )
         self._climatology_cache: dict[str, dict[int, tuple[float, float, float, float, float]]] = {}
 
     def close(self) -> None:
@@ -381,9 +393,8 @@ class OpenMeteoWeatherSource:
             raise httpx.HTTPStatusError("Injected fault: openmeteo_5xx", request=req, response=resp)
 
     def _record_fetch_failure(self, now: datetime, latency_ms: float, detail: str) -> None:
-        self._consecutive_failures += 1
-        if self._consecutive_failures >= self._breaker_threshold:
-            self._circuit_open_until = now + timedelta(seconds=self._breaker_cooldown_s)
+        del now
+        self._breaker.record_failure()
         if self._call_log is not None:
             self._call_log.record("weather", ok=False, latency_ms=latency_ms, detail=detail)
         logger.error(
@@ -394,7 +405,10 @@ class OpenMeteoWeatherSource:
 
     def _fetch_all_cities_live(self, now: datetime) -> bool:
         """Execute ONE multi-location Open-Meteo GET for all 5 cities and cache results."""
-        if self._circuit_open_until is not None and now < self._circuit_open_until:
+        if is_offline():
+            logger.info("openmeteo_offline_short_circuit", extra={"event": "openmeteo_offline_short_circuit"})
+            return False
+        if not self._breaker.allow_request():
             logger.warning("openmeteo_circuit_open", extra={"event": "openmeteo_circuit_open"})
             return False
 
@@ -512,8 +526,7 @@ class OpenMeteoWeatherSource:
         if self._weather_cache is not None:
             self._weather_cache.upsert_entries(entries)
 
-        self._consecutive_failures = 0
-        self._circuit_open_until = None
+        self._breaker.record_success()
         if self._call_log is not None:
             self._call_log.record(
                 "weather",
