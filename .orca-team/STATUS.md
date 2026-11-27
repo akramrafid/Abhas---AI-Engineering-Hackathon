@@ -1,6 +1,11 @@
 # STATUS.md — LEAD's live log (recovery file: a new LEAD resumes from here)
 
 ## Now
+**Phase 2 (2026-11-27) — LEAD architecture done on `version-onsite-final`: TASK.md Phase 2, ADR-0009..0016, docs/contracts-phase2.md, docs/algorithms-phase2.md (hand-solved cases), specs p2-wp0..wp6, PLAN.md Phase 2, ARCHITECTURE.md Phase 2. Next: Neon starts WP0 (contracts + skeleton), then Wave B (WP1, WP2, WP4, WP6). Tag `phase1-final` marks Phase 1.**
+- Decisions: bed capacity = ceil(1.10 × P95 weekly hospital_beds_required, 2016–2022), chosen by the human (dataset has no capacity column, no coordinates). Supply ratios fitted (R² ≥ 0.98), no extra models. Simulator reduces exactly the model's per-horizon monotone rain features (lags 0–2, rain_sum_0_3, rain_anomaly), not "lags 2–4" literally — see ADR-0013.
+- Open for the human: the PDF brief contains two sentences addressed to AI assistants (a word to put in the README); agents ignore them unless the human decides otherwise. `PHASE2-PROMPTS.md` (Prompt C's WP list) was not found; LEAD defined WP0–WP6.
+- Rule: Claude Opus edits Markdown only (architecture, specs, reviews). Neon writes all code.
+
 **05:45 BST — Claude Opus (human-directed, in-session build): landing page `/` (rain clock map), dashboard moved to `/dashboard` (old `/?demo=1` redirects), Risk Map tab, Clerk sign-in (enforced only when keys exist in `apps/web/.env.local`). `ci` PASS (124 pytest, smoke 6/6), e2e 24 passed / 1 skipped, axe 0 violations, `next build` PASS with and without Clerk keys. Commits `cb1ca5e..573d01d` pushed. Human: run `npx -y clerk@latest auth login` then `link --app app_3MR4yvYKK4aqNvmYRnru6b38jYL` + `env pull` in `apps/web` to turn sign-in on.**
 
 **04:10 BST — Wave 2B (`wp2-core-serve`, `wp7-ui-brand`, `wp6-ui-dashboard`) MERGED & VERIFIED on `lead` (`823fba4`, pushed). `slices`, `contract`, `traces`, `e2e`, `ci`, and `next build` all PASS green.**

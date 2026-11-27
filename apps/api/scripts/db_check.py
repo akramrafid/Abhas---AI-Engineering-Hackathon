@@ -26,6 +26,9 @@ EXPECTED_TABLES: frozenset[str] = frozenset(
         "predictions_cache",
         "api_calls",
         "llm_traces",
+        "plans",
+        "plan_runs",
+        "dispatch_log",
     }
 )
 
@@ -71,6 +74,28 @@ def _assert_schema_details(url: str) -> None:
         ward_idx_cols = {tuple(ix["column_names"]) for ix in insp.get_indexes("wards")}
         if ("city",) not in ward_idx_cols:
             raise AssertionError(f"Missing index on wards(city), found: {sorted(ward_idx_cols)}")
+
+        plans_idx_names = {ix["name"] for ix in insp.get_indexes("plans")}
+        if "ix_plans_kind_created" not in plans_idx_names:
+            raise AssertionError(f"Missing index ix_plans_kind_created on plans, found: {plans_idx_names}")
+
+        plans_cks = insp.get_check_constraints("plans")
+        if not any("allocation" in str(ck.get("sqltext", "")) for ck in plans_cks):
+            raise AssertionError(f"Missing kind check constraint on plans: {plans_cks}")
+
+        plan_runs_fks = insp.get_foreign_keys("plan_runs")
+        if not any(fk.get("referred_table") == "plans" for fk in plan_runs_fks):
+            raise AssertionError(f"Missing FK from plan_runs to plans: {plan_runs_fks}")
+
+        dispatch_idx_names = {ix["name"] for ix in insp.get_indexes("dispatch_log")}
+        if "ix_dispatch_log_ward_created" not in dispatch_idx_names:
+            raise AssertionError(
+                f"Missing index ix_dispatch_log_ward_created on dispatch_log, found: {dispatch_idx_names}"
+            )
+
+        dispatch_fks = insp.get_foreign_keys("dispatch_log")
+        if not any(fk.get("referred_table") == "plans" for fk in dispatch_fks):
+            raise AssertionError(f"Missing FK from dispatch_log to plans: {dispatch_fks}")
 
         with engine.connect() as conn:
             journal_mode = str(conn.execute(text("PRAGMA journal_mode")).scalar_one()).lower()

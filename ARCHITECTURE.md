@@ -132,3 +132,76 @@ To eliminate temporal data leakage in time-series forecasting, the 10-year datas
 - [ADR Index (ADR-0001 through ADR-0008)](docs/adr/0001-modular-monolith-slices.md)
 - [System Design & Latency Budgets](docs/system-design.md)
 - [AI Model Design & Model Card](docs/model-card.md) · [Threat Model](docs/threat-model.md)
+
+---
+
+## Phase 2 — Operational Command System (onsite final, `version-onsite-final`)
+
+Phase 2 turns the forecast into decisions: how many saline bags, kits and beds each ward gets when stock is short,
+where overflow patients go, which wards to spray, and the notice each officer receives. The architecture style is
+unchanged (ADR-0001): one FastAPI modular monolith with vertical slices and ports & adapters. Five new API slices
+(`allocation`, `overflow`, `simulator`, `dispatch`, `plans`) sit on four new pure modules in `shared/` (`supply`,
+`optimizer`, `routing`, `intervention`); the web app gains one slice, `features/command/`, the 5-step Command Center.
+Decisions: ADR-0009 to ADR-0016. Contract: `docs/contracts-phase2.md`. Maths with hand-solved examples:
+`docs/algorithms-phase2.md`.
+
+### Data flow
+```mermaid
+flowchart LR
+  DS[(Onsite dataset<br/>2016–2025)] -->|fit 2016–2022| FIT[ml/fit_supply.py<br/>ratios + capacity JSON]
+  DS --> FC[Forecast engine<br/>LightGBM Poisson h=1..4<br/>NegBin bands]
+  FC -->|window means + NB size| SUP[Supply<br/>service-level quantile × ratio]
+  FIT --> SUP
+  SUP -->|planned demand d_i| ALLOC[Allocation<br/>weighted LP per city<br/>stock 30–100 %]
+  SUP -->|planned beds| ROUTE[Overflow routing<br/>min-max utilisation LP<br/>+ min-transfer MILP]
+  FIT -->|capacity_i| ROUTE
+  FC -->|monotone rain features| SIM[Simulator<br/>counterfactual re-predict h=2..4]
+  SIM -->|marginal cases prevented| ALLOC
+  ALLOC --> DISP[Dispatch<br/>SMS · WhatsApp · HTML/PDF brief]
+  ROUTE --> DISP
+  SIM --> DISP
+  ALLOC & ROUTE & SIM & DISP -->|inputs, outputs, git SHA| PLANS[(Plans<br/>decision log)]
+  DISP --> EXP[/exports samples/]
+```
+
+### The maths, one paragraph per module
+**Supply (ADR-0009).** In the onsite data the three supply columns are proportional to cases (saline 2.384, kits 1.158,
+beds 0.295 per case; R² 0.9997, 0.9988, 0.981 on 2016–2022). We plan to the newsvendor critical fractile, not the
+mean: window cases follow a moment-matched negative binomial from the model's own per-horizon dispersion, and we take
+P80 for saline and kits, P90 for beds, then multiply by the fitted ratio and round up.
+
+**Allocation (ADR-0010, ADR-0011).** Each city is one stock pool, S = stock% × planned demand. Every ward first gets an
+equity floor (20 % of demand); the rest maximises Σ wᵢxᵢ with weight = tier (1, 2, 4, 8) × density factor (density
+over city median, clipped 0.5–2), solved by SciPy HiGHS and rounded by largest remainder so totals are exact. Any
+unmet High/Critical ward, or any ward under 50 %, is a critical deficit. Crews go one at a time to the ward with the
+largest marginal cases prevented; with diminishing returns this greedy rule is optimal.
+
+**Overflow routing (ADR-0012).** Bed capacity is derived from history (ceil 1.10 × P95 weekly beds, 2016–2022; the
+dataset has no capacity column, decided by the human). Inside each city only, a transportation LP minimises the
+worst post-transfer utilisation; a second MILP keeps that optimum and uses the fewest transfers. The output shows net
+deficit per ward, city utilisation before and after, remaining headroom and patients no city bed can absorb.
+
+**Simulator (ADR-0013).** Crews shrink the treated ward's breeding-water signal: exactly the rain features the model
+is constrained to be monotone in for each horizon, by E(c) = E_max(1 − e^(−kc)). The same LightGBM re-predicts weeks
+2–4; the difference is cases prevented, converted to beds and saline with the ADR-0009 ratios. Because only monotone
+inputs decrease, the counterfactual can never exceed the baseline. Efficacy is a stated assumption with low/base/high
+presets shown as a band; wards rank by cases prevented per crew.
+
+**Dispatch (ADR-0014).** Deterministic templates fill SMS (GSM-7 160/153 or UCS-2 70/67 for Bangla, with segment
+count), WhatsApp text and an A4 HTML brief rendered to PDF by Playwright for `/exports`. Every number comes from one
+facts object, and a test checks it.
+
+### Offline design (ADR-0015)
+`ABHAS_OFFLINE=1` is a kill switch; a background probe also detects loss of internet (never at startup, never on the
+request path). Every external adapter has a 2 s connect timeout, a circuit breaker and a cache-then-climatology
+fallback. All Phase 2 maths is pure NumPy/SciPy on local files. The web app self-hosts its images, falls back from
+OpenStreetMap tiles to a bundled layer, and disables Clerk when offline or unconfigured. `npm run offline:check`
+proves it: the API suite under a socket guard and Playwright with every non-localhost request aborted, across all five
+modules. Every Phase 2 response says `offline: true|false`.
+
+### Cost controls
+Zero LLM calls on any core path: forecasting, allocation, routing, simulation and dispatch templates are local and
+free. The optional advisory/assistant LLMs keep their Phase 1 caps and are off when offline. Forecasts are cached
+(in-memory LRU + SQLite); counterfactuals are never cached into the forecast cache. Ratios and capacities are fitted
+once offline and read at startup. Every run is saved as a plan with its git SHA and model version (ADR-0016), so any
+number in a notice can be traced and compared.

@@ -34,6 +34,7 @@
     "redteam": "cd apps/api && uv run python -m evals.redteam",
     "load": "node .orca-team/tools/with-server.mjs --env RATE_LIMIT_PER_MINUTE=10000 -- k6 run -e API={API} tests/load/smoke.js",
     "check:traces": "cd apps/api && uv run pytest -q -m tracing",
+    "offline:check": "cd apps/api && uv run pytest -q tests/test_p2_contracts.py -k offline",
     "smoke": "node scripts/smoke.mjs",
     "smoke:local": "node .orca-team/tools/with-server.mjs -- node scripts/smoke.mjs --api {API}",
     "ci": "npm run lint && npm run typecheck && npm run test && npm run smoke:local",

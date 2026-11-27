@@ -21,17 +21,29 @@ from app.core.errors import (
 from app.core.logging import RequestIdMiddleware, configure_logging, enable_abhas_loggers
 from app.core.ratelimit import BodySizeLimitMiddleware, RateLimitMiddleware
 from app.core.readiness import evaluate_readiness_checks, get_readiness_checks
+from app.core.run_meta import is_offline, resolve_git_sha
 from app.core.security import SecurityHeadersMiddleware
+from app.core.types import DATA_END
 from app.features.advisory.router import router as advisory_router
+from app.features.allocation.router import router as allocation_router
+from app.features.allocation.router import stub_allocation_runner
 from app.features.chat.router import router as chat_router
+from app.features.dispatch.router import router as dispatch_router
+from app.features.dispatch.router import stub_dispatch_runner
 from app.features.forecast.router import router as forecast_router
 from app.features.heatmap.router import router as heatmap_router
 from app.features.lags.deps import warm_lags_cache
 from app.features.lags.router import router as lags_router
 from app.features.ops.router import router as ops_router
+from app.features.overflow.router import router as overflow_router
+from app.features.overflow.router import stub_overflow_runner
+from app.features.plans.router import router as plans_router
+from app.features.simulator.router import router as simulator_router
+from app.features.simulator.router import stub_simulator_runner
 from app.features.validation.router import router as validation_router
 from app.features.wards.router import router as wards_router
 from app.features.weather.router import router as weather_router
+from app.shared.plan_registry import register_runner
 
 API_VERSION = "0.1.0"
 logger = logging.getLogger("abhas.main")
@@ -151,7 +163,19 @@ def create_app() -> FastAPI:
                 else "No readiness checks registered"
             )
             raise AppError(503, "not-ready", "Service not ready", detail)
-        return {"status": "ready", "version": API_VERSION, "checks": results}
+        return {
+            "status": "ready",
+            "version": API_VERSION,
+            "git_sha": resolve_git_sha(),
+            "offline": is_offline(),
+            "data_as_of": DATA_END.isoformat(),
+            "checks": results,
+        }
+
+    register_runner("allocation", stub_allocation_runner)
+    register_runner("overflow", stub_overflow_runner)
+    register_runner("simulation", stub_simulator_runner)
+    register_runner("dispatch", stub_dispatch_runner)
 
     for r in (
         wards_router,
@@ -163,6 +187,11 @@ def create_app() -> FastAPI:
         advisory_router,
         chat_router,
         ops_router,
+        allocation_router,
+        overflow_router,
+        simulator_router,
+        dispatch_router,
+        plans_router,
     ):
         app.include_router(r)
     return app
