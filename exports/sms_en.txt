@@ -1,59 +1,59 @@
 # DSCC_Ward_04 | GSM-7 | 111 chars | 1 seg
-ABHAS Ward 04 Dhaka South, wk of 19 Aug: CRITICAL. 53.4 cases. Saline 155/155, kits 76/76, beds 21/21. Crews 1.
+ABHAS Ward 04 Dhaka South, wk of 19 Aug: CRITICAL. 53.4 cases. Saline 155/155, kits 76/76, beds 10/10. Crews 1.
 
 # DSCC_Ward_06 | GSM-7 | 111 chars | 1 seg
-ABHAS Ward 06 Dhaka South, wk of 19 Aug: CRITICAL. 50.4 cases. Saline 145/145, kits 71/71, beds 20/20. Crews 1.
+ABHAS Ward 06 Dhaka South, wk of 19 Aug: CRITICAL. 50.4 cases. Saline 145/145, kits 71/71, beds 10/10. Crews 1.
 
 # DSCC_Ward_10 | GSM-7 | 111 chars | 1 seg
-ABHAS Ward 10 Dhaka South, wk of 19 Aug: CRITICAL. 46.5 cases. Saline 136/136, kits 66/66, beds 19/19. Crews 1.
+ABHAS Ward 10 Dhaka South, wk of 19 Aug: CRITICAL. 46.5 cases. Saline 136/136, kits 66/66, beds 10/10. Crews 1.
 
 # DSCC_Ward_19 | GSM-7 | 109 chars | 1 seg
-ABHAS Ward 19 Dhaka South, wk of 19 Aug: CRITICAL. 49 cases. Saline 143/143, kits 70/70, beds 20/20. Crews 1.
+ABHAS Ward 19 Dhaka South, wk of 19 Aug: CRITICAL. 49 cases. Saline 143/143, kits 70/70, beds 10/10. Crews 1.
 
-# DSCC_Ward_08 | GSM-7 | 109 chars | 1 seg
-ABHAS Ward 08 Dhaka South, wk of 19 Aug: CRITICAL. 33.5 cases. Saline 98/98, kits 48/48, beds 14/14. Crews 0.
+# DSCC_Ward_08 | GSM-7 | 107 chars | 1 seg
+ABHAS Ward 08 Dhaka South, wk of 19 Aug: CRITICAL. 33.5 cases. Saline 98/98, kits 48/48, beds 7/7. Crews 0.
 
-# DSCC_Ward_12 | GSM-7 | 111 chars | 1 seg
-ABHAS Ward 12 Dhaka South, wk of 19 Aug: CRITICAL. 45.7 cases. Saline 134/134, kits 65/65, beds 18/18. Crews 1.
+# DSCC_Ward_12 | GSM-7 | 109 chars | 1 seg
+ABHAS Ward 12 Dhaka South, wk of 19 Aug: CRITICAL. 45.7 cases. Saline 134/134, kits 65/65, beds 9/9. Crews 1.
 
-# DSCC_Ward_13 | GSM-7 | 111 chars | 1 seg
-ABHAS Ward 13 Dhaka South, wk of 19 Aug: CRITICAL. 38.1 cases. Saline 112/112, kits 55/55, beds 15/15. Crews 1.
+# DSCC_Ward_13 | GSM-7 | 109 chars | 1 seg
+ABHAS Ward 13 Dhaka South, wk of 19 Aug: CRITICAL. 38.1 cases. Saline 112/112, kits 55/55, beds 8/8. Crews 1.
 
-# DSCC_Ward_01 | GSM-7 | 107 chars | 1 seg
-ABHAS Ward 01 Dhaka South, wk of 19 Aug: CRITICAL. 29 cases. Saline 86/86, kits 42/42, beds 12/12. Crews 0.
+# DSCC_Ward_01 | GSM-7 | 122 chars | 1 seg
+ABHAS Ward 01 Dhaka South, wk of 19 Aug: CRITICAL. 29 cases. Saline 86/86, kits 42/42, beds 4/6. Crews 0. Deficit: beds 2.
 
-# DSCC_Ward_07 | GSM-7 | 145 chars | 1 seg
-ABHAS Ward 07 Dhaka South, wk of 19 Aug: CRITICAL. 22.3 cases. Saline 35/67, kits 18/33, beds 6/10. Crews 0. Deficit: saline 32, kits 15, beds 4.
+# DSCC_Ward_07 | GSM-7 | 144 chars | 1 seg
+ABHAS Ward 07 Dhaka South, wk of 19 Aug: CRITICAL. 22.3 cases. Saline 29/67, kits 14/33, beds 1/5. Crews 0. Deficit: saline 38, kits 19, beds 4.
 
-# DSCC_Ward_02 | GSM-7 | 142 chars | 1 seg
-ABHAS Ward 02 Dhaka South, wk of 19 Aug: CRITICAL. 26 cases. Saline 15/76, kits 8/37, beds 2/11. Crews 0. Deficit: saline 61, kits 29, beds 9.
+# DSCC_Ward_02 | GSM-7 | 141 chars | 1 seg
+ABHAS Ward 02 Dhaka South, wk of 19 Aug: CRITICAL. 26 cases. Saline 16/76, kits 8/37, beds 2/6. Crews 0. Deficit: saline 60, kits 29, beds 4.
 
-# DSCC_Ward_15 | GSM-7 | 145 chars | 1 seg
-ABHAS Ward 15 Dhaka South, wk of 19 Aug: CRITICAL. 27.8 cases. Saline 16/81, kits 8/40, beds 2/12. Crews 0. Deficit: saline 65, kits 32, beds 10.
+# DSCC_Ward_15 | GSM-7 | 143 chars | 1 seg
+ABHAS Ward 15 Dhaka South, wk of 19 Aug: CRITICAL. 27.8 cases. Saline 17/81, kits 8/40, beds 2/6. Crews 0. Deficit: saline 64, kits 32, beds 4.
 
-# DSCC_Ward_09 | GSM-7 | 144 chars | 1 seg
-ABHAS Ward 09 Dhaka South, wk of 19 Aug: CRITICAL. 25.9 cases. Saline 15/76, kits 7/37, beds 2/11. Crews 0. Deficit: saline 61, kits 30, beds 9.
+# DSCC_Ward_09 | GSM-7 | 143 chars | 1 seg
+ABHAS Ward 09 Dhaka South, wk of 19 Aug: CRITICAL. 25.9 cases. Saline 16/76, kits 8/37, beds 2/6. Crews 0. Deficit: saline 60, kits 29, beds 4.
 
-# DSCC_Ward_16 | GSM-7 | 144 chars | 1 seg
-ABHAS Ward 16 Dhaka South, wk of 19 Aug: CRITICAL. 27.6 cases. Saline 16/81, kits 8/40, beds 2/11. Crews 0. Deficit: saline 65, kits 32, beds 9.
+# DSCC_Ward_16 | GSM-7 | 143 chars | 1 seg
+ABHAS Ward 16 Dhaka South, wk of 19 Aug: CRITICAL. 27.6 cases. Saline 17/81, kits 8/40, beds 2/6. Crews 0. Deficit: saline 64, kits 32, beds 4.
 
-# DSCC_Ward_17 | GSM-7 | 144 chars | 1 seg
-ABHAS Ward 17 Dhaka South, wk of 19 Aug: CRITICAL. 24.6 cases. Saline 15/74, kits 7/36, beds 2/10. Crews 0. Deficit: saline 59, kits 29, beds 8.
+# DSCC_Ward_17 | GSM-7 | 143 chars | 1 seg
+ABHAS Ward 17 Dhaka South, wk of 19 Aug: CRITICAL. 24.6 cases. Saline 15/74, kits 8/36, beds 1/5. Crews 0. Deficit: saline 59, kits 28, beds 4.
 
-# DSCC_Ward_20 | GSM-7 | 147 chars | 1 seg
-ABHAS Ward 20 Dhaka South, wk of 19 Aug: CRITICAL. 36.5 cases. Saline 21/107, kits 10/52, beds 3/15. Crews 1. Deficit: saline 86, kits 42, beds 12.
+# DSCC_Ward_20 | GSM-7 | 145 chars | 1 seg
+ABHAS Ward 20 Dhaka South, wk of 19 Aug: CRITICAL. 36.5 cases. Saline 22/107, kits 11/52, beds 2/8. Crews 1. Deficit: saline 85, kits 41, beds 6.
 
-# DSCC_Ward_18 | GSM-7 | 147 chars | 1 seg
-ABHAS Ward 18 Dhaka South, wk of 19 Aug: CRITICAL. 38.2 cases. Saline 22/112, kits 11/55, beds 3/16. Crews 1. Deficit: saline 90, kits 44, beds 13.
+# DSCC_Ward_18 | GSM-7 | 145 chars | 1 seg
+ABHAS Ward 18 Dhaka South, wk of 19 Aug: CRITICAL. 38.2 cases. Saline 23/112, kits 11/55, beds 2/8. Crews 1. Deficit: saline 89, kits 44, beds 6.
 
-# DSCC_Ward_03 | GSM-7 | 147 chars | 1 seg
-ABHAS Ward 03 Dhaka South, wk of 19 Aug: CRITICAL. 43.1 cases. Saline 25/124, kits 12/61, beds 4/17. Crews 1. Deficit: saline 99, kits 49, beds 13.
+# DSCC_Ward_03 | GSM-7 | 145 chars | 1 seg
+ABHAS Ward 03 Dhaka South, wk of 19 Aug: CRITICAL. 43.1 cases. Saline 25/124, kits 13/61, beds 2/8. Crews 1. Deficit: saline 99, kits 48, beds 6.
 
-# DSCC_Ward_11 | GSM-7 | 145 chars | 1 seg
-ABHAS Ward 11 Dhaka South, wk of 19 Aug: CRITICAL. 31.2 cases. Saline 19/93, kits 9/45, beds 3/13. Crews 0. Deficit: saline 74, kits 36, beds 10.
+# DSCC_Ward_11 | GSM-7 | 143 chars | 1 seg
+ABHAS Ward 11 Dhaka South, wk of 19 Aug: CRITICAL. 31.2 cases. Saline 19/93, kits 9/45, beds 2/7. Crews 0. Deficit: saline 74, kits 36, beds 5.
 
 # DSCC_Ward_14 | GSM-7 | 143 chars | 1 seg
-ABHAS Ward 14 Dhaka South, wk of 19 Aug: CRITICAL. 20.5 cases. Saline 13/62, kits 6/30, beds 2/9. Crews 0. Deficit: saline 49, kits 24, beds 7.
+ABHAS Ward 14 Dhaka South, wk of 19 Aug: CRITICAL. 20.5 cases. Saline 13/62, kits 6/30, beds 1/5. Crews 0. Deficit: saline 49, kits 24, beds 4.
 
-# DSCC_Ward_05 | GSM-7 | 147 chars | 1 seg
-ABHAS Ward 05 Dhaka South, wk of 19 Aug: CRITICAL. 37.3 cases. Saline 22/110, kits 11/54, beds 3/15. Crews 1. Deficit: saline 88, kits 43, beds 12.
+# DSCC_Ward_05 | GSM-7 | 145 chars | 1 seg
+ABHAS Ward 05 Dhaka South, wk of 19 Aug: CRITICAL. 37.3 cases. Saline 22/110, kits 11/54, beds 2/8. Crews 1. Deficit: saline 88, kits 43, beds 6.

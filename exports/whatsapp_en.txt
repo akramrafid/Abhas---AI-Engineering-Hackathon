@@ -5,7 +5,7 @@ Predicted Cases: *53.4*
 Supplies (Allocated / Required):
 - Saline bags: 155 / 155
 - Diagnostic kits: 76 / 76
-- Hospital beds: 21 / 21
+- Hospital beds: 10 / 10
 Deficit Alert: None
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -19,7 +19,7 @@ Predicted Cases: *50.4*
 Supplies (Allocated / Required):
 - Saline bags: 145 / 145
 - Diagnostic kits: 71 / 71
-- Hospital beds: 20 / 20
+- Hospital beds: 10 / 10
 Deficit Alert: None
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -33,7 +33,7 @@ Predicted Cases: *46.5*
 Supplies (Allocated / Required):
 - Saline bags: 136 / 136
 - Diagnostic kits: 66 / 66
-- Hospital beds: 19 / 19
+- Hospital beds: 10 / 10
 Deficit Alert: None
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -47,7 +47,7 @@ Predicted Cases: *49*
 Supplies (Allocated / Required):
 - Saline bags: 143 / 143
 - Diagnostic kits: 70 / 70
-- Hospital beds: 20 / 20
+- Hospital beds: 10 / 10
 Deficit Alert: None
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -61,7 +61,7 @@ Predicted Cases: *33.5*
 Supplies (Allocated / Required):
 - Saline bags: 98 / 98
 - Diagnostic kits: 48 / 48
-- Hospital beds: 14 / 14
+- Hospital beds: 7 / 7
 Deficit Alert: None
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -75,7 +75,7 @@ Predicted Cases: *45.7*
 Supplies (Allocated / Required):
 - Saline bags: 134 / 134
 - Diagnostic kits: 65 / 65
-- Hospital beds: 18 / 18
+- Hospital beds: 9 / 9
 Deficit Alert: None
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -89,7 +89,7 @@ Predicted Cases: *38.1*
 Supplies (Allocated / Required):
 - Saline bags: 112 / 112
 - Diagnostic kits: 55 / 55
-- Hospital beds: 15 / 15
+- Hospital beds: 8 / 8
 Deficit Alert: None
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
@@ -103,10 +103,10 @@ Predicted Cases: *29*
 Supplies (Allocated / Required):
 - Saline bags: 86 / 86
 - Diagnostic kits: 42 / 42
-- Hospital beds: 12 / 12
-Deficit Alert: None
+- Hospital beds: 4 / 6 (deficit 2)
+Deficit Alert: *CRITICAL DEFICIT* — beds 2
 Assigned Crews: *0*
-Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
 ---
 
@@ -115,10 +115,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *22.3*
 Supplies (Allocated / Required):
-- Saline bags: 35 / 67 (deficit 32)
-- Diagnostic kits: 18 / 33 (deficit 15)
-- Hospital beds: 6 / 10 (deficit 4)
-Deficit Alert: *CRITICAL DEFICIT* — saline 32, kits 15, beds 4
+- Saline bags: 29 / 67 (deficit 38)
+- Diagnostic kits: 14 / 33 (deficit 19)
+- Hospital beds: 1 / 5 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 38, kits 19, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -129,10 +129,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *26*
 Supplies (Allocated / Required):
-- Saline bags: 15 / 76 (deficit 61)
+- Saline bags: 16 / 76 (deficit 60)
 - Diagnostic kits: 8 / 37 (deficit 29)
-- Hospital beds: 2 / 11 (deficit 9)
-Deficit Alert: *CRITICAL DEFICIT* — saline 61, kits 29, beds 9
+- Hospital beds: 2 / 6 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 60, kits 29, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -143,10 +143,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *27.8*
 Supplies (Allocated / Required):
-- Saline bags: 16 / 81 (deficit 65)
+- Saline bags: 17 / 81 (deficit 64)
 - Diagnostic kits: 8 / 40 (deficit 32)
-- Hospital beds: 2 / 12 (deficit 10)
-Deficit Alert: *CRITICAL DEFICIT* — saline 65, kits 32, beds 10
+- Hospital beds: 2 / 6 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 64, kits 32, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -157,10 +157,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *25.9*
 Supplies (Allocated / Required):
-- Saline bags: 15 / 76 (deficit 61)
-- Diagnostic kits: 7 / 37 (deficit 30)
-- Hospital beds: 2 / 11 (deficit 9)
-Deficit Alert: *CRITICAL DEFICIT* — saline 61, kits 30, beds 9
+- Saline bags: 16 / 76 (deficit 60)
+- Diagnostic kits: 8 / 37 (deficit 29)
+- Hospital beds: 2 / 6 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 60, kits 29, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -171,10 +171,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *27.6*
 Supplies (Allocated / Required):
-- Saline bags: 16 / 81 (deficit 65)
+- Saline bags: 17 / 81 (deficit 64)
 - Diagnostic kits: 8 / 40 (deficit 32)
-- Hospital beds: 2 / 11 (deficit 9)
-Deficit Alert: *CRITICAL DEFICIT* — saline 65, kits 32, beds 9
+- Hospital beds: 2 / 6 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 64, kits 32, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -186,9 +186,9 @@ Risk Tier: *Critical*
 Predicted Cases: *24.6*
 Supplies (Allocated / Required):
 - Saline bags: 15 / 74 (deficit 59)
-- Diagnostic kits: 7 / 36 (deficit 29)
-- Hospital beds: 2 / 10 (deficit 8)
-Deficit Alert: *CRITICAL DEFICIT* — saline 59, kits 29, beds 8
+- Diagnostic kits: 8 / 36 (deficit 28)
+- Hospital beds: 1 / 5 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 59, kits 28, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -199,10 +199,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *36.5*
 Supplies (Allocated / Required):
-- Saline bags: 21 / 107 (deficit 86)
-- Diagnostic kits: 10 / 52 (deficit 42)
-- Hospital beds: 3 / 15 (deficit 12)
-Deficit Alert: *CRITICAL DEFICIT* — saline 86, kits 42, beds 12
+- Saline bags: 22 / 107 (deficit 85)
+- Diagnostic kits: 11 / 52 (deficit 41)
+- Hospital beds: 2 / 8 (deficit 6)
+Deficit Alert: *CRITICAL DEFICIT* — saline 85, kits 41, beds 6
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -213,10 +213,10 @@ Window: 2024-08-19 to 2024-09-02
 Risk Tier: *Critical*
 Predicted Cases: *38.2*
 Supplies (Allocated / Required):
-- Saline bags: 22 / 112 (deficit 90)
+- Saline bags: 23 / 112 (deficit 89)
 - Diagnostic kits: 11 / 55 (deficit 44)
-- Hospital beds: 3 / 16 (deficit 13)
-Deficit Alert: *CRITICAL DEFICIT* — saline 90, kits 44, beds 13
+- Hospital beds: 2 / 8 (deficit 6)
+Deficit Alert: *CRITICAL DEFICIT* — saline 89, kits 44, beds 6
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -228,9 +228,9 @@ Risk Tier: *Critical*
 Predicted Cases: *43.1*
 Supplies (Allocated / Required):
 - Saline bags: 25 / 124 (deficit 99)
-- Diagnostic kits: 12 / 61 (deficit 49)
-- Hospital beds: 4 / 17 (deficit 13)
-Deficit Alert: *CRITICAL DEFICIT* — saline 99, kits 49, beds 13
+- Diagnostic kits: 13 / 61 (deficit 48)
+- Hospital beds: 2 / 8 (deficit 6)
+Deficit Alert: *CRITICAL DEFICIT* — saline 99, kits 48, beds 6
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -243,8 +243,8 @@ Predicted Cases: *31.2*
 Supplies (Allocated / Required):
 - Saline bags: 19 / 93 (deficit 74)
 - Diagnostic kits: 9 / 45 (deficit 36)
-- Hospital beds: 3 / 13 (deficit 10)
-Deficit Alert: *CRITICAL DEFICIT* — saline 74, kits 36, beds 10
+- Hospital beds: 2 / 7 (deficit 5)
+Deficit Alert: *CRITICAL DEFICIT* — saline 74, kits 36, beds 5
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -257,8 +257,8 @@ Predicted Cases: *20.5*
 Supplies (Allocated / Required):
 - Saline bags: 13 / 62 (deficit 49)
 - Diagnostic kits: 6 / 30 (deficit 24)
-- Hospital beds: 2 / 9 (deficit 7)
-Deficit Alert: *CRITICAL DEFICIT* — saline 49, kits 24, beds 7
+- Hospital beds: 1 / 5 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 49, kits 24, beds 4
 Assigned Crews: *0*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
 
@@ -271,7 +271,7 @@ Predicted Cases: *37.3*
 Supplies (Allocated / Required):
 - Saline bags: 22 / 110 (deficit 88)
 - Diagnostic kits: 11 / 54 (deficit 43)
-- Hospital beds: 3 / 15 (deficit 12)
-Deficit Alert: *CRITICAL DEFICIT* — saline 88, kits 43, beds 12
+- Hospital beds: 2 / 8 (deficit 6)
+Deficit Alert: *CRITICAL DEFICIT* — saline 88, kits 43, beds 6
 Assigned Crews: *1*
 Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
