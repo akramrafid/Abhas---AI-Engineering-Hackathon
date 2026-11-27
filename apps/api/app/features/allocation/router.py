@@ -43,9 +43,9 @@ def build_stub_allocation_response(req: AllocationRequest) -> AllocationResponse
         generated_at=meta.generated_at,
         request=req,
         supply_ratios={
-            "saline_bags": 2.384,
-            "diagnostic_kits": 1.158,
-            "hospital_beds": 0.295,
+            "saline_bags": 2.385,
+            "diagnostic_kits": 1.164,
+            "hospital_beds": 0.298,
         },
         service_levels={
             "saline_bags": saline_level,
