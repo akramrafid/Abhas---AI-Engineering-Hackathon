@@ -2,7 +2,7 @@ ROLE: CORE · Gemini 4 Neon (XHigh) · hat build
 LEAD_BRANCH: version-onsite-final   TASK: p2-wp2 — Intra-city hospital overflow routing (rubric P2, 10 pts)
 SKILLS: production-standards, backend-engineering, property-based-testing, verification-before-completion
 READ FIRST: docs/contracts-phase2.md §2.2, §3, §4 · docs/algorithms-phase2.md §4 · ADR-0012.
-DEPENDS ON: WP0 merged; reads config/ward_capacity.json produced by WP1 (use a test fixture file until it lands).
+DEPENDS ON: WP0 merged; reads config/ward_capacity.json created in WP0 (284 beds, 3–7 per ward; human-approved assumption).
 
 OWNED PATHS
 - apps/api/app/shared/routing.py · apps/api/app/adapters/config_capacity.py (new)

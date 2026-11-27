@@ -1,38 +1,40 @@
-# ADR-0009: Convert forecast cases to supplies with fitted per-case ratios at a service-level quantile
+# ADR-0009: Convert forecast cases to supplies with the dataset's exact per-case constants at a service-level quantile
 
 ## Status
-Accepted · 2026-11-27 (Phase 2)
+Accepted · 2026-11-27 (Phase 2) · revised the same day after the data profile; constants decided by the human
 
 ## Context
 Rubric P1 needs `saline_bags_needed`, `diagnostic_kits_needed` and `hospital_beds_required` per ward. The onsite
-dataset adds these three columns to the unchanged Phase 1 data. Profiling the training years (2016–2022) shows they
-are almost exactly proportional to `dengue_cases`: a ratio through the origin explains saline at R² 0.9997
-(2.384 bags/case), kits at R² 0.9988 (1.158 kits/case) and beds at R² 0.981 (0.295 beds/case). Residual SD is about
-0.2 units; every supply is 0 when cases are 0; per-case ratios are the same in all five cities. The values are integers,
-which is rounding of a per-case ratio in the generator.
+dataset adds these three integer columns to the unchanged Phase 1 data. The data profile
+(`docs/data-profile-onsite.md`) shows they are **deterministic**: for every case count the supply is a single value
+(std 0 across city, ward and year), namely `round(c × dengue_cases)` with one constant per supply. The constants
+2.385 (saline), 1.164 (kits) and 0.298 (beds) reproduce all 31,320 rows exactly, with no rounding ties for 0–41 cases.
+A regression ratio (OLS through the origin: 2.384, 1.158, 0.295, R² ≥ 0.98) is only an approximation of that rule.
 
-Orders are placed against an uncertain forecast. Ordering the mean runs out half the time; an officer needs a
-service level, the classic newsvendor critical fractile.
+Orders are placed against an uncertain forecast. Ordering for the mean runs out about half the time, so an officer
+needs a service level, the classic newsvendor critical fractile.
 
 ## Decision
-- `ml/fit_supply.py` fits one ratio per supply on 2016–2022 only (OLS through the origin), records R², residual SD and
-  per-city ratios, and writes `apps/api/config/supply_ratios.json` with the dataset SHA-256 and fit date. Startup
-  reads the file; no fitting at request time.
-- Planned demand per ward = `ceil(ratio × Q_s(cases))`, where `Q_s` is the service-level quantile of the window's
-  predictive case distribution. The forecaster already models cases as negative binomial (ADR-0004); a planning
-  window h_start..h_end sums weekly forecasts, approximated by a moment-matched negative binomial (means add,
-  variances add). Defaults: P80 for saline and kits, P90 for beds (a missing bed is worse than a spare one);
-  the request may override the level (0.50–0.99).
+- Supply per case count k is `round_half_up(c × k)` with c = 2.385 / 1.164 / 0.298, the exact rule in the data.
+  The constants live in `apps/api/config/supply_ratios.json` with the dataset SHA-256 and the valid interval for each
+  constant; a test asserts they reproduce 100 % of rows.
+- Planned demand per ward = `round_half_up(c × Q_s)`, where `Q_s` is the service-level quantile of the window's
+  predictive case distribution. The forecaster already models cases as negative binomial (ADR-0004); a window
+  h_start..h_end sums weekly forecasts, approximated by a moment-matched negative binomial (means add, variances add).
+  Defaults: P80 for saline and kits, P90 for beds (a missing bed is worse than a spare one); the request may set one
+  level for all three (0.50–0.99). The service level applies to the case distribution only, never to the constants.
 - The tier shown is unchanged; only quantities use the quantile.
 
 ## Rejected options
-- **Hand-typed multipliers** (e.g. "3 bags per case") — rejected: not traceable to data; the fitted ratio is
-  measured and reproducible from a script.
-- **Three more trained models (one per supply)** — rejected: a linear ratio already explains ≥ 98 % of variance, so
-  extra models add training, artefacts and failure modes for no accuracy. Revisit trigger: any ratio fit drops below
-  R² 0.90 on a future dataset; then train LightGBM per target with the forecast feature set.
+- **Regression ratios (2.384, 1.158, 0.295)** — rejected: they approximate a rule the data states exactly and miss
+  rows after rounding; the exact constants are both simpler and correct.
+- **Hand-typed multipliers without verification** — rejected: not traceable; ours are proven against every row.
+- **Three more trained models (one per supply)** — rejected: the relation is deterministic, so a model would learn a
+  rounding rule at best. Revisit only if a future dataset breaks the 100 % reproduction test; then fit LightGBM per
+  target with the forecast feature set.
 - **Planning to the mean** — rejected: stock-outs every other week by construction.
 
 ## Consequences
 Supplies inherit the forecast's uncertainty honestly and stay explainable in one sentence ("80th-percentile cases ×
-2.38 bags"). The fit file must be regenerated when the dataset changes (its SHA is checked at startup).
+2.385 bags, rounded"). The model card states the provenance caveat: real deployment must replace the constants with
+DGHS admission and consumption tables.

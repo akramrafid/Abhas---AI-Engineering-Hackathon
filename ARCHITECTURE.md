@@ -148,7 +148,7 @@ Decisions: ADR-0009 to ADR-0016. Contract: `docs/contracts-phase2.md`. Maths wit
 ### Data flow
 ```mermaid
 flowchart LR
-  DS[(Onsite dataset<br/>2016–2025)] -->|fit 2016–2022| FIT[ml/fit_supply.py<br/>ratios + capacity JSON]
+  DS[(Onsite dataset<br/>2016–2025)] -->|verify constants, P95 2016–2022| FIT[ml/fit_supply.py<br/>supply constants + capacity JSON]
   DS --> FC[Forecast engine<br/>LightGBM Poisson h=1..4<br/>NegBin bands]
   FC -->|window means + NB size| SUP[Supply<br/>service-level quantile × ratio]
   FIT --> SUP
@@ -165,10 +165,10 @@ flowchart LR
 ```
 
 ### The maths, one paragraph per module
-**Supply (ADR-0009).** In the onsite data the three supply columns are proportional to cases (saline 2.384, kits 1.158,
-beds 0.295 per case; R² 0.9997, 0.9988, 0.981 on 2016–2022). We plan to the newsvendor critical fractile, not the
-mean: window cases follow a moment-matched negative binomial from the model's own per-horizon dispersion, and we take
-P80 for saline and kits, P90 for beds, then multiply by the fitted ratio and round up.
+**Supply (ADR-0009).** In the onsite data each supply column is exactly `round(c × cases)`: c = 2.385 bags, 1.164 kits
+and 0.298 beds per case reproduce all 31,320 rows. We plan to the newsvendor critical fractile, not the mean: window
+cases follow a moment-matched negative binomial from the model's own per-horizon dispersion, we take P80 for saline
+and kits and P90 for beds, then apply the same rounding rule.
 
 **Allocation (ADR-0010, ADR-0011).** Each city is one stock pool, S = stock% × planned demand. Every ward first gets an
 equity floor (20 % of demand); the rest maximises Σ wᵢxᵢ with weight = tier (1, 2, 4, 8) × density factor (density
@@ -176,8 +176,9 @@ over city median, clipped 0.5–2), solved by SciPy HiGHS and rounded by largest
 unmet High/Critical ward, or any ward under 50 %, is a critical deficit. Crews go one at a time to the ward with the
 largest marginal cases prevented; with diminishing returns this greedy rule is optimal.
 
-**Overflow routing (ADR-0012).** Bed capacity is derived from history (ceil 1.10 × P95 weekly beds, 2016–2022; the
-dataset has no capacity column, decided by the human). Inside each city only, a transportation LP minimises the
+**Overflow routing (ADR-0012).** Bed capacity is derived from history (max(1, ceil(1.10 × P95 weekly beds,
+2016–2022)): 3–7 per ward, 284 in total; the dataset has no capacity column; approved by the human and overridable in
+the UI). Inside each city only, a transportation LP minimises the
 worst post-transfer utilisation; a second MILP keeps that optimum and uses the fewest transfers. The output shows net
 deficit per ward, city utilisation before and after, remaining headroom and patients no city bed can absorb.
 

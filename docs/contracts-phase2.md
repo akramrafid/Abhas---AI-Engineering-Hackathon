@@ -58,7 +58,7 @@ Nothing here is code to paste; JSON blocks are example data. The maths behind ev
 | Field | Type | Notes |
 |---|---|---|
 | `request` | AllocationRequest | Echo |
-| `supply_ratios` | map resource → float | Fitted ratios used |
+| `supply_ratios` | map resource → float | Per-case constants used (2.385, 1.164, 0.298) |
 | `service_levels` | map resource → float | Effective quantiles |
 | `crew_method` | `"greedy"` or `"greedy (approximate)"` | Approximate if marginals were not non-increasing |
 | `wards` | list of `WardAllocation` | Sorted by city, then priority weight descending, then ward_id |
@@ -89,7 +89,7 @@ is in deficit; crews sum to `min(total_crews, wards_in_scope × 5)`; output is i
 ```json
 {"model_version": "abhas-lgbm-1.1.2", "git_sha": "075e81b", "data_as_of": "2025-12-29", "offline": false,
  "generated_at": "2026-11-27T05:12:00Z", "request": {"...": "echo"},
- "supply_ratios": {"saline_bags": 2.384, "diagnostic_kits": 1.158, "hospital_beds": 0.295},
+ "supply_ratios": {"saline_bags": 2.385, "diagnostic_kits": 1.164, "hospital_beds": 0.298},
  "service_levels": {"saline_bags": 0.8, "diagnostic_kits": 0.8, "hospital_beds": 0.9},
  "crew_method": "greedy",
  "wards": [{"ward_id": "DSCC_Ward_04", "city": "Dhaka South", "tier": "Critical", "expected_cases": 47.2,
@@ -265,30 +265,37 @@ Add to the existing success body: `git_sha` (as in RunMeta), `offline` (bool), a
 `ward_capacity` (true when the config files load and their `dataset_sha256` matches the seeded data). Readiness
 must never make a network call.
 
-## 3. Config files (written by `ml/fit_supply.py`, read at startup)
+## 3. Config files (created in WP0 by `ml/fit_supply.py`, committed, read at startup)
+
+The script refuses to write unless the onsite file's SHA-256 is `24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0`.
+It verifies that each constant reproduces 100 % of rows (`round_half_up(c × dengue_cases) == column`) and fails loudly
+otherwise.
 
 `apps/api/config/supply_ratios.json`
 ```json
-{"method": "OLS through origin on 2016–2022 ward-weeks", "fitted_years": [2016, 2022],
+{"method": "supply = round_half_up(c × dengue_cases); constants reproduce 31,320/31,320 rows",
  "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
- "ratios": {"saline_bags": 2.3843, "diagnostic_kits": 1.1582, "hospital_beds": 0.2954},
- "r2": {"saline_bags": 0.9997, "diagnostic_kits": 0.9988, "hospital_beds": 0.9806},
- "per_city": {"Dhaka South": {"saline_bags": 2.322, "diagnostic_kits": 1.106, "hospital_beds": 0.251}}}
+ "ratios": {"saline_bags": 2.385, "diagnostic_kits": 1.164, "hospital_beds": 0.298},
+ "valid_interval": {"saline_bags": [2.383333, 2.386364], "diagnostic_kits": [1.161765, 1.166667],
+                    "hospital_beds": [0.296875, 0.300000]},
+ "row_match": {"saline_bags": 1.0, "diagnostic_kits": 1.0, "hospital_beds": 1.0}}
 ```
 `apps/api/config/ward_capacity.json`
 ```json
-{"method": "ceil(1.10 × P95 weekly hospital_beds_required, 2016–2022)", "fitted_years": [2016, 2022],
- "dataset_sha256": "24fac543…", "minimum": 1, "wards": {"DSCC_Ward_04": 7, "GCC_Ward_02": 3}}
+{"method": "max(1, ceil(1.10 × P95 weekly hospital_beds_required, 2016–2022))", "fitted_years": [2016, 2022],
+ "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
+ "assumption": "Derived: the dataset has no capacity column. Replace with real hospital capacity before deployment.",
+ "total_beds": 284, "wards": {"DSCC_Ward_04": 7, "GCC_Ward_02": 3}}
 ```
-Capacity is never below 1. Values above are illustrative; the script computes them.
+Expected: 60 wards, 3–7 beds each, 284 in total (the ward values above are illustrative; the script computes them).
 
 ## 4. Shared modules (pure, deterministic, offline; NumPy/SciPy only)
 
 | Module | Function | Inputs | Output | Invariants |
 |---|---|---|---|---|
 | `shared/supply.py` | `window_case_quantile(means, nb_r, q)` | per-horizon means, per-horizon NB size r, quantile | int cases | Moment-matched NB; Poisson when variance ≤ mean; 0 when means sum to 0; monotone in q |
-| | `supply_for_cases(cases, ratios)` | int cases, SupplyRatios | `{saline_bags, diagnostic_kits, hospital_beds}` ints | `ceil(ratio × cases)`; 0 cases → 0 |
-| | `fit_ratios(frame, years)` | DataFrame with cases and the 3 supplies | SupplyRatios + R² + per-city | Training years only (used by `ml/fit_supply.py`) |
+| | `supply_for_cases(cases, ratios)` | int cases, SupplyRatios | `{saline_bags, diagnostic_kits, hospital_beds}` ints | `floor(c × cases + 0.5)` (round half up); 0 cases → 0; equals the dataset for every row |
+| | `verify_constants(frame, ratios)` | DataFrame with cases and the 3 supplies | match share per supply | Used by `ml/fit_supply.py`; must be 1.0 |
 | `shared/optimizer.py` | `density_factors(densities, city_median)` | floats | floats in [0.5, 2] | Clipped |
 | | `priority_weights(tiers, density_factors)` | tiers, floats | floats | Low 1, Medium 2, High 4, Critical 8 × factor |
 | | `allocate_city(demand, weights, stock_pct, floor_pct, ward_ids)` | ints, floats, ints, ids | `AllocationResult(allocated, floors_scaled)` | HiGHS LP; Σ = min(S, Σd); 0 ≤ x ≤ d; ties by ward_id |
@@ -309,7 +316,7 @@ Capacity is never below 1. Values above are illustrative; the script computes th
 
 | Port | File | Methods | Adapter |
 |---|---|---|---|
-| `SupplyRatioSource` | `ports/supply.py` | `ratios() -> SupplyRatios` (dataclass: three ratios, r2, fitted_years, dataset_sha256) | `adapters/config_supply.py` reads `config/supply_ratios.json` |
+| `SupplyRatioSource` | `ports/supply.py` | `ratios() -> SupplyRatios` (dataclass: three constants, valid intervals, row_match, dataset_sha256) | `adapters/config_supply.py` reads `config/supply_ratios.json` |
 | `BedCapacitySource` | `ports/capacity.py` | `method: str`, `capacity(ward_ids) -> Mapping[str, int]` (unknown → KeyError → 404) | `adapters/config_capacity.py` reads `config/ward_capacity.json` |
 | `CounterfactualForecaster` | `ports/intervention.py` | `window(ward_ids, origin_week, horizons) -> map (ward, h) → PointForecast`; `counterfactual(ward_ids, origin_week, horizons, fractions: map ward → float) -> map (ward, h) → PointForecast`; `nb_size(horizon) -> float` | `ForecastEngine` gains these methods; reduction applied at feature level (ADR-0013), never via raw weather |
 | `PlanStore` | `ports/repositories.py` (extend) | `save(record)`, `get(id)`, `list(kind, limit)` | SQLAlchemy adapter over the 0002 tables |
