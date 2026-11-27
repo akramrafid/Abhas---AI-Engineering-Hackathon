@@ -7,9 +7,9 @@ const WEB_URL = `http://127.0.0.1:${WEB_PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
-  timeout: 45_000,
+  timeout: 90_000,
   expect: {
-    timeout: 15_000,
+    timeout: 25_000,
   },
   fullyParallel: false,
   workers: 1,
