@@ -530,8 +530,146 @@ def test_wp4_5_offline_socket_guard_dispatch_and_brief(
             )
             assert r_brief.status_code == 200
             assert r_brief.headers["content-type"].startswith("text/html")
+            assert (
+                r_brief.headers.get("content-security-policy")
+                == "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'"
+            )
             assert "offline=true" in r_brief.text
             assert "075e81b" in r_brief.text
             assert "http://" not in r_brief.text and "https://" not in r_brief.text
 
     assert socket_guard.blocked == []
+
+
+def test_brief_ward_outside_plan_scope_409() -> None:
+    """B2: Requesting a brief for a ward outside the saved plan scope returns 409 ward-not-in-plan."""
+    with TestClient(create_app()) as client:
+        plan_resp = client.post(
+            "/api/v1/plans",
+            json={
+                "kind": "allocation",
+                "label": "DSCC scope plan for B2 brief check",
+                "request": {"scope": "Dhaka South", "origin_week": "2024-08-05", "stock_pct": 60},
+            },
+        )
+        assert plan_resp.status_code == 201, plan_resp.text
+        plan_id = plan_resp.json()["id"]
+
+        r = client.get(
+            "/api/v1/dispatch/brief/GCC_Ward_01.html",
+            params={"origin_week": "2024-08-05", "lang": "en", "plan_id": plan_id},
+        )
+        assert r.status_code == 409, r.text
+        assert r.headers["content-type"].startswith("application/problem+json")
+        body = r.json()
+        assert body["type"].endswith("/ward-not-in-plan")
+        assert "GCC_Ward_01" in body["detail"]
+        assert "Dhaka South" in body["detail"]
+
+
+def test_notices_ward_ids_outside_plan_409() -> None:
+    """B2: Requesting dispatch notices for a ward outside the saved plan scope returns 409 ward-not-in-plan."""
+    with TestClient(create_app()) as client:
+        plan_resp = client.post(
+            "/api/v1/plans",
+            json={
+                "kind": "allocation",
+                "label": "DSCC scope plan for B2 notices check",
+                "request": {"scope": "Dhaka South", "origin_week": "2024-08-05", "stock_pct": 60},
+            },
+        )
+        assert plan_resp.status_code == 201, plan_resp.text
+        plan_id = plan_resp.json()["id"]
+
+        r = client.post(
+            "/api/v1/dispatch/notices",
+            json={
+                "origin_week": "2024-08-05",
+                "ward_ids": ["GCC_Ward_01"],
+                "channels": ["sms", "whatsapp", "brief"],
+                "lang": "en",
+                "plan_id": plan_id,
+            },
+        )
+        assert r.status_code == 409, r.text
+        assert r.headers["content-type"].startswith("application/problem+json")
+        body = r.json()
+        assert body["type"].endswith("/ward-not-in-plan")
+        assert "GCC_Ward_01" in body["detail"]
+        assert "Dhaka South" in body["detail"]
+
+
+def test_dispatch_origin_mismatch_with_plan_id_422() -> None:
+    """L8 (QA Q9): Dispatch with a plan_id whose origin_week differs from request returns 422 origin-mismatch."""
+    with TestClient(create_app()) as client:
+        plan_resp = client.post(
+            "/api/v1/plans",
+            json={
+                "kind": "allocation",
+                "label": "DSCC 2024-08-05 plan for L8",
+                "request": {"scope": "Dhaka South", "origin_week": "2024-08-05", "stock_pct": 60},
+            },
+        )
+        assert plan_resp.status_code == 201, plan_resp.text
+        plan_id = plan_resp.json()["id"]
+
+        r_notices = client.post(
+            "/api/v1/dispatch/notices",
+            json={
+                "origin_week": "2020-08-03",
+                "ward_ids": ["DSCC_Ward_04"],
+                "plan_id": plan_id,
+            },
+        )
+        assert r_notices.status_code == 422, r_notices.text
+        assert r_notices.json()["type"].endswith("/origin-mismatch")
+
+        r_brief = client.get(
+            "/api/v1/dispatch/brief/DSCC_Ward_04.html",
+            params={"origin_week": "2020-08-03", "plan_id": plan_id},
+        )
+        assert r_brief.status_code == 422, r_brief.text
+        assert r_brief.json()["type"].endswith("/origin-mismatch")
+
+
+def test_notice_facts_equal_allocation_rows() -> None:
+    """B2: Every NoticeFacts field equals the matching live allocation/plan ward row."""
+    with TestClient(create_app()) as client:
+        alloc_resp = client.post(
+            "/api/v1/allocation/plan",
+            json={
+                "scope": "Dhaka South",
+                "origin_week": "2024-08-05",
+                "h_start": 2,
+                "h_end": 4,
+                "stock_pct": 60,
+                "total_crews": 10,
+            },
+        )
+        assert alloc_resp.status_code == 200, alloc_resp.text
+        alloc_by_id = {w["ward_id"]: w for w in alloc_resp.json()["wards"]}
+
+        disp_resp = client.post(
+            "/api/v1/dispatch/notices",
+            json={
+                "origin_week": "2024-08-05",
+                "scope": "Dhaka South",
+                "channels": ["sms", "whatsapp", "brief"],
+                "lang": "en",
+                "stock_pct": 60,
+                "total_crews": 10,
+            },
+        )
+        assert disp_resp.status_code == 200, disp_resp.text
+        notices = disp_resp.json()["notices"]
+        assert len(notices) == len(alloc_by_id) == 20
+
+        for n in notices:
+            facts = n["facts"]
+            row = alloc_by_id[facts["ward_id"]]
+            assert facts["predicted_cases"] == pytest.approx(round(row["expected_cases"], 1))
+            for key in ("saline_bags", "diagnostic_kits", "hospital_beds"):
+                assert facts[key]["required"] == row[key]["required"]
+                assert facts[key]["allocated"] == row[key]["allocated"]
+            assert facts["crews_assigned"] == row["crews"]
+            assert facts["deficit_level"] == row["deficit_level"]

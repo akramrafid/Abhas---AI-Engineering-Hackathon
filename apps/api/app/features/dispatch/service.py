@@ -38,24 +38,6 @@ _VALID_TIERS: frozenset[str] = frozenset({"Low", "Medium", "High", "Critical"})
 _VALID_DEFICITS: frozenset[str] = frozenset({"none", "deficit", "critical"})
 
 
-def _classify_deficit_fallback(
-    saline: SupplyPair,
-    kits: SupplyPair,
-    beds: SupplyPair,
-    tier: Tier,
-) -> DeficitLevel:
-    pairs = (saline, kits, beds)
-    has_any_deficit = any(p.allocated < p.required for p in pairs)
-    if not has_any_deficit:
-        return "none"
-    if tier in ("High", "Critical"):
-        return "critical"
-    for p in pairs:
-        if p.required > 0 and (p.allocated / p.required) < 0.5:
-            return "critical"
-    return "deficit"
-
-
 def _row_to_facts(
     *,
     ward: WardRecord,
@@ -83,11 +65,14 @@ def _row_to_facts(
     crews = max(0, int(row.get("crews", 0)))
 
     raw_def = str(row.get("deficit_level", ""))
-    deficit_level: DeficitLevel = (
-        cast(DeficitLevel, raw_def)
-        if raw_def in _VALID_DEFICITS
-        else _classify_deficit_fallback(saline, kits, beds, tier)
-    )
+    if raw_def not in _VALID_DEFICITS:
+        raise AppError(
+            500,
+            "invalid-allocation-row",
+            "Invalid allocation row",
+            f"Allocation row for {ward.ward_id} is missing a valid deficit_level ({raw_def!r})",
+        )
+    deficit_level: DeficitLevel = cast(DeficitLevel, raw_def)
 
     return NoticeFacts(
         ward_id=ward.ward_id,
@@ -104,64 +89,6 @@ def _row_to_facts(
         deficit_level=deficit_level,
         action=tier_action_text(tier, deficit_level, lang),
     )
-
-
-def _fallback_row_for_ward(
-    ward: WardRecord,
-    *,
-    template_row: Mapping[str, Any] | None,
-    stock_pct: int,
-    total_crews: int,
-    ward_index: int,
-) -> dict[str, Any]:
-    """Deterministic fallback when allocation runner is still a single-ward WP0 stub."""
-    density_scale = max(0.35, min(1.35, float(ward.population_density_sqkm) / 45000.0))
-    base_cases = float(template_row.get("expected_cases", 24.0)) if template_row else 24.0
-    expected_cases = round(max(1.0, base_cases * density_scale), 1)
-
-    if template_row and isinstance(template_row.get("saline_bags"), Mapping):
-        base_sal = int(template_row["saline_bags"].get("required", 60))
-        base_kit = int(template_row["diagnostic_kits"].get("required", 30))
-        base_bed = int(template_row["hospital_beds"].get("required", 8))
-    else:
-        base_sal, base_kit, base_bed = 60, 30, 8
-
-    sal_req = max(1, round(base_sal * density_scale))
-    kit_req = max(1, round(base_kit * density_scale))
-    bed_req = max(1, round(base_bed * density_scale))
-
-    ratio = stock_pct / 100.0
-    sal_alloc = min(sal_req, round(sal_req * ratio))
-    kit_alloc = min(kit_req, round(kit_req * ratio))
-    bed_alloc = min(bed_req, round(bed_req * ratio))
-
-    if expected_cases >= 42.0:
-        tier: Tier = "Critical"
-    elif expected_cases >= 24.0:
-        tier = "High"
-    elif expected_cases >= 10.0:
-        tier = "Medium"
-    else:
-        tier = "Low"
-
-    crews = 1 if (total_crews > 0 and ward_index < total_crews) else 0
-    deficit_level = _classify_deficit_fallback(
-        SupplyPair(required=sal_req, allocated=sal_alloc),
-        SupplyPair(required=kit_req, allocated=kit_alloc),
-        SupplyPair(required=bed_req, allocated=bed_alloc),
-        tier,
-    )
-    return {
-        "ward_id": ward.ward_id,
-        "city": ward.city,
-        "tier": tier,
-        "expected_cases": expected_cases,
-        "saline_bags": {"required": sal_req, "allocated": sal_alloc},
-        "diagnostic_kits": {"required": kit_req, "allocated": kit_alloc},
-        "hospital_beds": {"required": bed_req, "allocated": bed_alloc},
-        "crews": crews,
-        "deficit_level": deficit_level,
-    }
 
 
 def _build_brief_url(
@@ -209,7 +136,7 @@ class DispatchService:
         plan_id: str | None,
         stock_pct: int,
         total_crews: int,
-    ) -> tuple[dict[str, Mapping[str, Any]], Mapping[str, Any] | None, date, date, str, int, int]:
+    ) -> tuple[dict[str, Mapping[str, Any]], str, date, date, str, int, int]:
         """Load allocation rows either from a saved allocation plan or via shared.plan_registry."""
         if plan_id is not None:
             if self._plan_store is None:
@@ -224,9 +151,18 @@ class DispatchService:
                     "Invalid plan kind",
                     f"Plan {plan_id} has kind {stored.kind!r}; dispatch requires an 'allocation' plan",
                 )
+            if stored.origin_week != origin_week:
+                raise AppError(
+                    422,
+                    "origin-mismatch",
+                    "Origin week mismatch",
+                    f"Requested origin_week {origin_week.isoformat()} does not match plan {plan_id} "
+                    f"(origin_week {stored.origin_week.isoformat()})",
+                )
             outputs = json.loads(stored.outputs_json)
             inputs = json.loads(stored.inputs_json)
             plan_origin = stored.origin_week
+            plan_scope = str(inputs.get("scope", "unknown"))
             h_start = int(inputs.get("h_start", 2))
             h_end = int(inputs.get("h_end", 4))
             eff_stock = int(inputs.get("stock_pct", stock_pct))
@@ -246,6 +182,7 @@ class DispatchService:
             h_start = int(req_echo.get("h_start", 2)) if isinstance(req_echo, Mapping) else 2
             h_end = int(req_echo.get("h_end", 4)) if isinstance(req_echo, Mapping) else 4
             plan_origin = origin_week
+            plan_scope = str(scope)
             eff_stock = stock_pct
             eff_crews = total_crews
             raw_mv = outputs.get("model_version") if isinstance(outputs, Mapping) else None
@@ -253,17 +190,39 @@ class DispatchService:
 
         raw_wards = outputs.get("wards", []) if isinstance(outputs, Mapping) else []
         by_id: dict[str, Mapping[str, Any]] = {}
-        first_row: Mapping[str, Any] | None = None
         for entry in raw_wards:
             if isinstance(entry, Mapping) and "ward_id" in entry:
                 wid = str(entry["ward_id"])
                 by_id[wid] = entry
-                if first_row is None:
-                    first_row = entry
 
         window_start = plan_origin + timedelta(weeks=h_start)
         window_end = plan_origin + timedelta(weeks=h_end)
-        return by_id, first_row, window_start, window_end, model_version, eff_stock, eff_crews
+        return by_id, plan_scope, window_start, window_end, model_version, eff_stock, eff_crews
+
+    def _require_allocation_row(
+        self,
+        *,
+        alloc_by_id: Mapping[str, Mapping[str, Any]],
+        ward_id: str,
+        plan_id: str | None,
+        plan_scope: str,
+    ) -> Mapping[str, Any]:
+        row = alloc_by_id.get(ward_id)
+        if row is not None:
+            return row
+        if plan_id is not None:
+            raise AppError(
+                409,
+                "ward-not-in-plan",
+                "Ward not in plan",
+                f"{ward_id} is not in plan {plan_id} (scope {plan_scope})",
+            )
+        raise AppError(
+            500,
+            "allocation-missing-ward",
+            "Allocation missing ward",
+            f"Live allocation output did not include ward {ward_id} (scope {plan_scope})",
+        )
 
     def _resolve_target_wards(self, repo: ObservationRepository, req: DispatchRequest) -> list[WardRecord]:
         if req.ward_ids is not None:
@@ -290,12 +249,12 @@ class DispatchService:
 
         (
             alloc_by_id,
-            template_row,
+            plan_scope,
             window_start,
             window_end,
             model_version,
-            eff_stock,
-            eff_crews,
+            _eff_stock,
+            _eff_crews,
         ) = self._resolve_allocation(
             origin_week=req.origin_week,
             scope=alloc_scope,
@@ -322,16 +281,13 @@ class DispatchService:
 
         channels = set(req.channels)
         notices_out: list[Notice] = []
-        for idx, ward in enumerate(ordered_wards):
-            row = alloc_by_id.get(ward.ward_id)
-            if row is None:
-                row = _fallback_row_for_ward(
-                    ward,
-                    template_row=template_row,
-                    stock_pct=eff_stock,
-                    total_crews=eff_crews,
-                    ward_index=idx,
-                )
+        for ward in ordered_wards:
+            row = self._require_allocation_row(
+                alloc_by_id=alloc_by_id,
+                ward_id=ward.ward_id,
+                plan_id=req.plan_id,
+                plan_scope=plan_scope,
+            )
             facts = _row_to_facts(
                 ward=ward,
                 row=row,
@@ -384,7 +340,7 @@ class DispatchService:
 
         (
             alloc_by_id,
-            template_row,
+            plan_scope,
             window_start,
             window_end,
             model_version,
@@ -398,15 +354,12 @@ class DispatchService:
             total_crews=total_crews,
         )
 
-        row = alloc_by_id.get(ward.ward_id)
-        if row is None:
-            row = _fallback_row_for_ward(
-                ward,
-                template_row=template_row,
-                stock_pct=eff_stock,
-                total_crews=eff_crews,
-                ward_index=0,
-            )
+        row = self._require_allocation_row(
+            alloc_by_id=alloc_by_id,
+            ward_id=ward.ward_id,
+            plan_id=plan_id,
+            plan_scope=plan_scope,
+        )
 
         facts = _row_to_facts(
             ward=ward,

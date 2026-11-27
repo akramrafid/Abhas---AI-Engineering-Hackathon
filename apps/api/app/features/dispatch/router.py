@@ -80,4 +80,12 @@ async def get_commissioner_brief(
         stock_pct=stock_pct,
         total_crews=total_crews,
     )
-    return HTMLResponse(content=doc, status_code=200)
+    return HTMLResponse(
+        content=doc,
+        status_code=200,
+        headers={
+            "Content-Security-Policy": (
+                "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'"
+            ),
+        },
+    )
