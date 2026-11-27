@@ -364,7 +364,12 @@ def test_sec_7_and_sec_11_problem_json_404_405_500_headers_and_prod_docs(
             r_rz = c.get("/readyz")
             assert r_rz.status_code == 200
             assert r_rz.headers.get("cache-control") == "no-store"
-            assert r_rz.json()["checks"] == {"database": True, "model": True}
+            assert r_rz.json()["checks"] == {
+                "database": True,
+                "model": True,
+                "supply_ratios": True,
+                "ward_capacity": True,
+            }
     finally:
         root_abhas.removeHandler(err_handler)
 
