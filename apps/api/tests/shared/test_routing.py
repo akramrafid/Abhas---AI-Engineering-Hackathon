@@ -59,6 +59,14 @@ def test_alg_R3_city_pool_isolation() -> None:
     assert ds_res.loads == [0]
 
 
+def test_regression_highs_degenerate_minmax_case() -> None:
+    """Regression: Hypothesis-found instance where HiGHS MIP presolve threw status=4."""
+    res = route_city([7, 2, 11, 5], [11, 1, 10, 1], ["W00", "W01", "W02", "W03"])
+    assert sum(t.patients for t in res.transfers) == 4
+    assert res.u_star == pytest.approx(2.0)
+    assert sum(res.loads) == 25
+
+
 def test_derive_capacity_training_years_only() -> None:
     """derive_capacity uses training years (2016..2022) only and ignores hold-out spike."""
     df = pd.DataFrame(
