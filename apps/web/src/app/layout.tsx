@@ -10,6 +10,7 @@ import "@fontsource/noto-sans-bengali/600.css";
 import "@fontsource/noto-sans-bengali/700.css";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { CookieBanner } from "@/components/layout/CookieBanner";
 import { LazyChatWidget } from "@/features/chat/LazyChatWidget";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
@@ -97,6 +98,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans" suppressHydrationWarning>
         <AuthProvider>
           {children}
+          <CookieBanner />
           <LazyChatWidget />
         </AuthProvider>
       </body>

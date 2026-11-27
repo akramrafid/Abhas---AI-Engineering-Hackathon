@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 
 const PUBLIC_ALLOW = ["/", "/llms.txt"];
-const PRIVATE_DISALLOW = ["/api/", "/sign-in/", "/sign-up/"];
+const PRIVATE_DISALLOW = ["/api/", "/sign-in/", "/sign-up/", "/thank-you/"];
 
 export default function robots(): MetadataRoute.Robots {
   return {
