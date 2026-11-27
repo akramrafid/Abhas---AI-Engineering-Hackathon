@@ -167,14 +167,16 @@ flowchart LR
 ### The maths, one paragraph per module
 **Supply (ADR-0009).** In the onsite data each supply column is exactly `round(c × cases)`: c = 2.385 bags, 1.164 kits
 and 0.298 beds per case reproduce all 31,320 rows. We plan to the newsvendor critical fractile, not the mean: window
-cases follow a moment-matched negative binomial from the model's own per-horizon dispersion, we take P80 for saline
-and kits and P90 for beds, then apply the same rounding rule.
+cases follow a moment-matched negative binomial from the model's own per-horizon dispersion, taking P80 over the window
+sum for consumable saline and kits and the **peak single-week P90** for reusable hospital beds (matching overflow
+routing), then applying the same round-half-up rule.
 
-**Allocation (ADR-0010, ADR-0011).** Each city is one stock pool, S = stock% × planned demand. Every ward first gets an
-equity floor (20 % of demand); the rest maximises Σ wᵢxᵢ with weight = tier (1, 2, 4, 8) × density factor (density
-over city median, clipped 0.5–2), solved by SciPy HiGHS and rounded by largest remainder so totals are exact. Any
-unmet High/Critical ward, or any ward under 50 %, is a critical deficit. Crews go one at a time to the ward with the
-largest marginal cases prevented; with diminishing returns this greedy rule is optimal.
+**Allocation (ADR-0010, ADR-0011).** Each city is one stock pool, `S = (stock% × Σ dᵢ + 50) // 100`. Every ward first gets
+a ceiling integer equity floor `fᵢ = min(dᵢ, ceil(floor% × dᵢ / 100))`; when `Σ fᵢ ≤ S`, HiGHS solves an integral-vertex
+box-constrained LP maximising Σ wᵢxᵢ with weight = tier (1, 2, 4, 8) × density factor (density over city median, clipped
+0.5–2) for the exact integer optimum; when `Σ fᵢ > S`, unit-by-unit D'Hondt apportionment guarantees strict monotonicity in
+`stock_pct`. Any unmet High/Critical ward, or any ward under 50 %, is a critical deficit. Crews go one at a time to the
+ward with the largest marginal cases prevented; with diminishing returns this greedy rule is optimal.
 
 **Overflow routing (ADR-0012).** Bed capacity is derived from history (max(1, ceil(1.10 × P95 weekly beds,
 2016–2022)): 3–7 per ward, 284 in total; the dataset has no capacity column; approved by the human and overridable in
@@ -216,10 +218,10 @@ number in a notice can be traced and compared.
 | **Counterfactual simulator (10 wards × 4 scenarios × 3 horizons)** | `45.6 ms` p95 | `< 800 ms` (WP3-6) |
 | **Counterfactual simulator (`auto_crews=10`, all 60 wards)** | `224.6 ms` p95 | `< 800 ms` |
 | **Dispatch notices (`Dhaka South`, 20 wards, SMS + WhatsApp + brief)** | `73.2 ms` p95 | `< 500 ms` |
-| **k6 concurrent load (20 VUs × 30 s · 2,786 requests)** | `290.2 ms` p95 · `0.00%` failed · `5,570/5,570` checks | `< 300 ms` p95 · `< 1%` error |
+| **k6 concurrent load (20 VUs × 30 s: 16 P1 + 4 P2 · 3,303 reqs)** | `151.9 ms` overall p95 · P1 GET `122.1 ms` · `0.00%` failed · `6,602/6,602` checks | P1 GET `< 300 ms` · `< 1%` error |
 | **Vertical-slice isolation (`gates.mjs slices`)** | `14` API slices · `12` Web slices · `0` violations | `0` violations |
-| **Automated API test suite (`pytest` + Hypothesis + socket guard)** | `211` passed (`10` `-m offline`) · `0` ruff/pyright errors | `100%` pass |
-| **Contract fuzzing (`gates.mjs contract`, Schemathesis)** | `22/22` operations · `22/22` coverage · `36/36` stateful · `0` failures | `0` failures |
+| **Automated API test suite (`pytest` + Hypothesis + socket guard)** | `223` passed (`10` `-m offline`) · `0` ruff/pyright errors | `100%` pass |
+| **Contract fuzzing (`gates.mjs contract`, Schemathesis)** | `22/22` operations · `22/22` coverage · `32/32` stateful · `409/413` documented · `0` failures | `0` failures |
 | **Migrations (`gates.mjs migrations`, Alembic `0001`+`0002`)** | `9` tables verified `up → check → down → up` | Clean reversible |
 | **Hold-out ML evaluation (`gates.mjs eval`, 2024–2025 locked)** | `40/48` (`83.33%`) · `h3 MAE = 1.010` · `11/11` floors | Zero Phase 1 regression |
-| **Offline resilience (`gates.mjs offline`)** | `10/10` `-m offline` + `211/211` API + `3/3` Playwright offline | `0` external calls / `0` errors |
+| **Offline resilience (`gates.mjs offline`)** | `10/10` `-m offline` + `223/223` API + `3/3` Playwright offline (incl. Weather layer) | `0` external calls / `0` errors |
