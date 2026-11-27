@@ -206,3 +206,20 @@ free. The optional advisory/assistant LLMs keep their Phase 1 caps and are off w
 (in-memory LRU + SQLite); counterfactuals are never cached into the forecast cache. Ratios and capacities are fitted
 once offline and read at startup. Every run is saved as a plan with its git SHA and model version (ADR-0016), so any
 number in a notice can be traced and compared.
+
+### Phase 2 Measured Numbers (`version-onsite-final`)
+
+| Metric | Measured Value | Budget / Target |
+|---|---:|---|
+| **Allocation (`scope="all"`, 60 wards, 10 greedy crews)** | `139.3 ms` p95 (`131.5 ms` median · `solve_ms = 134.4 ms`) | Interactive slider (`< 500 ms`) |
+| **Overflow routing (`scope="all"`, 60 wards, 5 city pools)** | `18.4 ms` p95 (`solve_ms = 12.6 ms`) | `< 250 ms` |
+| **Counterfactual simulator (10 wards × 4 scenarios × 3 horizons)** | `45.6 ms` p95 | `< 800 ms` (WP3-6) |
+| **Counterfactual simulator (`auto_crews=10`, all 60 wards)** | `224.6 ms` p95 | `< 800 ms` |
+| **Dispatch notices (`Dhaka South`, 20 wards, SMS + WhatsApp + brief)** | `73.2 ms` p95 | `< 500 ms` |
+| **k6 concurrent load (20 VUs × 30 s · 2,786 requests)** | `290.2 ms` p95 · `0.00%` failed · `5,570/5,570` checks | `< 300 ms` p95 · `< 1%` error |
+| **Vertical-slice isolation (`gates.mjs slices`)** | `14` API slices · `12` Web slices · `0` violations | `0` violations |
+| **Automated API test suite (`pytest` + Hypothesis + socket guard)** | `211` passed (`10` `-m offline`) · `0` ruff/pyright errors | `100%` pass |
+| **Contract fuzzing (`gates.mjs contract`, Schemathesis)** | `22/22` operations · `22/22` coverage · `36/36` stateful · `0` failures | `0` failures |
+| **Migrations (`gates.mjs migrations`, Alembic `0001`+`0002`)** | `9` tables verified `up → check → down → up` | Clean reversible |
+| **Hold-out ML evaluation (`gates.mjs eval`, 2024–2025 locked)** | `40/48` (`83.33%`) · `h3 MAE = 1.010` · `11/11` floors | Zero Phase 1 regression |
+| **Offline resilience (`gates.mjs offline`)** | `10/10` `-m offline` + `211/211` API + `3/3` Playwright offline | `0` external calls / `0` errors |

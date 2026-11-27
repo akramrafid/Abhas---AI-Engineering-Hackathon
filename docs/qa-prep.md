@@ -1,0 +1,110 @@
+# Abhas Phase 2 — Technical Judge Q&A Prep (25 Hardest Questions)
+
+Crisp, numbers-backed answers for onsite judging. Every number below was measured directly on `version-onsite-final` (`abhas-lgbm-1.1.2`, `data_as_of: 2025-12-29`).
+
+---
+
+## A. Constrained Allocation & Equity Floor (ADR-0010)
+
+### 1. Why use a linear programme (HiGHS) for allocation when a single-budget weighted knapsack reduces to sorting by priority weight?
+Two reasons: (1) **Explicit constraint guarantees** — the HiGHS LP directly enforces both the per-ward equity floor (`ℓ_i ≤ x_i ≤ d_i`) and city stock conservation (`Σ x_i ≤ S`) with auditable primal feasibility rather than ad-hoc nested loops; (2) **Extensibility** — municipal health offices routinely add multi-depot transfer caps, minimum hospital buffer sizes, or cross-resource bundling constraints, which drop straight into the LP matrix without rewriting the algorithm. At 60 wards across 5 cities (15 LPs + 10 greedy crews), total `solve_ms` is **134.4 ms** (`p95 = 139.3 ms`).
+
+### 2. How does the 20% equity floor behave during an extreme shortage (e.g., 30% stock with a 50% equity floor)?
+When `Σ ℓ_i > S`, we scale every ward's floor proportionally by `S / Σ ℓ_i`, set `floors_scaled: true` in the response so the operator sees the floor was compressed, and solve cleanly without raising an infeasibility error. Hand-solved test `A3` (`stock=30%`, `floor=50%`, demands `(100,100,100)`) yields exact `(30, 30, 30)` with `floors_scaled = true`.
+
+### 3. How are fractional LP solutions converted to integer bags, kits, and beds without losing or inventing stock?
+We apply **largest-remainder rounding** bounded by `[0, d_i]` with deterministic tie-breaking by ascending `ward_id` (test `A4`). Hypothesis property tests prove three invariants across random demand/weight/stock combinations: exact conservation `Σ x_i = min(S, Σ d_i)`, strict bounds `0 ≤ x_i ≤ d_i`, and strict permutation invariance (reordering input wards never changes any ward's allocation).
+
+### 4. Why weight wards by `tier_weight × clipped_density_factor` instead of expected cases alone?
+Expected cases alone can under-prioritize an accelerating **Critical** ward with high transmission density relative to a large **Medium** ward. Using `tier_weight ∈ {1, 2, 4, 8}` (`Low`, `Medium`, `High`, `Critical`) multiplied by `clip(ρ_i / median_city(ρ), 0.5, 2.0)` ensures Critical wards always fill first, denser wards within a tier fill first, and outlier density values cannot swamp tier ordering (`A5`).
+
+### 5. What triggers a `critical` deficit alert versus a regular `deficit`?
+Per ADR-0010, any shortfall (`allocated < required`) in a **High** or **Critical** tier ward, OR any ward whose fulfilment drops below **50%** on any resource (`2 * allocated < required`), is classified as `critical` with explicit per-resource human-readable reasons. Under `stock_pct = 60%` on `2024-08-05` in Dhaka South, the top 8 highest-priority wards (including `DSCC_Ward_04` at `155/155` saline, `76/76` kits, `21/21` beds) reach 100% fulfilment while 12 lower-priority Critical wards flag `critical` deficit with exact shortfall counts.
+
+---
+
+## B. Greedy Spraying-Crew Assignment (ADR-0011)
+
+### 6. When is greedy marginal crew placement provably globally optimal, and what happens if LightGBM breaks concavity?
+When every ward's marginal benefit sequence `m_i(c) = B_i(c) − B_i(c−1)` is non-increasing (diminishing returns), assigning each next crew to `argmax_i m_i(c_i + 1)` is provably globally optimal by a standard matroid/discrete-concavity exchange argument. Because piecewise-constant LightGBM decision trees can occasionally exhibit a non-concave step between tree split thresholds, `greedy_crews` explicitly monitors every evaluated marginal pair: if `m_i(c) > m_i(c−1) + 1e-9` is ever observed, it flips `approximate = True` and reports `crew_method: "greedy (approximate)"` in the API response instead of silently claiming global optimality.
+
+### 7. Why cap spraying crews at 5 per ward, and how are ties broken?
+Beyond 5 crews in a single ward, marginal breeding-water clearance saturates (`E(5) = 0.367` of `E_max = 0.40` under base preset — 91.8% of ceiling) and operational logistics crowd out field coverage. Ties break deterministically by **priority weight descending**, then **`ward_id` ascending**. Total crews assigned always equals `min(total_crews, 5 × len(wards))`.
+
+### 8. How do you guarantee `auto_crews = N` in the Simulator produces the exact same placement as `total_crews = N` in Allocation?
+Both `AllocationService` and `SimulatorService` delegate to the **single shared function** `app.shared.intervention.assign_crews_for_wards(...)` using identical per-city priority weights over `h ∈ {2, 3, 4}` and the same `CounterfactualForecaster` batch evaluation. Automated integration test `test_wp3_4_5_auto_crews_matches_allocation_crew_placement` asserts exact dictionary equality (`sim_crews == alloc_crews`) for `N = 10` on `2024-08-05`.
+
+---
+
+## C. Model-Driven Monotone Counterfactual Simulator (ADR-0013)
+
+### 9. Why not simply multiply predicted cases by `(1 − E(c))` instead of re-running LightGBM?
+Because a flat multiplier ignores the non-linear interaction between rainfall, water-logging index, sanitation score, temperature, and seasonality learned by LightGBM. Two wards with identical baseline cases can have very different rainfall sensitivity: spraying a ward whose surge is driven by recent monsoon rain (`rain_sum_0_3`, `rain_anomaly`) prevents far more cases per crew than spraying a ward driven purely by baseline endemic crowding. Re-running the actual LightGBM boosters (`h = 2, 3, 4`) captures that heterogeneity directly.
+
+### 10. How do you mathematically guarantee that adding spraying crews can NEVER predict MORE dengue cases?
+During Phase 1 training (`ml/train.py:monotone_constraints_for_horizon`), LightGBM enforced `+1` monotone constraints on the exact causal rainfall features for each horizon (`MONOTONE_RAIN_FEATURES[2/3/4]`). At simulation time, `apply_reduction(...)` reduces ONLY those exact `+1`-constrained features (scaling positive rain lags/sums by `1 − E(c)` and subtracting `E(c) × rainfall_lag_0` from `rain_anomaly`) while leaving every unconstrained feature untouched. A CI test asserts `MONOTONE_RAIN_FEATURES == ml/train.py`, and test `T3` verifies `counterfactual ≤ baseline` across **all 60 wards × 3 horizons × 3 presets × 3 crew levels** (1,620 checks) with zero violations.
+
+### 11. Where do the efficacy parameters (`E_max`, `k`) come from? Are they fitted to data?
+**No — and we state that explicitly in every API response and UI panel.** The dataset has zero vector-control or spraying intervention labels, so any "fitted" efficacy would be fabricated. We document three transparent operational presets in ADR-0013 (`low: 0.25/0.35`, `base: 0.40/0.50`, `high: 0.55/0.70`) and always return the full **`[low, high]` sensitivity band** per ward and in totals. On `2024-08-05` with `auto_crews = 10`, the base estimate is **90.56 cases prevented**, with a transparent sensitivity band of **[48.61 – 112.55] cases prevented** (`26.99` beds avoided, `215.99` saline bags avoided).
+
+### 12. Why does the counterfactual simulator evaluate horizons `h = 2, 3, 4` and exclude `h = 1`?
+Biologically, *Aedes aegypti* larval maturation plus extrinsic and intrinsic dengue incubation takes roughly **14–21 days**. Larviciding breeding water today cannot prevent patients already infected who will present at clinics in week `+1`; its measurable impact begins at weeks `+2` to `+4` (the exact window where lagged rainfall correlation peaks at `r = 0.468` in week `+3`).
+
+### 13. Does running counterfactual simulations pollute the forecast cache or slow down the UI?
+Never. `ForecastEngine.counterfactual_grid(...)` never writes to `predictions_cache` (verified by SQLite row-count assertion in `test_wp3_6`), never mutates raw observations, and runs fast `raw_score=True` vectorized LightGBM inference (skipping unnecessary TreeSHAP during counterfactual sweeps) — delivering **10-ward simulations in `45.6 ms` p95** (17× under the 800 ms target) and **60-ward `auto_crews=10` in `224.6 ms` p95**.
+
+---
+
+## D. Supply Conversion Ratios & Newsvendor Quantiles (ADR-0009)
+
+### 14. How were the supply ratios (`2.385` saline, `1.164` kits, `0.298` beds per case) derived?
+Our read-only profiler (`apps/api/scripts/profile_onsite.py`, `docs/data-profile-onsite.md`) inspected all **31,320 rows** of the onsite dataset (SHA-256 `24fac543...ef9b0`) and discovered that the dataset's three supply columns are deterministic integer roundings (`floor(c × dengue_cases + 0.5)`) with exact narrow valid intervals: `2.385`, `1.164`, and `0.298` reproduce **31,320 / 31,320 rows (100.00%)** across all 5 cities and all 10 years. `ml/fit_supply.py` verifies the dataset SHA-256 and 100% row-match before emitting `apps/api/config/supply_ratios.json`, and `/readyz` fails closed (`503`) if tampered.
+
+### 15. Why convert the P80 / P90 case quantile into supplies instead of multiplying the mean forecast by the ratio?
+Ordering to the mean leaves a ward under-stocked roughly **50% of the time** during skewed outbreak surges (asymmetric cost of stockouts). Following classic newsvendor inventory sizing, we match the first two moments of summed window cases `N = Σ_h N_h` using each horizon's 2023-calibrated Negative Binomial dispersion `r_h` (falling back to Poisson when `V ≤ M`, tests `S1–S4`), then take **P80** for saline/kits and **P90** for hospital beds before applying the dataset's `round_half_up` rule.
+
+---
+
+## E. Hospital Bed Capacity & Overflow Routing (ADR-0012)
+
+### 16. The onsite dataset has no hospital bed capacity column. How did you avoid inventing arbitrary numbers?
+We explicitly disclose that capacity is absent in the dataset (`ward_capacity.json` carries `"assumption": "Derived: the dataset has no capacity column. Replace with real hospital capacity before deployment."`). We derived a reproducible, leakage-free baseline strictly on training years **2016–2022**: `κ_i = max(1, ceil(1.10 × P95(weekly hospital_beds_required, 2016–2022)))`, giving **3–7 beds per ward (284 beds total across 60 wards)** with zero use of 2023–2025 data. Furthermore, the UI and API accept per-ward **`capacity_overrides`** so an officer can enter actual hospital bed counts on the spot and re-route immediately (`solve_ms = 12.6 ms`).
+
+### 17. Why use two-stage optimisation (min-max utilisation then min-arcs MILP) for overflow routing?
+Stage 1 ensures **equity of clinical load**: no ward is left at 180% overload while another ward in the same city sits at 105%. Stage 2 then selects, among all plans achieving that exact minimum peak utilisation `u*` and maximum patient placement `P* = min(Σ D, Σ H)`, the plan with the **fewest distinct ward-to-ward transfer arcs** — because every active arc represents a separate ambulance coordination channel and clinical hand-off (`R1`, `R2`).
+
+### 18. Why are patients never routed across cities (e.g., Dhaka North to Dhaka South), and why does `2024-08-05` show 61 unroutable patients?
+Each Bangladesh city corporation (`DNCC`, `DSCC`, `CCC`, `GCC`, `NCC`) operates an independent municipal health administration and hospital referral network; silently routing Gazipur patients to Chattogram would be operationally invalid (`R3`). On peak monsoon week `2024-08-05` (`horizon = 3`, `P90`), all 5 cities simultaneously exceed 120% of historical baseline capacity (`345` beds required vs `284` derived beds), producing **61 honestly reported unroutable patients** (`21` DNCC, `19` DSCC, `10` CCC, `6` GCC, `5` NCC) — an explicit signal to activate temporary field wards rather than hiding overflow.
+
+### 19. How fast is your MILP solver, and what stops it from hanging or failing on degenerate inputs?
+Stage 1 runs an exact rational (`fractions.Fraction`) discrete max-heap water-filling algorithm (provably optimal by exchange argument, eliminating HiGHS MIP presolve errors on degenerate instances — caught and hardened via Hypothesis!). Stage 2 runs HiGHS MILP with tight per-arc bounds, degree cuts, a 1,500-node limit, a `presolve=False` retry, and a deterministic northwest-corner fallback. Across all 60 wards in 5 cities, full routing completes in **`12.6 ms` (`p95 = 18.4 ms`)**.
+
+---
+
+## F. Offline Resilience, Dispatch Integrity & Security (ADR-0014, ADR-0015, ADR-0016)
+
+### 20. What actually happens if the internet drops mid-crisis inside a municipal health office?
+Every core workflow — forecasting, allocation, overflow routing, counterfactual simulation, bilingual SMS/WhatsApp/A4 brief generation, and the SQLite plans log — executes **100% locally on CPU** with zero external dependencies. `ABHAS_OFFLINE=1` acts as an instant kill switch; without it, a background daemon probe (2 s TCP timeout, never on startup or request paths) detects outages within ≤ 30 s and switches `"offline": true`. External clients (Open-Meteo, Gemini, Claude) enforce 2 s connect timeouts and 3-failure / 60 s circuit breakers, and the web console serves self-hosted fonts/icons/portraits plus a bundled GeoJSON/SVG map fallback. Proven automatically by `npm run offline:check` (**211/211 API tests under socket guard + 3/3 Playwright offline tests, 0 external calls**).
+
+### 21. How do you guarantee that dispatch SMS/WhatsApp/HTML notices never hallucinate a single number or inject XSS?
+Zero LLMs touch Phase 2 dispatch. Every channel is rendered deterministically from one validated `NoticeFacts` object (`features/dispatch/templates.py`). Automated tests extract every numeric token (mapping Bangla digits `০–৯` to ASCII `0–9`) from SMS, WhatsApp, and `<main>` HTML and assert 100% membership in `NoticeFacts`. Every dynamic string in HTML briefs is escaped with `html.escape(..., quote=True)` (test `D6` verifies `<script>x</script>` renders inert), and briefs contain zero `http://` or `https://` URLs.
+
+### 22. Why do English SMS notices fit in 1 segment while Bangla SMS uses 2–3 segments?
+Per 3GPP TS 23.038 (GSM 03.38), pure ASCII/GSM-7 characters pack **160 septets** in 1 segment (153/seg multipart, extension characters counting 2 septets), whereas Unicode Bangla scripts require **UCS-2** encoding (**70 characters** in 1 segment, **67/seg** multipart). Our classifier (`classify_sms`, tests `D1–D5`) accurately computes encoding, character/septet count, and segment count — keeping every Dhaka South English SMS in **1 segment (107–147 chars)** and every Bangla SMS in **2–3 segments (122–162 chars)** so health offices know exact gateway SMS billing upfront.
+
+---
+
+## G. Limitations, Governance & Real DGHS Transition Plan
+
+### 23. What are the biggest honest limitations of Abhas today?
+Four transparent limits: (1) **Simulated challenge dataset** — supply ratios are exact synthetic multipliers and ward coordinates are approximated around city centroids; (2) **Derived bed capacity** — `ward_capacity.json` estimates capacity from 2016–2022 P95 demand because real hospital bed counts are absent; (3) **Uncalibrated intervention efficacy** — `E(c)` presets are stated assumptions until field spraying outcomes are logged; (4) **Weekly cadence** — inputs operate at ISO-week granularity rather than daily clinic admissions.
+
+### 24. How would Abhas transition to real DGHS / DNCC / DSCC operations without a rewrite?
+Because Abhas uses **Hexagonal Ports & Adapters (ADR-0001)** enforced by `gates.mjs slices` (`14 API slices · 12 Web slices · 0 violations`), transitioning to production requires swapping only adapters while keeping the domain math untouched:
+- **`ObservationRepository`:** point `DATABASE_URL` to managed PostgreSQL (Alembic `0001`+`0002` already Postgres-compatible) fed by weekly DGHS/IEDCR MIS case ingestion.
+- **`BedCapacitySource`:** replace `config/ward_capacity.json` with live DGHS hospital bed registry counts (already overridable per ward via API/UI).
+- **`SupplyRatioSource`:** refit `supply_ratios.json` via `npm run fit:supply` on real CMSD / hospital consumption logs (handling non-deterministic variance cleanly via OLS + residual quantiles).
+- **Dispatch & GIS:** wire municipal bulk-SMS gateway webhooks onto `DispatchResponse.notices` (already GSM-7/UCS-2 metered) and drop official BBS/DNCC GeoJSON ward polygons into `apps/web/public/`.
+
+### 25. How is every operational decision audited after an outbreak?
+Every saved plan writes an **append-only** record (`plans` + `plan_runs`, Alembic `0002`, no `PUT`/`DELETE`) capturing validated `inputs_json`, full `outputs_json`, `headline_json`, `solve_ms`, `model_version`, `git_sha`, `data_as_of`, and `offline` flag. Officers can compare any two historical runs side-by-side via `GET /api/v1/plans/compare` (even across different plan kinds) and trace every number in a printed A4 commissioner brief back to the exact commit SHA and model version.
