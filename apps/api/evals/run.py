@@ -411,6 +411,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--split", choices=["dev", "heldout", "all"], default="heldout")
     ap.add_argument("--tag", default="", help="Optional run tag (e.g. baseline).")
+    ap.add_argument(
+        "--record",
+        action="store_true",
+        help="Update tracked latest-*.json, eval.json, history.jsonl, and report.md (release runs only).",
+    )
     args = ap.parse_args(argv)
 
     cfg = load_config()
@@ -526,40 +531,50 @@ def main(argv: list[str] | None = None) -> int:
         "cases": golden_rows,
     }
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    run_stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    run_dir = RESULTS_DIR / "runs" / f"{run_stamp}-{args.split}"
+    run_dir.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
-    (RESULTS_DIR / f"latest-{args.split}.json").write_text(serialized, encoding="utf-8")
-    # CR-14: write eval.json ONLY when scoring the locked heldout split.
+    report_md = render_report(payload)
+    (run_dir / f"latest-{args.split}.json").write_text(serialized, encoding="utf-8")
+    (run_dir / "report.md").write_text(report_md, encoding="utf-8")
     if args.split == "heldout":
-        (RESULTS_DIR / "eval.json").write_text(serialized, encoding="utf-8")
-    if args.tag == "baseline":
-        (RESULTS_DIR / "baseline.json").write_text(serialized, encoding="utf-8")
+        (run_dir / "eval.json").write_text(serialized, encoding="utf-8")
 
-    history_entry = {
-        "ts": ts,
-        "commit": commit,
-        "split": args.split,
-        "tag": args.tag,
-        "n": payload["n"],
-        "skipped": total_skipped,
-        "pass_rate": payload["pass_rate"],
-        "floors_passed": floors_passed,
-        "generator_model": payload["generator_model"],
-        "judge_model": "-",
-        "cost_usd": 0.0,
-        "mae_h2": global_metrics["by_horizon"]["h2"]["mae"],
-        "mae_h3": global_metrics["by_horizon"]["h3"]["mae"],
-        "mae_h4": global_metrics["by_horizon"]["h4"]["mae"],
-        "coverage_80": global_metrics["coverage_80"],
-        "within_one_tier": global_metrics["within_one_tier"],
-        "critical_recall": global_metrics["critical_recall"],
-        "p95_ward_ms": global_metrics["p95_ward_ms"],
-        "throughput_ms_per_ward": global_metrics["throughput_ms_per_ward"],
-    }
-    with HISTORY_PATH.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(history_entry, ensure_ascii=False) + "\n")
+    if args.record:
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+        (RESULTS_DIR / f"latest-{args.split}.json").write_text(serialized, encoding="utf-8")
+        # CR-14: write eval.json ONLY when scoring the locked heldout split.
+        if args.split == "heldout":
+            (RESULTS_DIR / "eval.json").write_text(serialized, encoding="utf-8")
+        if args.tag == "baseline":
+            (RESULTS_DIR / "baseline.json").write_text(serialized, encoding="utf-8")
 
-    REPORT_PATH.write_text(render_report(payload), encoding="utf-8")
+        history_entry = {
+            "ts": ts,
+            "commit": commit,
+            "split": args.split,
+            "tag": args.tag,
+            "n": payload["n"],
+            "skipped": total_skipped,
+            "pass_rate": payload["pass_rate"],
+            "floors_passed": floors_passed,
+            "generator_model": payload["generator_model"],
+            "judge_model": "-",
+            "cost_usd": 0.0,
+            "mae_h2": global_metrics["by_horizon"]["h2"]["mae"],
+            "mae_h3": global_metrics["by_horizon"]["h3"]["mae"],
+            "mae_h4": global_metrics["by_horizon"]["h4"]["mae"],
+            "coverage_80": global_metrics["coverage_80"],
+            "within_one_tier": global_metrics["within_one_tier"],
+            "critical_recall": global_metrics["critical_recall"],
+            "p95_ward_ms": global_metrics["p95_ward_ms"],
+            "throughput_ms_per_ward": global_metrics["throughput_ms_per_ward"],
+        }
+        with HISTORY_PATH.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(history_entry, ensure_ascii=False) + "\n")
+
+        REPORT_PATH.write_text(report_md, encoding="utf-8")
 
     print(
         f"eval[{args.split}] model={forecaster.model_version} "

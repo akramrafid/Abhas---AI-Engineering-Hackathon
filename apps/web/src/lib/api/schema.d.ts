@@ -1587,6 +1587,8 @@ export interface components {
              * Format: date
              */
             origin_week: string;
+            /** Scope */
+            scope?: string | null;
         };
         /** PredictionStats */
         PredictionStats: {
@@ -2154,6 +2156,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -2372,6 +2384,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -2466,6 +2488,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2583,6 +2615,16 @@ export interface operations {
                     "text/html": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -2679,6 +2721,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2791,6 +2843,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -2895,6 +2957,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -2989,6 +3061,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3214,6 +3296,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -3310,6 +3402,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3423,6 +3525,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -3519,6 +3631,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3631,6 +3753,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -3723,6 +3855,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3825,6 +3967,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3938,6 +4090,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -4042,6 +4204,16 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             /** @description Request body exceeds the 64 KB size limit */
             413: {
                 headers: {
@@ -4134,6 +4306,16 @@ export interface operations {
             };
             /** @description Unknown ward, city or resource */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -33,7 +33,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `node ../../scripts/py.mjs -m app --env test --port ${API_PORT} --no-reload`,
+      command: `node ../../scripts/prepare_test_db.mjs && node ../../scripts/py.mjs -m app --env test --port ${API_PORT} --no-reload`,
       url: `${API_URL}/healthz`,
       timeout: 120_000,
       reuseExistingServer: false,
@@ -53,6 +53,7 @@ export default defineConfig({
       reuseExistingServer: false,
       env: {
         ...process.env,
+        NEXT_DIST_DIR: ".next-e2e",
         NEXT_PUBLIC_API_BASE_URL: API_URL,
         // e2e exercises the product, not Clerk's hosted sign-in.
         NEXT_PUBLIC_AUTH_DISABLED: "1",

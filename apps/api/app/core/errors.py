@@ -84,6 +84,7 @@ PROBLEM_RESPONSES: dict[int | str, dict[str, Any]] = {
     400: _p("Malformed request body or syntax error"),
     401: _p("Missing or invalid X-Ops-Token"),
     404: _p("Unknown ward, city or resource"),
+    409: _p("Conflict with plan scope or infeasible optimization state"),
     413: _p("Request body exceeds the 64 KB size limit"),
     422: _p("Request failed validation; `errors` names each field"),
     429: _p("Rate limit exceeded; retry after the Retry-After header"),

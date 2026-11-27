@@ -1,6 +1,7 @@
 """Typed settings. Every value has a safe default so the app runs with zero keys."""
 
 import ipaddress
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -121,6 +122,12 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _validate_external_urls(self) -> "Settings":
+        if self.app_env == "test" and not os.environ.get("DATABASE_URL"):
+            default_dev_db = f"sqlite:///{(REPO_ROOT / 'data' / 'abhas.db').resolve().as_posix()}"
+            if self.database_url == default_dev_db:
+                test_db = (REPO_ROOT / "data" / "abhas-test.db").resolve()
+                test_db.parent.mkdir(parents=True, exist_ok=True)
+                self.database_url = f"sqlite:///{test_db.as_posix()}"
         parsed = urlparse(self.open_meteo_base_url.strip())
         if not parsed.hostname:
             raise ValueError("OPEN_METEO_BASE_URL must include a hostname")

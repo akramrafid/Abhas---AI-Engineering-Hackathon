@@ -2657,6 +2657,17 @@
             "format": "date",
             "title": "Origin Week",
             "type": "string"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
           }
         },
         "required": [
@@ -3979,6 +3990,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -4296,6 +4322,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -4439,6 +4480,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -4667,6 +4723,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/problem+json": {
@@ -4818,6 +4889,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -4968,6 +5054,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -5155,6 +5256,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -5313,6 +5429,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -5657,6 +5788,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -5828,6 +5974,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -6002,6 +6163,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -6152,6 +6328,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -6304,6 +6495,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -6444,6 +6650,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -6610,6 +6831,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {
@@ -6798,6 +7034,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -6963,6 +7214,21 @@
             },
             "description": "Unknown ward, city or resource"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -7103,6 +7369,21 @@
               }
             },
             "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
           },
           "413": {
             "content": {

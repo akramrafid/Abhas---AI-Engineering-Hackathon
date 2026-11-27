@@ -12,6 +12,7 @@ import logging
 import sys
 import threading
 import time
+from collections import OrderedDict
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
@@ -281,6 +282,11 @@ class ForecastEngine:
         self._db_fault_hook = db_fault_hook
         self._strict_live_origin = strict_live_origin
         self._now_fn = now_fn
+        self._feature_lock = threading.RLock()
+        self._feature_cache: OrderedDict[
+            tuple[tuple[str, ...], date, tuple[int, ...]],
+            dict[int, list[dict[str, float]]],
+        ] = OrderedDict()
 
     def validate_origin(self, origin_week: date, source: WeatherMode = "dataset") -> None:
         validate_origin_week(
@@ -300,6 +306,28 @@ class ForecastEngine:
     def _resolve_wards(self, ward_ids: Sequence[str]) -> list[WardRecord]:
         if self._db_fault_hook is not None:
             self._db_fault_hook()
+        if len(ward_ids) > 1:
+            try:
+                by_id = {w.ward_id: w for w in self._repo.wards()}
+            except Exception as exc:  # noqa: BLE001
+                raise AppError(
+                    status=503,
+                    slug="db-unavailable",
+                    title="Database unavailable",
+                    detail="Could not query ward directory.",
+                ) from exc
+            resolved_batch: list[WardRecord] = []
+            for wid in ward_ids:
+                rec = by_id.get(wid)
+                if rec is None:
+                    raise AppError(
+                        status=404,
+                        slug="unknown-ward",
+                        title="Unknown ward",
+                        detail=f"Unknown ward_id: {wid}",
+                    )
+                resolved_batch.append(rec)
+            return resolved_batch
         resolved: list[WardRecord] = []
         for wid in ward_ids:
             try:
@@ -684,42 +712,66 @@ class ForecastEngine:
     ) -> dict[int, list[dict[str, float]]]:
         """Build baseline serving feature rows aligned to ``wards`` without caching or mutating weather."""
         ward_ids = [w.ward_id for w in wards]
-        obs_df, _, _ = self._load_window_dataframe(wards, origin_week, source="dataset")
-        normals = self._rain_normals(obs_df)
-        feat_cols = list(FEATURE_COLUMNS)
-        rows_by_h: dict[int, list[dict[str, float]]] = {}
+        cache_key = (tuple(ward_ids), origin_week, tuple(int(h) for h in horizons))
+        if self._db_fault_hook is None:
+            with self._feature_lock:
+                cached = self._feature_cache.get(cache_key)
+                if cached is not None:
+                    self._feature_cache.move_to_end(cache_key)
+                    return cached
 
-        for h in horizons:
-            feat_df = build_serving_features(
-                obs_df,
-                origin_week=origin_week,
-                horizon=h,
-                ward_ids=ward_ids,
-                rain_normals=normals,
-            )
-            if feat_df.empty:
-                raise AppError(
-                    status=422,
-                    slug="validation-error",
-                    title="Insufficient observations",
-                    detail=f"Missing feature row at origin_week {origin_week.isoformat()}.",
+        flight_key = ("cf_features", id(self), cache_key)
+        with _SINGLE_FLIGHT.acquire(flight_key):
+            if self._db_fault_hook is None:
+                with self._feature_lock:
+                    cached = self._feature_cache.get(cache_key)
+                    if cached is not None:
+                        self._feature_cache.move_to_end(cache_key)
+                        return cached
+
+            obs_df, _, _ = self._load_window_dataframe(wards, origin_week, source="dataset")
+            normals = self._rain_normals(obs_df)
+            feat_cols = list(FEATURE_COLUMNS)
+            rows_by_h: dict[int, list[dict[str, float]]] = {}
+
+            for h in horizons:
+                feat_df = build_serving_features(
+                    obs_df,
+                    origin_week=origin_week,
+                    horizon=h,
+                    ward_ids=ward_ids,
+                    rain_normals=normals,
                 )
-            row_by_ward: dict[str, dict[str, float]] = {}
-            feat_values = feat_df[feat_cols].to_numpy(dtype=float)
-            for wid, vals in zip(feat_df["ward_id"].tolist(), feat_values, strict=True):
-                row_by_ward[str(wid)] = {col: float(v) for col, v in zip(feat_cols, vals, strict=True)}
+                if feat_df.empty:
+                    raise AppError(
+                        status=422,
+                        slug="validation-error",
+                        title="Insufficient observations",
+                        detail=f"Missing feature row at origin_week {origin_week.isoformat()}.",
+                    )
+                row_by_ward: dict[str, dict[str, float]] = {}
+                feat_values = feat_df[feat_cols].to_numpy(dtype=float)
+                for wid, vals in zip(feat_df["ward_id"].tolist(), feat_values, strict=True):
+                    row_by_ward[str(wid)] = {col: float(v) for col, v in zip(feat_cols, vals, strict=True)}
 
-            missing = sorted(set(ward_ids) - set(row_by_ward.keys()))
-            if missing:
-                raise AppError(
-                    status=422,
-                    slug="validation-error",
-                    title="Insufficient observations",
-                    detail=f"Missing origin_week {origin_week.isoformat()} data for wards: {', '.join(missing[:3])}",
-                )
-            rows_by_h[h] = [row_by_ward[wid] for wid in ward_ids]
+                missing = sorted(set(ward_ids) - set(row_by_ward.keys()))
+                if missing:
+                    raise AppError(
+                        status=422,
+                        slug="validation-error",
+                        title="Insufficient observations",
+                        detail=f"Missing origin_week {origin_week.isoformat()} data for wards: {', '.join(missing[:3])}",
+                    )
+                rows_by_h[h] = [row_by_ward[wid] for wid in ward_ids]
 
-        return rows_by_h
+            if self._db_fault_hook is None:
+                with self._feature_lock:
+                    self._feature_cache[cache_key] = rows_by_h
+                    self._feature_cache.move_to_end(cache_key)
+                    while len(self._feature_cache) > 64:
+                        self._feature_cache.popitem(last=False)
+
+            return rows_by_h
 
     def _predict_feature_rows(
         self,

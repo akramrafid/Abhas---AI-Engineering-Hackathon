@@ -381,19 +381,27 @@ def test_cr_14_eval_json_written_only_on_heldout_split(
         ),
     )
 
-    # 1. --split dev must NOT write eval.json
+    # 0. Q13: Without --record, tracked summary files are never touched (written only to runs/)
     assert run_mod.main(["--split", "dev"]) == 0
+    assert not (results_dir / "latest-dev.json").exists()
+    assert not (results_dir / "eval.json").exists()
+    assert not (tmp_path / "history.jsonl").exists()
+    assert not (tmp_path / "report.md").exists()
+    assert any((results_dir / "runs").glob("*-dev/latest-dev.json"))
+
+    # 1. --split dev --record must NOT write eval.json
+    assert run_mod.main(["--split", "dev", "--record"]) == 0
     assert (results_dir / "latest-dev.json").exists()
     assert not (results_dir / "eval.json").exists()
 
-    # 2. --split all --tag baseline must write latest-all.json & baseline.json, NOT eval.json
-    assert run_mod.main(["--split", "all", "--tag", "baseline"]) == 0
+    # 2. --split all --tag baseline --record must write latest-all.json & baseline.json, NOT eval.json
+    assert run_mod.main(["--split", "all", "--tag", "baseline", "--record"]) == 0
     assert (results_dir / "latest-all.json").exists()
     assert (results_dir / "baseline.json").exists()
     assert not (results_dir / "eval.json").exists()
 
-    # 3. --split heldout MUST write eval.json (and latest-heldout.json)
-    run_mod.main(["--split", "heldout"])
+    # 3. --split heldout --record MUST write eval.json (and latest-heldout.json)
+    run_mod.main(["--split", "heldout", "--record"])
     assert (results_dir / "latest-heldout.json").exists()
     assert (results_dir / "eval.json").exists()
     eval_payload = json.loads((results_dir / "eval.json").read_text(encoding="utf-8"))
@@ -484,7 +492,7 @@ def test_cr_15_fallback_rows_counted_as_skipped_and_fail_heldout(
     # Force floors to pass so only CR-15 skipped > 0 can cause failure.
     monkeypatch.setattr(run_mod, "check_ac5_floors", lambda *_a, **_kw: ({"ok": True}, True))
 
-    rc = run_mod.main(["--split", "heldout"])
+    rc = run_mod.main(["--split", "heldout", "--record"])
     captured = capsys.readouterr()
     assert rc == 1
     assert "skipped" in captured.err.lower()

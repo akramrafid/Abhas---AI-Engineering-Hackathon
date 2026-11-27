@@ -17,6 +17,7 @@ __pycache__/
 dist/
 build/
 .next/
+.next-e2e/
 out/
 .cache/
 coverage/
@@ -48,4 +49,6 @@ Thumbs.db
 # app runtime data
 .qdrant/
 *.db
+data/abhas-test.db*
+apps/api/evals/results/runs/
 .fastembed_cache/

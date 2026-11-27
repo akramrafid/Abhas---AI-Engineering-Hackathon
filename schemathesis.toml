@@ -1,0 +1,4 @@
+# Schemathesis v4 configuration — accept RFC 9457 413 Payload Too Large from
+# BodySizeLimitMiddleware (64 KB streaming cap) as a valid negative-data rejection (QA Q3).
+[checks.negative_data_rejection]
+expected-statuses = ["400", "401", "403", "404", "406", "413", "422", "428"]

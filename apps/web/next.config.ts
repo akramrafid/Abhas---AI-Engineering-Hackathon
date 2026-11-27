@@ -12,6 +12,8 @@ const staticAssetHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Allow E2E runs to use an isolated distDir (.next-e2e) alongside an open dev server (QA Q12).
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // The dev badge covers bottom-left map stamps in localhost demo recordings.
   devIndicators: false,
   poweredByHeader: false,

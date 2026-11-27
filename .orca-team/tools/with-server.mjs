@@ -38,6 +38,14 @@ const port = await freePort();
 const api = `http://127.0.0.1:${port}`;
 const env = { ...process.env, ...extraEnv };
 const isWin = process.platform === "win32";
+if (mode === "test" && !env.DATABASE_URL) {
+  const prep = spawnSync("node", [path.join(root, "scripts", "prepare_test_db.mjs")], {
+    cwd: root,
+    env,
+    stdio: "inherit",
+  });
+  if (prep.status !== 0) process.exit(prep.status ?? 1);
+}
 const server = spawn("uv", ["run", "python", "-m", "app", "--env", mode, "--port", String(port), "--no-reload"], {
   cwd: path.join(root, "apps", "api"), env, stdio: ["ignore", "pipe", "pipe"], detached: !isWin,
 });

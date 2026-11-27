@@ -26,7 +26,7 @@
     "test:api": "cd apps/api && uv run pytest -q",
     "test:web": "npm --prefix apps/web run test --if-present",
     "test": "npm run test:api && npm run test:web",
-    "test:contract": "node .orca-team/tools/with-server.mjs --env RATE_LIMIT_PER_MINUTE=10000 -- uvx schemathesis run {API}/openapi.json --checks all --exclude-checks positive_data_acceptance --max-examples 25",
+    "test:contract": "node .orca-team/tools/with-server.mjs --env RATE_LIMIT_PER_MINUTE=10000 --env ABHAS_OFFLINE=1 --env GEMINI_API_KEY= --env GEMINI_API_KEY_FALLBACK= --env ANTHROPIC_API_KEY= -- uvx schemathesis run {API}/openapi.json --checks all --exclude-checks positive_data_acceptance --max-examples 25",
     "e2e": "npm --prefix apps/web run e2e",
     "eval": "cd apps/api && uv run python -m evals.run --split heldout",
     "eval:dev": "cd apps/api && uv run python -m evals.run --split dev",
