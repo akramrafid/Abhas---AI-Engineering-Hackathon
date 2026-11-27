@@ -21,9 +21,10 @@
     "load": "npm run load",
     "redteam": "npm run redteam",
     "traces": "npm run check:traces",
+    "offline": "npm run offline:check",
     "bootstrap": "npm run setup"
   },
-  "timeouts_min": { "default": 15, "e2e": 20, "eval": 30, "redteam": 30, "fresh-clone": 40 },
+  "timeouts_min": { "default": 15, "e2e": 20, "eval": 30, "redteam": 30, "offline": 20, "fresh-clone": 40 },
   "gitleaks_required": true,
   "skip": {
     "deploy": "localhost demo per TASK.md (Deploy: not required); deploy only with the human's approval"

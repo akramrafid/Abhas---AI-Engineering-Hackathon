@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/allocation/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Constrained intra-city supply allocation and crew placement */
+        post: operations["plan_allocation_api_v1_allocation_plan_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/chat": {
         parameters: {
             query?: never;
@@ -49,6 +66,40 @@ export interface paths {
         put?: never;
         /** Streaming Abhas AI Assistant over Server-Sent Events (text/event-stream) */
         post: operations["chat_stream_api_v1_chat_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dispatch/brief/{ward_id}.html": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Self-contained printable A4 commissioner brief (HTML) */
+        get: operations["get_commissioner_brief_api_v1_dispatch_brief__ward_id__html_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dispatch/notices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate deterministic SMS, WhatsApp, and brief URL dispatch notices */
+        post: operations["create_dispatch_notices_api_v1_dispatch_notices_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -106,6 +157,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/overflow/route": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Intra-city hospital bed overflow routing */
+        post: operations["route_overflow_api_v1_overflow_route_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List saved operational plans newest first */
+        get: operations["list_plans_api_v1_plans_get"];
+        put?: never;
+        /** Execute and append-only persist an operational planning run */
+        post: operations["create_plan_api_v1_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/compare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Compare headline KPIs between two saved plans (delta = b - a) */
+        get: operations["compare_plans_api_v1_plans_compare_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scenario": {
         parameters: {
             query?: never;
@@ -117,6 +220,23 @@ export interface paths {
         put?: never;
         /** What-if weather for the origin week */
         post: operations["scenario_api_v1_scenario_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/simulator/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Model-driven vector-control counterfactual simulation and ROI ranking */
+        post: operations["run_simulator_api_v1_simulator_run_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -328,6 +448,130 @@ export interface components {
              */
             ward_id: string;
         };
+        /** AllocationPlanCreate */
+        AllocationPlanCreate: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "allocation";
+            /**
+             * Label
+             * @description Human-readable label for the saved plan (1–80 chars)
+             */
+            label: string;
+            request: components["schemas"]["AllocationRequest"];
+        };
+        /**
+         * AllocationRequest
+         * @description POST /api/v1/allocation/plan request (contracts §2.1).
+         */
+        AllocationRequest: {
+            /**
+             * Equity Floor Pct
+             * @description Minimum share of demand guaranteed per ward (0–50 %)
+             * @default 20
+             */
+            equity_floor_pct: number;
+            /**
+             * H End
+             * @description Weeks ahead of the origin week (1–4)
+             * @default 4
+             */
+            h_end: number;
+            /**
+             * H Start
+             * @description Weeks ahead of the origin week (1–4)
+             * @default 2
+             */
+            h_start: number;
+            /**
+             * Origin Week
+             * Format: date
+             * @description Monday of the last observed week; 2016-02-29 … 2025-12-29
+             * @example 2025-08-04
+             */
+            origin_week: string;
+            /**
+             * Scope
+             * @default all
+             * @enum {string}
+             */
+            scope: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj" | "all";
+            /**
+             * Service Level
+             * @description Optional quantile override; null uses P80 saline/kits and P90 beds
+             */
+            service_level?: number | null;
+            /**
+             * Stock Pct
+             * @description Available Regional Stock percentage (30–100)
+             * @default 100
+             */
+            stock_pct: number;
+            /**
+             * Total Crews
+             * @description Total spraying crews to assign (0–300)
+             * @default 0
+             */
+            total_crews: number;
+        };
+        /**
+         * AllocationResponse
+         * @description POST /api/v1/allocation/plan response (contracts §2.1).
+         */
+        AllocationResponse: {
+            /** Cities */
+            cities: components["schemas"]["CityAllocationSummary"][];
+            /**
+             * Crew Method
+             * @enum {string}
+             */
+            crew_method: "greedy" | "greedy (approximate)";
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            request: components["schemas"]["AllocationRequest"];
+            /** Service Levels */
+            service_levels: {
+                [key: string]: number;
+            };
+            /** Solve Ms */
+            solve_ms: number;
+            /** Supply Ratios */
+            supply_ratios: {
+                [key: string]: number;
+            };
+            /** Wards */
+            wards: components["schemas"]["WardAllocation"][];
+        };
         /** CallStats */
         CallStats: {
             /** Cache Hits */
@@ -406,6 +650,60 @@ export interface components {
              */
             role: "user" | "assistant";
         };
+        /** CityAllocationSummary */
+        CityAllocationSummary: {
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Crews Assigned */
+            crews_assigned: number;
+            /** Critical Wards */
+            critical_wards: number;
+            /** Deficit Wards */
+            deficit_wards: number;
+            /** Resources */
+            resources: components["schemas"]["CityResourceTotals"][];
+        };
+        /** CityBedSummary */
+        CityBedSummary: {
+            /** Capacity Total */
+            capacity_total: number;
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Headroom After */
+            headroom_after: number;
+            /** Required Total */
+            required_total: number;
+            /** Transfers */
+            transfers: number;
+            /** Unroutable Patients */
+            unroutable_patients: number;
+            /** Utilisation After */
+            utilisation_after: number;
+            /** Utilisation Before */
+            utilisation_before: number;
+        };
+        /** CityResourceTotals */
+        CityResourceTotals: {
+            /** Allocated */
+            allocated: number;
+            /** Available */
+            available: number;
+            /** Floors Scaled */
+            floors_scaled: boolean;
+            /** Required */
+            required: number;
+            /**
+             * Resource
+             * @enum {string}
+             */
+            resource: "saline_bags" | "diagnostic_kits" | "hospital_beds";
+        };
         /** CityWeatherStatus */
         CityWeatherStatus: {
             /** Cache Age Hours */
@@ -455,6 +753,131 @@ export interface components {
             /** Period */
             period: string;
         };
+        /**
+         * Deployment
+         * @description Single ward crew deployment entry for SimulatorRequest.
+         */
+        Deployment: {
+            /**
+             * Crews
+             * @description Spraying crews deployed to this ward (1–20)
+             */
+            crews: number;
+            /**
+             * Ward Id
+             * @example DSCC_Ward_07
+             */
+            ward_id: string;
+        };
+        /** DispatchPlanCreate */
+        DispatchPlanCreate: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "dispatch";
+            /**
+             * Label
+             * @description Human-readable label for the saved plan (1–80 chars)
+             */
+            label: string;
+            request: components["schemas"]["DispatchRequest"];
+        };
+        /**
+         * DispatchRequest
+         * @description POST /api/v1/dispatch/notices request (contracts §2.4).
+         */
+        DispatchRequest: {
+            /**
+             * Channels
+             * @description Channels to render (default all three)
+             */
+            channels?: ("sms" | "whatsapp" | "brief")[];
+            /**
+             * Lang
+             * @default en
+             * @enum {string}
+             */
+            lang: "en" | "bn";
+            /**
+             * Origin Week
+             * Format: date
+             * @description Monday of the last observed week; 2016-02-29 … 2025-12-29
+             * @example 2025-08-04
+             */
+            origin_week: string;
+            /**
+             * Plan Id
+             * @description Optional saved allocation plan UUID; if omitted, computes allocation from stock_pct and total_crews
+             */
+            plan_id?: string | null;
+            /**
+             * Scope
+             * @description City or 'all'; mutually exclusive with ward_ids
+             */
+            scope?: ("Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj" | "all") | null;
+            /**
+             * Stock Pct
+             * @description Available Regional Stock percentage (30–100)
+             * @default 100
+             */
+            stock_pct: number;
+            /**
+             * Total Crews
+             * @description Total spraying crews to assign (0–300)
+             * @default 0
+             */
+            total_crews: number;
+            /**
+             * Ward Ids
+             * @description Explicit ward list (1–60 unique wards); mutually exclusive with scope
+             */
+            ward_ids?: string[] | null;
+        };
+        /**
+         * DispatchResponse
+         * @description POST /api/v1/dispatch/notices response (contracts §2.4).
+         */
+        DispatchResponse: {
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Lang
+             * @enum {string}
+             */
+            lang: "en" | "bn";
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /** Notices */
+            notices: components["schemas"]["Notice"][];
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            request: components["schemas"]["DispatchRequest"];
+        };
         /** Driver */
         Driver: {
             /**
@@ -477,6 +900,20 @@ export interface components {
              * @example Rain 2–4 weeks ago
              */
             label: string;
+        };
+        /** EfficacyParams */
+        EfficacyParams: {
+            /** Assumption Note */
+            assumption_note: string;
+            /** E Max */
+            e_max: number;
+            /** K */
+            k: number;
+            /**
+             * Preset
+             * @enum {string}
+             */
+            preset: "low" | "base" | "high";
         };
         /** FieldError */
         FieldError: {
@@ -645,6 +1082,20 @@ export interface components {
              */
             tier_escalated: boolean;
         };
+        /** HorizonImpact */
+        HorizonImpact: {
+            /** Baseline Cases */
+            baseline_cases: number;
+            /** Cases Prevented */
+            cases_prevented: number;
+            /** Counterfactual Cases */
+            counterfactual_cases: number;
+            /**
+             * Horizon
+             * @description Weeks ahead of the origin week (1–4)
+             */
+            horizon: number;
+        };
         /** LLMStats */
         LLMStats: {
             /** Budget Usd Per Day */
@@ -746,6 +1197,68 @@ export interface components {
             /** Rmse */
             rmse: number;
         };
+        /** Notice */
+        Notice: {
+            /** Brief Url */
+            brief_url?: string | null;
+            facts: components["schemas"]["NoticeFacts"];
+            sms?: components["schemas"]["SmsMessage"] | null;
+            /** Whatsapp */
+            whatsapp?: string | null;
+        };
+        /**
+         * NoticeFacts
+         * @description Single source of truth for every number rendered in SMS, WhatsApp, and brief HTML (ADR-0014).
+         */
+        NoticeFacts: {
+            /**
+             * Action
+             * @description Tier action directive in the requested language
+             */
+            action: string;
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Crews Assigned */
+            crews_assigned: number;
+            /**
+             * Deficit Level
+             * @enum {string}
+             */
+            deficit_level: "none" | "deficit" | "critical";
+            diagnostic_kits: components["schemas"]["SupplyPair"];
+            hospital_beds: components["schemas"]["SupplyPair"];
+            /**
+             * Predicted Cases
+             * @description Window sum of expected cases, rounded to one decimal
+             */
+            predicted_cases: number;
+            saline_bags: components["schemas"]["SupplyPair"];
+            /**
+             * Tier
+             * @enum {string}
+             */
+            tier: "Low" | "Medium" | "High" | "Critical";
+            /**
+             * Ward Id
+             * @example DSCC_Ward_07
+             */
+            ward_id: string;
+            /** Ward Name */
+            ward_name: string;
+            /**
+             * Window End
+             * Format: date
+             */
+            window_end: string;
+            /**
+             * Window Start
+             * Format: date
+             */
+            window_start: string;
+        };
         /** OpsResponse */
         OpsResponse: {
             /**
@@ -765,6 +1278,315 @@ export interface components {
             /** Uptime S */
             uptime_s: number;
             weather: components["schemas"]["CallStats"];
+        };
+        /** OverflowPlanCreate */
+        OverflowPlanCreate: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "overflow";
+            /**
+             * Label
+             * @description Human-readable label for the saved plan (1–80 chars)
+             */
+            label: string;
+            request: components["schemas"]["OverflowRequest"];
+        };
+        /**
+         * OverflowRequest
+         * @description POST /api/v1/overflow/route request (contracts §2.2).
+         */
+        OverflowRequest: {
+            /**
+             * Capacity Overrides
+             * @description Optional ward_id -> capacity overrides (1–500 beds, ≤ 60 entries)
+             */
+            capacity_overrides?: {
+                [key: string]: number;
+            };
+            /**
+             * Horizon
+             * @description Weeks ahead of the origin week (1–4)
+             * @default 3
+             */
+            horizon: number;
+            /**
+             * Origin Week
+             * Format: date
+             * @description Monday of the last observed week; 2016-02-29 … 2025-12-29
+             * @example 2025-08-04
+             */
+            origin_week: string;
+            /**
+             * Scope
+             * @default all
+             * @enum {string}
+             */
+            scope: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj" | "all";
+            /**
+             * Service Level
+             * @description Forecast quantile service level (0.50–0.99)
+             * @default 0.9
+             */
+            service_level: number;
+        };
+        /**
+         * OverflowResponse
+         * @description POST /api/v1/overflow/route response (contracts §2.2).
+         */
+        OverflowResponse: {
+            /** Capacity Method */
+            capacity_method: string;
+            /** Cities */
+            cities: components["schemas"]["CityBedSummary"][];
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            request: components["schemas"]["OverflowRequest"];
+            /** Solve Ms */
+            solve_ms: number;
+            /** Transfers */
+            transfers: components["schemas"]["Transfer"][];
+            /** Wards */
+            wards: components["schemas"]["WardBedStatus"][];
+        };
+        /**
+         * PlanComparison
+         * @description GET /api/v1/plans/compare response (contracts §2.6 + RunMeta provenance envelope).
+         */
+        PlanComparison: {
+            a: components["schemas"]["PlanSummary"];
+            b: components["schemas"]["PlanSummary"];
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /** Diffs */
+            diffs: components["schemas"]["PlanMetricDiff"][];
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+        };
+        /**
+         * PlanHeadline
+         * @description Comparable headline KPIs extracted per plan kind (nullable when not applicable).
+         */
+        PlanHeadline: {
+            /** Cases Prevented */
+            cases_prevented?: number | null;
+            /** Crews */
+            crews?: number | null;
+            /** Critical Wards */
+            critical_wards?: number | null;
+            /** Deficit Wards */
+            deficit_wards?: number | null;
+            /** Mean Fulfilment Pct */
+            mean_fulfilment_pct?: number | null;
+            /** Notices */
+            notices?: number | null;
+            /** Stock Pct */
+            stock_pct?: number | null;
+            /** Unroutable Patients */
+            unroutable_patients?: number | null;
+        };
+        /**
+         * PlanList
+         * @description GET /api/v1/plans response (contracts §2.6 + RunMeta provenance envelope).
+         */
+        PlanList: {
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /** Plans */
+            plans: components["schemas"]["PlanSummary"][];
+        };
+        /** PlanMetricDiff */
+        PlanMetricDiff: {
+            /** A */
+            a?: number | null;
+            /** B */
+            b?: number | null;
+            /** Delta */
+            delta?: number | null;
+            /** Metric */
+            metric: string;
+        };
+        /**
+         * PlanRecord
+         * @description POST /api/v1/plans 201 response (contracts §2.6).
+         */
+        PlanRecord: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            headline: components["schemas"]["PlanHeadline"];
+            /**
+             * Id
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            id: string;
+            /** Inputs */
+            inputs: components["schemas"]["AllocationRequest"] | components["schemas"]["OverflowRequest"] | components["schemas"]["SimulatorRequest"] | components["schemas"]["DispatchRequest"];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "allocation" | "overflow" | "simulation" | "dispatch";
+            /** Label */
+            label: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /**
+             * Origin Week
+             * Format: date
+             */
+            origin_week: string;
+            /** Outputs */
+            outputs: {
+                [key: string]: unknown;
+            };
+        };
+        /** PlanSummary */
+        PlanSummary: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            headline: components["schemas"]["PlanHeadline"];
+            /**
+             * Id
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "allocation" | "overflow" | "simulation" | "dispatch";
+            /** Label */
+            label: string;
+            /** Model Version */
+            model_version: string;
+            /**
+             * Origin Week
+             * Format: date
+             */
+            origin_week: string;
         };
         /** PredictionStats */
         PredictionStats: {
@@ -802,6 +1624,17 @@ export interface components {
              * @example https://abhas.dev/problems/unknown-ward
              */
             type: string;
+        };
+        /** ResourceLine */
+        ResourceLine: {
+            /** Allocated */
+            allocated: number;
+            /** Deficit */
+            deficit: number;
+            /** Fulfilment Pct */
+            fulfilment_pct: number;
+            /** Required */
+            required: number;
         };
         /** ScenarioRequest */
         ScenarioRequest: {
@@ -849,6 +1682,146 @@ export interface components {
             ward_id: string;
             weather: components["schemas"]["WeatherOverride"];
         };
+        /** SimulationPlanCreate */
+        SimulationPlanCreate: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "simulation";
+            /**
+             * Label
+             * @description Human-readable label for the saved plan (1–80 chars)
+             */
+            label: string;
+            request: components["schemas"]["SimulatorRequest"];
+        };
+        /**
+         * SimulatorRequest
+         * @description POST /api/v1/simulator/run request (contracts §2.3).
+         */
+        SimulatorRequest: {
+            /**
+             * Auto Crews
+             * @description Total crews placed greedily by the engine; mutually exclusive with deployments
+             */
+            auto_crews?: number | null;
+            /**
+             * Deployments
+             * @description Explicit ward deployments (unique wards); mutually exclusive with auto_crews
+             */
+            deployments?: components["schemas"]["Deployment"][] | null;
+            /**
+             * Efficacy
+             * @default base
+             * @enum {string}
+             */
+            efficacy: "low" | "base" | "high";
+            /**
+             * Origin Week
+             * Format: date
+             * @description Monday of the last observed week; 2016-02-29 … 2025-12-29
+             * @example 2025-08-04
+             */
+            origin_week: string;
+        };
+        /**
+         * SimulatorResponse
+         * @description POST /api/v1/simulator/run response (contracts §2.3).
+         */
+        SimulatorResponse: {
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            efficacy: components["schemas"]["EfficacyParams"];
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            request: components["schemas"]["SimulatorRequest"];
+            totals: components["schemas"]["SimulatorTotals"];
+            /** Wards */
+            wards: components["schemas"]["WardImpact"][];
+        };
+        /** SimulatorTotals */
+        SimulatorTotals: {
+            /** Beds Avoided */
+            beds_avoided: number;
+            /** Cases Prevented */
+            cases_prevented: number;
+            /** Cases Prevented High */
+            cases_prevented_high: number;
+            /** Cases Prevented Low */
+            cases_prevented_low: number;
+            /** Crews */
+            crews: number;
+            /** Saline Avoided */
+            saline_avoided: number;
+        };
+        /** SmsMessage */
+        SmsMessage: {
+            /** Characters */
+            characters: number;
+            /**
+             * Encoding
+             * @enum {string}
+             */
+            encoding: "GSM-7" | "UCS-2";
+            /** Segments */
+            segments: number;
+            /** Text */
+            text: string;
+        };
+        /** SupplyPair */
+        SupplyPair: {
+            /** Allocated */
+            allocated: number;
+            /** Required */
+            required: number;
+        };
+        /** Transfer */
+        Transfer: {
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /**
+             * From Ward
+             * @example DSCC_Ward_07
+             */
+            from_ward: string;
+            /** Patients */
+            patients: number;
+            /**
+             * To Ward
+             * @example DSCC_Ward_07
+             */
+            to_ward: string;
+        };
         /** ValidationResponse */
         ValidationResponse: {
             confusion: components["schemas"]["ConfusionMatrix"];
@@ -893,6 +1866,87 @@ export interface components {
             /** Water Logging Risk Index */
             water_logging_risk_index: number;
         };
+        /** WardAllocation */
+        WardAllocation: {
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Crews */
+            crews: number;
+            /**
+             * Deficit Level
+             * @enum {string}
+             */
+            deficit_level: "none" | "deficit" | "critical";
+            /** Deficit Reasons */
+            deficit_reasons: string[];
+            /** Density Factor */
+            density_factor: number;
+            diagnostic_kits: components["schemas"]["ResourceLine"];
+            /**
+             * Expected Cases
+             * @description Sum of forecast means across the window
+             */
+            expected_cases: number;
+            hospital_beds: components["schemas"]["ResourceLine"];
+            /**
+             * Planned Cases
+             * @description Window case quantile used for supply sizing
+             */
+            planned_cases: number;
+            /** Priority Weight */
+            priority_weight: number;
+            saline_bags: components["schemas"]["ResourceLine"];
+            /**
+             * Tier
+             * @description Peak tier across the planning window
+             * @enum {string}
+             */
+            tier: "Low" | "Medium" | "High" | "Critical";
+            /**
+             * Ward Id
+             * @example DSCC_Ward_07
+             */
+            ward_id: string;
+        };
+        /** WardBedStatus */
+        WardBedStatus: {
+            /** Beds Required */
+            beds_required: number;
+            /** Capacity */
+            capacity: number;
+            /**
+             * Capacity Source
+             * @enum {string}
+             */
+            capacity_source: "derived" | "override";
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Headroom Before */
+            headroom_before: number;
+            /** Local Deficit */
+            local_deficit: number;
+            /** Net Deficit */
+            net_deficit: number;
+            /** Transferred In */
+            transferred_in: number;
+            /** Transferred Out */
+            transferred_out: number;
+            /** Utilisation After */
+            utilisation_after: number;
+            /** Utilisation Before */
+            utilisation_before: number;
+            /**
+             * Ward Id
+             * @example DSCC_Ward_07
+             */
+            ward_id: string;
+        };
         /** WardForecast */
         WardForecast: {
             /**
@@ -922,6 +1976,39 @@ export interface components {
              * @description Date-sorted weekly rows, inclusive range
              */
             weeks: components["schemas"]["WeekObservation"][];
+        };
+        /** WardImpact */
+        WardImpact: {
+            /** Beds Avoided */
+            beds_avoided: number;
+            /** Cases Prevented */
+            cases_prevented: number;
+            /** Cases Prevented High */
+            cases_prevented_high: number;
+            /** Cases Prevented Low */
+            cases_prevented_low: number;
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Crews */
+            crews: number;
+            /** Horizons */
+            horizons: components["schemas"]["HorizonImpact"][];
+            /** Rank */
+            rank: number;
+            /** Reduction Fraction */
+            reduction_fraction: number;
+            /** Roi Cases Per Crew */
+            roi_cases_per_crew: number;
+            /** Saline Avoided */
+            saline_avoided: number;
+            /**
+             * Ward Id
+             * @example DSCC_Ward_07
+             */
+            ward_id: string;
         };
         /** WardList */
         WardList: {
@@ -1109,6 +2196,110 @@ export interface operations {
             };
         };
     };
+    plan_allocation_api_v1_allocation_plan_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AllocationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AllocationResponse"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Solver reported infeasibility after equity floor scaling */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     chat_api_v1_chat_post: {
         parameters: {
             query?: never;
@@ -1222,6 +2413,199 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_commissioner_brief_api_v1_dispatch_brief__ward_id__html_get: {
+        parameters: {
+            query: {
+                /** @description Monday of the last observed week; 2016-02-29 … 2025-12-29 */
+                origin_week: string;
+                lang?: "en" | "bn";
+                plan_id?: string | null;
+                stock_pct?: number;
+                total_crews?: number;
+            };
+            header?: never;
+            path: {
+                ward_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Self-contained A4 portrait printable HTML brief */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": string;
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                    "text/html": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    create_dispatch_notices_api_v1_dispatch_notices_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DispatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DispatchResponse"];
+                };
             };
             /** @description Missing or invalid X-Ops-Token */
             401: {
@@ -1575,6 +2959,392 @@ export interface operations {
             };
         };
     };
+    route_overflow_api_v1_overflow_route_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OverflowRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OverflowResponse"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Routing programme reported infeasibility */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_plans_api_v1_plans_get: {
+        parameters: {
+            query?: {
+                kind?: ("allocation" | "overflow" | "simulation" | "dispatch") | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanList"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    create_plan_api_v1_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AllocationPlanCreate"] | components["schemas"]["OverflowPlanCreate"] | components["schemas"]["SimulationPlanCreate"] | components["schemas"]["DispatchPlanCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanRecord"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    compare_plans_api_v1_plans_compare_get: {
+        parameters: {
+            query: {
+                /** @description UUID of baseline plan A */
+                a: string;
+                /** @description UUID of candidate plan B */
+                b: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanComparison"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     scenario_api_v1_scenario_post: {
         parameters: {
             query?: never;
@@ -1595,6 +3365,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ScenarioResponse"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    run_simulator_api_v1_simulator_run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimulatorRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulatorResponse"];
                 };
             };
             /** @description Missing or invalid X-Ops-Token */
