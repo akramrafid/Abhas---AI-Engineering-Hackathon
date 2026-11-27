@@ -66,8 +66,8 @@ Nothing here is code to paste; JSON blocks are example data. The maths behind ev
 | `solve_ms` | float ≥ 0 | |
 
 `WardAllocation`: `ward_id`, `city`, `tier` (peak in window), `expected_cases` (sum of means, ≥ 0),
-`planned_cases` (window quantile, ≥ 0), `density_factor` (0.5–2.0), `priority_weight` (> 0),
-`saline_bags` / `diagnostic_kits` / `hospital_beds` (each a `ResourceLine`), `crews` (int ≥ 0),
+`planned_cases` (window quantile for saline/kits, ≥ 0), `density_factor` (0.5–2.0), `priority_weight` (> 0),
+`saline_bags` / `diagnostic_kits` (window total at P80) / `hospital_beds` (peak-week beds at P90, matching overflow for single-week windows) (each a `ResourceLine`), `crews` (int ≥ 0),
 `deficit_level` (`none` | `deficit` | `critical`), `deficit_reasons` (list of strings).
 
 `ResourceLine`: `required` (int ≥ 0), `allocated` (int ≥ 0), `deficit` (= required − allocated),

@@ -173,3 +173,58 @@ def test_wp1_5_warm_latency_and_plan_save() -> None:
         plan = plan_resp.json()
         assert plan["headline"]["stock_pct"] == 60
         assert "mean_fulfilment_pct" in plan["headline"]
+
+
+def test_beds_equal_overflow_for_single_week() -> None:
+    """M1: For a single-week window (h=3), allocation hospital_beds.required equals overflow beds_required."""
+    with TestClient(create_app()) as client:
+        alloc_resp = client.post(
+            "/api/v1/allocation/plan",
+            json={
+                "scope": "all",
+                "origin_week": "2024-08-05",
+                "h_start": 3,
+                "h_end": 3,
+                "stock_pct": 100,
+            },
+        )
+        assert alloc_resp.status_code == 200, alloc_resp.text
+        over_resp = client.post(
+            "/api/v1/overflow/route",
+            json={"scope": "all", "origin_week": "2024-08-05", "horizon": 3, "service_level": 0.9},
+        )
+        assert over_resp.status_code == 200, over_resp.text
+
+    alloc_beds = {w["ward_id"]: w["hospital_beds"]["required"] for w in alloc_resp.json()["wards"]}
+    over_beds = {w["ward_id"]: w["beds_required"] for w in over_resp.json()["wards"]}
+    assert alloc_beds == over_beds
+
+
+def test_beds_peak_le_window_total() -> None:
+    """M1: Peak-week hospital_beds.required for h=2..4 never exceeds summing single-week bed requirements."""
+    with TestClient(create_app()) as client:
+        win_resp = client.post(
+            "/api/v1/allocation/plan",
+            json={
+                "scope": "all",
+                "origin_week": "2024-08-05",
+                "h_start": 2,
+                "h_end": 4,
+                "stock_pct": 100,
+            },
+        )
+        assert win_resp.status_code == 200, win_resp.text
+        single_beds: dict[str, list[int]] = {}
+        for h in (2, 3, 4):
+            r = client.post(
+                "/api/v1/overflow/route",
+                json={"scope": "all", "origin_week": "2024-08-05", "horizon": h, "service_level": 0.9},
+            )
+            assert r.status_code == 200, r.text
+            for w in r.json()["wards"]:
+                single_beds.setdefault(w["ward_id"], []).append(w["beds_required"])
+
+    for w in win_resp.json()["wards"]:
+        wid = w["ward_id"]
+        assert w["hospital_beds"]["required"] == max(single_beds[wid])
+        assert w["hospital_beds"]["required"] <= sum(single_beds[wid])

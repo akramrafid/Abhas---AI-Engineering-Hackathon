@@ -88,6 +88,27 @@ def window_case_quantile(means: Sequence[float], nb_r: Sequence[float], q: float
     return max(0, int(poisson.ppf(q_f, total_mean)))
 
 
+def single_week_case_quantile(mean: float, nb_r: float, q: float) -> int:
+    """Return the integer service-level quantile for a single forecast week (NB or Poisson)."""
+    return window_case_quantile([mean], [nb_r], q)
+
+
+def peak_week_case_quantile(means: Sequence[float], nb_r: Sequence[float], q: float) -> int:
+    """Return the maximum single-week case quantile across horizons in a planning window.
+
+    Hospital beds are reusable week to week, so peak-week sizing takes ``max_h Q_{q, h}``
+    instead of summing bed-weeks across the window (ADR-0009, M1).
+    """
+    if len(means) != len(nb_r):
+        raise ValueError(f"means ({len(means)}) and nb_r ({len(nb_r)}) must have the same length")
+    q_f = float(q)
+    if not math.isfinite(q_f) or q_f < 0.0 or q_f >= 1.0:
+        raise ValueError(f"quantile q must be in [0, 1), got {q!r}")
+    if not means or q_f == 0.0:
+        return 0
+    return max(single_week_case_quantile(mu, r, q_f) for mu, r in zip(means, nb_r, strict=True))
+
+
 def supply_for_cases(cases: int, ratios: SupplyRatios) -> dict[str, int]:
     """Convert an integer planned case count into integer supply quantities (ADR-0009).
 

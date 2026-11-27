@@ -13,7 +13,9 @@ from app.ports.supply import SupplyRatios
 from app.shared.supply import (
     DATASET_SUPPLY_CONSTANTS,
     fit_ratios,
+    peak_week_case_quantile,
     round_half_up,
+    single_week_case_quantile,
     supply_for_cases,
     verify_constants,
     window_case_quantile,
@@ -144,3 +146,12 @@ def test_prop_quantile_and_supply_monotone(
     sup2 = supply_for_cases(val2, CANONICAL_RATIOS)
     for k in ("saline_bags", "diagnostic_kits", "hospital_beds"):
         assert sup2[k] >= sup1[k] >= 0
+
+    # Peak-week quantile is non-decreasing in q and in every mu_h, and never exceeds window total
+    pk1 = peak_week_case_quantile(means, nb_r, q1)
+    pk2 = peak_week_case_quantile(means, nb_r, q2)
+    assert pk2 >= pk1 >= 0
+    assert pk1 <= val1
+    pk_bumped = peak_week_case_quantile(bumped, nb_r, q1)
+    assert pk_bumped >= pk1
+    assert peak_week_case_quantile([means[0]], [r_val], q1) == single_week_case_quantile(means[0], r_val, q1)

@@ -24,7 +24,7 @@ from app.shared.optimizer import (
     density_factors,
     priority_weights,
 )
-from app.shared.supply import supply_for_cases, window_case_quantile
+from app.shared.supply import peak_week_case_quantile, supply_for_cases, window_case_quantile
 
 from .schemas import (
     AllocationRequest,
@@ -198,13 +198,9 @@ class AllocationService:
                 expected_vec.append(sum(means))
 
                 q_primary = window_case_quantile(means, nb_r_vec, saline_level)
-                q_beds = (
-                    q_primary
-                    if beds_level == saline_level
-                    else window_case_quantile(means, nb_r_vec, beds_level)
-                )
+                q_beds = peak_week_case_quantile(means, nb_r_vec, beds_level)
                 primary_supplies = supply_for_cases(q_primary, ratios)
-                beds_supplies = primary_supplies if q_beds == q_primary else supply_for_cases(q_beds, ratios)
+                beds_supplies = supply_for_cases(q_beds, ratios)
 
                 planned_primary_vec.append(q_primary)
                 req_by_resource["saline_bags"].append(primary_supplies["saline_bags"])

@@ -15,8 +15,9 @@ beds 0.298 beds/case, applied as round_half_up(c × cases). Efficacy presets (AD
 negative-binomial size r_h (from the horizon's calibration, variance μ + μ²/r). Window cases N = Σ_h N_h.
 Moment matching: M = Σ μ_h, V = Σ (μ_h + μ_h²/r_h). If V > M, N ≈ NB(r_W, p) with r_W = M²/(V − M) and
 p = r_W/(r_W + M); otherwise N ≈ Poisson(M). Planned cases Q_s = the s-quantile of N (s = 0.8 for saline and
-kits, 0.9 for beds). Planned supply = round_half_up(c × Q_s) = ⌊c·Q_s + 0.5⌋ — the same rule that generated the
-dataset's supply columns.
+kits). Because hospital beds are reused week to week, planned beds use the peak single-week quantile
+Q_0.9,peak = max_{h ∈ W} Q_0.9(N_h). Planned supply = round_half_up(c × Q) = ⌊c·Q + 0.5⌋ — the same rule that
+generated the dataset's supply columns.
 
 **Plain words.** We forecast a range, not a point. To order supplies we take the number of cases we will not exceed
 four weeks in five (beds: nine in ten), then multiply by how many bags, kits and beds each case has needed
@@ -26,7 +27,7 @@ historically. In this dataset that relation is exact: every one of the 31,320 ro
 |---|---|---|---|
 | **S0** | Dataset rule, cases k = 0, 1, 2, 5, 10, 15, 20 | round_half_up(c·k) | (saline, kits, beds) = **(0,0,0), (2,1,0), (5,2,1), (12,6,1), (24,12,3), (36,17,4), (48,23,6)** — and 100 % of the 31,320 rows |
 | **S1** | One week, μ = 10, r = 2 | V = 10 + 100/2 = 60 > M; r_W = 100/50 = 2. Q₀.₈ = 15, Q₀.₉ = 20 | saline round(2.385×15 = 35.775) = **36**, kits round(17.46) = **17**, beds round(0.298×20 = 5.96) = **6** |
-| **S2** | Window h=2..4, μ = (4, 6, 8), r = 3 each | M = 18, V = 18 + (16+36+64)/3 = 56.667, r_W = 324/38.667 = 8.3793. Q₀.₈ = 24, Q₀.₉ = 28 | saline round(57.24) = **57**, kits round(27.936) = **28**, beds round(8.344) = **8** |
+| **S2** | Window h=2..4, μ = (4, 6, 8), r = 3 each | Window: M = 18, V = 56.667, r_W = 8.3793 → Q₀.₈ = 24. Peak week (μ = 8, r = 3): Q₀.₉ = 15 | saline round(57.24) = **57**, kits round(27.936) = **28**, peak-week beds round(0.298×15 = 4.47) = **4** *(window bed-weeks: Q₀.₉ = 28 → 8)* |
 | **S3** | Window μ = (2, 3), r very large (V ≤ M) | Poisson(5); Q₀.₈ = 7 | saline round(16.695) = **17**, kits round(8.148) = **8** |
 | **S4** | All μ = 0 | M = 0 | Q = **0** and every supply **0** (no division by zero) |
 
@@ -38,10 +39,13 @@ Property tests: Q_s is non-decreasing in s and in every μ_h; supplies are non-d
 
 **Notation.** City c, wards i with planned demand d_i (one resource at a time), tier weight t_i ∈ {1, 2, 4, 8}
 (Low, Medium, High, Critical), density factor f_i = clip(ρ_i / median_c(ρ), 0.5, 2), weight w_i = t_i·f_i.
-Stock S = round(stock_pct/100 × Σ d_i). Floors ℓ_i = φ·d_i (φ = equity_floor_pct/100); if Σ ℓ_i > S, scale all
-floors by S/Σ ℓ_i. Solve
-  maximise Σ w_i x_i  subject to  Σ x_i ≤ S,  ℓ_i ≤ x_i ≤ d_i
-with HiGHS, then largest-remainder rounding to integers summing to min(S, Σ d_i).
+Available stock uses integer round-half-up: S = (stock_pct × Σ d_i + 50) // 100, target T = min(S, Σ d_i).
+Integer equity floors use ceiling rounding: ℓ_i = min(d_i, ⌈equity_floor_pct · d_i / 100⌉) = min(d_i, (floor_pct · d_i + 99) // 100).
+When Σ ℓ_i ≤ T, HiGHS solves
+  maximise Σ w_i x_i  subject to  Σ x_i ≤ T,  ℓ_i ≤ x_i ≤ d_i
+whose vertex is integral (one budget row + integer box bounds + integer RHS), yielding the exact integer optimum.
+When Σ ℓ_i > T, T units are apportioned over the floors one unit at a time by D'Hondt / Jefferson (maximising ℓ_i / (x_i + 1),
+ties by higher weight then lower ward_id, capped at ℓ_i) with `floors_scaled = true`, guaranteeing strict monotonicity in stock_pct.
 Deficit: x_i < d_i. Critical: (tier ∈ {High, Critical} and x_i < d_i) or x_i/d_i < 0.5.
 
 **Plain words.** Every ward first gets a guaranteed share (20 % of its need) so no one is abandoned. The rest of the

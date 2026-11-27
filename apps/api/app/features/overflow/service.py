@@ -10,8 +10,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
 
-from scipy.stats import nbinom, poisson
-
 from app.core.config import API_DIR
 from app.core.errors import AppError
 from app.core.run_meta import current_run_meta
@@ -20,6 +18,7 @@ from app.ports.capacity import BedCapacitySource
 from app.ports.repositories import ObservationRepository, WardRecord
 from app.shared.forecast_engine import ForecastEngine
 from app.shared.routing import route_city, summarise_city
+from app.shared.supply import round_half_up, single_week_case_quantile
 
 from .schemas import (
     CapacitySource,
@@ -32,31 +31,6 @@ from .schemas import (
 
 DEFAULT_SUPPLY_RATIOS_PATH: Path = API_DIR / "config" / "supply_ratios.json"
 _FALLBACK_NB_R: float = 5.0
-
-
-def round_half_up(value: float) -> int:
-    """Deterministic round-half-up: floor(x + 0.5) matching ADR-0009 and the onsite dataset rule."""
-    return int(math.floor(float(value) + 0.5))
-
-
-def single_week_case_quantile(mean: float, nb_r: float, q: float) -> int:
-    """Single-horizon NB / Poisson service-level case quantile matching ADR-0009 (§1)."""
-    mu = float(mean)
-    if not math.isfinite(mu) or mu <= 0.0:
-        return 0
-    r = float(nb_r)
-    if math.isfinite(r) and r > 0.0:
-        var = mu + (mu * mu) / r
-    else:
-        var = mu
-    if var > mu:
-        p = r / (r + mu)
-        raw_q = float(nbinom.ppf(q, r, p))
-    else:
-        raw_q = float(poisson.ppf(q, mu))
-    if not math.isfinite(raw_q):
-        return 0
-    return max(0, int(round(raw_q)))
 
 
 @lru_cache(maxsize=1)
@@ -136,6 +110,7 @@ class OverflowService:
         overrides: Mapping[str, int],
         repo: ObservationRepository,
         capacity_source: BedCapacitySource,
+        scope: str,
     ) -> None:
         if not overrides:
             return
@@ -168,6 +143,13 @@ class OverflowService:
                     title="Unknown ward",
                     detail=f"Unknown ward_id in capacity_overrides: {wid}",
                 )
+            if scope != "all" and rec.city != scope:
+                raise AppError(
+                    status=422,
+                    slug="override-out-of-scope",
+                    title="Capacity override out of scope",
+                    detail=f"Ward {wid} ({rec.city}) is outside requested scope {scope!r}.",
+                )
 
     def route(self, req: OverflowRequest) -> OverflowResponse:
         if self._repo is None or self._engine is None or self._capacity_source is None:
@@ -182,7 +164,7 @@ class OverflowService:
             self._db_fault_hook()
 
         engine.validate_origin(req.origin_week, source="dataset")
-        self._validate_overrides(req.capacity_overrides, repo, capacity_source)
+        self._validate_overrides(req.capacity_overrides, repo, capacity_source, req.scope)
 
         bed_ratio = self._bed_ratio if self._bed_ratio is not None else load_hospital_bed_ratio()
 

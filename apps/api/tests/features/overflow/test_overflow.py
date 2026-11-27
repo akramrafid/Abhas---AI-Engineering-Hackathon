@@ -71,6 +71,21 @@ def test_wp2_2_capacity_override_and_unknown_ward_404() -> None:
         assert bad.status_code == 404
         assert bad.headers["content-type"].startswith("application/problem+json")
 
+        out_of_scope = client.post(
+            "/api/v1/overflow/route",
+            json={
+                "scope": "Dhaka North",
+                "origin_week": "2024-08-05",
+                "horizon": 3,
+                "capacity_overrides": {"CCC_Ward_01": 5},
+            },
+        )
+        assert out_of_scope.status_code == 422, out_of_scope.text
+        assert out_of_scope.headers["content-type"].startswith("application/problem+json")
+        body = out_of_scope.json()
+        assert body["type"].endswith("/override-out-of-scope")
+        assert "CCC_Ward_01" in body["detail"]
+
 
 def test_wp2_3_capacity_adapter_readiness(tmp_path: Path) -> None:
     """WP2-3: check_ward_capacity_ready validates committed ward_capacity.json and rejects invalid JSON."""
