@@ -466,6 +466,7 @@ const GATES = [
   { id: "e2e", hat: "build", roles: "10", name: "Frontend (Playwright + a11y)", skill: "frontend-engineering", seat: "UI", run: cmdGate("e2e") },
   { id: "eval", hat: "prove", roles: "11", name: "Eval engineer (held-out)", skill: "eval-engineering", seat: "QA", run: gateEval },
   { id: "load", hat: "prove", roles: "12", name: "SQA load (k6 thresholds)", skill: "sqa-testing", seat: "QA", run: gateLoad },
+  { id: "offline", hat: "prove", roles: "12", name: "Offline resilience (socket guard + Playwright)", skill: "sqa-testing", seat: "QA", run: cmdGate("offline") },
   { id: "redteam", hat: "prove", roles: "13", name: "AI red team + secrets", skill: "ai-red-team", seat: "REVIEWER-SEC", run: gateRedteam },
   { id: "fresh-clone", hat: "ship", roles: "14", name: "One-command run from a fresh clone", skill: "vercel-deploy", seat: "QA", run: gateFreshClone },
   { id: "deploy", hat: "ship", roles: "14", name: "Live URLs smoke (Vercel)", skill: "vercel-deploy", seat: "LEAD", run: gateDeploy },
