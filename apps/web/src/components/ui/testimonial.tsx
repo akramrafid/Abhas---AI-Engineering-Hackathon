@@ -81,11 +81,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/tariqul-islam.jpg"
                     alt="Dr. Tariqul Islam portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
@@ -113,11 +112,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/nasreen-akhtar.jpg"
                     alt="Nasreen Akhtar portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
@@ -149,11 +147,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/rafiqul-hassan.jpg"
                     alt="Rafiqul Hassan portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
@@ -181,11 +178,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1594824813589-9a74a3821a7c?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/shamima-sultana.jpg"
                     alt="Dr. Shamima Sultana portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
@@ -213,11 +209,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/zahidul-karim.jpg"
                     alt="Zahidul Karim portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
@@ -249,11 +244,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/mahbubur-rahman.jpg"
                     alt="Mahbubur Rahman portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
@@ -287,11 +281,10 @@ export function ClientFeedback() {
                     </p>
                   </div>
                   <Image
-                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80"
+                    src="/images/testimonials/jennifer-craig.jpg"
                     alt="Dr. Jennifer Craig portrait"
                     width={56}
                     height={56}
-                    unoptimized
                     className="h-14 w-14 rounded-full border border-white/20 object-cover"
                   />
                 </div>
