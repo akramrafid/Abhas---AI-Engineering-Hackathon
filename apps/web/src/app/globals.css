@@ -210,6 +210,57 @@ html {
   animation: abhas-progress-fill 6500ms linear forwards;
 }
 
+@keyframes abhas-pipeline-pulse {
+  0% {
+    stroke-dashoffset: 68;
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -20;
+    opacity: 0;
+  }
+}
+
+.abhas-pipeline-pulse {
+  stroke-dasharray: 22 68;
+  animation: abhas-pipeline-pulse 1.55s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes abhas-stage-enter {
+  0% {
+    opacity: 0.25;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.abhas-stage-enter {
+  animation: abhas-stage-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes abhas-stage-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.abhas-stage-fill {
+  transform-origin: left center;
+  animation: abhas-stage-fill var(--stage-duration, 4600ms) linear forwards;
+}
+
 .abhas-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-mist) transparent;

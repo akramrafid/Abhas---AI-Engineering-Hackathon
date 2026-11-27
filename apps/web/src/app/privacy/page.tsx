@@ -26,9 +26,9 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-base font-bold text-navy">2. No advertising or tracking cookies</h2>
           <p className="mt-1.5">
-            This website sets zero third-party advertising or cross-site tracking cookies. Theme preference is stored
-            locally in your browser only. When optional Clerk authentication is enabled, strictly necessary session
-            cookies are used solely to sign officers into the dashboard.
+            This website sets zero third-party advertising or cross-site tracking cookies. Language, theme, and your
+            cookie notice preference are stored locally in your browser only. When optional Clerk authentication is
+            enabled, strictly necessary session cookies are used solely to sign officers into the dashboard.
           </p>
         </section>
         <section>
