@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
+from fractions import Fraction
 from typing import Literal
 
 import numpy as np
@@ -53,12 +54,12 @@ class CrewAssignmentResult:
 
 
 def available_stock(total_demand: int, stock_pct: int) -> int:
-    """Compute available regional stock ``S = round(stock_pct / 100 * sum(demand))`` (ADR-0010)."""
+    """Compute available regional stock ``S = round_half_up(stock_pct / 100 * sum(demand))`` (ADR-0010)."""
     if total_demand < 0:
         raise ValueError(f"total_demand must be non-negative, got {total_demand}")
     if stock_pct < 0 or stock_pct > 100:
         raise ValueError(f"stock_pct must be in [0, 100], got {stock_pct}")
-    return int(round((stock_pct / 100.0) * total_demand))
+    return (stock_pct * total_demand + 50) // 100
 
 
 def density_factors(densities: Sequence[float], city_median: float) -> list[float]:
@@ -194,14 +195,32 @@ def _effective_objective_weights(
     return ranked
 
 
-def _solve_city_lp(
+def _apportion_dhondt(
+    floors_ord: Sequence[int],
+    weights_ord: Sequence[float],
+    ward_ids_ord: Sequence[str],
+    target_total: int,
+) -> list[int]:
+    """Apportion ``target_total`` units over integer floors using house-monotone D'Hondt / Jefferson."""
+    n = len(floors_ord)
+    x_ord = [0] * n
+    for _ in range(target_total):
+        best_k = min(
+            (k for k in range(n) if x_ord[k] < floors_ord[k]),
+            key=lambda k: (-Fraction(floors_ord[k], x_ord[k] + 1), -weights_ord[k], ward_ids_ord[k]),
+        )
+        x_ord[best_k] += 1
+    return x_ord
+
+
+def _solve_city_integer_allocation(
     demand: Sequence[int],
     weights: Sequence[float],
     stock_pct: int,
     floor_pct: int,
     ward_ids: Sequence[str],
-) -> tuple[list[float], int, bool]:
-    """Solve the continuous HiGHS LP in canonical ``ward_id`` order and map back to caller order."""
+) -> tuple[list[int], bool]:
+    """Solve integer-optimal, stock-monotone city allocation in canonical ``ward_id`` order."""
     n = len(demand)
     if len(weights) != n or len(ward_ids) != n:
         raise ValueError("demand, weights, and ward_ids must have the same length")
@@ -220,16 +239,16 @@ def _solve_city_lp(
         raise ValueError("weights must be finite and strictly positive")
 
     if n == 0:
-        return [], 0, False
+        return [], False
 
     total_demand = sum(demand_ints)
     avail = available_stock(total_demand, stock_pct)
     target_total = min(avail, total_demand)
 
     if total_demand == 0:
-        return [0.0] * n, 0, False
+        return [0] * n, False
     if target_total == 0:
-        return [0.0] * n, 0, floor_pct > 0
+        return [0] * n, floor_pct > 0
 
     # Canonical ordering by ward_id guarantees strict permutation invariance.
     order = sorted(range(n), key=lambda i: ward_ids[i])
@@ -237,37 +256,47 @@ def _solve_city_lp(
     w_ord = [weight_floats[i] for i in order]
     ids_ord = [ward_ids[i] for i in order]
 
-    phi = floor_pct / 100.0
-    floors = [phi * float(d) for d in d_ord]
+    # Ceiling integer floors: f_i = min(d_i, ceil(floor_pct * d_i / 100)).
+    floors = [min(d, (floor_pct * d + 99) // 100) for d in d_ord]
     floor_sum = sum(floors)
-    floors_scaled = False
-    if floor_sum > float(target_total) + 1e-12:
-        scale = float(target_total) / floor_sum
-        floors = [f * scale for f in floors]
+
+    if floor_sum > target_total:
+        x_ord = _apportion_dhondt(floors, w_ord, ids_ord, target_total)
         floors_scaled = True
+    else:
+        eff_weights = _effective_objective_weights(w_ord, ids_ord)
+        c = -eff_weights
+        a_ub = np.ones((1, n), dtype=np.float64)
+        b_ub = np.array([float(target_total)], dtype=np.float64)
+        bounds = [(float(floors[k]), float(d_ord[k])) for k in range(n)]
 
-    # Guard against float rounding pushing sum(floors) slightly past target_total.
-    floors = [min(f, float(d)) for f, d in zip(floors, d_ord, strict=True)]
-    post_sum = sum(floors)
-    if post_sum > float(target_total):
-        shrink = (float(target_total) / post_sum) * (1.0 - 1e-12)
-        floors = [f * shrink for f in floors]
+        res = linprog(c=c, A_ub=a_ub, b_ub=b_ub, bounds=bounds, method="highs")
+        if not res.success or res.x is None:
+            raise InfeasibleAllocationError(f"HiGHS allocation LP failed: {res.message}")
 
-    eff_weights = _effective_objective_weights(w_ord, ids_ord)
-    c = -eff_weights
-    a_ub = np.ones((1, n), dtype=np.float64)
-    b_ub = np.array([float(target_total)], dtype=np.float64)
-    bounds = [(floors[k], float(d_ord[k])) for k in range(n)]
+        x_ord = []
+        for k in range(n):
+            raw_v = float(res.x[k])
+            snapped = int(round(raw_v))
+            if abs(raw_v - snapped) > 1e-6:
+                raise InfeasibleAllocationError(
+                    f"HiGHS LP vertex for {ids_ord[k]} was non-integral: {raw_v!r}"
+                )
+            if snapped < floors[k] or snapped > d_ord[k]:
+                raise InfeasibleAllocationError(
+                    f"HiGHS LP solution for {ids_ord[k]} violated bounds [{floors[k]}, {d_ord[k]}]: {snapped}"
+                )
+            x_ord.append(snapped)
+        if sum(x_ord) != target_total:
+            raise InfeasibleAllocationError(
+                f"HiGHS LP sum ({sum(x_ord)}) did not match target stock ({target_total})"
+            )
+        floors_scaled = False
 
-    res = linprog(c=c, A_ub=a_ub, b_ub=b_ub, bounds=bounds, method="highs")
-    if not res.success or res.x is None:
-        raise InfeasibleAllocationError(f"HiGHS allocation LP failed: {res.message}")
-
-    x_ord = [min(float(d_ord[k]), max(0.0, float(res.x[k]))) for k in range(n)]
-    x_orig = [0.0] * n
+    x_orig = [0] * n
     for k, orig_idx in enumerate(order):
         x_orig[orig_idx] = x_ord[k]
-    return x_orig, target_total, floors_scaled
+    return x_orig, floors_scaled
 
 
 def allocate_city(
@@ -277,29 +306,23 @@ def allocate_city(
     floor_pct: int,
     ward_ids: Sequence[str],
 ) -> AllocationResult:
-    """Allocate scarce regional stock inside one city using a weighted HiGHS linear programme.
+    """Allocate scarce regional stock inside one city using an integral HiGHS linear programme.
 
     Invariants:
-    - ``S = round(stock_pct / 100 * sum(demand))``.
-    - Equity floors ``l_i = (floor_pct / 100) * d_i``; if ``sum(l_i) > S``, floors scale
-      proportionally by ``S / sum(l_i)`` and ``floors_scaled`` is ``True``.
-    - ``sum(allocated) == min(S, sum(demand))`` and ``0 <= allocated[i] <= demand[i]`` per ward.
-    - Deterministic tie-breaking by ``ward_id`` ascending and strict permutation invariance.
+    - ``S = (stock_pct * sum(demand) + 50) // 100`` (integer round-half-up).
+    - Ceiling integer equity floors ``f_i = min(d_i, ceil(floor_pct * d_i / 100))``; when
+      ``sum(f_i) <= T = min(S, sum(d))``, HiGHS solves an integral-vertex box-constrained LP;
+      when ``sum(f_i) > T``, D'Hondt apportionment allocates ``T`` units monotonically and sets
+      ``floors_scaled = True``.
+    - ``sum(allocated) == min(S, sum(demand))``, ``0 <= allocated[i] <= demand[i]``, strictly
+      monotone in ``stock_pct``, integer-optimal for ``sum(f_i) <= T``, and permutation-invariant.
     """
-    x_lp, target_total, floors_scaled = _solve_city_lp(
+    allocated, floors_scaled = _solve_city_integer_allocation(
         demand=demand,
         weights=weights,
         stock_pct=stock_pct,
         floor_pct=floor_pct,
         ward_ids=ward_ids,
-    )
-    if not demand:
-        return AllocationResult(allocated=[], floors_scaled=False)
-    allocated = largest_remainder_round(
-        x_lp,
-        target_total,
-        ward_ids,
-        upper_bounds=[int(d) for d in demand],
     )
     return AllocationResult(allocated=allocated, floors_scaled=floors_scaled)
 

@@ -104,9 +104,7 @@ def test_prop_allocation_conservation_bounds_monotone_and_permutation_invariant(
     for di, x_lo, x_hi in zip(d, res_lo.allocated, res_hi.allocated, strict=True):
         assert 0 <= x_lo <= di
         assert 0 <= x_hi <= di
-        # Integer largest-remainder rounding can shift a boundary ward by at most 1 unit when floors scale,
-        # while total allocated is strictly non-decreasing; check exact continuous monotonicity in normal regime.
-        assert x_hi + 1 >= x_lo
+        assert x_hi >= x_lo
 
     # Strict permutation invariance: reversing input order yields identical ward -> allocation map.
     res_rev = allocate_city(list(reversed(d)), list(reversed(w)), s_lo, floor_pct, list(reversed(ids)))
@@ -114,3 +112,69 @@ def test_prop_allocation_conservation_bounds_monotone_and_permutation_invariant(
     map_rev = dict(zip(reversed(ids), res_rev.allocated, strict=True))
     assert map_fwd == map_rev
     assert res_rev.floors_scaled == res_lo.floors_scaled
+
+
+def test_available_stock_round_half_up() -> None:
+    """H1: available_stock uses deterministic integer round-half-up (p * d + 50) // 100."""
+    assert available_stock(15, 30) == 5
+    assert available_stock(5, 30) == 2
+    assert available_stock(10, 35) == 4
+    for pct in range(30, 101):
+        for total in range(0, 401):
+            assert available_stock(total, pct) == (pct * total + 50) // 100
+
+
+@settings(max_examples=120, deadline=None)
+@given(
+    n=st.integers(min_value=2, max_value=4),
+    data=st.data(),
+    stock_pct=st.integers(min_value=30, max_value=100),
+    floor_pct=st.integers(min_value=0, max_value=50),
+)
+def test_alloc_integer_optimal_bruteforce(
+    n: int,
+    data: st.DataObject,
+    stock_pct: int,
+    floor_pct: int,
+) -> None:
+    """H1: In the sum(f) <= T regime, allocate_city equals brute-force integer optimum of sum(w_i * x_i)."""
+    d = data.draw(st.lists(st.integers(min_value=0, max_value=9), min_size=n, max_size=n))
+    tiers = data.draw(st.lists(st.sampled_from([1.0, 2.0, 4.0, 8.0]), min_size=n, max_size=n))
+    dfactors = data.draw(st.lists(st.sampled_from([0.5, 1.0, 1.3, 2.0]), min_size=n, max_size=n))
+    w = [t * f for t, f in zip(tiers, dfactors, strict=True)]
+    ids = [f"W{i}" for i in range(n)]
+
+    floors = [min(di, (floor_pct * di + 99) // 100) for di in d]
+    target = min(available_stock(sum(d), stock_pct), sum(d))
+    res = allocate_city(d, w, stock_pct, floor_pct, ids)
+
+    assert sum(res.allocated) == target
+    if sum(floors) > target:
+        assert res.floors_scaled is True
+        return
+
+    assert res.floors_scaled is False
+    for fi, xi, di in zip(floors, res.allocated, d, strict=True):
+        assert fi <= xi <= di
+
+    # Enumerate all feasible integer vectors f_i <= x_i <= d_i with sum(x) == target
+    best_obj = -1.0
+
+    def _search(idx: int, rem: int, acc: float) -> None:
+        nonlocal best_obj
+        if idx == n - 1:
+            if floors[idx] <= rem <= d[idx]:
+                val = acc + w[idx] * rem
+                if val > best_obj:
+                    best_obj = val
+            return
+        min_rest = sum(floors[idx + 1 :])
+        max_rest = sum(d[idx + 1 :])
+        lo = max(floors[idx], rem - max_rest)
+        hi = min(d[idx], rem - min_rest)
+        for x in range(lo, hi + 1):
+            _search(idx + 1, rem - x, acc + w[idx] * x)
+
+    _search(0, target, 0.0)
+    got_obj = sum(wi * xi for wi, xi in zip(w, res.allocated, strict=True))
+    assert got_obj == pytest.approx(best_obj, abs=1e-9)
