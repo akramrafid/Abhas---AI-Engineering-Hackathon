@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Annotated, Literal
 
 from pydantic import (
+    AfterValidator,
     BaseModel,
     BeforeValidator,
     ConfigDict,
@@ -82,9 +83,20 @@ AutoCrews = Annotated[
     Field(ge=1, le=300, description="Total crews placed greedily by the engine (1–300)"),
     BeforeValidator(_strict_int),
 ]
+
+
+def _reject_control_and_bidi(value: str) -> str:
+    for ch in value:
+        code = ord(ch)
+        if code <= 0x1F or code == 0x7F or 0x202A <= code <= 0x202E or 0x2066 <= code <= 0x2069:
+            raise ValueError("label must not contain control or bidirectional override characters")
+    return value
+
+
 PlanLabel = Annotated[
     str,
     StringConstraints(strip_whitespace=True, min_length=1, max_length=80),
+    AfterValidator(_reject_control_and_bidi),
     Field(description="Human-readable label for the saved plan (1–80 chars)"),
 ]
 

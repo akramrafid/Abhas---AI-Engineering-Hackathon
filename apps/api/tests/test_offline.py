@@ -757,3 +757,89 @@ def test_plans_store_direct_persistence_sequence(tmp_path: Path) -> None:
         assert listed[0].id == rec.id
     finally:
         engine.dispose()
+
+
+def test_gemini_budget_checked_before_half_open_probe(monkeypatch: pytest.MonkeyPatch) -> None:
+    """L3: Budget check runs before breaker.allow_request(), so a budget error never consumes the half-open probe."""
+    import asyncio
+
+    from app.adapters.gemini_chat import GeminiChatAdapter
+    from app.ports.chat_llm import ChatBudgetExceededError, ChatTurnInput
+
+    monkeypatch.setenv("ABHAS_OFFLINE", "0")
+    now = [100.0]
+
+    class _OverBudgetLog:
+        def today(self, kind: str) -> tuple[int, float]:
+            return (10, 10.0)
+
+        def record(self, *args: Any, **kwargs: Any) -> None:
+            pass
+
+    adapter = GeminiChatAdapter(
+        api_key="test-fake-key",
+        model="gemini-2.5-flash",
+        daily_budget_usd=1.0,
+        call_log=_OverBudgetLog(),  # type: ignore[arg-type]
+        clock=lambda: now[0],
+        breaker_threshold=3,
+        breaker_cooldown_s=60.0,
+    )
+    for _ in range(3):
+        adapter._breaker.record_failure()
+    assert adapter._breaker.state == "open"
+
+    # Advance past cooldown so the breaker is ready for a single half-open probe.
+    now[0] = 161.0
+    assert adapter._breaker.state == "half_open"
+
+    with pytest.raises(ChatBudgetExceededError, match="budget"):
+        asyncio.run(
+            adapter.complete(
+                system="sys",
+                messages=[ChatTurnInput(role="user", content="hello")],
+                max_output_tokens=64,
+            )
+        )
+
+    # Probe slot must NOT have been consumed by the budget error!
+    assert adapter._breaker.allow_request() is True
+
+
+def test_plan_label_rejects_control_and_bidi(tmp_path: Path) -> None:
+    """L7 (QA Q8): POST /api/v1/plans rejects control chars & bidi overrides with 422, accepts Bangla labels."""
+    engine = _migrated_db_engine(tmp_path, "wp6_label_validation.sqlite")
+    try:
+        store = SqlPlanStore(engine)
+        svc = PlansService(
+            store=store,
+            runner=lambda _k, _r: ({"ok": True}, {"stock_pct": 60}),
+        )
+        app = create_app()
+        app.dependency_overrides[get_plans_service] = lambda: svc
+
+        with TestClient(app) as client:
+            for bad_label in ("a\u202eb", "bad\x00null", "line1\nline2", "iso\u2066override"):
+                r = client.post(
+                    "/api/v1/plans",
+                    json={
+                        "kind": "allocation",
+                        "label": bad_label,
+                        "request": {"origin_week": "2024-08-05", "stock_pct": 60},
+                    },
+                )
+                assert r.status_code == 422, f"Expected 422 for {bad_label!r}, got {r.status_code}"
+                assert r.headers["content-type"].startswith("application/problem+json")
+
+            ok = client.post(
+                "/api/v1/plans",
+                json={
+                    "kind": "allocation",
+                    "label": "Monsoon plan ৬০%",
+                    "request": {"origin_week": "2024-08-05", "stock_pct": 60},
+                },
+            )
+            assert ok.status_code == 201, ok.text
+            assert ok.json()["label"] == "Monsoon plan ৬০%"
+    finally:
+        engine.dispose()

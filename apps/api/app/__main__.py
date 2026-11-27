@@ -15,7 +15,13 @@ def main() -> None:
         os.environ["APP_ENV"] = a.env  # set before the app (and its settings) are imported
     import uvicorn
 
-    uvicorn.run("app.main:app", host=a.host, port=a.port, reload=not a.no_reload)
+    uvicorn.run(
+        "app.main:app",
+        host=a.host,
+        port=a.port,
+        reload=not a.no_reload,
+        proxy_headers=False,
+    )
 
 
 if __name__ == "__main__":

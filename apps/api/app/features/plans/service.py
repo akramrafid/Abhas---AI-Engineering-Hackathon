@@ -38,6 +38,27 @@ HEADLINE_METRICS: tuple[str, ...] = (
 PlanRunnerFn = Callable[[PlanKind, Any], tuple[dict[str, Any], dict[str, Any]]]
 
 
+def _extract_scope(inputs_json: str) -> str | None:
+    try:
+        raw = json.loads(inputs_json)
+    except Exception:
+        return None
+    if not isinstance(raw, dict):
+        return None
+    scope = raw.get("scope")
+    if isinstance(scope, str) and scope.strip():
+        return scope.strip()
+    ward_ids = raw.get("ward_ids")
+    if isinstance(ward_ids, list) and ward_ids:
+        return f"{len(ward_ids)} wards"
+    deployments = raw.get("deployments")
+    if isinstance(deployments, list) and deployments:
+        return f"{len(deployments)} wards"
+    if raw.get("auto_crews") is not None:
+        return "all"
+    return None
+
+
 def _stored_to_summary(row: StoredPlan) -> PlanSummary:
     return PlanSummary(
         id=row.id,
@@ -45,6 +66,7 @@ def _stored_to_summary(row: StoredPlan) -> PlanSummary:
         label=row.label,
         created_at=row.created_at,
         origin_week=row.origin_week,
+        scope=_extract_scope(row.inputs_json),
         model_version=row.model_version,
         git_sha=row.git_sha,
         headline=PlanHeadline.model_validate_json(row.headline_json),

@@ -260,11 +260,12 @@ class GeminiChatAdapter:
             raise ChatLLMUnavailableError("GEMINI_API_KEY not configured")
         if is_offline():
             raise ChatLLMUnavailableError("Offline mode active; skipping Gemini API call")
-        if not self._breaker.allow_request():
-            raise ChatLLMUnavailableError("Gemini circuit breaker is open")
 
         est_in = (len(system) + sum(len(m.content) for m in messages)) // 4
         self._check_budget(est_in, max_output_tokens, language, ward_id)
+
+        if not self._breaker.allow_request():
+            raise ChatLLMUnavailableError("Gemini circuit breaker is open")
 
         url = f"{GEMINI_API_BASE}/{self.model}:generateContent"
         body = self._build_body(system, messages, max_output_tokens)
@@ -378,11 +379,12 @@ class GeminiChatAdapter:
             raise ChatLLMUnavailableError("GEMINI_API_KEY not configured")
         if is_offline():
             raise ChatLLMUnavailableError("Offline mode active; skipping Gemini stream call")
-        if not self._breaker.allow_request():
-            raise ChatLLMUnavailableError("Gemini circuit breaker is open")
 
         est_in = (len(system) + sum(len(m.content) for m in messages)) // 4
         self._check_budget(est_in, max_output_tokens, language, ward_id)
+
+        if not self._breaker.allow_request():
+            raise ChatLLMUnavailableError("Gemini circuit breaker is open")
 
         url = f"{GEMINI_API_BASE}/{self.model}:streamGenerateContent"
         body = self._build_body(system, messages, max_output_tokens)

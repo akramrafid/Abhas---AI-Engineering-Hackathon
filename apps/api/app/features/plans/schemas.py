@@ -62,6 +62,7 @@ class PlanSummary(BaseModel):
     label: str
     created_at: datetime
     origin_week: date
+    scope: str | None = None
     model_version: str
     git_sha: GitSha
     headline: PlanHeadline

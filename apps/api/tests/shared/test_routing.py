@@ -123,3 +123,23 @@ def test_prop_routing_invariants(req: list[int], cap: list[int]) -> None:
         (t.from_ward, t.to_ward, t.patients) for t in res.transfers
     ]
     assert dict(zip(reversed(wids), res_rev.loads, strict=True)) == dict(zip(wids, res.loads, strict=True))
+
+
+def test_routing_20_ward_time_limit() -> None:
+    """L1: 20-ward city (10 deficit, 10 headroom) solves cleanly under the 2 s MILP time limit."""
+    import random
+    import time
+
+    rng = random.Random(42)
+    req = [rng.randint(8, 18) for _ in range(10)] + [rng.randint(0, 3) for _ in range(10)]
+    cap = [rng.randint(3, 6) for _ in range(10)] + [rng.randint(6, 12) for _ in range(10)]
+    wids = [f"DSCC_Ward_{i + 1:02d}" for i in range(20)]
+
+    t0 = time.perf_counter()
+    res = route_city(req, cap, wids)
+    elapsed = time.perf_counter() - t0
+    assert elapsed < 3.0, f"20-ward routing took {elapsed:.2f}s"
+    assert sum(res.loads) == sum(req)
+    total_d = sum(max(r - k, 0) for r, k in zip(req, cap, strict=True))
+    total_h = sum(max(k - r, 0) for r, k in zip(req, cap, strict=True))
+    assert sum(t.patients for t in res.transfers) == min(total_d, total_h)

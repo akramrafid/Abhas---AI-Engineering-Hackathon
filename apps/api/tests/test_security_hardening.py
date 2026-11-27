@@ -581,3 +581,66 @@ def test_py_runner_reports_clear_api_port_in_use_error() -> None:
     assert proc.returncode != 0
     assert str(busy_port) in proc.stderr
     assert "API_PORT" in proc.stderr
+
+
+def test_xff_spoof_does_not_reset_rate_limit() -> None:
+    """Q1: Uvicorn proxy_headers=False prevents localhost clients from bypassing rate limits via X-Forwarded-For."""
+    import os
+    import socket
+    import sys
+    import time
+    import urllib.error
+    import urllib.request
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as srv:
+        srv.bind(("127.0.0.1", 0))
+        free_port = srv.getsockname()[1]
+
+    env = dict(os.environ)
+    env["APP_ENV"] = "test"
+    env["RATE_LIMIT_PER_MINUTE"] = "5"
+    env["TRUSTED_PROXIES"] = ""
+    env["ABHAS_OFFLINE"] = "1"
+
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "app", "--env", "test", "--port", str(free_port), "--no-reload"],
+        cwd=str(REPO_ROOT / "apps" / "api"),
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    base = f"http://127.0.0.1:{free_port}"
+    try:
+        deadline = time.monotonic() + 30.0
+        ready = False
+        while time.monotonic() < deadline and proc.poll() is None:
+            try:
+                with urllib.request.urlopen(f"{base}/healthz", timeout=2.0) as resp:
+                    if resp.status == 200:
+                        ready = True
+                        break
+            except Exception:  # noqa: BLE001
+                time.sleep(0.2)
+        assert ready, f"API failed to boot on port {free_port}"
+
+        def _get(headers: dict[str, str] | None = None) -> int:
+            req = urllib.request.Request(f"{base}/api/v1/plans?limit=1", headers=headers or {})
+            try:
+                with urllib.request.urlopen(req, timeout=5.0) as r:
+                    return int(r.status)
+            except urllib.error.HTTPError as err:
+                return int(err.code)
+
+        statuses = [_get() for _ in range(6)]
+        assert statuses[:5] == [200, 200, 200, 200, 200], statuses
+        assert statuses[5] == 429, statuses
+
+        spoofed = _get({"X-Forwarded-For": "203.0.113.1"})
+        assert spoofed == 429, f"Expected 429 on spoofed X-Forwarded-For, got {spoofed}"
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait(timeout=5)

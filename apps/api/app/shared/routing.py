@@ -302,7 +302,7 @@ def _solve_stage2_min_arcs(
         integrality=integrality,
         bounds=Bounds(cast(Any, lb_v), cast(Any, ub_v)),
         constraints=LinearConstraint(a_mat, cast(Any, lb_c), cast(Any, ub_c)),
-        options={"mip_rel_gap": 0.0, "node_limit": _STAGE2_NODE_LIMIT},
+        options={"mip_rel_gap": 0.0, "node_limit": _STAGE2_NODE_LIMIT, "time_limit": 2.0},
     )
     if res.status == 4 or res.x is None:
         res = milp(
@@ -310,7 +310,7 @@ def _solve_stage2_min_arcs(
             integrality=integrality,
             bounds=Bounds(cast(Any, lb_v), cast(Any, ub_v)),
             constraints=LinearConstraint(a_mat, cast(Any, lb_c), cast(Any, ub_c)),
-            options={"presolve": False, "node_limit": _STAGE2_NODE_LIMIT},
+            options={"presolve": False, "node_limit": _STAGE2_NODE_LIMIT, "time_limit": 2.0},
         )
 
     if res.status == 2:
