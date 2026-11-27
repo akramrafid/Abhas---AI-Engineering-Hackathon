@@ -7,6 +7,8 @@ _Pinned Demo URL: `http://localhost:3000/dashboard?demo=1`_
 
 ## 1. Demo Inputs & Pre-Flight Checklist
 
+> **Phase 2 pre-flight rule (see also [docs/demo-7min.md](demo-7min.md)):** Always restart the API after the final commit and before recording; check that `/readyz` `git_sha` equals `git rev-parse --short HEAD` and that `git status` is clean.
+
 Before hitting record, verify the local environment is running in two terminal windows:
 ```bash
 # Terminal 1: Backend API
