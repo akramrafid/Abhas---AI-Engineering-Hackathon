@@ -150,3 +150,100 @@ else ⌈n/67⌉.
 
 Number faithfulness: extract every number (Bangla digits mapped to 0–9) from each rendered notice; each must equal a
 value in `NoticeFacts` (integers exactly, cases to one decimal or rounded integer).
+
+---
+
+## 7. Early-action trigger (`shared/trigger.py`, ADR-0020)
+
+**Notation.** For ward $i$ at origin week $t$, define strictly causal 2-week rainfall
+$R_{2\text{w}}(i, t) = \text{rainfall\_lag\_0}(i, t) + \text{rainfall\_lag\_1}(i, t)$ and static ward drainage risk
+$w_i = \text{water\_logging\_risk\_index}_i$. Given thresholds $(R, W)$, the binary alert indicator is
+$$A_{i,t}(R, W) = \mathbf{1}\!\left[R_{2\text{w}}(i, t) > R \;\wedge\; w_i \ge W\right].$$
+The $h = 3$ outbreak event is $E_{i,t} = \mathbf{1}[\text{dengue\_cases}_{i,t+3} \ge 8]$ (High or Critical tier,
+`DEFAULT_TIER_CUTOFFS[1] = 8.0`). Over all scored ward-weeks with observed $t + 3$, form contingency counts
+$a = \text{TP}$ ($A=1, E=1$), $b = \text{FP}$ ($A=1, E=0$), $c = \text{FN}$ ($A=0, E=1$), $d = \text{TN}$ ($A=0, E=0$):
+- **Hit rate (POD / recall):** $H = \frac{a}{a + c}$ (0 if $a + c = 0$).
+- **False-alarm rate (POFD / FPR):** $F = \frac{b}{b + d}$ (0 if $b + d = 0$).
+- **False-alarm ratio (FAR):** $\text{FAR} = \frac{b}{a + b}$ (fraction of alerts that do not become High; 0 if $a + b = 0$).
+- **Peirce skill score (PSS / Hanssen–Kuipers):** $\text{PSS} = H - F \in [-1, 1]$.
+- **Alerts vs High weeks:** total alerts $a + b$ vs observed High weeks $a + c$.
+
+**Threshold fit.** Search candidate grids $R \in \{20, 30, \dots, 200\}\text{ mm}$ and
+$W \in \{0.0, 0.05, \dots, 0.90\}$ strictly on **2016–2023** to maximise $\text{PSS}$ (ties broken by lower FAR, then
+higher $R$, then higher $W$). Freeze $(R^*, W^*)$ and evaluate once on the locked **2024–2025** hold-out alongside
+Abhas LightGBM $h = 3$ alerts on the exact same ward-weeks.
+
+**Episode lead-time quartiles.** For each ward, define a High spell onset as any week $t_0$ with
+$\text{cases}_{i,t_0} \ge 8$ preceded by $\text{cases}_{i,t_0-1} < 8$ (or the first week of the hold-out). Look back
+$k \in \{1, \dots, 8\}$ weeks before $t_0$ for contiguous pre-onset alerts; if at least one alert fired in
+$[t_0 - 8, t_0 - 1]$, the spell's lead time is $\ell = t_0 - t_{\text{earliest}}$ weeks (using the earliest alert of
+the run preceding $t_0$). Report `(q25, median, q75)` across all covered spells plus `spells_covered / total_spells`.
+
+**Plain words.** A field officer without a computer needs one rule they can check on paper: if two weeks of rain pass
+the rainfall cutoff and the ward has poor drainage, start larviciding now — three weeks before hospitals fill up. We
+pick the cutoffs only on 2016–2023 using the Peirce skill score (which rewards catching High weeks without crying wolf),
+freeze them, and test them on 2024–2025. Then we score our LightGBM model on the exact same weeks to prove the model
+keeps the same high catch rate while cutting false alarms.
+
+| ID | Input | Working | Expected output |
+|---|---|---|---|
+| **TR1** | Contingency counts $a = 16, b = 18, c = 4, d = 62$ ($N = 100$) | $H = 16/20 = 0.80$; $F = 18/80 = 0.225$; $\text{FAR} = 18/34 = 0.5294$; $\text{PSS} = 0.80 - 0.225 = 0.575$ | hit rate **0.8000**, FPR **0.2250**, FAR **0.5294**, Peirce **0.5750**, alerts **34** vs High **20** |
+| **TR2** | Boundary test, rule $R = 80, W = 0.30$: `(80.0, 0.30)`, `(80.1, 0.30)`, `(140.0, 0.29)` | Strict `>` on rain; inclusive `≥` on water-logging | alerts **(0, 1, 0)** |
+| **TR3** | Five High spells with earliest pre-onset alert leads `[2, 3, 4, 5, 6]` weeks | Quartiles Q25, Q50, Q75; all 5 covered | **Q25 = 3.0, median = 4.0, Q75 = 5.0** weeks; coverage **5/5 (1.0)** |
+| **TR4** | Zero alerts fired: $a = 0, b = 0, c = 5, d = 95$ | Zero-division guard on FAR | hit rate **0.0**, FPR **0.0**, FAR **0.0**, Peirce **0.0** (no NaN) |
+| **TR5** | Locked 2024–25 hold-out replay (reference benchmark) | Fitted on 2016–2023 → $R = 80\text{ mm}, W = 0.30$ | hit rate **≈ 0.94**, FAR **≈ 0.63**, Peirce **≈ 0.73**, median lead **4 weeks**; Abhas model target: hit rate ≥ rule, FAR < rule |
+
+Property tests: $-1 \le \text{PSS} \le 1$; raising $R$ or $W$ never increases total alerts (monotone); permuting
+ward-week rows does not change contingency counts or PSS; 2016–2023 fit never reads any 2024–2025 row.
+
+---
+
+## 8. Structural-fix planner (`shared/structural.py`, ADR-0021)
+
+**Notation.** Each ward $i$ has static traits `(population_density_sqkm, water_logging_risk_index, sanitation_score)`
+denoted $(\rho_i, w_i, s_i)$ with $w_i, s_i \in [0, 1]$. For improvement step $\delta \in \{0.1, 0.2\}$, the clamped
+trait shifts are:
+$$\Delta w_i(\delta) = -\min(\delta, w_i) \le 0 \quad\text{(lower water-logging risk)}, \qquad
+\Delta s_i(\delta) = \min(\delta, 1 - s_i) \ge 0 \quad\text{(higher sanitation)}.$$
+
+**Estimator 1 — Poisson GLM (log link).** Fit on 2016–2023 weekly ward observations:
+$$\log \mu_{i,t} = \beta_0 + \beta_{r2}\,\text{rainfall\_lag\_2}_{i,t} + \beta_{r3}\,\text{rainfall\_lag\_3}_{i,t} + \beta_{r4}\,\text{rainfall\_lag\_4}_{i,t} + \beta_{\text{dens}}\,\rho_i + \beta_{\text{wl}}\,w_i + \beta_{\text{san}}\,s_i.$$
+Holding weather fixed, shifting $w_i \to w_i + \Delta w_i$ multiplies expected cases by $\exp(\beta_{\text{wl}} \Delta w_i)$, so:
+- **Seasonal % reduction** (for an unclamped shift $\Delta$): $p_{\text{glm}}(\Delta) = 100 \cdot \bigl(1 - \exp(\beta_j \Delta)\bigr)$.
+- **Annualised cases prevented in ward $i$:** $\Delta Y^{\text{glm}}_{i,\text{yr}} = \bar{Y}_{i,\text{yr}} \cdot \bigl(1 - \exp(\beta_j \Delta x_i)\bigr)$, where $\bar{Y}_{i,\text{yr}} = \frac{52}{T_i}\sum_t y_{i,t}$ is the ward's historical annualised case burden.
+
+**Estimator 2 — LightGBM partial dependence (PD) cross-check.** Using the locked production LightGBM ($h = 3$) over
+all historical feature rows $x_{i,t}$ of ward $i$, construct $x'_{i,t}$ by replacing **only** $w_i \to \max(0, w_i - \delta)$
+(or $s_i \to \min(1, s_i + \delta)$) and leaving all weather lags, density, and calendar features identical:
+$$\Delta Y^{\text{pd}}_{i,\text{yr}} = \frac{52}{T_i} \sum_{t=1}^{T_i} \Bigl(\hat{\mu}_3(x_{i,t}) - \hat{\mu}_3(x'_{i,t})\Bigr), \qquad
+p_{\text{pd}} = 100 \cdot \frac{\sum_{i,t}\bigl(\hat{\mu}_3(x_{i,t}) - \hat{\mu}_3(x'_{i,t})\bigr)}{\sum_{i,t} \hat{\mu}_3(x_{i,t})}.$$
+
+**Bootstrap 95 % CIs.** Run $B = 500$ deterministic-seed cluster resamples (resampling ward-year blocks with
+replacement, refitting the Poisson GLM on each bootstrap draw and resampling evaluation ward-years for LightGBM PD)
+and report the 2.5th and 97.5th percentiles `[ci_low, ci_high]` for every seasonal % reduction and per-ward annual
+estimate.
+
+**"Build vs send" ratio.** For each ward $i$, pair annualised permanent drainage benefit
+$D_i = \Delta Y^{\text{glm}}_{i,\text{yr}}(\Delta w = -0.2)$ against the Phase 2 simulator's peak-season 1-crew ROI
+$R^{\text{crew}}_i$ (cases prevented per crew over $h = 2..4$ at the reference peak origin `2024-08-05`, base preset,
+ADR-0013):
+$$\text{crew\_deployments\_equiv}_i = \begin{cases} D_i / R^{\text{crew}}_i & \text{if } R^{\text{crew}}_i > 0, \\ \text{null} & \text{otherwise.} \end{cases}$$
+
+**Plain words.** Spraying crews are a recurring seasonal cost; fixing drainage or sanitation is a permanent capital
+project. To estimate how many cases a year a drainage or sanitation upgrade could avoid in each ward, we fit a simple
+Poisson regression controlling for rainfall 2–4 weeks earlier, and then cross-check it by nudging only that one trait
+inside our trained LightGBM model. We show both numbers with 95 % uncertainty ranges and compare them side-by-side
+with spraying ROI — always labelled clearly as **associations in simulated data, not causal real-world estimates**.
+
+| ID | Input | Working | Expected output |
+|---|---|---|---|
+| **ST1** | GLM $\beta_{\text{wl}} = +0.8665$, $\beta_{\text{san}} = -0.3459$, ward $\bar{Y}_{\text{yr}} = 200$, $w_i = 0.70, s_i = 0.50$ | $1 - e^{-0.08665} = 0.0830$; $1 - e^{-0.1733} = 0.1591$; $1 - e^{-0.03459} = 0.0340$; $1 - e^{-0.06918} = 0.06684$ | `−0.1` wl: **8.30 % / 16.60 cases/yr**; `−0.2` wl: **15.91 % / 31.82 cases/yr**; `+0.1` san: **3.40 % / 6.80 cases/yr**; `+0.2` san: **6.68 % / 13.37 cases/yr** |
+| **ST2** | Boundary clamping: $w_i = 0.05$ (`−0.2` requested), $s_i = 0.95$ (`+0.2` requested), $w_j = 0.0$ | Effective $\Delta w_i = -0.05$, $\Delta s_i = +0.05$, $\Delta w_j = 0.0$ | $w_i$: **4.24 %** (not 15.91 %); $s_i$: **1.71 %**; $w_j$: **0.0 % / 0.0 cases/yr** |
+| **ST3** | LightGBM PD toy ward: 2 weeks, baseline $\hat{\mu} = (10.0, 14.0)$, shifted $\hat{\mu}' = (9.0, 12.6)$ | Mean weekly diff $= (1.0 + 1.4)/2 = 1.2$; annualised $= 52 \times 1.2$ | **62.40 cases/yr** prevented; **10.0 %** seasonal reduction |
+| **ST4** | Build vs send: drainage **32.0 cases/yr** vs simulator ROI **8.0 cases/crew** (and edge case ROI `0.0`) | $32.0 / 8.0 = 4.0$; zero ROI guarded | **4.0** crew-deployments/yr equivalent (`null` when ROI = 0) |
+| **ST5** | Reference onsite dataset replay | Poisson GLM + LightGBM PD, 60 wards | `−0.1` water-logging **≈ 8.3 %** fewer cases/season; `+0.1` sanitation **≈ 3.4 %**; top wards **≈ 31–34 cases/yr** for `−0.2` water-logging |
+
+Property tests: clamped traits always stay in $[0, 1]$; `−0.2` reduction ≥ `−0.1` reduction ≥ 0 when $\beta_{\text{wl}} > 0$
+(and symmetrically for `+0.2` vs `+0.1` sanitation when $\beta_{\text{san}} < 0$); `ci_low ≤ ci_high` for every CI;
+exact mandatory disclaimer string `"associations in simulated data, not causal real-world estimates"` present on every
+response.

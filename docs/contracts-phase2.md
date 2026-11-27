@@ -261,9 +261,112 @@ same request; `git_sha` and `model_version` are stored as they were at run time.
 
 ### 2.7 `GET /readyz` additions
 
-Add to the existing success body: `git_sha` (as in RunMeta), `offline` (bool), and checks `supply_ratios` and
-`ward_capacity` (true when the config files load and their `dataset_sha256` matches the seeded data). Readiness
-must never make a network call.
+Add to the existing success body: `git_sha` (as in RunMeta), `offline` (bool), and checks `supply_ratios`,
+`ward_capacity`, `trigger_evaluation`, and `structural_planner` (true when each precomputed JSON artefact loads and
+its `dataset_sha256` matches the seeded data). Readiness must never make a network call.
+
+### 2.8 `GET /api/v1/validation/trigger` — early-action trigger evaluation (ADR-0020)
+
+Read-only endpoint in the existing `validation` slice. Serves precomputed JSON from
+`apps/api/config/trigger_evaluation.json` (zero runtime training or network calls; 100 % offline). No query parameters.
+
+**Response `TriggerValidationResponse`** = `RunMeta` +
+
+| Field | Type | Notes |
+|---|---|---|
+| `dataset_sha256` | string | Must match the locked onsite dataset SHA-256 |
+| `rule` | `TriggerRuleSpec` | `rain_2w_gt_mm` (float, ref `80.0`), `water_logging_gte` (float, ref `0.3`), `target_horizon` (`3`), `high_case_threshold` (`8`), `fit_years` (`[2016, 2023]`), `holdout_years` (`[2024, 2025]`), `rule_text_en`, `rule_text_bn` |
+| `holdout_rule` | `TriggerMetrics` | Frozen rule scored on locked 2024–2025 hold-out |
+| `holdout_model` | `TriggerMetrics` | Abhas LightGBM `h = 3` alerts scored on the exact same hold-out ward-weeks |
+| `comparison` | `TriggerComparison` | `hit_rate_delta` (`model − rule`), `far_delta` (`model − rule`, negative = fewer false alarms), `pss_delta` (`model − rule`), `model_meets_hit_rate` (bool), `model_reduces_far` (bool), `summary_note` |
+| `grid_top` | list of `TriggerGridPoint` | Top 5 `(rain_2w_gt_mm, water_logging_gte, train_pss, train_hit_rate, train_far)` candidates evaluated on 2016–2023 |
+
+`TriggerMetrics`: `hit_rate` (0–1), `false_alarm_ratio` (0–1), `false_alarm_rate` (0–1), `peirce_skill_score` (−1–1),
+`alerts` (int ≥ 0), `high_weeks` (int ≥ 0), `total_ward_weeks` (int ≥ 1), `tp`, `fp`, `fn`, `tn` (ints ≥ 0),
+`lead_time_weeks` (`LeadTimeStats`: `q25`, `median`, `q75` floats ≥ 0 or null, `spells_covered` int, `total_spells` int).
+
+**Example response (abridged)**
+```json
+{"model_version": "abhas-lgbm-1.1.2", "git_sha": "16c4a2c", "data_as_of": "2025-12-29", "offline": true,
+ "generated_at": "2026-11-27T11:30:00Z",
+ "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
+ "rule": {"rain_2w_gt_mm": 80.0, "water_logging_gte": 0.3, "target_horizon": 3, "high_case_threshold": 8,
+   "fit_years": [2016, 2023], "holdout_years": [2024, 2025],
+   "rule_text_en": "Act when 2-week rain > 80 mm AND water-logging index >= 0.30 (3-week warning for >= 8 cases).",
+   "rule_text_bn": "২ সপ্তাহের বৃষ্টিপাত > ৮০ মিমি এবং জলাবদ্ধতা সূচক >= ০.৩০ হলে ৩ সপ্তাহ আগেই ব্যবস্থা নিন।"},
+ "holdout_rule": {"hit_rate": 0.94, "false_alarm_ratio": 0.63, "false_alarm_rate": 0.21,
+   "peirce_skill_score": 0.73, "alerts": 2100, "high_weeks": 820, "total_ward_weeks": 6240,
+   "tp": 771, "fp": 1329, "fn": 49, "tn": 4091,
+   "lead_time_weeks": {"q25": 3.0, "median": 4.0, "q75": 6.0, "spells_covered": 115, "total_spells": 120}},
+ "holdout_model": {"hit_rate": 0.95, "false_alarm_ratio": 0.41, "false_alarm_rate": 0.10,
+   "peirce_skill_score": 0.85, "alerts": 1320, "high_weeks": 820, "total_ward_weeks": 6240,
+   "tp": 779, "fp": 541, "fn": 41, "tn": 4879,
+   "lead_time_weeks": {"q25": 3.0, "median": 4.0, "q75": 5.0, "spells_covered": 116, "total_spells": 120}},
+ "comparison": {"hit_rate_delta": 0.01, "far_delta": -0.22, "pss_delta": 0.12,
+   "model_meets_hit_rate": true, "model_reduces_far": true,
+   "summary_note": "Abhas LightGBM matches or beats the clipboard rule's hit rate with substantially fewer false alarms."},
+ "grid_top": [{"rain_2w_gt_mm": 80.0, "water_logging_gte": 0.3, "train_pss": 0.74, "train_hit_rate": 0.93, "train_far": 0.61}]}
+```
+
+**Brief integration (§2.5 extension).** `GET /api/v1/dispatch/brief/{ward_id}.html` prints the auditable rule
+(`rule_text_en` / `rule_text_bn` from `TriggerRuleSource`) and notes whether the ward's `water_logging_risk_index ≥ W`,
+so the brief functions even with no model or server.
+
+### 2.9 `GET /api/v1/planning/structural` — structural-fix planner (ADR-0021)
+
+Read-only endpoint in a new vertical slice `apps/api/app/features/planning/`. Serves precomputed JSON from
+`apps/api/config/structural_planner.json` (zero runtime GLM fitting, LightGBM inference, or network calls; 100 % offline).
+
+**Query parameters**
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `city` | `City` or null | `null` | Optional filter (`Dhaka North`, `Dhaka South`, `Chattogram`, `Gazipur`, `Narayanganj`); unknown city → `422 validation-error` |
+
+**Response `StructuralPlannerResponse`** = `RunMeta` +
+
+| Field | Type | Notes |
+|---|---|---|
+| `dataset_sha256` | string | Locked onsite dataset SHA-256 |
+| `disclaimer` | Literal | MUST equal `"associations in simulated data, not causal real-world estimates"` |
+| `fit_years` | `[int, int]` | `[2016, 2023]` for Poisson GLM; locked production model for LightGBM PD |
+| `bootstrap_resamples` | int ≥ 100 | e.g. `500` (deterministic seed) |
+| `city_filter` | `City` or null | Echo of query param |
+| `build_vs_send_origin_week` | date | Reference peak week used for simulator crew ROI (e.g. `2024-08-05`) |
+| `summary` | `StructuralSummary` | Seasonal % case reduction for `water_logging_minus_01`, `water_logging_minus_02`, `sanitation_plus_01`, `sanitation_plus_02`, each carrying `glm` and `lgbm_pd` `EstimateWithCI` (`estimate`, `ci_low`, `ci_high`) |
+| `wards` | list of `WardStructuralImpact` | Filtered by `city` if set; sorted by `water_logging_minus_02.glm.estimate` descending, then `ward_id` |
+
+`WardStructuralImpact`: `ward_id`, `city`, `water_logging_risk_index`, `sanitation_score`, `population_density_sqkm`,
+`baseline_cases_per_yr`, `water_logging_minus_01`, `water_logging_minus_02`, `sanitation_plus_01`,
+`sanitation_plus_02` (each a `DualAnnualEffect`: `effective_delta`, `glm: EstimateWithCI`, `lgbm_pd: EstimateWithCI` in
+cases prevented/yr), and `build_vs_send` (`BuildVsSendRow`: `drainage_cases_per_yr_glm`, `drainage_cases_per_yr_pd`,
+`sim_roi_cases_per_crew`, `crew_deployments_equiv` float or null, `priority_signal` `"build_and_send" | "build_priority" | "send_priority" | "monitor"`).
+
+**Example response (abridged)**
+```json
+{"model_version": "abhas-lgbm-1.1.2", "git_sha": "16c4a2c", "data_as_of": "2025-12-29", "offline": true,
+ "generated_at": "2026-11-27T11:30:00Z",
+ "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
+ "disclaimer": "associations in simulated data, not causal real-world estimates",
+ "fit_years": [2016, 2023], "bootstrap_resamples": 500, "city_filter": "Dhaka South",
+ "build_vs_send_origin_week": "2024-08-05",
+ "summary": {
+   "water_logging_minus_01": {"glm": {"estimate": 8.3, "ci_low": 7.6, "ci_high": 9.0},
+                              "lgbm_pd": {"estimate": 7.9, "ci_low": 7.1, "ci_high": 8.7}},
+   "sanitation_plus_01":     {"glm": {"estimate": 3.4, "ci_low": 2.8, "ci_high": 4.0},
+                              "lgbm_pd": {"estimate": 3.1, "ci_low": 2.4, "ci_high": 3.8}}},
+ "wards": [{"ward_id": "DSCC_Ward_04", "city": "Dhaka South", "water_logging_risk_index": 0.78,
+   "sanitation_score": 0.41, "population_density_sqkm": 68500.0, "baseline_cases_per_yr": 208.0,
+   "water_logging_minus_02": {"effective_delta": -0.2,
+     "glm": {"estimate": 33.1, "ci_low": 30.2, "ci_high": 36.0},
+     "lgbm_pd": {"estimate": 31.4, "ci_low": 28.1, "ci_high": 34.7}},
+   "build_vs_send": {"drainage_cases_per_yr_glm": 33.1, "drainage_cases_per_yr_pd": 31.4,
+     "sim_roi_cases_per_crew": 7.4, "crew_deployments_equiv": 4.47, "priority_signal": "build_and_send"}}]}
+```
+
+**Invariants (tested):** `disclaimer` equals the mandatory string verbatim; `ci_low ≤ estimate ≤ ci_high` on every CI
+(within `1e-6`); `city` filter returns only wards of that city and `null` returns all 60 wards; unknown `city` returns
+`422`; both endpoints succeed with the socket guard active (zero network calls).
 
 ## 3. Config files (created in WP0 by `ml/fit_supply.py`, committed, read at startup)
 
@@ -311,6 +414,12 @@ Expected: 60 wards, 3–7 beds each, 284 in total (the ward values above are ill
 | | `apply_reduction(feature_row, horizon, fraction, rain_total)` | dict, int, float, float | new dict | Scales only that horizon's monotone rain features; `rain_anomaly` drops by fraction × rain; never increases any feature |
 | | `roi(prevented, crews)` | floats | float | prevented / crews |
 | `shared/plan_registry.py` | `register_runner(kind, fn)`, `run(kind, request)` | | `(outputs, headline)` | Composition root registers; no feature imports another |
+| `shared/trigger.py` | `evaluate_trigger(rain_2w, wl_index, high_next_3w, r_mm, w_min)` | arrays, floats | `TriggerScore` (`tp, fp, fn, tn, hit_rate, far, fpr, pss`) | Strict `>` on rain, `≥` on `w`; zero-division safe; monotone alerts in `(R, W)` |
+| | `select_best_trigger(frame_train, r_grid, w_grid)` | 2016–2023 DataFrame, grids | `(best_rule, grid_top)` | Maximises Peirce skill score; deterministic tie-break; refuses any row > 2023 |
+| | `episode_lead_times(wards, weeks, alerts, high_flags, max_lookback=8)` | aligned series | `LeadTimeStats` | Quartiles `(q25, median, q75)` across High spell onsets; deterministic |
+| `shared/structural.py` | `clamp_trait_delta(value, delta, low=0.0, high=1.0)` | floats | effective delta | Keeps shifted trait in `[0, 1]`; 0 when already at boundary |
+| | `glm_annual_prevented(baseline_yr, beta, effective_delta)` | floats | `(pct_reduction, cases_yr)` | `1 - exp(beta * effective_delta)`; exact for ST1/ST2 |
+| | `build_vs_send_ratio(drainage_cases_yr, sim_roi_per_crew)` | floats | float or None | `None` when ROI ≤ 0; deterministic |
 
 ## 5. Ports
 
@@ -320,6 +429,8 @@ Expected: 60 wards, 3–7 beds each, 284 in total (the ward values above are ill
 | `BedCapacitySource` | `ports/capacity.py` | `method: str`, `capacity(ward_ids) -> Mapping[str, int]` (unknown → KeyError → 404) | `adapters/config_capacity.py` reads `config/ward_capacity.json` |
 | `CounterfactualForecaster` | `ports/intervention.py` | `window(ward_ids, origin_week, horizons) -> map (ward, h) → PointForecast`; `counterfactual(ward_ids, origin_week, horizons, fractions: map ward → float) -> map (ward, h) → PointForecast`; `nb_size(horizon) -> float` | `ForecastEngine` gains these methods; reduction applied at feature level (ADR-0013), never via raw weather |
 | `PlanStore` | `ports/repositories.py` (extend) | `save(record)`, `get(id)`, `list(kind, limit)` | SQLAlchemy adapter over the 0002 tables |
+| `TriggerEvaluationSource` | `ports/planning.py` | `load() -> TriggerEvaluationData` (precomputed rule, hold-out rule vs model metrics, `dataset_sha256`) | `adapters/config_planning.py` reads `config/trigger_evaluation.json` |
+| `StructuralPlannerSource` | `ports/planning.py` | `load() -> StructuralPlannerData` (precomputed GLM + LightGBM PD estimates, CIs, build-vs-send rows, `dataset_sha256`) | `adapters/config_planning.py` reads `config/structural_planner.json` |
 
 ## 6. Database — Alembic `0002_phase2_plans` (reversible)
 
