@@ -53,7 +53,7 @@ Distance uses Haversine ($R_E = 6371.0\text{ km}$). Straight-line ETA estimate =
 Reference user coordinates: `(23.7500, 90.3900)`.
 Three hospitals due north along longitude `90.3900`:
 - `H1`: `(23.7590, 90.3900)` → `1.00 km`, ETA `9 min` (estimate)
-- `H2`: `(23.7770, 90.3900)` → `3.00 km`, ETA `15 min` (estimate)
+- `H2`: `(23.7770, 90.3900)` → `3.002 km`, ETA `16 min` (estimate)
 - `H3`: `(23.7950, 90.3900)` → `5.00 km`, ETA `22 min` (estimate)
 
 | ID | Inputs (hospital: km, city, free_beds, age_hours) | Rule applied | Expected ranking & flags |

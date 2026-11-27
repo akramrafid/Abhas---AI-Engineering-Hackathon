@@ -1,0 +1,2040 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "snapshot_date": "2026-11-27",
+    "fetched_at_utc": "2026-11-27T12:36:27.500901+00:00",
+    "source": "OpenStreetMap Overpass API (amenity=hospital / healthcare=hospital)",
+    "attribution": "© OpenStreetMap contributors · ODbL 1.0",
+    "license": "ODbL-1.0",
+    "phone_policy": "Verified OSM phone / contact:phone tags only; null otherwise. Always provide 999 fallback.",
+    "counts_by_city": {
+      "Dhaka North": 25,
+      "Dhaka South": 25,
+      "Chattogram": 25,
+      "Gazipur": 22,
+      "Narayanganj": 4
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.403546,
+          23.87049
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1496128734",
+        "osm_type": "node",
+        "osm_id": 1496128734,
+        "name": "American SuperSpecialty Hospital",
+        "city": "Dhaka North",
+        "address": "Isha Khan Avenue, Sector 6, Uttara Model Town, Dhaka",
+        "phone": "+880 2 8932345",
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.453559,
+          23.83512
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4608145192",
+        "osm_type": "node",
+        "osm_id": 4608145192,
+        "name": "Ashiyan Medical College Hospital",
+        "city": "Dhaka North",
+        "address": "Khilkhet Isapura, Dhaka North",
+        "phone": "+8801713895345",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.395192,
+          23.77499
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4410495892",
+        "osm_type": "node",
+        "osm_id": 4410495892,
+        "name": "Ayesha Memorial Hospital",
+        "city": "Dhaka North",
+        "address": "Bir Uttam Ziaur Rahman Road, Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.376646,
+          23.894181
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2895202033",
+        "osm_type": "node",
+        "osm_id": 2895202033,
+        "name": "East West Medical College and Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.368032,
+          23.827649
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4532130990",
+        "osm_type": "node",
+        "osm_id": 4532130990,
+        "name": "English",
+        "city": "Dhaka North",
+        "address": "Block-C,Line-12., Dhaka North",
+        "phone": "+8801717168522",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.398825,
+          23.767839
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5252017826",
+        "osm_type": "node",
+        "osm_id": 5252017826,
+        "name": "Impulse Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.365486,
+          23.81951
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4322832764",
+        "osm_type": "node",
+        "osm_id": 4322832764,
+        "name": "Islami Bank Hospital",
+        "city": "Dhaka North",
+        "address": "৩, Mirpur-11, Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.403577,
+          23.870968
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5216177321",
+        "osm_type": "node",
+        "osm_id": 5216177321,
+        "name": "Kuwait Bangladesh Friendship Government Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.412824,
+          23.794086
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2343354456",
+        "osm_type": "node",
+        "osm_id": 2343354456,
+        "name": "Lab Aid Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.410109,
+          23.780555
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2993160472",
+        "osm_type": "node",
+        "osm_id": 2993160472,
+        "name": "Life Care",
+        "city": "Dhaka North",
+        "address": "Bir Uttam A. K. Khandakar Road, Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.386506,
+          23.798971
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2877319781",
+        "osm_type": "node",
+        "osm_id": 2877319781,
+        "name": "MARKS HOSPITAL",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.369431,
+          23.770367
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4929887711",
+        "osm_type": "node",
+        "osm_id": 4929887711,
+        "name": "National Institute of Cardiovascular Diseases",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.408734,
+          23.77626
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2993197559",
+        "osm_type": "node",
+        "osm_id": 2993197559,
+        "name": "National Institute of Diseases of the Chest & Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.36956,
+          23.774589
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5033788421",
+        "osm_type": "node",
+        "osm_id": 5033788421,
+        "name": "National Institute of Ophthalmology and Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.366379,
+          23.817702
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4322833430",
+        "osm_type": "node",
+        "osm_id": 4322833430,
+        "name": "Physiotherapy Centre",
+        "city": "Dhaka North",
+        "address": "৬, Mirpur-11, Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.363862,
+          23.827747
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4432181774",
+        "osm_type": "node",
+        "osm_id": 4432181774,
+        "name": "Regent Hospital Ltd(রিজেন্ট হসপিটাল লিমিটেড)",
+        "city": "Dhaka North",
+        "address": "১, N/A, Dhaka",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.403002,
+          23.893548
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5683686826",
+        "osm_type": "node",
+        "osm_id": 5683686826,
+        "name": "Shaheed Ahsanullah General Hospital",
+        "city": "Dhaka North",
+        "address": "Tongi Kaliganj Highway, Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.369521,
+          23.768748
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5342132622",
+        "osm_type": "node",
+        "osm_id": 5342132622,
+        "name": "Shaheed Suhrawardi Medical College Hospital",
+        "city": "Dhaka North",
+        "address": "Mirpur Road, Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.371355,
+          23.815186
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3810938213",
+        "osm_type": "node",
+        "osm_id": 3810938213,
+        "name": "Tara Medical Centre",
+        "city": "Dhaka North",
+        "address": "Line 12, Road 10, Tara Medical Road, Mirpur 11, Dhaka",
+        "phone": "+8801924521356",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.409911,
+          23.773921
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3283392704",
+        "osm_type": "node",
+        "osm_id": 3283392704,
+        "name": "TB Hospital",
+        "city": "Dhaka North",
+        "address": "Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.396733,
+          23.874799
+        ]
+      },
+      "properties": {
+        "id": "osm-node-266877864",
+        "osm_type": "node",
+        "osm_id": 266877864,
+        "name": "Uttara Adhunik Medical College",
+        "city": "Dhaka North",
+        "address": "Sonargaon Janapath, Uttara, Dhaka",
+        "phone": "+88028911600",
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.404109,
+          23.869156
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2697236496",
+        "osm_type": "node",
+        "osm_id": 2697236496,
+        "name": "Uttara Community Hospital",
+        "city": "Dhaka North",
+        "address": "Road 13, Sector 6, Uttara Model Town, Dhaka",
+        "phone": "+88028951475",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.396671,
+          23.867307
+        ]
+      },
+      "properties": {
+        "id": "osm-node-266885101",
+        "osm_type": "node",
+        "osm_id": 266885101,
+        "name": "Uttara Cresent",
+        "city": "Dhaka North",
+        "address": "Dhaka North",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.354832,
+          23.771355
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4976689771",
+        "osm_type": "node",
+        "osm_id": 4976689771,
+        "name": "Vard Eye Hospital",
+        "city": "Dhaka North",
+        "address": "০৮, Baitul_Aman, Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.355232,
+          23.76997
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4976689766",
+        "osm_type": "node",
+        "osm_id": 4976689766,
+        "name": "Wellcare Hospital Limited",
+        "city": "Dhaka North",
+        "address": "১২, Pisiculture_Housing_Society, Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.405068,
+          23.748503
+        ]
+      },
+      "properties": {
+        "id": "osm-node-871761335",
+        "osm_type": "node",
+        "osm_id": 871761335,
+        "name": "Ad-Din Women's Medical college & Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.418684,
+          23.741027
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3731446676",
+        "osm_type": "node",
+        "osm_id": 3731446676,
+        "name": "AL-Barakah General Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.424777,
+          23.703551
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3744956568",
+        "osm_type": "node",
+        "osm_id": 3744956568,
+        "name": "Aroggo niketon homio center",
+        "city": "Dhaka South",
+        "address": "Dinanath Sen Road, Dhaka",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.367321,
+          23.751793
+        ]
+      },
+      "properties": {
+        "id": "osm-node-364419618",
+        "osm_type": "node",
+        "osm_id": 364419618,
+        "name": "Bangladesh Eye Hospital",
+        "city": "Dhaka South",
+        "address": "Satmasjid Road, Dhaka",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.369748,
+          23.750195
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1787174815",
+        "osm_type": "node",
+        "osm_id": 1787174815,
+        "name": "Bangladesh Medical College Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.416376,
+          23.716
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4388841143",
+        "osm_type": "node",
+        "osm_id": 4388841143,
+        "name": "Bardem Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.406109,
+          23.731709
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3797662116",
+        "osm_type": "node",
+        "osm_id": 3797662116,
+        "name": "BIRDEM General Hospital 2",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.39238,
+          23.727934
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1121485809",
+        "osm_type": "node",
+        "osm_id": 1121485809,
+        "name": "BUET Health Complex",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.370231,
+          23.747293
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3732862292",
+        "osm_type": "node",
+        "osm_id": 3732862292,
+        "name": "Eden Multicare Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.38772,
+          23.738396
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3559086357",
+        "osm_type": "node",
+        "osm_id": 3559086357,
+        "name": "General Medical Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.382585,
+          23.743483
+        ]
+      },
+      "properties": {
+        "id": "osm-node-364425541",
+        "osm_type": "node",
+        "osm_id": 364425541,
+        "name": "Gonoshastha Nagar Hospital",
+        "city": "Dhaka South",
+        "address": "Road 6, Dhaka",
+        "phone": "+8801716-838078",
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.402732,
+          23.746598
+        ]
+      },
+      "properties": {
+        "id": "osm-node-877863211",
+        "osm_type": "node",
+        "osm_id": 877863211,
+        "name": "Holy Family Red Crescent Medical College and Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.368919,
+          23.751595
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1787175313",
+        "osm_type": "node",
+        "osm_id": 1787175313,
+        "name": "Ibn Sina Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.395553,
+          23.739118
+        ]
+      },
+      "properties": {
+        "id": "osm-node-354463524",
+        "osm_type": "node",
+        "osm_id": 354463524,
+        "name": "Institute of Post Graduates Medicine and Research",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.409824,
+          23.737574
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3797620952",
+        "osm_type": "node",
+        "osm_id": 3797620952,
+        "name": "Islami Bank Central Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.420587,
+          23.739668
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4389406404",
+        "osm_type": "node",
+        "osm_id": 4389406404,
+        "name": "Islami Bank Hospital Buding 5",
+        "city": "Dhaka South",
+        "address": "আউটার সার্কুলার রোড, Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.367716,
+          23.716214
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3529323293",
+        "osm_type": "node",
+        "osm_id": 3529323293,
+        "name": "MEDICINS SANS FRONTIERES",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.386652,
+          23.737073
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3671354272",
+        "osm_type": "node",
+        "osm_id": 3671354272,
+        "name": "Meherun Homeo Pharmacy",
+        "city": "Dhaka South",
+        "address": "elephant, Dhaka",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.362535,
+          23.714157
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3502993813",
+        "osm_type": "node",
+        "osm_id": 3502993813,
+        "name": "Meri Staps Health Center",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.411916,
+          23.710653
+        ]
+      },
+      "properties": {
+        "id": "osm-node-395065676",
+        "osm_type": "node",
+        "osm_id": 395065676,
+        "name": "National Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.41599,
+          23.717942
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4388781962",
+        "osm_type": "node",
+        "osm_id": 4388781962,
+        "name": "Nibedita General Hospital",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.42226,
+          23.738045
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4389421503",
+        "osm_type": "node",
+        "osm_id": 4389421503,
+        "name": "Pan pacific Hospital",
+        "city": "Dhaka South",
+        "address": "আউটার সার্কুলার রোড, Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.372324,
+          23.744251
+        ]
+      },
+      "properties": {
+        "id": "osm-node-3732776471",
+        "osm_type": "node",
+        "osm_id": 3732776471,
+        "name": "Prime Bank Eye Hospitals",
+        "city": "Dhaka South",
+        "address": "Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.412379,
+          23.748218
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4381071794",
+        "osm_type": "node",
+        "osm_id": 4381071794,
+        "name": "Saphena General Hospital",
+        "city": "Dhaka South",
+        "address": "ডিআইটি সড়ক, Dhaka South",
+        "phone": "+8801711560347",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.412378,
+          23.748176
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4381094290",
+        "osm_type": "node",
+        "osm_id": 4381094290,
+        "name": "Saphena Womens Dental College & Hospital",
+        "city": "Dhaka South",
+        "address": "ডিআইটি সড়ক, Dhaka South",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.797692,
+          22.361529
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2208720878",
+        "osm_type": "node",
+        "osm_id": 2208720878,
+        "name": "Banghabondhu Memorial Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.824061,
+          22.35933
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1848622267",
+        "osm_type": "node",
+        "osm_id": 1848622267,
+        "name": "Bell View Diagonistics",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.833969,
+          22.343781
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1963093210",
+        "osm_type": "node",
+        "osm_id": 1963093210,
+        "name": "Centre Point Hospital , OS",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.796479,
+          22.313445
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4635158151",
+        "osm_type": "node",
+        "osm_id": 4635158151,
+        "name": "Chiitagong Port Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.806031,
+          22.401536
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4684480190",
+        "osm_type": "node",
+        "osm_id": 4684480190,
+        "name": "Chittagong cantonment",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.802456,
+          22.361783
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2208720882",
+        "osm_type": "node",
+        "osm_id": 2208720882,
+        "name": "Chittagong diabetic and general Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.831544,
+          22.360102
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1329007641",
+        "osm_type": "node",
+        "osm_id": 1329007641,
+        "name": "Chittagong Medical College",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.830657,
+          22.359335
+        ]
+      },
+      "properties": {
+        "id": "osm-node-842543448",
+        "osm_type": "node",
+        "osm_id": 842543448,
+        "name": "Chittagong Medical College Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.823457,
+          22.358938
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1848616382",
+        "osm_type": "node",
+        "osm_id": 1848616382,
+        "name": "Chittagong Metropolitan Hospital",
+        "city": "Chattogram",
+        "address": "OR Nizam Rd, Chittagong, Bangladesh",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.831206,
+          22.361091
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2209597873",
+        "osm_type": "node",
+        "osm_id": 2209597873,
+        "name": "Chittagong shishu hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.833482,
+          22.366103
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2342005239",
+        "osm_type": "node",
+        "osm_id": 2342005239,
+        "name": "Ekushe Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.824913,
+          22.358256
+        ]
+      },
+      "properties": {
+        "id": "osm-node-4372209895",
+        "osm_type": "node",
+        "osm_id": 4372209895,
+        "name": "Evergreen Health Center",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.795943,
+          22.360442
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5019275482",
+        "osm_type": "node",
+        "osm_id": 5019275482,
+        "name": "Eye infarmary and training complex",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.838129,
+          22.341204
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1962572816",
+        "osm_type": "node",
+        "osm_id": 1962572816,
+        "name": "General Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.809356,
+          22.362018
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2208720880",
+        "osm_type": "node",
+        "osm_id": 2208720880,
+        "name": "Holy Crescent Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.830401,
+          22.361853
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2208595895",
+        "osm_type": "node",
+        "osm_id": 2208595895,
+        "name": "Holy Health Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.837451,
+          22.342437
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2211572832",
+        "osm_type": "node",
+        "osm_id": 2211572832,
+        "name": "Jemison redcrescent maternity hospital,Anderkilla",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.828263,
+          22.360394
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2209597874",
+        "osm_type": "node",
+        "osm_id": 2209597874,
+        "name": "Life save Blood bank",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.825463,
+          22.358303
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2209597869",
+        "osm_type": "node",
+        "osm_id": 2209597869,
+        "name": "Metro diagnostic center",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.823759,
+          22.359339
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1848622264",
+        "osm_type": "node",
+        "osm_id": 1848622264,
+        "name": "Metropolitan Clinic",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.788105,
+          22.28418
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5105441222",
+        "osm_type": "node",
+        "osm_id": 5105441222,
+        "name": "Patenga Naval Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.831772,
+          22.36091
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2209597865",
+        "osm_type": "node",
+        "osm_id": 2209597865,
+        "name": "Popular Diagnostic Center",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.824298,
+          22.359315
+        ]
+      },
+      "properties": {
+        "id": "osm-node-1848622265",
+        "osm_type": "node",
+        "osm_id": 1848622265,
+        "name": "Royal Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.813602,
+          22.361431
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2208720875",
+        "osm_type": "node",
+        "osm_id": 2208720875,
+        "name": "Surjer Hasi Clinic",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          91.829743,
+          22.361898
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2208594272",
+        "osm_type": "node",
+        "osm_id": 2208594272,
+        "name": "Treatment Hospital",
+        "city": "Chattogram",
+        "address": "Chattogram",
+        "phone": null,
+        "emergency_tag": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.38363,
+          24.014557
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5209683724",
+        "osm_type": "node",
+        "osm_id": 5209683724,
+        "name": "ABC Eye Hospital এবিসি চক্ষু হাসপাতাল",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.382321,
+          23.991482
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5209557021",
+        "osm_type": "node",
+        "osm_id": 5209557021,
+        "name": "Apex Medical and Diagnostic Centre, Hospital,",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.379973,
+          23.956727
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12119932190",
+        "osm_type": "node",
+        "osm_id": 12119932190,
+        "name": "BGMEA HEALTH CENTRE And SCHOOL, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.382616,
+          23.946054
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12121796922",
+        "osm_type": "node",
+        "osm_id": 12121796922,
+        "name": "City Digital Diagnostic And Consultation Center, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.377135,
+          23.989494
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12330714963",
+        "osm_type": "node",
+        "osm_id": 12330714963,
+        "name": "City Medical College And Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.382655,
+          24.002589
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12135508516",
+        "osm_type": "node",
+        "osm_id": 12135508516,
+        "name": "Fachi Medical Hall, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.385751,
+          24.009619
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12141885361",
+        "osm_type": "node",
+        "osm_id": 12141885361,
+        "name": "Galaxy Hospital (pvt) Ltd. Monipur, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.379184,
+          23.989655
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12127205474",
+        "osm_type": "node",
+        "osm_id": 12127205474,
+        "name": "Gazipur Metropolitan Hospital And Diagnostic Centre, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.380352,
+          23.981158
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12127046609",
+        "osm_type": "node",
+        "osm_id": 12127046609,
+        "name": "Hazrat Shahjalal (RA) Homeo Complex",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.384654,
+          24.026851
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12139541360",
+        "osm_type": "node",
+        "osm_id": 12139541360,
+        "name": "Health care hospital, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.350531,
+          23.99423
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12336985716",
+        "osm_type": "node",
+        "osm_id": 12336985716,
+        "name": "Kodda Primary Health Center, Government hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.384044,
+          24.026877
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12139578941",
+        "osm_type": "node",
+        "osm_id": 12139578941,
+        "name": "Ma o Shishu Hospital And Diagnostic Center, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.381604,
+          23.99253
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12127231702",
+        "osm_type": "node",
+        "osm_id": 12127231702,
+        "name": "Medicare Medical Services, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.380289,
+          23.965952
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12124106772",
+        "osm_type": "node",
+        "osm_id": 12124106772,
+        "name": "Mother and Child General Hospital, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.381346,
+          23.956011
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12121823203",
+        "osm_type": "node",
+        "osm_id": 12121823203,
+        "name": "Rokeya General Hospital, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.382522,
+          23.946106
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12121749971",
+        "osm_type": "node",
+        "osm_id": 12121749971,
+        "name": "Saki Daigonostic Center, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.378347,
+          23.989883
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12330731048",
+        "osm_type": "node",
+        "osm_id": 12330731048,
+        "name": "Seba Hospital, Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.423642,
+          24.009726
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12451250001",
+        "osm_type": "node",
+        "osm_id": 12451250001,
+        "name": "Shaheed Tajuddin Ahmad Medical College Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.38395,
+          23.943142
+        ]
+      },
+      "properties": {
+        "id": "osm-node-12118226040",
+        "osm_type": "node",
+        "osm_id": 12118226040,
+        "name": "Sultan General Hospital",
+        "city": "Gazipur",
+        "address": "Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.416703,
+          23.996803
+        ]
+      },
+      "properties": {
+        "id": "osm-node-14060875805",
+        "osm_type": "node",
+        "osm_id": 14060875805,
+        "name": "পপুলার ডায়াগনেস্টিক সেন্টার",
+        "city": "Gazipur",
+        "address": "Gazipur Road, Gazipur",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.424804,
+          23.992547
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2332686514",
+        "osm_type": "node",
+        "osm_id": 2332686514,
+        "name": "শহীদ তাজউদ্দীন আহমেদ মেডিকেল কলেজ হাসপাতাল",
+        "city": "Gazipur",
+        "address": "Hospital Road, Gazipur",
+        "phone": "+8802224423306",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.36198,
+          23.990427
+        ]
+      },
+      "properties": {
+        "id": "osm-node-13634210501",
+        "osm_type": "node",
+        "osm_id": 13634210501,
+        "name": "সিটি মেডিকেল কলেজ এন্ড হসপিটাল,গাজীপুর",
+        "city": "Gazipur",
+        "address": "Dhaka - Tangail Highway, Gazipur",
+        "phone": "01770178257",
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.525128,
+          23.629403
+        ]
+      },
+      "properties": {
+        "id": "osm-node-2344450874",
+        "osm_type": "node",
+        "osm_id": 2344450874,
+        "name": "Bandar Upazila Health Complex",
+        "city": "Narayanganj",
+        "address": "Narayanganj",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.501042,
+          23.621965
+        ]
+      },
+      "properties": {
+        "id": "osm-node-5187825943",
+        "osm_type": "node",
+        "osm_id": 5187825943,
+        "name": "Mukti General Hospital মুক্তি জেনারেল হাসপাতাল লিঃ",
+        "city": "Narayanganj",
+        "address": "Narayanganj",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.50791,
+          23.626766
+        ]
+      },
+      "properties": {
+        "id": "osm-way-68830095",
+        "osm_type": "way",
+        "osm_id": 68830095,
+        "name": "Narayanganj General Hospital",
+        "city": "Narayanganj",
+        "address": "Narayanganj",
+        "phone": null,
+        "emergency_tag": false
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          90.503317,
+          23.60858
+        ]
+      },
+      "properties": {
+        "id": "osm-way-689628097",
+        "osm_type": "way",
+        "osm_id": 689628097,
+        "name": "Victoria General Hospital",
+        "city": "Narayanganj",
+        "address": "বঙ্গবন্ধু সড়ক, Narayanganj",
+        "phone": null,
+        "emergency_tag": false
+      }
+    }
+  ]
+}

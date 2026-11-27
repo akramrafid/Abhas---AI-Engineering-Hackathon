@@ -106,6 +106,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/facilities/ambulance-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List recent control-room ambulance requests (zero patient PII) */
+        get: operations["get_ambulance_requests_api_v1_facilities_ambulance_requests_get"];
+        put?: never;
+        /** Log a control-room ambulance coordination request (strictly zero patient PII) */
+        post: operations["post_ambulance_request_api_v1_facilities_ambulance_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facilities/beds/{hospital_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update hospital bed availability (manager role required) */
+        post: operations["post_bed_update_api_v1_facilities_beds__hospital_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/facilities/hospitals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** OSM hospital snapshot with DEMO/board bed availability and city forecast tiers */
+        get: operations["get_hospitals_api_v1_facilities_hospitals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/forecast": {
         parameters: {
             query?: never;
@@ -605,6 +657,176 @@ export interface components {
             };
             /** Wards */
             wards: components["schemas"]["WardAllocation"][];
+        };
+        /**
+         * AmbulanceRequestCreate
+         * @description Control-room coordination log request — strictly ZERO patient personal data or user GPS.
+         */
+        AmbulanceRequestCreate: {
+            /**
+             * Beds Requested
+             * @default 1
+             */
+            beds_requested: number;
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /** Dispatcher Note */
+            dispatcher_note?: string | null;
+            /** Hospital Id */
+            hospital_id: string;
+            /**
+             * Severity
+             * @default High
+             * @enum {string}
+             */
+            severity: "Moderate" | "High" | "Critical";
+        };
+        /** AmbulanceRequestList */
+        AmbulanceRequestList: {
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /** Requests */
+            requests: components["schemas"]["AmbulanceRequestRecord"][];
+        };
+        /** AmbulanceRequestRecord */
+        AmbulanceRequestRecord: {
+            /** Beds Requested */
+            beds_requested: number;
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /** Dispatcher Note */
+            dispatcher_note?: string | null;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /** Hospital Id */
+            hospital_id: string;
+            /** Hospital Name */
+            hospital_name: string;
+            /** Id */
+            id: string;
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "Moderate" | "High" | "Critical";
+            /**
+             * Status
+             * @default logged
+             * @constant
+             */
+            status: "logged";
+        };
+        /** BedUpdateRequest */
+        BedUpdateRequest: {
+            /** Free Beds */
+            free_beds: number;
+            /** Note */
+            note?: string | null;
+            /** Total Beds */
+            total_beds: number;
+        };
+        /** BedUpdateResponse */
+        BedUpdateResponse: {
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            hospital: components["schemas"]["HospitalRecord"];
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /** Update Id */
+            update_id: number;
         };
         /** BuildVsSendRow */
         BuildVsSendRow: {
@@ -1168,6 +1390,112 @@ export interface components {
              * @description Weeks ahead of the origin week (1–4)
              */
             horizon: number;
+        };
+        /** HospitalRecord */
+        HospitalRecord: {
+            /** Address */
+            address?: string | null;
+            /** Age Hours */
+            age_hours: number;
+            /**
+             * City
+             * @enum {string}
+             */
+            city: "Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj";
+            /**
+             * Data Source
+             * @enum {string}
+             */
+            data_source: "demo" | "board";
+            /**
+             * Forecast Tier
+             * @enum {string}
+             */
+            forecast_tier: "Low" | "Medium" | "High" | "Critical";
+            /** Free Beds */
+            free_beds: number;
+            /** Id */
+            id: string;
+            /** Is Stale */
+            is_stale: boolean;
+            /** Lat */
+            lat: number;
+            /** Lon */
+            lon: number;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone?: string | null;
+            /** Tel Href */
+            tel_href?: string | null;
+            /** Total Beds */
+            total_beds: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** HospitalsResponse */
+        HospitalsResponse: {
+            /** Attribution */
+            attribution: string;
+            /**
+             * Bed Data Disclaimer
+             * @default Demo bed data — replace with verified hospital bed-board feeds before clinical use.
+             */
+            bed_data_disclaimer: string;
+            /** City Filter */
+            city_filter?: ("Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj") | null;
+            /** City Forecast Tiers */
+            city_forecast_tiers: {
+                [key: string]: "Low" | "Medium" | "High" | "Critical";
+            };
+            /**
+             * Data As Of
+             * Format: date
+             * @description Last observed week used (2025-12-29 for the onsite dataset)
+             * @example 2025-12-29
+             */
+            data_as_of: string;
+            /**
+             * Emergency Number
+             * @default 999
+             * @constant
+             */
+            emergency_number: "999";
+            /**
+             * Generated At
+             * Format: date-time
+             * @description UTC timestamp when this response was generated
+             */
+            generated_at: string;
+            /**
+             * Git Sha
+             * @description Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'
+             * @example 075e81b
+             */
+            git_sha: string;
+            /** Hospitals */
+            hospitals: components["schemas"]["HospitalRecord"][];
+            /**
+             * Model Version
+             * @description Forecast artefact version, e.g. abhas-lgbm-1.1.2
+             * @example abhas-lgbm-1.1.2
+             */
+            model_version: string;
+            /**
+             * Offline
+             * @description Kill switch set or network probe down (ADR-0015)
+             */
+            offline: boolean;
+            /** Snapshot Date */
+            snapshot_date: string;
+            /**
+             * Stale After Hours
+             * @default 6
+             */
+            stale_after_hours: number;
         };
         /** LLMStats */
         LLMStats: {
@@ -3033,6 +3361,466 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DispatchResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_ambulance_requests_api_v1_facilities_ambulance_requests_get: {
+        parameters: {
+            query?: {
+                /** @description Optional city filter */
+                city?: ("Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj") | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AmbulanceRequestList"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    post_ambulance_request_api_v1_facilities_ambulance_requests_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AmbulanceRequestCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AmbulanceRequestRecord"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    post_bed_update_api_v1_facilities_beds__hospital_id__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Facility-Role"?: string | null;
+                "X-Facility-Token"?: string | null;
+            };
+            path: {
+                hospital_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BedUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BedUpdateResponse"];
+                };
+            };
+            /** @description Malformed request body or syntax error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Missing or invalid X-Ops-Token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unknown ward, city or resource */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Conflict with plan scope or infeasible optimization state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request body exceeds the 64 KB size limit */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Request failed validation; `errors` names each field */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Rate limit exceeded; retry after the Retry-After header */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Model or data not ready (run npm run setup) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Problem"];
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_hospitals_api_v1_facilities_hospitals_get: {
+        parameters: {
+            query?: {
+                /** @description Optional city filter */
+                city?: ("Dhaka North" | "Dhaka South" | "Chattogram" | "Gazipur" | "Narayanganj") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HospitalsResponse"];
                 };
             };
             /** @description Malformed request body or syntax error */

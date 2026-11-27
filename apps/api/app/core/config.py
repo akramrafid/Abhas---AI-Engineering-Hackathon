@@ -68,6 +68,7 @@ class Settings(BaseSettings):
     gemini_timeout_s: float = Field(default=15.0, gt=0, allow_inf_nan=False)
 
     ops_token: SecretStr | None = None
+    facility_manager_token: SecretStr | None = None
     rate_limit_per_minute: int = Field(default=120, ge=1)
     trusted_proxies: str = ""
     fault_inject: str = ""

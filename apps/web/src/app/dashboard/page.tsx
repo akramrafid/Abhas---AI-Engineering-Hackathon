@@ -24,6 +24,10 @@ const CommandCenterView = dynamic(
   () => import("@/features/command/CommandCenterView").then((m) => m.CommandCenterView),
   { loading: () => <PanelSkeleton testId="command-loading" label="Loading Command Center…" /> },
 );
+const NearestBedView = dynamic(
+  () => import("@/features/nearest-bed/NearestBedView").then((m) => m.NearestBedView),
+  { loading: () => <PanelSkeleton testId="nearest-bed-loading" label="Loading Nearest Bed…" /> },
+);
 const RiskMapView = dynamic(
   () => import("@/features/risk-map/components/RiskMapView").then((m) => m.RiskMapView),
   { loading: () => <PanelSkeleton testId="risk-map-loading" label="Loading risk map…" /> },
@@ -326,6 +330,7 @@ function DashboardWorkspace() {
     return [
       { id: "ward-risk", label: labels["ward-risk"], testId: "tab-ward-risk" },
       { id: "command", label: labels.command, testId: "tab-command" },
+      { id: "nearest-bed", label: labels["nearest-bed"], testId: "tab-nearest-bed" },
       { id: "map", label: labels.map, testId: "tab-map" },
       { id: "lags", label: labels.lags, testId: "tab-lags" },
       { id: "scenario", label: labels.scenario, testId: "tab-scenario" },
@@ -353,7 +358,10 @@ function DashboardWorkspace() {
   };
 
   const showSelectionBar =
-    activeTab !== "validation" && activeTab !== "about" && activeTab !== "command";
+    activeTab !== "validation" &&
+    activeTab !== "about" &&
+    activeTab !== "command" &&
+    activeTab !== "nearest-bed";
 
   // Shell: theme (remembered per browser), search (Ctrl+K), alerts, CSV export, view transitions.
   const [dark, toggleTheme] = useDashboardTheme();
@@ -550,6 +558,10 @@ function DashboardWorkspace() {
               onStepChange={setCommandStep}
               onOriginWeekChange={setOriginWeekOverride}
             />
+          ) : null}
+
+          {activeTab === "nearest-bed" ? (
+            <NearestBedView cities={cities} wards={allWards} lang={lang} />
           ) : null}
 
           {activeTab === "map" && !wardsQuery.isError ? (

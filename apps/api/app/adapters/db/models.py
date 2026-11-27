@@ -241,3 +241,80 @@ class DispatchLogRow(Base):
         server_default=sa.text("CURRENT_TIMESTAMP"),
         nullable=False,
     )
+
+
+class HospitalRow(Base):
+    __tablename__ = "hospitals"
+    __table_args__ = (
+        CheckConstraint("total_beds >= 1", name="total_beds_pos"),
+        CheckConstraint("free_beds >= 0 AND free_beds <= total_beds", name="free_beds_bounds"),
+        CheckConstraint("data_source in ('demo','board')", name="data_source_valid"),
+        Index("ix_hospitals_city", "city"),
+    )
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(160), nullable=False)
+    city: Mapped[str] = mapped_column(String(32), nullable=False)
+    lat: Mapped[float] = mapped_column(Float, nullable=False)
+    lon: Mapped[float] = mapped_column(Float, nullable=False)
+    address: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    total_beds: Mapped[int] = mapped_column(Integer, nullable=False)
+    free_beds: Mapped[int] = mapped_column(Integer, nullable=False)
+    data_source: Mapped[str] = mapped_column(String(16), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=sa.text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
+
+class BedUpdateRow(Base):
+    __tablename__ = "bed_updates"
+    __table_args__ = (
+        CheckConstraint("total_beds >= 1", name="total_beds_pos"),
+        CheckConstraint("free_beds >= 0 AND free_beds <= total_beds", name="free_beds_bounds"),
+        Index("ix_bed_updates_hospital_time", "hospital_id", "updated_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    hospital_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("hospitals.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    free_beds: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_beds: Mapped[int] = mapped_column(Integer, nullable=False)
+    data_source: Mapped[str] = mapped_column(String(16), nullable=False)
+    note: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=sa.text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
+
+class AmbulanceRequestRow(Base):
+    __tablename__ = "ambulance_requests"
+    __table_args__ = (
+        CheckConstraint("severity in ('Moderate','High','Critical')", name="severity_valid"),
+        CheckConstraint("beds_requested >= 1 AND beds_requested <= 10", name="beds_bounds"),
+        Index("ix_ambulance_requests_city_created", "city", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    hospital_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("hospitals.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    city: Mapped[str] = mapped_column(String(32), nullable=False)
+    severity: Mapped[str] = mapped_column(String(16), nullable=False)
+    beds_requested: Mapped[int] = mapped_column(Integer, nullable=False)
+    dispatcher_note: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=sa.text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )

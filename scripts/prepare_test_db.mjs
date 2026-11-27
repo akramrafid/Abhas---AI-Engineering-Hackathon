@@ -45,9 +45,10 @@ if (fs.existsSync(devDb)) {
   runPy(["-m", "alembic", "upgrade", "head"]);
   runPy([
     "-c",
-    "import sqlite3, sys; c = sqlite3.connect(sys.argv[1]); c.execute('DELETE FROM plans'); c.execute('DELETE FROM dispatch_log'); c.commit(); c.close()",
+    "import sqlite3, sys; c = sqlite3.connect(sys.argv[1]); c.execute('DELETE FROM plans'); c.execute('DELETE FROM dispatch_log'); c.execute('DELETE FROM ambulance_requests'); c.execute('DELETE FROM bed_updates'); c.execute('DELETE FROM hospitals'); c.commit(); c.close()",
     testDb,
   ]);
+  runPy(["-c", "from app.adapters.db.engine import create_db_engine; from app.adapters.db.facilities_repo import seed_hospitals_from_geojson; import os; seed_hospitals_from_geojson(create_db_engine(os.environ['DATABASE_URL']))"]);
 } else {
   // Fresh clone without data/abhas.db yet: migrate and seed test DB directly.
   runPy(["-m", "alembic", "upgrade", "head"]);

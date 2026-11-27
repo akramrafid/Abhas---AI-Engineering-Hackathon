@@ -402,6 +402,334 @@
         "title": "AllocationResponse",
         "type": "object"
       },
+      "AmbulanceRequestCreate": {
+        "additionalProperties": false,
+        "description": "Control-room coordination log request — strictly ZERO patient personal data or user GPS.",
+        "properties": {
+          "beds_requested": {
+            "default": 1,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Beds Requested",
+            "type": "integer"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "dispatcher_note": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dispatcher Note"
+          },
+          "hospital_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Hospital Id",
+            "type": "string"
+          },
+          "severity": {
+            "default": "High",
+            "enum": [
+              "Moderate",
+              "High",
+              "Critical"
+            ],
+            "title": "Severity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "hospital_id",
+          "city"
+        ],
+        "title": "AmbulanceRequestCreate",
+        "type": "object"
+      },
+      "AmbulanceRequestList": {
+        "properties": {
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/AmbulanceRequestRecord"
+            },
+            "title": "Requests",
+            "type": "array"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "requests"
+        ],
+        "title": "AmbulanceRequestList",
+        "type": "object"
+      },
+      "AmbulanceRequestRecord": {
+        "properties": {
+          "beds_requested": {
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Beds Requested",
+            "type": "integer"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "dispatcher_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dispatcher Note"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "hospital_id": {
+            "title": "Hospital Id",
+            "type": "string"
+          },
+          "hospital_name": {
+            "title": "Hospital Name",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "severity": {
+            "enum": [
+              "Moderate",
+              "High",
+              "Critical"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "status": {
+            "const": "logged",
+            "default": "logged",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "id",
+          "hospital_id",
+          "hospital_name",
+          "city",
+          "severity",
+          "beds_requested",
+          "created_at"
+        ],
+        "title": "AmbulanceRequestRecord",
+        "type": "object"
+      },
+      "BedUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "free_beds": {
+            "maximum": 2000.0,
+            "minimum": 0.0,
+            "title": "Free Beds",
+            "type": "integer"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "total_beds": {
+            "maximum": 2000.0,
+            "minimum": 1.0,
+            "title": "Total Beds",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "free_beds",
+          "total_beds"
+        ],
+        "title": "BedUpdateRequest",
+        "type": "object"
+      },
+      "BedUpdateResponse": {
+        "properties": {
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "hospital": {
+            "$ref": "#/components/schemas/HospitalRecord"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "update_id": {
+            "minimum": 1.0,
+            "title": "Update Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "hospital",
+          "update_id"
+        ],
+        "title": "BedUpdateResponse",
+        "type": "object"
+      },
       "BuildVsSendRow": {
         "properties": {
           "crew_deployments_equiv": {
@@ -1713,6 +2041,244 @@
           "cases_prevented"
         ],
         "title": "HorizonImpact",
+        "type": "object"
+      },
+      "HospitalRecord": {
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "age_hours": {
+            "minimum": 0.0,
+            "title": "Age Hours",
+            "type": "number"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "data_source": {
+            "enum": [
+              "demo",
+              "board"
+            ],
+            "title": "Data Source",
+            "type": "string"
+          },
+          "forecast_tier": {
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Forecast Tier",
+            "type": "string"
+          },
+          "free_beds": {
+            "minimum": 0.0,
+            "title": "Free Beds",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_stale": {
+            "title": "Is Stale",
+            "type": "boolean"
+          },
+          "lat": {
+            "title": "Lat",
+            "type": "number"
+          },
+          "lon": {
+            "title": "Lon",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "tel_href": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tel Href"
+          },
+          "total_beds": {
+            "minimum": 1.0,
+            "title": "Total Beds",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "city",
+          "lat",
+          "lon",
+          "total_beds",
+          "free_beds",
+          "data_source",
+          "updated_at",
+          "age_hours",
+          "is_stale",
+          "forecast_tier"
+        ],
+        "title": "HospitalRecord",
+        "type": "object"
+      },
+      "HospitalsResponse": {
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "bed_data_disclaimer": {
+            "default": "Demo bed data — replace with verified hospital bed-board feeds before clinical use.",
+            "title": "Bed Data Disclaimer",
+            "type": "string"
+          },
+          "city_filter": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Dhaka North",
+                  "Dhaka South",
+                  "Chattogram",
+                  "Gazipur",
+                  "Narayanganj"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City Filter"
+          },
+          "city_forecast_tiers": {
+            "additionalProperties": {
+              "enum": [
+                "Low",
+                "Medium",
+                "High",
+                "Critical"
+              ],
+              "type": "string"
+            },
+            "title": "City Forecast Tiers",
+            "type": "object"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "emergency_number": {
+            "const": "999",
+            "default": "999",
+            "title": "Emergency Number",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "hospitals": {
+            "items": {
+              "$ref": "#/components/schemas/HospitalRecord"
+            },
+            "title": "Hospitals",
+            "type": "array"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "snapshot_date": {
+            "title": "Snapshot Date",
+            "type": "string"
+          },
+          "stale_after_hours": {
+            "default": 6.0,
+            "title": "Stale After Hours",
+            "type": "number"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "snapshot_date",
+          "attribution",
+          "city_forecast_tiers",
+          "hospitals"
+        ],
+        "title": "HospitalsResponse",
         "type": "object"
       },
       "LLMStats": {
@@ -5815,6 +6381,759 @@
         "summary": "Generate deterministic SMS, WhatsApp, and brief URL dispatch notices",
         "tags": [
           "dispatch"
+        ]
+      }
+    },
+    "/api/v1/facilities/ambulance-requests": {
+      "get": {
+        "operationId": "get_ambulance_requests_api_v1_facilities_ambulance_requests_get",
+        "parameters": [
+          {
+            "description": "Optional city filter",
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Dhaka North",
+                    "Dhaka South",
+                    "Chattogram",
+                    "Gazipur",
+                    "Narayanganj"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional city filter",
+              "title": "City"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AmbulanceRequestList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "List recent control-room ambulance requests (zero patient PII)",
+        "tags": [
+          "facilities"
+        ]
+      },
+      "post": {
+        "operationId": "post_ambulance_request_api_v1_facilities_ambulance_requests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AmbulanceRequestCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AmbulanceRequestRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Log a control-room ambulance coordination request (strictly zero patient PII)",
+        "tags": [
+          "facilities"
+        ]
+      }
+    },
+    "/api/v1/facilities/beds/{hospital_id}": {
+      "post": {
+        "operationId": "post_bed_update_api_v1_facilities_beds__hospital_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "hospital_id",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Hospital Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Facility-Role",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Facility-Role"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Facility-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Facility-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BedUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BedUpdateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Update hospital bed availability (manager role required)",
+        "tags": [
+          "facilities"
+        ]
+      }
+    },
+    "/api/v1/facilities/hospitals": {
+      "get": {
+        "operationId": "get_hospitals_api_v1_facilities_hospitals_get",
+        "parameters": [
+          {
+            "description": "Optional city filter",
+            "in": "query",
+            "name": "city",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Dhaka North",
+                    "Dhaka South",
+                    "Chattogram",
+                    "Gazipur",
+                    "Narayanganj"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional city filter",
+              "title": "City"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HospitalsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict with plan scope or infeasible optimization state"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "OSM hospital snapshot with DEMO/board bed availability and city forecast tiers",
+        "tags": [
+          "facilities"
         ]
       }
     },
