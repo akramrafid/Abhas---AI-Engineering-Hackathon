@@ -61,10 +61,10 @@ export function DashboardHeader({
     <>
       <header
         className={clsx(
-          "no-print sticky top-3 z-40 mx-3 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-[22px] px-3 py-2 ring-1 backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 sm:mx-5 lg:rounded-full lg:pl-5",
+          "no-print sticky top-2.5 z-40 mx-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl px-3.5 py-2 ring-1 backdrop-blur-xl transition-colors duration-200 sm:mx-5 lg:px-4",
           dark
-            ? "bg-navy/85 text-white ring-white/15 shadow-[0_16px_40px_-10px_rgba(4,8,18,0.7),inset_0_1px_0_rgba(255,255,255,0.22)]"
-            : "bg-white/85 text-ink ring-mist/80 shadow-[0_12px_32px_-10px_rgba(11,26,92,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]",
+            ? "bg-navy/92 text-white ring-white/15"
+            : "bg-white/94 text-ink ring-mist/90",
         )}
       >
         <button
@@ -72,19 +72,19 @@ export function DashboardHeader({
           data-testid="dashboard-logo-logout"
           onClick={() => setConfirmLogout(true)}
           title={bn ? "লগআউট করে হোম পেজে যান" : "Log out and return to landing page"}
-          className="flex shrink-0 cursor-pointer items-center gap-3 rounded-md text-left transition-opacity hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal"
+          className="flex shrink-0 cursor-pointer items-center gap-3 rounded-lg text-left transition-opacity hover:opacity-85 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal"
         >
           <AbhasLogo variant={dark ? "reverse" : "primary"} size="sm" showBangla city={selectedCity} />
           <span className="sr-only">Log out and return to Abhas landing page</span>
         </button>
-      <div className={clsx("hidden min-w-0 border-l pl-4 xl:block", dark ? "border-white/15" : "border-mist")}>
-        <p data-testid="header-heading" lang={lang} className={clsx("truncate text-sm font-semibold", bn && "font-bangla")}>
+      <div className={clsx("hidden min-w-0 border-l pl-3.5 2xl:block", dark ? "border-white/15" : "border-mist")}>
+        <p data-testid="header-heading" lang={lang} className={clsx("truncate text-[13px] font-semibold leading-tight", bn && "font-bangla")}>
           {copy.appHeading}
         </p>
         <p
           data-testid="header-promise"
           lang={lang}
-          className={clsx("truncate text-xs", dark ? "text-mist" : "text-slate", bn && "font-bangla")}
+          className={clsx("truncate text-[11px] leading-tight mt-0.5", dark ? "text-mist" : "text-slate", bn && "font-bangla")}
         >
           {copy.productPromise}
         </p>
@@ -97,19 +97,23 @@ export function DashboardHeader({
           data-testid="open-search"
           aria-keyshortcuts="Control+K Meta+K"
           className={clsx(
-            "order-last flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-full px-4 text-left text-sm ring-1 transition-colors duration-300 md:order-none md:mx-auto md:w-auto md:min-w-[18rem]",
-            dark ? "bg-white/5 text-mist ring-white/15 hover:bg-white/10" : "bg-paper text-slate ring-mist hover:bg-mist/60",
+            "order-last flex min-h-9 w-full cursor-pointer items-center gap-2 rounded-xl px-3 text-left text-xs font-medium ring-1 transition-colors duration-150 md:order-none md:w-56 lg:w-64",
+            dark
+              ? "bg-white/6 text-mist ring-white/15 hover:bg-white/12 hover:text-white"
+              : "bg-paper/90 text-slate ring-mist hover:bg-white hover:text-navy hover:ring-royal/40",
           )}
         >
-          <Search aria-hidden="true" className="h-4 w-4" />
-          <span className={clsx("flex-1", bn && "font-bangla")}>
+          <Search aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+          <span className={clsx("flex-1 truncate", bn && "font-bangla")}>
             {bn ? "ওয়ার্ড ও ভিউ খুঁজুন" : "Search wards and views"}
           </span>
-          <kbd className="font-mono text-[11px]">Ctrl K</kbd>
+          <kbd className={clsx("rounded px-1.5 py-0.5 font-mono text-[10px] ring-1", dark ? "bg-white/10 text-mist ring-white/15" : "bg-white text-slate ring-mist")}>
+            Ctrl K
+          </kbd>
         </button>
       ) : null}
 
-      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">
         {isDemoMode ? (
           <span
             data-testid="demo-mode-badge"
@@ -201,6 +205,11 @@ export function DashboardHeader({
             {weatherBadgeText}
           </span>
         )}
+
+        <span
+          aria-hidden="true"
+          className={clsx("mx-0.5 hidden h-5 w-px sm:inline-block", dark ? "bg-white/15" : "bg-mist")}
+        />
 
         <div
           data-testid="lang-toggle"

@@ -72,7 +72,7 @@ function TierDot({ cx, cy, payload }: CustomDotProps) {
           fill={payload.isPeak ? "var(--color-white)" : "var(--color-navy)"}
           fontSize={11}
           fontWeight={700}
-          fontFamily="var(--font-sans)"
+          fontFamily="var(--font-mono)"
         >
           {payload.expected.toFixed(1)}
         </text>
@@ -95,32 +95,32 @@ function ForecastTooltip({ active, payload }: CustomTooltipProps) {
   const pct = Math.min(100, Math.max(0, ((row.expected - row.p10) / span) * 100));
 
   return (
-    <div className="min-w-[230px] rounded-[12px] border border-mist bg-white/95 p-3.5 text-xs text-ink shadow-[0_18px_40px_-10px_rgba(11,15,20,0.28)] backdrop-blur-xl">
+    <div className="min-w-[224px] rounded-xl bg-white/98 p-3 text-xs text-ink shadow-md ring-1 ring-mist backdrop-blur-md">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="font-bold text-navy tnum">
+          <p className="font-mono font-bold text-navy tnum">
             +{row.horizon}w · {row.shortDate}
           </p>
-          <p className="text-[11px] text-slate tnum">{row.targetWeek}</p>
+          <p className="font-mono text-[11px] text-slate tnum">{row.targetWeek}</p>
         </div>
         <RiskTierBadge tier={row.tier} size="sm" />
       </div>
 
-      <div className="mt-3 flex items-baseline justify-between border-t border-mist pt-2.5">
+      <div className="mt-2.5 flex items-baseline justify-between border-t border-mist pt-2">
         <span className="text-slate">Expected cases</span>
-        <span className="text-lg font-extrabold tracking-tight text-navy tnum">
+        <span className="font-mono text-base font-bold tracking-tight text-navy tnum">
           {row.expected.toFixed(1)}
         </span>
       </div>
 
       {/* Visual P10 -> Expected -> P90 interval bar */}
       <div className="mt-2">
-        <div className="flex items-center justify-between text-[11px] text-slate tnum">
-          <span>P10: {row.p10.toFixed(1)}</span>
-          <span className="font-medium text-royal">80% band</span>
-          <span>P90: {row.p90.toFixed(1)}</span>
+        <div className="flex items-center justify-between font-mono text-[11px] text-slate tnum">
+          <span>P10 {row.p10.toFixed(1)}</span>
+          <span className="font-sans font-semibold text-royal">80% band</span>
+          <span>P90 {row.p90.toFixed(1)}</span>
         </div>
-        <div className="relative mt-1 h-2 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist">
+        <div className="relative mt-1 h-1.5 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist">
           <div className="absolute inset-y-0 left-0 right-0 rounded-full bg-royal/20" />
           <span
             className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-royal ring-2 ring-white"
@@ -129,9 +129,9 @@ function ForecastTooltip({ active, payload }: CustomTooltipProps) {
         </div>
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between border-t border-mist pt-2 text-[11px] text-slate tnum">
+      <div className="mt-2 flex items-center justify-between border-t border-mist pt-2 text-[11px] text-slate tnum">
         <span>Risk score</span>
-        <span className="font-semibold text-navy">{row.riskScore} / 100</span>
+        <span className="font-mono font-bold text-navy">{row.riskScore} / 100</span>
       </div>
     </div>
   );
@@ -148,7 +148,6 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
   const uid = useId().replace(/:/g, "");
   const bandGradId = `bandGrad-${uid}`;
   const lineAreaGradId = `lineAreaGrad-${uid}`;
-  const glowId = `royalGlow-${uid}`;
 
   const peakExpected = horizons.reduce((m, h) => Math.max(m, h.expected_cases), 0);
   const peakRow =
@@ -179,32 +178,30 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
   const peakLabel = data.find((d) => d.isPeak)?.label;
 
   return (
-    <div className="space-y-4">
-      {/* Executive summary telemetry ribbon */}
-      <div className="grid grid-cols-1 gap-2.5 rounded-[12px] border border-mist bg-paper/75 px-4 py-3 sm:grid-cols-3">
-        <div className="flex items-baseline justify-between gap-2 sm:block">
+    <div className="space-y-3">
+      {/* Flush hairline telemetry strip — zero nested cards, Measured Mono Rule */}
+      <div className="grid grid-cols-1 divide-y divide-mist/80 border-b border-mist/80 pb-3 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="flex items-baseline justify-between gap-2 pb-2 sm:block sm:pb-0 sm:pr-4">
           <p className="text-[11px] font-semibold text-slate">Peak expected</p>
-          <p className="mt-0.5 text-base font-extrabold tracking-tight text-navy tnum">
-            {peakRow ? `${peakRow.expected_cases.toFixed(1)} cases` : "—"}
-            {peakRow ? (
-              <span className="ml-1.5 text-xs font-medium text-slate">
-                (+{peakRow.horizon}w)
-              </span>
-            ) : null}
+          <p className="mt-0.5 font-mono text-base font-bold tracking-tight text-navy tnum">
+            {peakRow ? `${peakRow.expected_cases.toFixed(1)}` : "—"}{" "}
+            <span className="font-sans text-xs font-medium text-slate">
+              cases{peakRow ? ` (+${peakRow.horizon}w)` : ""}
+            </span>
           </p>
         </div>
 
-        <div className="flex items-baseline justify-between gap-2 border-t border-mist pt-2 sm:block sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+        <div className="flex items-baseline justify-between gap-2 py-2 sm:block sm:px-4 sm:py-0">
           <p className="text-[11px] font-semibold text-slate">80% ceiling (P90)</p>
-          <p className="mt-0.5 text-base font-extrabold tracking-tight text-royal tnum">
-            {maxP90.toFixed(1)} cases
-            <span className="ml-1.5 text-xs font-medium text-slate">bed planning</span>
+          <p className="mt-0.5 font-mono text-base font-bold tracking-tight text-royal tnum">
+            {maxP90.toFixed(1)}{" "}
+            <span className="font-sans text-xs font-medium text-slate">cases · bed planning</span>
           </p>
         </div>
 
-        <div className="flex items-baseline justify-between gap-2 border-t border-mist pt-2 sm:block sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+        <div className="flex items-baseline justify-between gap-2 pt-2 sm:block sm:pl-4 sm:pt-0">
           <p className="text-[11px] font-semibold text-slate">Window trajectory</p>
-          <p className="mt-0.5 inline-flex items-center gap-1 text-base font-extrabold tracking-tight text-navy tnum">
+          <p className="mt-0.5 inline-flex items-center gap-1 font-mono text-base font-bold tracking-tight text-navy tnum">
             {delta > 0.3 ? (
               <ArrowUpRight aria-hidden="true" className="h-4 w-4 text-royal" />
             ) : delta < -0.3 ? (
@@ -213,13 +210,11 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
               <Minus aria-hidden="true" className="h-4 w-4 text-slate" />
             )}
             {delta > 0.1 ? "+" : ""}
-            {delta.toFixed(1)} cases
-            {Math.abs(deltaPct) >= 1 ? (
-              <span className="text-xs font-medium text-slate">
-                ({deltaPct > 0 ? "+" : ""}
-                {Math.round(deltaPct)}%)
-              </span>
-            ) : null}
+            {delta.toFixed(1)}
+            <span className="font-sans text-xs font-medium text-slate">
+              cases
+              {Math.abs(deltaPct) >= 1 ? ` (${deltaPct > 0 ? "+" : ""}${Math.round(deltaPct)}%)` : ""}
+            </span>
           </p>
         </div>
       </div>
@@ -227,25 +222,22 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
       {/* Interactive Recharts canvas */}
       <div
         data-testid="forecast-chart"
-        className="h-72 w-full"
+        className="h-64 w-full"
         role="region"
         aria-label="Expected weekly dengue cases with 80 percent prediction band"
       >
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 34, right: 32, left: 2, bottom: 8 }}>
+          <ComposedChart data={data} margin={{ top: 32, right: 28, left: 2, bottom: 4 }}>
             <defs>
               <linearGradient id={bandGradId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2F5BFF" stopOpacity={0.22} />
-                <stop offset="55%" stopColor="#2F5BFF" stopOpacity={0.11} />
-                <stop offset="100%" stopColor="#2F5BFF" stopOpacity={0.04} />
+                <stop offset="0%" stopColor="#2F5BFF" stopOpacity={0.2} />
+                <stop offset="55%" stopColor="#2F5BFF" stopOpacity={0.1} />
+                <stop offset="100%" stopColor="#2F5BFF" stopOpacity={0.03} />
               </linearGradient>
               <linearGradient id={lineAreaGradId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2F5BFF" stopOpacity={0.14} />
+                <stop offset="0%" stopColor="#2F5BFF" stopOpacity={0.1} />
                 <stop offset="100%" stopColor="#2F5BFF" stopOpacity={0} />
               </linearGradient>
-              <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#2F5BFF" floodOpacity="0.28" />
-              </filter>
             </defs>
 
             <CartesianGrid stroke="var(--color-mist)" strokeDasharray="3 5" vertical={false} />
@@ -270,7 +262,7 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
             <YAxis
               domain={[0, maxY]}
               tickCount={5}
-              tick={{ fill: "var(--color-slate)", fontSize: 12, fontFamily: "var(--font-sans)" }}
+              tick={{ fill: "var(--color-slate)", fontSize: 11, fontFamily: "var(--font-mono)" }}
               axisLine={false}
               tickLine={false}
               width={44}
@@ -344,20 +336,19 @@ export function ForecastChart({ horizons }: { horizons: readonly HorizonForecast
               isAnimationActive={false}
             />
 
-            {/* Primary expected cases trajectory spline with luminous drop shadow & tier callout nodes */}
+            {/* Primary expected cases trajectory line with crisp tier callout nodes */}
             <Line
               type="monotone"
               dataKey="expected"
               name="Expected cases"
               stroke="var(--color-royal)"
-              strokeWidth={3}
-              filter={`url(#${glowId})`}
+              strokeWidth={2.5}
               dot={<TierDot />}
               activeDot={{
-                r: 7.5,
+                r: 7,
                 fill: "var(--color-royal)",
                 stroke: "var(--color-white)",
-                strokeWidth: 3,
+                strokeWidth: 2.5,
               }}
               isAnimationActive={false}
             />

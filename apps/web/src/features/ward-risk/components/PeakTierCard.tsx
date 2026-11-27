@@ -107,30 +107,30 @@ export function PeakTierCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="p-0">
         {peakHorizon && actBy ? (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid divide-y divide-mist/80 sm:grid-cols-2 sm:divide-y-0 xl:grid-cols-4 xl:divide-x">
             {/* 1. Peak risk score with 0–100 gauge bar */}
-            <div className="flex flex-col justify-between rounded-xl bg-paper/75 p-4 ring-1 ring-mist/85">
+            <div className="flex flex-col justify-between p-4">
               <div>
-                <p className={clsx("text-[11px] font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
                   {copy.peakRiskScore}
                 </p>
                 <p
                   data-testid="peak-risk-score"
-                  className="mt-1.5 font-sans text-2xl font-extrabold tracking-tight text-navy tnum"
+                  className="mt-1.5 font-mono text-2xl font-bold tracking-tight text-navy tnum"
                 >
                   <NumberTicker value={peakHorizon.risk_score} decimalPlaces={0} />
-                  <span className="text-sm font-semibold text-slate"> / 100</span>
+                  <span className="text-sm font-medium text-slate"> / 100</span>
                 </p>
               </div>
               <div className="mt-2.5">
                 <div
                   aria-hidden="true"
-                  className="h-1.5 w-full overflow-hidden rounded-full bg-white ring-1 ring-mist/80"
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist/80"
                 >
                   <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#0B1A5C_0%,#2F5BFF_100%)] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="h-full rounded-full bg-navy transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     style={{ width: `${riskScorePct}%` }}
                   />
                 </div>
@@ -141,14 +141,14 @@ export function PeakTierCard({
             </div>
 
             {/* 2. Peak expected cases with P10–P90 conformal whisker */}
-            <div className="flex flex-col justify-between rounded-xl bg-paper/75 p-4 ring-1 ring-mist/85">
+            <div className="flex flex-col justify-between border-mist/80 p-4 sm:border-l xl:border-l-0">
               <div>
-                <p className={clsx("text-[11px] font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
                   {copy.peakExpectedCases} (+{peakHorizon.horizon}w)
                 </p>
                 <p
                   data-testid="peak-expected-cases"
-                  className="mt-1.5 font-sans text-2xl font-extrabold tracking-tight text-navy tnum"
+                  className="mt-1.5 font-mono text-2xl font-bold tracking-tight text-navy tnum"
                 >
                   <NumberTicker value={peakHorizon.expected_cases} decimalPlaces={1} />
                 </p>
@@ -159,21 +159,21 @@ export function PeakTierCard({
                   className="relative h-1.5 w-full rounded-full bg-royal/15"
                 >
                   <span
-                    className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-royal transition-[left] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-royal transition-[left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     style={{ left: `${bandMarkerPct}%` }}
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] font-medium text-slate tnum">
+                <p className="mt-1.5 font-mono text-[11px] font-medium text-slate tnum">
                   {copy.bandLabel}: {peakHorizon.p10.toFixed(1)}–{peakHorizon.p90.toFixed(1)} {copy.casesUnit}
                 </p>
               </div>
             </div>
 
-            {/* 3. Act-by operational deadline callout */}
-            <div className="flex flex-col justify-between rounded-xl bg-royal/[0.06] p-4 ring-1 ring-royal/25">
+            {/* 3. Act-by operational deadline callout (primary focal anchor) */}
+            <div className="flex flex-col justify-between border-mist/80 bg-royal/[0.045] p-4 sm:border-t xl:border-t-0">
               <p
                 className={clsx(
-                  "flex items-center gap-1.5 text-[11px] font-bold text-royal",
+                  "flex items-center gap-1.5 text-xs font-bold text-royal",
                   lang === "bn" && "font-bangla",
                 )}
               >
@@ -182,7 +182,7 @@ export function PeakTierCard({
               </p>
               <p
                 data-testid="peak-act-by"
-                className="mt-1.5 font-sans text-xl font-extrabold tracking-tight text-navy tnum"
+                className="mt-1.5 font-mono text-xl font-bold tracking-tight text-navy tnum"
               >
                 {actBy.displayDate}
               </p>
@@ -192,24 +192,22 @@ export function PeakTierCard({
             </div>
 
             {/* 4. Peak target week */}
-            <div className="flex flex-col justify-between rounded-xl bg-paper/75 p-4 ring-1 ring-mist/85">
-              <p className={clsx("text-[11px] font-semibold text-slate", lang === "bn" && "font-bangla")}>
+            <div className="flex flex-col justify-between border-mist/80 p-4 sm:border-l sm:border-t xl:border-l-0 xl:border-t-0">
+              <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
                 {copy.peakTargetWeek}
               </p>
-              <p className="mt-1.5 font-sans text-xl font-extrabold tracking-tight text-navy tnum">
+              <p className="mt-1.5 font-mono text-xl font-bold tracking-tight text-navy tnum">
                 {peakHorizon.target_week}
               </p>
-              <p className="mt-2">
-                <span className="inline-flex rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-navy ring-1 ring-mist tnum">
-                  +{peakHorizon.horizon} week{peakHorizon.horizon === 1 ? "" : "s"} after origin
-                </span>
+              <p className="mt-2 font-mono text-[11px] font-semibold text-slate tnum">
+                +{peakHorizon.horizon} week{peakHorizon.horizon === 1 ? "" : "s"} after origin
               </p>
             </div>
           </div>
         ) : null}
 
         {escalated ? (
-          <div className={clsx("flex items-start gap-2.5 rounded-xl bg-paper px-3.5 py-2.5 text-xs font-medium text-navy ring-1 ring-risk-medium/70", lang === "bn" && "font-bangla")}>
+          <div className={clsx("mx-4 my-3 flex items-start gap-2.5 rounded-xl bg-paper px-3.5 py-2.5 text-xs font-medium text-navy ring-1 ring-risk-medium/70", lang === "bn" && "font-bangla")}>
             <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-navy" />
             <p>
               {lang === "bn"
@@ -219,24 +217,26 @@ export function PeakTierCard({
           </div>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-mist/80 pt-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-mist/80 bg-paper/45 px-4 py-3">
           {wardMeta ? (
-            <div className={clsx("flex flex-wrap items-center gap-2 text-xs text-slate", lang === "bn" && "font-bangla")}>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
-                {lang === "bn" ? "জলাবদ্ধতা" : "Water-logging"}
-                <strong className="font-bold text-navy tnum">
+            <div className={clsx("flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate", lang === "bn" && "font-bangla")}>
+              <span className="inline-flex items-center gap-1.5">
+                <span>{lang === "bn" ? "জলাবদ্ধতা" : "Water-logging"}</span>
+                <strong className="font-mono font-bold text-navy tnum">
                   {wardMeta.water_logging_risk_index.toFixed(2)}
                 </strong>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
-                {lang === "bn" ? "জনঘনত্ব" : "Density"}
-                <strong className="font-bold text-navy tnum">
+              <span aria-hidden="true" className="text-mist">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span>{lang === "bn" ? "জনঘনত্ব" : "Density"}</span>
+                <strong className="font-mono font-bold text-navy tnum">
                   {Math.round(wardMeta.population_density_sqkm).toLocaleString()} / km²
                 </strong>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 ring-1 ring-mist/80">
-                {lang === "bn" ? "স্যানিটেশন" : "Sanitation"}
-                <strong className="font-bold text-navy tnum">
+              <span aria-hidden="true" className="text-mist">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span>{lang === "bn" ? "স্যানিটেশন" : "Sanitation"}</span>
+                <strong className="font-mono font-bold text-navy tnum">
                   {wardMeta.sanitation_score.toFixed(2)}
                 </strong>
               </span>
@@ -250,7 +250,7 @@ export function PeakTierCard({
             data-testid="print-ward-brief-btn"
             onClick={onPrintBrief}
             className={clsx(
-              "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-navy ring-1 ring-mist transition-all hover:bg-royal hover:text-white hover:ring-royal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+              "inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3.5 py-1.5 text-xs font-semibold text-navy ring-1 ring-mist transition-colors duration-150 hover:bg-royal hover:text-white hover:ring-royal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
               lang === "bn" && "font-bangla",
             )}
           >

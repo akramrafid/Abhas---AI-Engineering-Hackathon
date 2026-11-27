@@ -402,7 +402,10 @@ function DashboardWorkspace() {
   return (
     <div
       data-theme={dark ? "dark" : "light"}
-      className={clsx("flex min-h-screen flex-col pb-24 pt-3 lg:pb-0", dark ? "bg-ink text-white" : "bg-paper text-ink")}
+      className={clsx(
+        "flex min-h-screen flex-col scroll-pt-24 pb-24 pt-2.5 lg:pb-0",
+        dark ? "bg-ink text-white" : "bg-paper text-ink",
+      )}
     >
       <DashboardHeader
         selectedCity={selectedCity}
@@ -427,27 +430,27 @@ function DashboardWorkspace() {
         onOpenAlerts={() => setDialog("alerts")}
       />
 
-      <div className="mx-auto flex w-full max-w-[96rem] flex-1 gap-5 px-3 pt-5 sm:px-5">
+      <div className="mx-auto flex w-full max-w-[96rem] flex-1 gap-4 px-3 pt-4 sm:px-5 lg:gap-5">
         <ViewDock items={tabs} active={activeTab} onChange={setActiveTab} lang={lang} dark={dark} />
 
       {/* Main Clinical Data Workspace — strictly zero Lime anywhere inside [data-view="data"] */}
       <main
         data-view="data"
-        className="flex min-w-0 flex-1 flex-col gap-5 pb-8"
+        className="flex min-w-0 flex-1 flex-col gap-4 pb-10"
       >
-        <header className="no-print flex flex-wrap items-end justify-between gap-4 pt-2">
-          <div className="max-w-3xl">
+        <header className="no-print flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div className="min-w-0 max-w-3xl">
             <h1
               lang={lang}
               className={clsx(
-                "text-[clamp(1.75rem,3.2vw,2.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em]",
+                "text-2xl font-extrabold leading-tight tracking-[-0.025em]",
                 dark ? "text-white" : "text-navy",
                 lang === "bn" && "font-bangla",
               )}
             >
               {tabs.find((t) => t.id === activeTab)?.label}
             </h1>
-            <p lang={lang} className={clsx("mt-2 text-body", dark ? "text-mist" : "text-slate", lang === "bn" && "font-bangla")}>
+            <p lang={lang} className={clsx("mt-1 text-sm", dark ? "text-mist" : "text-slate", lang === "bn" && "font-bangla")}>
               {meta.description[lang]}
             </p>
           </div>
@@ -457,7 +460,7 @@ function DashboardWorkspace() {
             onClick={exportCsv}
             disabled={signals.exportRows.length < 2}
             className={clsx(
-              "inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] px-5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-royal px-4 text-xs font-semibold text-white transition-colors duration-150 hover:bg-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
               lang === "bn" && "font-bangla",
             )}
           >
@@ -466,166 +469,166 @@ function DashboardWorkspace() {
           </button>
         </header>
 
-        {meta.showStats && !wardsQuery.isError ? (
-          <StatTiles signals={signals} city={selectedCity} windowKey={windowKey} lang={lang} />
-        ) : null}
-
-        {showSelectionBar ? (
-          <SelectionBar
-            cities={cities}
-            selectedCity={selectedCity}
-            cityWards={cityWards}
-            selectedWardId={selectedWardId}
-            unknownWardId={unknownWardId}
-            mondayWeeks={mondayWeeks}
-            selectedOriginWeek={selectedOriginWeek}
-            windowKey={windowKey}
-            lang={lang}
-            isLoading={wardsQuery.isPending}
-            isError={wardsQuery.isError}
-            error={wardsQuery.error}
-            onRetryWards={() => {
-              void wardsQuery.refetch();
-            }}
-            onChangeCity={(nextCity) => {
-              setDismissedUrlWard(true);
-              setCityOverride(nextCity);
-              setWardOverride(null);
-              if (activeTab === "scenario") setScenarioManualSelection(true);
-            }}
-            onChangeWard={(nextWard) => {
-              setDismissedUrlWard(true);
-              setWardOverride(nextWard);
-              if (activeTab === "scenario") setScenarioManualSelection(true);
-            }}
-            onChangeOriginWeek={(nextWeek) => {
-              setOriginWeekOverride(nextWeek);
-              if (activeTab === "scenario") setScenarioManualSelection(true);
-            }}
-            onChangeWindow={setWindowKey}
-          />
-        ) : null}
-
-        <section
-          id={`tabpanel-${activeTab}`}
-          role="tabpanel"
-          aria-labelledby={`tab-btn-${activeTab}`}
-          className="flex-1"
-        >
-          <div ref={contentRef} key={activeTab}>
-          {activeTab === "ward-risk" && !wardsQuery.isError ? (
-            wardsQuery.isPending ? (
-              <PanelSkeleton
-                testId="ward-forecast-loading"
-                label="Loading wards and forecast…"
-              />
-            ) : (
-              <WardForecastView
-                city={selectedCity}
-                cityWards={cityWards}
-                selectedWardId={selectedWardId}
-                unknownWardId={unknownWardId}
-                originWeek={selectedOriginWeek}
-                windowKey={windowKey}
-                source={activeSource}
-                lang={lang}
-                onSelectWard={(wid) => {
-                  setDismissedUrlWard(true);
-                  setWardOverride(wid);
-                }}
-                onResetUnknownWard={handleResetUnknownWard}
-              />
-            )
+          {meta.showStats && !wardsQuery.isError ? (
+            <StatTiles signals={signals} city={selectedCity} windowKey={windowKey} lang={lang} />
           ) : null}
 
-          {activeTab === "command" ? (
-            <CommandCenterView
+          {showSelectionBar ? (
+            <SelectionBar
               cities={cities}
-              wards={allWards}
-              mondayWeeks={mondayWeeks}
-              originWeek={selectedOriginWeek}
-              windowKey={windowKey}
-              lang={lang}
-              step={commandStep}
-              onStepChange={setCommandStep}
-              onOriginWeekChange={setOriginWeekOverride}
-            />
-          ) : null}
-
-          {activeTab === "map" && !wardsQuery.isError ? (
-            wardsQuery.isPending ? (
-              <PanelSkeleton testId="risk-map-loading" label="Loading wards…" />
-            ) : (
-              <RiskMapView
-                wards={allWards}
-                selectedCity={selectedCity}
-                selectedWardId={selectedWardId}
-                originWeek={selectedOriginWeek}
-                windowKey={windowKey}
-                source={activeSource}
-                lang={lang}
-                onSelectWard={handleSelectWardFromMatrix}
-              />
-            )
-          ) : null}
-
-          {activeTab === "lags" && !wardsQuery.isError ? (
-            <LagsPanel
-              wardId={selectedWardId}
-              unknownWardId={unknownWardId}
-              lang={lang}
-              onResetUnknownWard={handleResetUnknownWard}
-            />
-          ) : null}
-
-          {activeTab === "scenario" && !wardsQuery.isError ? (
-            <ScenarioPanel
-              wardId={scenarioWardId}
-              originWeek={scenarioOriginWeek}
-              unknownWardId={unknownWardId}
-              onResetUnknownWard={handleResetUnknownWard}
-              isDemoBaseline={scenarioUsesDemoBaseline}
-              lang={lang}
-            />
-          ) : null}
-
-          {activeTab === "heatmap" && !wardsQuery.isError ? (
-            <HeatmapView
-              city={selectedCity}
-              originWeek={selectedOriginWeek}
-              source={activeSource}
-              lang={lang}
-              onSelectWard={handleSelectWardFromMatrix}
-              onResetCity={() => {
-                setCityOverride(DEMO_CONFIG.city);
-                setWardOverride(null);
-              }}
-            />
-          ) : null}
-
-          {activeTab === "priority" && !wardsQuery.isError ? (
-            <PriorityListView
-              city={selectedCity}
+              selectedCity={selectedCity}
               cityWards={cityWards}
               selectedWardId={selectedWardId}
-              originWeek={selectedOriginWeek}
+              unknownWardId={unknownWardId}
+              mondayWeeks={mondayWeeks}
+              selectedOriginWeek={selectedOriginWeek}
               windowKey={windowKey}
-              source={activeSource}
               lang={lang}
-              onSelectWard={handleSelectWardFromMatrix}
-              onResetCity={() => {
-                setCityOverride(DEMO_CONFIG.city);
-                setWardOverride(null);
+              isLoading={wardsQuery.isPending}
+              isError={wardsQuery.isError}
+              error={wardsQuery.error}
+              onRetryWards={() => {
+                void wardsQuery.refetch();
               }}
+              onChangeCity={(nextCity) => {
+                setDismissedUrlWard(true);
+                setCityOverride(nextCity);
+                setWardOverride(null);
+                if (activeTab === "scenario") setScenarioManualSelection(true);
+              }}
+              onChangeWard={(nextWard) => {
+                setDismissedUrlWard(true);
+                setWardOverride(nextWard);
+                if (activeTab === "scenario") setScenarioManualSelection(true);
+              }}
+              onChangeOriginWeek={(nextWeek) => {
+                setOriginWeekOverride(nextWeek);
+                if (activeTab === "scenario") setScenarioManualSelection(true);
+              }}
+              onChangeWindow={setWindowKey}
             />
           ) : null}
 
-          {activeTab === "validation" ? <ValidationView lang={lang} /> : null}
+          <section
+            id={`tabpanel-${activeTab}`}
+            role="tabpanel"
+            aria-labelledby={`tab-btn-${activeTab}`}
+            className="flex-1"
+          >
+            <div ref={contentRef} key={activeTab}>
+              {activeTab === "ward-risk" && !wardsQuery.isError ? (
+                wardsQuery.isPending ? (
+                  <PanelSkeleton
+                    testId="ward-forecast-loading"
+                    label="Loading wards and forecast…"
+                  />
+                ) : (
+                  <WardForecastView
+                    city={selectedCity}
+                    cityWards={cityWards}
+                    selectedWardId={selectedWardId}
+                    unknownWardId={unknownWardId}
+                    originWeek={selectedOriginWeek}
+                    windowKey={windowKey}
+                    source={activeSource}
+                    lang={lang}
+                    onSelectWard={(wid) => {
+                      setDismissedUrlWard(true);
+                      setWardOverride(wid);
+                    }}
+                    onResetUnknownWard={handleResetUnknownWard}
+                  />
+                )
+              ) : null}
 
-          {activeTab === "about" ? <AboutCostView lang={lang} /> : null}
-          </div>
-        </section>
-      </main>
+              {activeTab === "command" ? (
+                <CommandCenterView
+                  cities={cities}
+                  wards={allWards}
+                  mondayWeeks={mondayWeeks}
+                  originWeek={selectedOriginWeek}
+                  windowKey={windowKey}
+                  lang={lang}
+                  step={commandStep}
+                  onStepChange={setCommandStep}
+                  onOriginWeekChange={setOriginWeekOverride}
+                />
+              ) : null}
+
+              {activeTab === "map" && !wardsQuery.isError ? (
+                wardsQuery.isPending ? (
+                  <PanelSkeleton testId="risk-map-loading" label="Loading wards…" />
+                ) : (
+                  <RiskMapView
+                    wards={allWards}
+                    selectedCity={selectedCity}
+                    selectedWardId={selectedWardId}
+                    originWeek={selectedOriginWeek}
+                    windowKey={windowKey}
+                    source={activeSource}
+                    lang={lang}
+                    onSelectWard={handleSelectWardFromMatrix}
+                  />
+                )
+              ) : null}
+
+              {activeTab === "lags" && !wardsQuery.isError ? (
+                <LagsPanel
+                  wardId={selectedWardId}
+                  unknownWardId={unknownWardId}
+                  lang={lang}
+                  onResetUnknownWard={handleResetUnknownWard}
+                />
+              ) : null}
+
+              {activeTab === "scenario" && !wardsQuery.isError ? (
+                <ScenarioPanel
+                  wardId={scenarioWardId}
+                  originWeek={scenarioOriginWeek}
+                  unknownWardId={unknownWardId}
+                  onResetUnknownWard={handleResetUnknownWard}
+                  isDemoBaseline={scenarioUsesDemoBaseline}
+                  lang={lang}
+                />
+              ) : null}
+
+              {activeTab === "heatmap" && !wardsQuery.isError ? (
+                <HeatmapView
+                  city={selectedCity}
+                  originWeek={selectedOriginWeek}
+                  source={activeSource}
+                  lang={lang}
+                  onSelectWard={handleSelectWardFromMatrix}
+                  onResetCity={() => {
+                    setCityOverride(DEMO_CONFIG.city);
+                    setWardOverride(null);
+                  }}
+                />
+              ) : null}
+
+              {activeTab === "priority" && !wardsQuery.isError ? (
+                <PriorityListView
+                  city={selectedCity}
+                  cityWards={cityWards}
+                  selectedWardId={selectedWardId}
+                  originWeek={selectedOriginWeek}
+                  windowKey={windowKey}
+                  source={activeSource}
+                  lang={lang}
+                  onSelectWard={handleSelectWardFromMatrix}
+                  onResetCity={() => {
+                    setCityOverride(DEMO_CONFIG.city);
+                    setWardOverride(null);
+                  }}
+                />
+              ) : null}
+
+              {activeTab === "validation" ? <ValidationView lang={lang} /> : null}
+
+              {activeTab === "about" ? <AboutCostView lang={lang} /> : null}
+            </div>
+          </section>
+        </main>
       </div>
 
       {dialog === "search" ? (

@@ -114,7 +114,7 @@ export function SelectionBar({
   return (
     <section
       aria-label="Forecast selection controls"
-      className="no-print rounded-[16px] bg-white p-4 ring-1 ring-mist/90"
+      className="no-print rounded-2xl bg-white px-4 py-3 ring-1 ring-mist/90"
     >
       {isError ? (
         <ErrorBanner
@@ -177,7 +177,7 @@ export function SelectionBar({
                     }
                   }}
                   placeholder={copy.wardFilterPlaceholder}
-                  className="w-28 rounded-full border border-mist/90 bg-paper/70 py-0.5 pl-6 pr-2.5 text-[11px] font-medium text-ink placeholder:text-slate/75 transition-all hover:border-royal/40 focus-visible:w-32 focus-visible:border-royal focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal/15 sm:w-32 sm:focus-visible:w-36"
+                  className="w-28 rounded-lg border border-mist/90 bg-paper/70 py-0.5 pl-6 pr-2 text-[11px] font-medium text-ink placeholder:text-slate/75 transition-colors hover:border-royal/40 focus-visible:border-royal focus-visible:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal/15 sm:w-32"
                 />
               </div>
             </div>
@@ -233,7 +233,7 @@ export function SelectionBar({
               <span
                 ref={togglePillRef}
                 aria-hidden="true"
-                className="invisible absolute left-0 top-0 rounded-lg bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] data-[ready=true]:visible data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-250 data-[ready=true]:ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="invisible absolute left-0 top-0 rounded-lg bg-royal data-[ready=true]:visible data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-200 data-[ready=true]:ease-[cubic-bezier(0.16,1,0.3,1)]"
               />
               {windowChoices.map((w) => {
                 const active = windowKey === w.id;

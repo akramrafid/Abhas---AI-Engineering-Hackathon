@@ -93,59 +93,59 @@ export function StatTiles({ signals, city, windowKey = "2-4w", lang }: StatTiles
   return (
     <div
       data-testid="stat-tiles"
-      className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+      className="grid grid-cols-2 divide-y divide-mist/80 overflow-hidden rounded-2xl bg-white ring-1 ring-mist/90 sm:divide-y-0 lg:grid-cols-4 lg:divide-x"
       aria-busy={signals.isPending}
     >
-      {tiles.map((tile) => {
+      {tiles.map((tile, idx) => {
         const Icon = tile.icon;
         return (
           <div
             key={tile.testId}
             data-testid={tile.testId}
             data-enter
-            className="group flex flex-col justify-between rounded-[16px] bg-white p-4 ring-1 ring-mist/90 transition-colors duration-200 hover:ring-royal/35 sm:p-4.5"
+            className={clsx(
+              "group flex flex-col justify-between px-4 py-3.5 transition-colors duration-150 hover:bg-paper/55",
+              idx % 2 === 1 && "border-l border-mist/80 lg:border-l-0",
+              idx >= 2 && "border-t border-mist/80 lg:border-t-0",
+            )}
           >
-            <div className="flex items-start justify-between gap-2.5">
+            <div className="flex items-center justify-between gap-2">
               <p
                 lang={lang}
-                className={clsx("text-xs font-semibold leading-snug text-slate", bn && "font-bangla")}
+                className={clsx("truncate text-xs font-semibold text-slate", bn && "font-bangla")}
               >
                 {tile.label}
               </p>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-royal/[0.07] text-royal ring-1 ring-royal/12 transition-colors duration-200 group-hover:bg-royal group-hover:text-white group-hover:ring-royal">
-                <Icon aria-hidden="true" className="h-4 w-4" />
-              </span>
+              <Icon
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 text-royal/80 transition-colors duration-150 group-hover:text-royal"
+              />
             </div>
 
-            <div className="mt-3">
+            <div className="mt-2 flex items-baseline gap-2">
               <span
                 data-testid={`${tile.testId}-value`}
-                className="block font-sans text-[1.9rem] font-extrabold leading-none tracking-[-0.03em] text-navy tnum"
+                className="font-mono text-2xl font-bold leading-none tracking-[-0.02em] text-navy tnum"
               >
                 {tile.value === null ? "…" : <NumberTicker value={tile.value} decimalPlaces={tile.decimals} />}
               </span>
               {tile.progressPct !== null ? (
-                <div
-                  aria-hidden="true"
-                  className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist/70"
-                >
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#0B1A5C_0%,#2F5BFF_100%)] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                    style={{ width: `${tile.progressPct}%` }}
-                  />
-                </div>
+                <span className="font-mono text-[11px] font-semibold text-slate tnum">
+                  ({tile.progressPct}%)
+                </span>
               ) : null}
-              <span
-                data-testid={`${tile.testId}-note`}
-                lang={lang}
-                className={clsx(
-                  "mt-2 block truncate text-[11px] font-medium text-slate",
-                  bn && "font-bangla",
-                )}
-              >
-                {tile.note}
-              </span>
             </div>
+
+            <span
+              data-testid={`${tile.testId}-note`}
+              lang={lang}
+              className={clsx(
+                "mt-1.5 block truncate text-[11px] font-medium text-slate",
+                bn && "font-bangla",
+              )}
+            >
+              {tile.note}
+            </span>
           </div>
         );
       })}

@@ -62,16 +62,21 @@ export function HorizonTable({
                   onClick={() => onSelectHorizon(h.horizon)}
                   className={clsx(
                     "group cursor-pointer transition-colors duration-150",
-                    active ? "bg-royal/[0.06]" : "bg-white hover:bg-paper/75",
+                    active
+                      ? "bg-royal/[0.06] shadow-[inset_3px_0_0_0_var(--color-royal)]"
+                      : "bg-white hover:bg-paper/75",
                   )}
                 >
                   <td className="whitespace-nowrap px-4 py-3 text-xs font-bold text-navy tnum">
                     <button
                       type="button"
                       aria-pressed={active}
-                      onClick={() => onSelectHorizon(h.horizon)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectHorizon(h.horizon);
+                      }}
                       className={clsx(
-                        "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold transition-colors tnum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+                        "inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-0.5 font-mono text-xs font-bold transition-colors tnum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
                         active
                           ? "bg-royal text-white"
                           : "bg-paper text-navy ring-1 ring-mist group-hover:bg-white group-hover:text-royal",
@@ -80,18 +85,16 @@ export function HorizonTable({
                       +{h.horizon}w
                     </button>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-xs font-medium text-ink tnum">
+                  <td className="whitespace-nowrap px-3 py-3 font-mono text-xs font-medium text-ink tnum">
                     {h.target_week}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right text-sm font-bold text-navy tnum">
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-mono text-sm font-bold text-navy tnum">
                     {h.expected_cases.toFixed(1)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right text-xs font-medium text-slate tnum">
-                    <span className="rounded-md bg-paper/80 px-2 py-0.5 ring-1 ring-mist/70">
-                      {h.p10.toFixed(1)}–{h.p90.toFixed(1)}
-                    </span>
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-mono text-xs font-medium text-slate tnum">
+                    {h.p10.toFixed(1)}–{h.p90.toFixed(1)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right text-xs font-bold text-navy tnum">
+                  <td className="whitespace-nowrap px-3 py-3 text-right font-mono text-xs font-bold text-navy tnum">
                     {h.risk_score}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">

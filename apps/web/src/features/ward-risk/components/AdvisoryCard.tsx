@@ -122,16 +122,16 @@ export function AdvisoryCard({
               <p className="max-w-[74ch] text-sm leading-6 text-ink">{data.summary}</p>
             </div>
             {data.actions.length > 0 ? (
-              <ul className="grid gap-2.5 sm:grid-cols-2">
+              <ul className="divide-y divide-mist/75 border-t border-mist/80">
                 {data.actions.map((item, idx) => (
                   <li
                     key={`${item.when}-${idx}`}
-                    className="flex flex-col gap-1.5 rounded-xl bg-paper/75 p-3.5 ring-1 ring-mist/85 transition-colors hover:bg-paper"
+                    className="flex flex-col gap-1.5 py-2.5 sm:flex-row sm:items-baseline sm:gap-4"
                   >
-                    <span className="inline-flex w-fit items-center rounded-full bg-white px-2.5 py-0.5 text-[11px] font-bold text-royal ring-1 ring-mist">
+                    <span className="inline-flex w-fit shrink-0 items-center rounded-md bg-royal/[0.08] px-2 py-0.5 font-mono text-[11px] font-bold text-royal sm:min-w-[7.5rem] sm:justify-center">
                       {item.when}
                     </span>
-                    <span className="text-xs leading-5 font-medium text-navy">{item.action}</span>
+                    <span className="text-[13px] leading-5 font-medium text-navy">{item.action}</span>
                   </li>
                 ))}
               </ul>

@@ -43,7 +43,7 @@ export function ViewDock({ items, active, onChange, lang, dark }: ViewDockProps)
     observer.observe(list);
     place();
     return () => observer.disconnect();
-  }, [active]);
+  }, [active, lang]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key];
@@ -63,11 +63,11 @@ export function ViewDock({ items, active, onChange, lang, dark }: ViewDockProps)
     <nav
       aria-label="Dashboard views"
       className={clsx(
-        "no-print z-30 rounded-[18px] p-1.5 ring-1 backdrop-blur-md transition-colors duration-200",
-        "fixed inset-x-2 bottom-2 lg:sticky lg:inset-auto lg:top-24 lg:self-start",
+        "no-print z-30 rounded-2xl p-1.5 ring-1 backdrop-blur-md transition-colors duration-200",
+        "fixed inset-x-2 bottom-2 lg:sticky lg:inset-auto lg:top-20 lg:w-52 lg:shrink-0 lg:self-start lg:p-2",
         dark
-          ? "bg-navy/92 ring-white/12"
-          : "bg-white/92 ring-mist/90",
+          ? "bg-navy/94 ring-white/12"
+          : "bg-white/95 ring-mist/90",
       )}
     >
       <div
@@ -75,12 +75,12 @@ export function ViewDock({ items, active, onChange, lang, dark }: ViewDockProps)
         role="tablist"
         aria-label="Dashboard views"
         aria-orientation="vertical"
-        className="relative flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible"
+        className="relative flex gap-1 overflow-x-auto lg:flex-col lg:gap-0.5 lg:overflow-visible"
       >
         <span
           ref={pillRef}
           aria-hidden="true"
-          className="invisible absolute left-0 top-0 rounded-[12px] bg-[linear-gradient(135deg,#2F5BFF_0%,#1D42E0_100%)] data-[ready=true]:visible data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-300 data-[ready=true]:ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="invisible absolute left-0 top-0 rounded-xl bg-royal data-[ready=true]:visible data-[ready=true]:transition-[transform,width,height] data-[ready=true]:duration-200 data-[ready=true]:ease-[cubic-bezier(0.16,1,0.3,1)]"
         />
         {items.map((item, index) => {
           const selected = item.id === active;
@@ -99,7 +99,7 @@ export function ViewDock({ items, active, onChange, lang, dark }: ViewDockProps)
               onKeyDown={(event) => onKeyDown(event, index)}
               lang={lang}
               className={clsx(
-                "group relative z-10 flex min-h-[3.25rem] min-w-[4.75rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-[12px] px-2 py-2 text-[11px] font-semibold leading-tight transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal lg:w-[5.75rem]",
+                "group relative z-10 flex min-h-11 min-w-[4.5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl px-2.5 py-2 text-[11px] font-semibold leading-tight transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-1 lg:min-h-10 lg:w-full lg:flex-row lg:justify-start lg:gap-2.5 lg:px-3 lg:py-2 lg:text-[13px]",
                 lang === "bn" && "font-bangla",
                 selected
                   ? "text-white"
@@ -111,11 +111,11 @@ export function ViewDock({ items, active, onChange, lang, dark }: ViewDockProps)
               <Icon
                 aria-hidden="true"
                 className={clsx(
-                  "h-[19px] w-[19px] transition-transform duration-200",
-                  selected ? "scale-105" : "group-hover:scale-105",
+                  "h-[18px] w-[18px] shrink-0 transition-colors duration-150",
+                  selected ? "text-white" : dark ? "text-mist group-hover:text-white" : "text-slate group-hover:text-royal",
                 )}
               />
-              <span className="text-center">{item.label}</span>
+              <span className="truncate text-center lg:text-left">{item.label}</span>
             </button>
           );
         })}

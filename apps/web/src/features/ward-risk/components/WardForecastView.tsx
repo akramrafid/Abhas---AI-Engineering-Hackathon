@@ -195,7 +195,7 @@ export function WardForecastView({
         lang={lang}
       />
 
-      <div className="no-print grid gap-5 lg:grid-cols-[332px_1fr] lg:items-start">
+      <div className="no-print grid gap-4 lg:grid-cols-[296px_1fr] lg:items-start xl:grid-cols-[312px_1fr]">
         <WardRailList
           city={city}
           sortedForecasts={sortedForecasts}
@@ -209,7 +209,7 @@ export function WardForecastView({
           }}
         />
 
-        <div className="space-y-5" aria-live="polite">
+        <div className="min-w-0 space-y-4" aria-live="polite">
           <PeakTierCard
             response={response}
             selectedForecast={selectedForecast}
@@ -252,7 +252,7 @@ export function WardForecastView({
             </CardContent>
           </Card>
 
-          <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+          <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
             <HorizonTable
               horizons={selectedForecast.horizons}
               activeHorizon={activeDriverHorizon?.horizon ?? null}

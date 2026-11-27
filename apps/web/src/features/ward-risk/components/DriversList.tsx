@@ -73,17 +73,17 @@ export function DriversList({
   const maxAbs = Math.max(15, ...rows.map((r) => Math.abs(r.effectPct)));
 
   return (
-    <div data-testid="drivers-panel" className="space-y-3.5">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-paper/75 px-3 py-2 text-[11px] font-medium text-slate ring-1 ring-mist/80">
+    <div data-testid="drivers-panel" className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-mist/75 pb-2 text-[11px] font-medium text-slate">
         <p className={lang === "bn" ? "font-bangla" : undefined}>
           {copy.driversWaterfallCaption} ({horizonLabel})
         </p>
-        <span className="font-semibold text-navy tnum">
+        <span className="font-mono font-semibold text-navy tnum">
           −{Math.round(maxAbs)}% · 0 · +{Math.round(maxAbs)}%
         </span>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="space-y-2.5">
         {rows.map((row) => {
           const isPositive = row.effectPct > 0;
           const isNegative = row.effectPct < 0;
@@ -102,7 +102,7 @@ export function DriversList({
               data-testid={`driver-row-${row.key}`}
               className={clsx(
                 "space-y-1.5",
-                row.isOther && "border-t border-mist/80 pt-3",
+                row.isOther && "border-t border-mist/80 pt-2.5",
               )}
             >
               <div className="flex items-center justify-between gap-2 text-sm">
@@ -134,10 +134,10 @@ export function DriversList({
                 </span>
                 <span
                   className={clsx(
-                    "rounded-full px-2 py-0.5 text-xs font-bold tnum",
+                    "rounded-md px-1.5 py-0.5 font-mono text-xs font-bold tnum",
                     isPositive
                       ? "bg-royal/10 text-royal"
-                      : "bg-paper text-slate ring-1 ring-mist",
+                      : "bg-paper text-slate ring-1 ring-mist/80",
                   )}
                 >
                   {formattedPct}
@@ -146,18 +146,18 @@ export function DriversList({
 
               {/* Smoothly animated diverging waterfall bar centered on 0% baseline */}
               <div
-                className="relative h-2.5 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist/85"
+                className="relative h-2 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist/80"
                 aria-hidden="true"
               >
                 <span className="absolute inset-y-0 left-1/2 z-10 w-px bg-navy/25" />
                 {isPositive ? (
                   <div
-                    className="absolute inset-y-0 rounded-r-full bg-[linear-gradient(90deg,#2F5BFF_0%,#5B7EFF_100%)] transition-[left,width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+                    className="absolute inset-y-0 rounded-r-full bg-royal transition-[left,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
                     style={{ left: "50%", width: `${halfPct}%` }}
                   />
                 ) : isNegative ? (
                   <div
-                    className="absolute inset-y-0 rounded-l-full bg-slate/80 transition-[left,width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
+                    className="absolute inset-y-0 rounded-l-full bg-slate/80 transition-[left,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none"
                     style={{ left: `${50 - halfPct}%`, width: `${halfPct}%` }}
                   />
                 ) : null}
