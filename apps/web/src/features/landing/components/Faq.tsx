@@ -30,7 +30,7 @@ export function Faq() {
       id="faq"
       aria-labelledby="faq-heading"
       lang={lang}
-      className="scroll-mt-20 border-t border-mist bg-paper/75 px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-32"
+      className="scroll-mt-20 border-t border-mist bg-paper px-4 py-24 text-ink sm:px-8 lg:px-14 lg:py-32"
     >
       <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,4.5fr)_minmax(0,7.5fr)] lg:items-start lg:gap-16">
         <div className="lg:sticky lg:top-28">
