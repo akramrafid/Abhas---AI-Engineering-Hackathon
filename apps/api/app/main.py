@@ -8,6 +8,8 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, inspect, select
 
+from app.adapters.config_capacity import check_ward_capacity_ready
+from app.adapters.config_supply import check_supply_ratios_ready
 from app.adapters.db.factory import ensure_database_ready, get_engine
 from app.adapters.db.models import WardRow
 from app.adapters.runtime import check_model_readiness
@@ -83,7 +85,12 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
     except Exception:
         logger.exception("lags cache warm-up failed during startup")
 
-    checks: dict[str, Any] = {"database": _database_is_seeded, "model": _model_is_ready}
+    checks: dict[str, Any] = {
+        "database": _database_is_seeded,
+        "model": _model_is_ready,
+        "supply_ratios": check_supply_ratios_ready,
+        "ward_capacity": check_ward_capacity_ready,
+    }
     checks.update(get_readiness_checks())
     checks.update(getattr(app.state, "checks", {}))
     app.state.checks = checks

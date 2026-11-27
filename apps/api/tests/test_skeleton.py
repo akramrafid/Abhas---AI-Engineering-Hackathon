@@ -201,6 +201,11 @@ def test_cr_16_readyz_extensible_checks_hook() -> None:
             state["loaded"] = True
             r_ok = c.get("/readyz")
             assert r_ok.status_code == 200
-            assert r_ok.json()["checks"] == {"database": True, "model": True}
+            assert r_ok.json()["checks"] == {
+                "database": True,
+                "model": True,
+                "supply_ratios": True,
+                "ward_capacity": True,
+            }
     finally:
         unregister_readiness_check("model")

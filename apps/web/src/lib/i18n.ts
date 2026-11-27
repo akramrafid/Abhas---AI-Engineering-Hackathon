@@ -4,6 +4,7 @@ export type Lang = "en" | "bn";
 
 export type DashboardTab =
   | "ward-risk"
+  | "command"
   | "map"
   | "lags"
   | "scenario"
@@ -14,6 +15,7 @@ export type DashboardTab =
 
 export const VALID_TABS: readonly DashboardTab[] = [
   "ward-risk",
+  "command",
   "map",
   "lags",
   "scenario",
@@ -135,6 +137,29 @@ export interface UiCopy {
     wardNotFound: string;
     resetDefaultWard: string;
   };
+  command: {
+    steps: {
+      forecast: string;
+      allocate: string;
+      route: string;
+      simulate: string;
+      dispatch: string;
+    };
+    scopeLabel: string;
+    scopeAll: string;
+    originLabel: string;
+    windowStartLabel: string;
+    windowEndLabel: string;
+    savePlanLabel: string;
+    savePlanPlaceholder: string;
+    savePlanButton: string;
+    savingPlan: string;
+    comparePlansButton: string;
+    offlineBadge: string;
+    onlineBadge: string;
+    previousStep: string;
+    nextStep: string;
+  };
 }
 
 export const UI_COPY: Record<Lang, UiCopy> = {
@@ -145,6 +170,7 @@ export const UI_COPY: Record<Lang, UiCopy> = {
     brandLink: "Brand System",
     tabs: {
       "ward-risk": "Ward Forecast",
+      command: "Command Center",
       map: "Risk Map",
       lags: "Lags",
       scenario: "Scenario",
@@ -237,6 +263,29 @@ export const UI_COPY: Record<Lang, UiCopy> = {
       wardNotFound: "Ward not found",
       resetDefaultWard: "Select Dhaka South default ward",
     },
+    command: {
+      steps: {
+        forecast: "Forecast",
+        allocate: "Allocate",
+        route: "Route",
+        simulate: "Simulate",
+        dispatch: "Dispatch",
+      },
+      scopeLabel: "Scope",
+      scopeAll: "All cities (60 wards)",
+      originLabel: "Origin week (ISO)",
+      windowStartLabel: "From horizon",
+      windowEndLabel: "To horizon",
+      savePlanLabel: "Plan label",
+      savePlanPlaceholder: "e.g. Dhaka South 60% stock",
+      savePlanButton: "Save as plan",
+      savingPlan: "Saving…",
+      comparePlansButton: "Compare plans",
+      offlineBadge: "Offline",
+      onlineBadge: "Local API",
+      previousStep: "Previous step",
+      nextStep: "Next step",
+    },
   },
   bn: {
     appHeading: "ওয়ার্ড-ভিত্তিক ডেঙ্গু আগাম সতর্কতা",
@@ -245,6 +294,7 @@ export const UI_COPY: Record<Lang, UiCopy> = {
     brandLink: "ব্র্যান্ড সিস্টেম",
     tabs: {
       "ward-risk": "ওয়ার্ড পূর্বাভাস",
+      command: "কমান্ড সেন্টার",
       map: "ঝুঁকি মানচিত্র",
       lags: "বৃষ্টি-ব্যবধান",
       scenario: "দৃশ্যপট",
@@ -333,6 +383,29 @@ export const UI_COPY: Record<Lang, UiCopy> = {
       retry: "আবার চেষ্টা করুন",
       wardNotFound: "ওয়ার্ড পাওয়া যায়নি",
       resetDefaultWard: "ঢাকা দক্ষিণ ডিফল্ট ওয়ার্ড নির্বাচন করুন",
+    },
+    command: {
+      steps: {
+        forecast: "পূর্বাভাস",
+        allocate: "বণ্টন",
+        route: "শয্যা রুট",
+        simulate: "সিমুলেট",
+        dispatch: "ডিসপ্যাচ",
+      },
+      scopeLabel: "অঞ্চল",
+      scopeAll: "সকল নগর (৬০ ওয়ার্ড)",
+      originLabel: "সূচনা সপ্তাহ (ISO)",
+      windowStartLabel: "শুরুর সপ্তাহ",
+      windowEndLabel: "শেষ সপ্তাহ",
+      savePlanLabel: "পরিকল্পনার নাম",
+      savePlanPlaceholder: "যেমন: ঢাকা দক্ষিণ ৬০% মজুত",
+      savePlanButton: "পরিকল্পনা সংরক্ষণ",
+      savingPlan: "সংরক্ষণ হচ্ছে…",
+      comparePlansButton: "পরিকল্পনা তুলনা",
+      offlineBadge: "অফলাইন",
+      onlineBadge: "লোকাল এপিআই",
+      previousStep: "আগের ধাপ",
+      nextStep: "পরবর্তী ধাপ",
     },
   },
 };

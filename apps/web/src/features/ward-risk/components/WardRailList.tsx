@@ -179,7 +179,7 @@ export function WardRailList({
                     <span
                       lang={lang}
                       className={clsx(
-                        "inline-flex shrink-0 items-center gap-1 rounded-full bg-royal/12 px-2 py-0.5 text-[11px] font-semibold text-royal",
+                        "inline-flex shrink-0 items-center gap-1 rounded-full bg-royal/12 px-2 py-0.5 text-[11px] font-semibold text-navy",
                         lang === "bn" && "font-bangla",
                       )}
                     >

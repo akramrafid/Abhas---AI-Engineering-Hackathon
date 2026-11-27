@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import { ShieldCheck } from "@/components/icons";
 import type { Lang } from "@/lib/i18n";
@@ -31,6 +32,7 @@ function subscribeConsent(onChange: () => void): () => void {
  * Uses strictly Abhas Ink/Royal/White tokens (zero Lime) and remembers the user's choice locally.
  */
 export function CookieBanner() {
+  const pathname = usePathname();
   // Server snapshot returns "hidden" so SSR never flashes the banner before checking localStorage.
   const consent = useSyncExternalStore(subscribeConsent, readConsent, () => "hidden");
   const [lang, setLang] = useState<Lang>("en");
@@ -53,7 +55,7 @@ export function CookieBanner() {
     return () => window.removeEventListener("abhas:lang", onLang);
   }, []);
 
-  if (consent !== null) return null;
+  if (consent !== null || pathname?.startsWith("/dashboard")) return null;
 
   const bn = lang === "bn";
 

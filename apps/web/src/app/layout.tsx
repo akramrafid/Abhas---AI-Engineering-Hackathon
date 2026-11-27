@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import "@fontsource/poppins/300.css";
 import "@fontsource/poppins/400.css";
@@ -98,7 +99,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-paper text-ink font-sans" suppressHydrationWarning>
         <AuthProvider>
           {children}
-          <CookieBanner />
+          <Suspense fallback={null}>
+            <CookieBanner />
+          </Suspense>
           <LazyChatWidget />
         </AuthProvider>
       </body>

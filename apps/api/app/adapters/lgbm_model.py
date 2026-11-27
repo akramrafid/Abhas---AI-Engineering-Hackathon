@@ -202,11 +202,13 @@ class LGBMForecastModel:
         *,
         ward_ids: Sequence[str] | None = None,
         target_iso_weeks: Sequence[int] | None = None,
+        include_contributions: bool = True,
     ) -> list[PointForecast]:
         """Predict one horizon (1–4) for feature rows built by app/shared/features.py.
 
-        Runs single-threaded (`num_threads=1`) with native TreeSHAP (`pred_contrib=True`) so
-        mean prediction and log-space SHAP contributions are produced in one fast pass.
+        Runs single-threaded (`num_threads=1`). Computes native TreeSHAP (`pred_contrib=True`)
+        when `include_contributions=True`, or fast log-margin inference (`raw_score=True`) for
+        batch counterfactual evaluation.
         """
         if horizon not in VALID_HORIZONS:
             raise ValueError(f"horizon must be in {VALID_HORIZONS}, got {horizon}")
@@ -215,12 +217,17 @@ class LGBMForecastModel:
 
         X = self._rows_to_matrix(rows)
         booster = self._boosters[horizon]
-        # Single-threaded native TreeSHAP returns (N, F + 1) in log-margin space; sum(row) == raw margin.
-        raw_contribs = np.asarray(booster.predict(X, pred_contrib=True, num_threads=1), dtype=np.float64)
-        if raw_contribs.ndim == 1:
-            raw_contribs = raw_contribs.reshape(1, -1)
-
-        raw_margin = np.sum(raw_contribs, axis=1)
+        raw_contribs: np.ndarray | None = None
+        if include_contributions:
+            # Single-threaded native TreeSHAP returns (N, F + 1) in log-margin space; sum(row) == raw margin.
+            raw_contribs = np.asarray(booster.predict(X, pred_contrib=True, num_threads=1), dtype=np.float64)
+            if raw_contribs.ndim == 1:
+                raw_contribs = raw_contribs.reshape(1, -1)
+            raw_margin = np.sum(raw_contribs, axis=1)
+        else:
+            raw_margin = np.asarray(booster.predict(X, raw_score=True, num_threads=1), dtype=np.float64)
+            if raw_margin.ndim == 0:
+                raw_margin = raw_margin.reshape(1)
         expected_arr = np.maximum(0.0, np.exp(np.clip(raw_margin, -20.0, 10.0)))
 
         cal = self.calibrations[horizon]
@@ -255,8 +262,11 @@ class LGBMForecastModel:
             base_tier = tier_from_cases(mu, self.tier_cutoffs)
             tier, escalated = escalate_tier(base_tier, p90, epi_thresh)
 
-            shap_row = raw_contribs[idx, :n_feats]
-            contribs = {fnames[j]: float(shap_row[j]) for j in range(n_feats)}
+            if raw_contribs is not None:
+                shap_row = raw_contribs[idx, :n_feats]
+                contribs = {fnames[j]: float(shap_row[j]) for j in range(n_feats)}
+            else:
+                contribs = {}
             results.append(
                 PointForecast(
                     expected_cases=mu,

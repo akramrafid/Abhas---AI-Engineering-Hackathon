@@ -36,26 +36,12 @@ from app.features.plans.service import PlansService
 from app.features.simulator.schemas import SimulatorResponse
 from app.features.simulator.service import SimulatorService
 from app.main import create_app
-from app.ports.supply import SupplyRatios
 from app.shared.features import FEATURE_COLUMNS
 from app.shared.intervention import (
     EFFICACY_PRESETS,
     MONOTONE_RAIN_FEATURES,
-    apply_reduction,
-    reduction,
-    roi,
-)
-from app.shared.optimizer import (
-    allocate_city,
-    classify_deficit,
-    density_factors,
-    greedy_crews,
-    largest_remainder_round,
-    priority_weights,
 )
 from app.shared.plan_registry import registered_kinds
-from app.shared.routing import derive_capacity, route_city, summarise_city
-from app.shared.supply import fit_ratios, supply_for_cases, window_case_quantile
 from ml.train import monotone_constraints_for_horizon
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -113,6 +99,8 @@ def test_wp0_2_fixture_roundtrip_and_provenance_all_endpoints(monkeypatch: pytes
         assert ready_body["git_sha"] == "075e81b"
         assert ready_body["offline"] is False
         assert ready_body["data_as_of"] == "2025-12-29"
+        assert ready_body["checks"]["supply_ratios"] is True
+        assert ready_body["checks"]["ward_capacity"] is True
 
         # 2.1 POST /api/v1/allocation/plan
         alloc_req = {
@@ -316,49 +304,9 @@ def test_monotone_rain_features_matches_ml_train() -> None:
 
 
 def test_wp0_shared_and_service_stubs_raise_not_implemented() -> None:
-    """WP0 locks signatures and leaves algorithm/service bodies raising NotImplementedError for WP1-WP6."""
+    """All four plan runners are registered and unconfigured services fail closed without injected dependencies."""
     create_app()
     assert registered_kinds() >= {"allocation", "overflow", "simulation", "dispatch"}
-
-    ratios = SupplyRatios(
-        saline_bags=2.384,
-        diagnostic_kits=1.158,
-        hospital_beds=0.295,
-        r2={"saline_bags": 0.9997, "diagnostic_kits": 0.9988, "hospital_beds": 0.9806},
-        fitted_years=(2016, 2022),
-        dataset_sha256="24fac543",
-    )
-
-    with pytest.raises(NotImplementedError):
-        window_case_quantile([4.0, 6.0], [3.0, 3.0], 0.8)
-    with pytest.raises(NotImplementedError):
-        supply_for_cases(10, ratios)
-    with pytest.raises(NotImplementedError):
-        fit_ratios(None)  # type: ignore[arg-type]
-    with pytest.raises(NotImplementedError):
-        density_factors([40000.0], 40000.0)
-    with pytest.raises(NotImplementedError):
-        priority_weights(["Critical"], [1.0])
-    with pytest.raises(NotImplementedError):
-        allocate_city([100], [8.0], 60, 20, ["DSCC_Ward_04"])
-    with pytest.raises(NotImplementedError):
-        largest_remainder_round([2.4, 1.6], 4, ["a", "b"])
-    with pytest.raises(NotImplementedError):
-        classify_deficit(10, 5, "Critical")
-    with pytest.raises(NotImplementedError):
-        greedy_crews(lambda _w, _c: 1.0, ["DSCC_Ward_04"], 2)
-    with pytest.raises(NotImplementedError):
-        derive_capacity({})
-    with pytest.raises(NotImplementedError):
-        route_city([9, 2], [5, 6], ["W1", "W2"])
-    with pytest.raises(NotImplementedError):
-        summarise_city([9, 2], [5, 6], [5, 6])
-    with pytest.raises(NotImplementedError):
-        reduction(2, 0.40, 0.50)
-    with pytest.raises(NotImplementedError):
-        apply_reduction({}, 2, 0.25, 100.0)
-    with pytest.raises(NotImplementedError):
-        roi(6.0, 2)
 
     with pytest.raises(NotImplementedError):
         AllocationService().plan(AllocationRequest(origin_week=date(2024, 8, 5)))

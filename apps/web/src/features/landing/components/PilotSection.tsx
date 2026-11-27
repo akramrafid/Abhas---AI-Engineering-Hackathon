@@ -227,7 +227,7 @@ export function PilotSection() {
               : "We do not publish fabricated testimonials. Abhas is an open early-warning platform seeking municipal pilot partners across Bangladesh — judge the model directly on its locked 2024–2025 validation numbers."}
           </p>
 
-          <dl className="mt-8 grid gap-4 sm:grid-cols-2">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {BENCHMARKS.map((item) => {
               const Icon = item.icon;
               const badgeText =
@@ -245,21 +245,21 @@ export function PilotSection() {
                       {badgeText}
                     </span>
                   </div>
-                  <dt className="mt-4 flex items-baseline gap-1.5">
+                  <p className="mt-4 flex items-baseline gap-1.5">
                     <span className="text-2xl font-extrabold tracking-tight text-navy tnum">
                       {item.value}
                     </span>
                     <span className={clsx("text-xs font-semibold text-slate", bn && "font-bangla")}>
                       {bn ? item.unitBn : item.unitEn}
                     </span>
-                  </dt>
-                  <dd className={clsx("mt-1.5 text-xs leading-5 text-slate", bn && "font-bangla")}>
+                  </p>
+                  <p className={clsx("mt-1.5 text-xs leading-5 text-slate", bn && "font-bangla")}>
                     {bn ? item.detailBn : item.detailEn}
-                  </dd>
+                  </p>
                 </div>
               );
             })}
-          </dl>
+          </div>
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link
@@ -285,7 +285,7 @@ export function PilotSection() {
               target="_blank"
               rel="noopener noreferrer"
               title="WhatsApp Abhas pilot desk (+880 1641-414949)"
-              aria-label="Open WhatsApp chat with Abhas pilot desk (01641414949)"
+              aria-label={bn ? "হোয়াটসঅ্যাপ পাইলট ডেস্ক (+৮৮০ ১৬৪১-৪১৪৯৪৯)" : "WhatsApp pilot desk (+880 1641-414949)"}
               onClick={() =>
                 trackEvent({ event: "cta_whatsapp_contact", location: "pilot_section", lang })
               }

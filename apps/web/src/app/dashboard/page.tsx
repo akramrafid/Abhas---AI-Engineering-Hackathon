@@ -20,6 +20,10 @@ import { downloadCsv } from "@/lib/csv";
 import { WardForecastView } from "@/features/ward-risk/components/WardForecastView";
 
 // Keep WardForecastView eager (default LCP tab); code-split secondary views & modals on demand.
+const CommandCenterView = dynamic(
+  () => import("@/features/command/CommandCenterView").then((m) => m.CommandCenterView),
+  { loading: () => <PanelSkeleton testId="command-loading" label="Loading Command Center…" /> },
+);
 const RiskMapView = dynamic(
   () => import("@/features/risk-map/components/RiskMapView").then((m) => m.RiskMapView),
   { loading: () => <PanelSkeleton testId="risk-map-loading" label="Loading risk map…" /> },
@@ -101,10 +105,18 @@ function DashboardWorkspace() {
   const urlWindowParam = searchParams.get("window")?.trim() || null;
   const urlTabParam = searchParams.get("tab")?.trim() || null;
   const urlLangParam = searchParams.get("lang")?.trim() || null;
+  const urlStepParam = searchParams.get("step")?.trim() || null;
 
   const [activeTab, setActiveTab] = useState<DashboardTab>(() =>
     isDashboardTab(urlTabParam) ? urlTabParam : "ward-risk",
   );
+  const [commandStep, setCommandStep] = useState<1 | 2 | 3 | 4 | 5>(() => {
+    const parsed = Number(urlStepParam);
+    if (parsed === 1 || parsed === 2 || parsed === 3 || parsed === 4 || parsed === 5) {
+      return parsed;
+    }
+    return 1;
+  });
   const [lang, setLangState] = useState<Lang>(() => {
     if (isLang(urlLangParam)) return urlLangParam;
     return "en";
@@ -253,6 +265,7 @@ function DashboardWorkspace() {
     if (selectedOriginWeek) params.set("origin", selectedOriginWeek);
     params.set("window", windowKey);
     params.set("tab", activeTab);
+    if (activeTab === "command") params.set("step", String(commandStep));
     params.set("lang", lang);
 
     const nextSearch = `?${params.toString()}`;
@@ -267,6 +280,7 @@ function DashboardWorkspace() {
     selectedOriginWeek,
     windowKey,
     activeTab,
+    commandStep,
     lang,
   ]);
 
@@ -301,6 +315,7 @@ function DashboardWorkspace() {
     const labels = UI_COPY[lang].tabs;
     return [
       { id: "ward-risk", label: labels["ward-risk"], testId: "tab-ward-risk" },
+      { id: "command", label: labels.command, testId: "tab-command" },
       { id: "map", label: labels.map, testId: "tab-map" },
       { id: "lags", label: labels.lags, testId: "tab-lags" },
       { id: "scenario", label: labels.scenario, testId: "tab-scenario" },
@@ -327,7 +342,8 @@ function DashboardWorkspace() {
     }
   };
 
-  const showSelectionBar = activeTab !== "validation" && activeTab !== "about";
+  const showSelectionBar =
+    activeTab !== "validation" && activeTab !== "about" && activeTab !== "command";
 
   // Shell: theme (remembered per browser), search (Ctrl+K), alerts, CSV export, view transitions.
   const [dark, toggleTheme] = useDashboardTheme();
@@ -509,6 +525,20 @@ function DashboardWorkspace() {
                 onResetUnknownWard={handleResetUnknownWard}
               />
             )
+          ) : null}
+
+          {activeTab === "command" ? (
+            <CommandCenterView
+              cities={cities}
+              wards={allWards}
+              mondayWeeks={mondayWeeks}
+              originWeek={selectedOriginWeek}
+              windowKey={windowKey}
+              lang={lang}
+              step={commandStep}
+              onStepChange={setCommandStep}
+              onOriginWeekChange={setOriginWeekOverride}
+            />
           ) : null}
 
           {activeTab === "map" && !wardsQuery.isError ? (

@@ -140,7 +140,11 @@ export function DashboardHeader({
                     : "text-slate hover:text-navy",
               )}
             >
-              {bn ? "ডেটাসেট" : "Dataset"}
+              {bn ? "ডেটাসেট" : (
+                <>
+                  Dataset<span className="sr-only"> mode</span>
+                </>
+              )}
             </button>
             <button
               type="button"
