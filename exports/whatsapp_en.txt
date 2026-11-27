@@ -1,0 +1,277 @@
+*ABHAS Operational Dispatch · Ward 04 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *53.4*
+Supplies (Allocated / Required):
+- Saline bags: 155 / 155
+- Diagnostic kits: 76 / 76
+- Hospital beds: 21 / 21
+Deficit Alert: None
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 06 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *50.4*
+Supplies (Allocated / Required):
+- Saline bags: 145 / 145
+- Diagnostic kits: 71 / 71
+- Hospital beds: 20 / 20
+Deficit Alert: None
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 10 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *46.5*
+Supplies (Allocated / Required):
+- Saline bags: 136 / 136
+- Diagnostic kits: 66 / 66
+- Hospital beds: 19 / 19
+Deficit Alert: None
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 19 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *49*
+Supplies (Allocated / Required):
+- Saline bags: 143 / 143
+- Diagnostic kits: 70 / 70
+- Hospital beds: 20 / 20
+Deficit Alert: None
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 08 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *33.5*
+Supplies (Allocated / Required):
+- Saline bags: 98 / 98
+- Diagnostic kits: 48 / 48
+- Hospital beds: 14 / 14
+Deficit Alert: None
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 12 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *45.7*
+Supplies (Allocated / Required):
+- Saline bags: 134 / 134
+- Diagnostic kits: 65 / 65
+- Hospital beds: 18 / 18
+Deficit Alert: None
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 13 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *38.1*
+Supplies (Allocated / Required):
+- Saline bags: 112 / 112
+- Diagnostic kits: 55 / 55
+- Hospital beds: 15 / 15
+Deficit Alert: None
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 01 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *29*
+Supplies (Allocated / Required):
+- Saline bags: 86 / 86
+- Diagnostic kits: 42 / 42
+- Hospital beds: 12 / 12
+Deficit Alert: None
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, pre-position allocated supplies at ward clinics, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 07 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *22.3*
+Supplies (Allocated / Required):
+- Saline bags: 35 / 67 (deficit 32)
+- Diagnostic kits: 18 / 33 (deficit 15)
+- Hospital beds: 6 / 10 (deficit 4)
+Deficit Alert: *CRITICAL DEFICIT* — saline 32, kits 15, beds 4
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 02 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *26*
+Supplies (Allocated / Required):
+- Saline bags: 15 / 76 (deficit 61)
+- Diagnostic kits: 8 / 37 (deficit 29)
+- Hospital beds: 2 / 11 (deficit 9)
+Deficit Alert: *CRITICAL DEFICIT* — saline 61, kits 29, beds 9
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 15 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *27.8*
+Supplies (Allocated / Required):
+- Saline bags: 16 / 81 (deficit 65)
+- Diagnostic kits: 8 / 40 (deficit 32)
+- Hospital beds: 2 / 12 (deficit 10)
+Deficit Alert: *CRITICAL DEFICIT* — saline 65, kits 32, beds 10
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 09 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *25.9*
+Supplies (Allocated / Required):
+- Saline bags: 15 / 76 (deficit 61)
+- Diagnostic kits: 7 / 37 (deficit 30)
+- Hospital beds: 2 / 11 (deficit 9)
+Deficit Alert: *CRITICAL DEFICIT* — saline 61, kits 30, beds 9
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 16 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *27.6*
+Supplies (Allocated / Required):
+- Saline bags: 16 / 81 (deficit 65)
+- Diagnostic kits: 8 / 40 (deficit 32)
+- Hospital beds: 2 / 11 (deficit 9)
+Deficit Alert: *CRITICAL DEFICIT* — saline 65, kits 32, beds 9
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 17 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *24.6*
+Supplies (Allocated / Required):
+- Saline bags: 15 / 74 (deficit 59)
+- Diagnostic kits: 7 / 36 (deficit 29)
+- Hospital beds: 2 / 10 (deficit 8)
+Deficit Alert: *CRITICAL DEFICIT* — saline 59, kits 29, beds 8
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 20 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *36.5*
+Supplies (Allocated / Required):
+- Saline bags: 21 / 107 (deficit 86)
+- Diagnostic kits: 10 / 52 (deficit 42)
+- Hospital beds: 3 / 15 (deficit 12)
+Deficit Alert: *CRITICAL DEFICIT* — saline 86, kits 42, beds 12
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 18 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *38.2*
+Supplies (Allocated / Required):
+- Saline bags: 22 / 112 (deficit 90)
+- Diagnostic kits: 11 / 55 (deficit 44)
+- Hospital beds: 3 / 16 (deficit 13)
+Deficit Alert: *CRITICAL DEFICIT* — saline 90, kits 44, beds 13
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 03 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *43.1*
+Supplies (Allocated / Required):
+- Saline bags: 25 / 124 (deficit 99)
+- Diagnostic kits: 12 / 61 (deficit 49)
+- Hospital beds: 4 / 17 (deficit 13)
+Deficit Alert: *CRITICAL DEFICIT* — saline 99, kits 49, beds 13
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 11 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *31.2*
+Supplies (Allocated / Required):
+- Saline bags: 19 / 93 (deficit 74)
+- Diagnostic kits: 9 / 45 (deficit 36)
+- Hospital beds: 3 / 13 (deficit 10)
+Deficit Alert: *CRITICAL DEFICIT* — saline 74, kits 36, beds 10
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 14 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *20.5*
+Supplies (Allocated / Required):
+- Saline bags: 13 / 62 (deficit 49)
+- Diagnostic kits: 6 / 30 (deficit 24)
+- Hospital beds: 2 / 9 (deficit 7)
+Deficit Alert: *CRITICAL DEFICIT* — saline 49, kits 24, beds 7
+Assigned Crews: *0*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.
+
+---
+
+*ABHAS Operational Dispatch · Ward 05 (Dhaka South)*
+Window: 2024-08-19 to 2024-09-02
+Risk Tier: *Critical*
+Predicted Cases: *37.3*
+Supplies (Allocated / Required):
+- Saline bags: 22 / 110 (deficit 88)
+- Diagnostic kits: 11 / 54 (deficit 43)
+- Hospital beds: 3 / 15 (deficit 12)
+Deficit Alert: *CRITICAL DEFICIT* — saline 88, kits 43, beds 12
+Assigned Crews: *1*
+Action: Deploy emergency larviciding and fogging crews immediately, escalate supply deficit requests to the city depot, and activate ward triage beds.

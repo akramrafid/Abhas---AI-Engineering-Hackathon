@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <title>আভাস কমিশনার ব্রিফ — ওয়ার্ড ০৪ (DSCC_Ward_04)</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 14mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: #FFFFFF;
+      color: #0B0F14;
+      font-family: "Manrope", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .sheet {
+      max-width: 794px;
+      margin: 0 auto;
+      padding: 0;
+    }
+    header.hero {
+      background: #0B1A5C;
+      color: #FFFFFF;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 18px;
+      border-bottom: 4px solid #2F5BFF;
+    }
+    .brand-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(221, 227, 243, 0.22);
+    }
+    .brand-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #DDE3F3;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: #DDE3F3;
+    }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #FFFFFF;
+    }
+    .ward-sub {
+      margin-top: 4px;
+      font-size: 13px;
+      color: #DDE3F3;
+    }
+    .mono {
+      font-family: "IBM Plex Mono", "Noto Sans Bengali", ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: #7F1D1D;
+      color: #FFFFFF;
+      border: 1px solid #631717;
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .meter {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 16px;
+    }
+    .meter-bar {
+      display: inline-block;
+      width: 4px;
+      border-radius: 1px;
+    }
+    .meter-bar.bar-1 { height: 6px; }
+    .meter-bar.bar-2 { height: 9px; }
+    .meter-bar.bar-3 { height: 12px; }
+    .meter-bar.bar-4 { height: 15px; }
+    .meter-bar.active {
+      background: #FFFFFF;
+    }
+    .meter-bar.inactive {
+      background: transparent;
+      border: 1px solid #FFFFFF;
+      opacity: 0.55;
+    }
+    .meta-strip {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(221, 227, 243, 0.22);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 12px;
+      color: #DDE3F3;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .card {
+      background: #FFFFFF;
+      border: 1px solid #DDE3F3;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4B5578;
+      margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: #0B1A5C;
+      line-height: 1.15;
+    }
+    .kpi-value.status-text {
+      font-size: 19px;
+      padding-top: 4px;
+    }
+    .kpi-sub {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #4B5578;
+    }
+    section.panel {
+      background: #FFFFFF;
+      border: 1px solid #DDE3F3;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0B1A5C;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #DDE3F3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #DDE3F3;
+      text-align: left;
+      font-size: 13px;
+    }
+    th {
+      background: #F4F6FD;
+      color: #0B1A5C;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    th.num, td.num {
+      text-align: right;
+    }
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .deficit-nonzero {
+      font-weight: 700;
+      color: #0B1A5C;
+    }
+    .callout {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background: #F4F6FD;
+      border-left: 4px solid #2F5BFF;
+      color: #0B0F14;
+      font-size: 13px;
+    }
+    .callout-ok {
+      border-left-color: #0B1A5C;
+    }
+    .action-text {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #0B0F14;
+    }
+    .crew-pill {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: #F4F6FD;
+      border: 1px solid #DDE3F3;
+      color: #0B1A5C;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    footer.provenance {
+      margin-top: 18px;
+      padding-top: 10px;
+      border-top: 1px solid #DDE3F3;
+      font-size: 11px;
+      color: #4B5578;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <header class="hero">
+      <div class="brand-row">
+        <span class="brand-name">ABHAS · আভাস</span>
+        <span class="brand-sub">ওয়ার্ড কমিশনার অপারেশনাল ব্রিফ · ডেঙ্গু পূর্বাভাস ও সরবরাহ পরিকল্পনা</span>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1>ওয়ার্ড ০৪ · ঢাকা দক্ষিণ</h1>
+          <div class="ward-sub mono">DSCC_Ward_04</div>
+        </div>
+        <div class="risk-badge" role="img" aria-label="Risk tier Critical">
+          <span class="meter" aria-hidden="true"><span class="meter-bar bar-1 active"></span><span class="meter-bar bar-2 active"></span><span class="meter-bar bar-3 active"></span><span class="meter-bar bar-4 active"></span></span>
+          <span>সংকটপূর্ণ · Critical</span>
+        </div>
+      </div>
+      <div class="meta-strip mono">
+        <span>পূর্বাভাস সময়কাল: ২০২৪-০৮-১৯ – ২০২৪-০৯-০২</span>
+        <span>ভিত্তি সপ্তাহ: ২০২৪-০৮-০৫</span>
+        <span>আঞ্চলিক মজুত ৬০% · মোট দল ১০ · পরিকল্পনা: স্বতন্ত্র</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="kpi-grid">
+        <div class="card">
+          <div class="kpi-label">প্রত্যাশিত রোগী</div>
+          <div class="kpi-value mono">৫৩.৪</div>
+          <div class="kpi-sub">পূর্বাভাস সময়কালে মোট সম্ভাব্য রোগী</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">নিয়োজিত স্প্রে দল</div>
+          <div class="kpi-value mono">১</div>
+          <div class="kpi-sub">ওয়ার্ডে বরাদ্দকৃত লার্ভিসাইড ও ফগিং দল</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">সরবরাহ অবস্থা</div>
+          <div class="kpi-value status-text">পূর্ণ বরাদ্দ</div>
+          <div class="kpi-sub">কোনো সরবরাহ ঘাটতি নেই</div>
+        </div>
+      </div>
+
+      <section class="panel">
+        <h2>সরবরাহ বরাদ্দ ও ঘাটতি</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>সরবরাহ উপকরণ</th>
+              <th class="num">প্রয়োজন</th>
+              <th class="num">বরাদ্দ</th>
+              <th class="num">ঘাটতি</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>স্যালাইন ব্যাগ</td>
+              <td class="num mono">১৫৫</td>
+              <td class="num mono">১৫৫</td>
+              <td class="num mono">০</td>
+            </tr>
+            <tr>
+              <td>ডায়াগনস্টিক কিট</td>
+              <td class="num mono">৭৬</td>
+              <td class="num mono">৭৬</td>
+              <td class="num mono">০</td>
+            </tr>
+            <tr>
+              <td>হাসপাতাল শয্যা</td>
+              <td class="num mono">২১</td>
+              <td class="num mono">২১</td>
+              <td class="num mono">০</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout-ok"><strong>সরবরাহ পূর্ণ:</strong> এই ওয়ার্ডের সকল প্রয়োজনীয় সরবরাহ সম্পূর্ণ বরাদ্দ করা হয়েছে।</div>
+      </section>
+
+      <section class="panel">
+        <h2>নিয়োজিত দল ও অগ্রাধিকার করণীয়</h2>
+        <p class="action-text">অবিলম্বে জরুরি লার্ভিসাইডিং ও ফগিং দল মোতায়েন করুন, ওয়ার্ড ক্লিনিকে বরাদ্দকৃত সরবরাহ মজুত রাখুন এবং ওয়ার্ড ট্রায়াজ শয্যা চালু করুন।</p>
+        <div class="crew-pill mono">এই ওয়ার্ডে নিয়োজিত স্প্রে দল: ১</div>
+      </section>
+    </main>
+
+    <footer class="provenance mono">
+      model_version=abhas-lgbm-1.1.2 · git_sha=eb12315 · data_as_of=2025-12-29 · offline=true · generated_at=2026-11-27T07:54:59.934747+00:00
+    </footer>
+  </div>
+</body>
+</html>
