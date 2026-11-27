@@ -171,6 +171,237 @@
         "title": "AdvisoryResponse",
         "type": "object"
       },
+      "AllocationPlanCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "allocation",
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "description": "Human-readable label for the saved plan (1–80 chars)",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "request": {
+            "$ref": "#/components/schemas/AllocationRequest"
+          }
+        },
+        "required": [
+          "label",
+          "kind",
+          "request"
+        ],
+        "title": "AllocationPlanCreate",
+        "type": "object"
+      },
+      "AllocationRequest": {
+        "additionalProperties": false,
+        "description": "POST /api/v1/allocation/plan request (contracts §2.1).",
+        "properties": {
+          "equity_floor_pct": {
+            "default": 20,
+            "description": "Minimum share of demand guaranteed per ward (0–50 %)",
+            "maximum": 50.0,
+            "minimum": 0.0,
+            "title": "Equity Floor Pct",
+            "type": "integer"
+          },
+          "h_end": {
+            "default": 4,
+            "description": "Weeks ahead of the origin week (1–4)",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "H End",
+            "type": "integer"
+          },
+          "h_start": {
+            "default": 2,
+            "description": "Weeks ahead of the origin week (1–4)",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "H Start",
+            "type": "integer"
+          },
+          "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "scope": {
+            "default": "all",
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj",
+              "all"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "service_level": {
+            "anyOf": [
+              {
+                "description": "Forecast quantile service level (0.50–0.99)",
+                "maximum": 0.99,
+                "minimum": 0.5,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional quantile override; null uses P80 saline/kits and P90 beds",
+            "title": "Service Level"
+          },
+          "stock_pct": {
+            "default": 100,
+            "description": "Available Regional Stock percentage (30–100)",
+            "maximum": 100.0,
+            "minimum": 30.0,
+            "title": "Stock Pct",
+            "type": "integer"
+          },
+          "total_crews": {
+            "default": 0,
+            "description": "Total spraying crews to assign (0–300)",
+            "maximum": 300.0,
+            "minimum": 0.0,
+            "title": "Total Crews",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "origin_week"
+        ],
+        "title": "AllocationRequest",
+        "type": "object"
+      },
+      "AllocationResponse": {
+        "description": "POST /api/v1/allocation/plan response (contracts §2.1).",
+        "properties": {
+          "cities": {
+            "items": {
+              "$ref": "#/components/schemas/CityAllocationSummary"
+            },
+            "title": "Cities",
+            "type": "array"
+          },
+          "crew_method": {
+            "enum": [
+              "greedy",
+              "greedy (approximate)"
+            ],
+            "title": "Crew Method",
+            "type": "string"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "request": {
+            "$ref": "#/components/schemas/AllocationRequest"
+          },
+          "service_levels": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "propertyNames": {
+              "enum": [
+                "saline_bags",
+                "diagnostic_kits",
+                "hospital_beds"
+              ]
+            },
+            "title": "Service Levels",
+            "type": "object"
+          },
+          "solve_ms": {
+            "minimum": 0.0,
+            "title": "Solve Ms",
+            "type": "number"
+          },
+          "supply_ratios": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "propertyNames": {
+              "enum": [
+                "saline_bags",
+                "diagnostic_kits",
+                "hospital_beds"
+              ]
+            },
+            "title": "Supply Ratios",
+            "type": "object"
+          },
+          "wards": {
+            "items": {
+              "$ref": "#/components/schemas/WardAllocation"
+            },
+            "title": "Wards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "request",
+          "supply_ratios",
+          "service_levels",
+          "crew_method",
+          "wards",
+          "cities",
+          "solve_ms"
+        ],
+        "title": "AllocationResponse",
+        "type": "object"
+      },
       "CallStats": {
         "properties": {
           "cache_hits": {
@@ -371,6 +602,155 @@
         "title": "ChatTurn",
         "type": "object"
       },
+      "CityAllocationSummary": {
+        "properties": {
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "crews_assigned": {
+            "minimum": 0.0,
+            "title": "Crews Assigned",
+            "type": "integer"
+          },
+          "critical_wards": {
+            "minimum": 0.0,
+            "title": "Critical Wards",
+            "type": "integer"
+          },
+          "deficit_wards": {
+            "minimum": 0.0,
+            "title": "Deficit Wards",
+            "type": "integer"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/CityResourceTotals"
+            },
+            "title": "Resources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "city",
+          "resources",
+          "crews_assigned",
+          "critical_wards",
+          "deficit_wards"
+        ],
+        "title": "CityAllocationSummary",
+        "type": "object"
+      },
+      "CityBedSummary": {
+        "properties": {
+          "capacity_total": {
+            "minimum": 1.0,
+            "title": "Capacity Total",
+            "type": "integer"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "headroom_after": {
+            "minimum": 0.0,
+            "title": "Headroom After",
+            "type": "integer"
+          },
+          "required_total": {
+            "minimum": 0.0,
+            "title": "Required Total",
+            "type": "integer"
+          },
+          "transfers": {
+            "minimum": 0.0,
+            "title": "Transfers",
+            "type": "integer"
+          },
+          "unroutable_patients": {
+            "minimum": 0.0,
+            "title": "Unroutable Patients",
+            "type": "integer"
+          },
+          "utilisation_after": {
+            "minimum": 0.0,
+            "title": "Utilisation After",
+            "type": "number"
+          },
+          "utilisation_before": {
+            "minimum": 0.0,
+            "title": "Utilisation Before",
+            "type": "number"
+          }
+        },
+        "required": [
+          "city",
+          "capacity_total",
+          "required_total",
+          "utilisation_before",
+          "utilisation_after",
+          "headroom_after",
+          "unroutable_patients",
+          "transfers"
+        ],
+        "title": "CityBedSummary",
+        "type": "object"
+      },
+      "CityResourceTotals": {
+        "properties": {
+          "allocated": {
+            "minimum": 0.0,
+            "title": "Allocated",
+            "type": "integer"
+          },
+          "available": {
+            "minimum": 0.0,
+            "title": "Available",
+            "type": "integer"
+          },
+          "floors_scaled": {
+            "title": "Floors Scaled",
+            "type": "boolean"
+          },
+          "required": {
+            "minimum": 0.0,
+            "title": "Required",
+            "type": "integer"
+          },
+          "resource": {
+            "enum": [
+              "saline_bags",
+              "diagnostic_kits",
+              "hospital_beds"
+            ],
+            "title": "Resource",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resource",
+          "required",
+          "available",
+          "allocated",
+          "floors_scaled"
+        ],
+        "title": "CityResourceTotals",
+        "type": "object"
+      },
       "CityWeatherStatus": {
         "properties": {
           "cache_age_hours": {
@@ -523,6 +903,251 @@
         "title": "CoverageRow",
         "type": "object"
       },
+      "Deployment": {
+        "additionalProperties": false,
+        "description": "Single ward crew deployment entry for SimulatorRequest.",
+        "properties": {
+          "crews": {
+            "description": "Spraying crews deployed to this ward (1–20)",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Crews",
+            "type": "integer"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "crews"
+        ],
+        "title": "Deployment",
+        "type": "object"
+      },
+      "DispatchPlanCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "dispatch",
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "description": "Human-readable label for the saved plan (1–80 chars)",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "request": {
+            "$ref": "#/components/schemas/DispatchRequest"
+          }
+        },
+        "required": [
+          "label",
+          "kind",
+          "request"
+        ],
+        "title": "DispatchPlanCreate",
+        "type": "object"
+      },
+      "DispatchRequest": {
+        "additionalProperties": false,
+        "description": "POST /api/v1/dispatch/notices request (contracts §2.4).",
+        "properties": {
+          "channels": {
+            "description": "Channels to render (default all three)",
+            "items": {
+              "enum": [
+                "sms",
+                "whatsapp",
+                "brief"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Channels",
+            "type": "array"
+          },
+          "lang": {
+            "default": "en",
+            "enum": [
+              "en",
+              "bn"
+            ],
+            "title": "Lang",
+            "type": "string"
+          },
+          "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "examples": [
+                  "550e8400-e29b-41d4-a716-446655440000"
+                ],
+                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional saved allocation plan UUID; if omitted, computes allocation from stock_pct and total_crews",
+            "title": "Plan Id"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "enum": [
+                  "Dhaka North",
+                  "Dhaka South",
+                  "Chattogram",
+                  "Gazipur",
+                  "Narayanganj",
+                  "all"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "City or 'all'; mutually exclusive with ward_ids",
+            "title": "Scope"
+          },
+          "stock_pct": {
+            "default": 100,
+            "description": "Available Regional Stock percentage (30–100)",
+            "maximum": 100.0,
+            "minimum": 30.0,
+            "title": "Stock Pct",
+            "type": "integer"
+          },
+          "total_crews": {
+            "default": 0,
+            "description": "Total spraying crews to assign (0–300)",
+            "maximum": 300.0,
+            "minimum": 0.0,
+            "title": "Total Crews",
+            "type": "integer"
+          },
+          "ward_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "examples": [
+                    "DSCC_Ward_07"
+                  ],
+                  "maxLength": 32,
+                  "pattern": "^[A-Za-z0-9_-]{1,32}$",
+                  "type": "string"
+                },
+                "maxItems": 60,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Explicit ward list (1–60 unique wards); mutually exclusive with scope",
+            "title": "Ward Ids"
+          }
+        },
+        "required": [
+          "origin_week"
+        ],
+        "title": "DispatchRequest",
+        "type": "object"
+      },
+      "DispatchResponse": {
+        "description": "POST /api/v1/dispatch/notices response (contracts §2.4).",
+        "properties": {
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "lang": {
+            "enum": [
+              "en",
+              "bn"
+            ],
+            "title": "Lang",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "notices": {
+            "items": {
+              "$ref": "#/components/schemas/Notice"
+            },
+            "title": "Notices",
+            "type": "array"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "request": {
+            "$ref": "#/components/schemas/DispatchRequest"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "request",
+          "lang",
+          "notices"
+        ],
+        "title": "DispatchResponse",
+        "type": "object"
+      },
       "Driver": {
         "properties": {
           "direction": {
@@ -567,6 +1192,42 @@
           "direction"
         ],
         "title": "Driver",
+        "type": "object"
+      },
+      "EfficacyParams": {
+        "properties": {
+          "assumption_note": {
+            "title": "Assumption Note",
+            "type": "string"
+          },
+          "e_max": {
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "E Max",
+            "type": "number"
+          },
+          "k": {
+            "exclusiveMinimum": 0.0,
+            "title": "K",
+            "type": "number"
+          },
+          "preset": {
+            "enum": [
+              "low",
+              "base",
+              "high"
+            ],
+            "title": "Preset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "preset",
+          "e_max",
+          "k",
+          "assumption_note"
+        ],
+        "title": "EfficacyParams",
         "type": "object"
       },
       "FieldError": {
@@ -911,6 +1572,40 @@
         "title": "HorizonForecast",
         "type": "object"
       },
+      "HorizonImpact": {
+        "properties": {
+          "baseline_cases": {
+            "minimum": 0.0,
+            "title": "Baseline Cases",
+            "type": "number"
+          },
+          "cases_prevented": {
+            "minimum": 0.0,
+            "title": "Cases Prevented",
+            "type": "number"
+          },
+          "counterfactual_cases": {
+            "minimum": 0.0,
+            "title": "Counterfactual Cases",
+            "type": "number"
+          },
+          "horizon": {
+            "description": "Weeks ahead of the origin week (1–4)",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "horizon",
+          "baseline_cases",
+          "counterfactual_cases",
+          "cases_prevented"
+        ],
+        "title": "HorizonImpact",
+        "type": "object"
+      },
       "LLMStats": {
         "properties": {
           "budget_usd_per_day": {
@@ -1149,6 +1844,150 @@
         "title": "MetricRow",
         "type": "object"
       },
+      "Notice": {
+        "properties": {
+          "brief_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brief Url"
+          },
+          "facts": {
+            "$ref": "#/components/schemas/NoticeFacts"
+          },
+          "sms": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SmsMessage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "whatsapp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Whatsapp"
+          }
+        },
+        "required": [
+          "facts"
+        ],
+        "title": "Notice",
+        "type": "object"
+      },
+      "NoticeFacts": {
+        "description": "Single source of truth for every number rendered in SMS, WhatsApp, and brief HTML (ADR-0014).",
+        "properties": {
+          "action": {
+            "description": "Tier action directive in the requested language",
+            "title": "Action",
+            "type": "string"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "crews_assigned": {
+            "minimum": 0.0,
+            "title": "Crews Assigned",
+            "type": "integer"
+          },
+          "deficit_level": {
+            "enum": [
+              "none",
+              "deficit",
+              "critical"
+            ],
+            "title": "Deficit Level",
+            "type": "string"
+          },
+          "diagnostic_kits": {
+            "$ref": "#/components/schemas/SupplyPair"
+          },
+          "hospital_beds": {
+            "$ref": "#/components/schemas/SupplyPair"
+          },
+          "predicted_cases": {
+            "description": "Window sum of expected cases, rounded to one decimal",
+            "minimum": 0.0,
+            "title": "Predicted Cases",
+            "type": "number"
+          },
+          "saline_bags": {
+            "$ref": "#/components/schemas/SupplyPair"
+          },
+          "tier": {
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          },
+          "ward_name": {
+            "title": "Ward Name",
+            "type": "string"
+          },
+          "window_end": {
+            "format": "date",
+            "title": "Window End",
+            "type": "string"
+          },
+          "window_start": {
+            "format": "date",
+            "title": "Window Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "ward_name",
+          "city",
+          "window_start",
+          "window_end",
+          "tier",
+          "predicted_cases",
+          "saline_bags",
+          "diagnostic_kits",
+          "hospital_beds",
+          "crews_assigned",
+          "deficit_level",
+          "action"
+        ],
+        "title": "NoticeFacts",
+        "type": "object"
+      },
       "OpsResponse": {
         "properties": {
           "est_monthly_cost_usd": {
@@ -1192,6 +2031,645 @@
           "est_monthly_cost_usd"
         ],
         "title": "OpsResponse",
+        "type": "object"
+      },
+      "OverflowPlanCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "overflow",
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "description": "Human-readable label for the saved plan (1–80 chars)",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "request": {
+            "$ref": "#/components/schemas/OverflowRequest"
+          }
+        },
+        "required": [
+          "label",
+          "kind",
+          "request"
+        ],
+        "title": "OverflowPlanCreate",
+        "type": "object"
+      },
+      "OverflowRequest": {
+        "additionalProperties": false,
+        "description": "POST /api/v1/overflow/route request (contracts §2.2).",
+        "properties": {
+          "capacity_overrides": {
+            "description": "Optional ward_id -> capacity overrides (1–500 beds, ≤ 60 entries)",
+            "maxProperties": 60,
+            "patternProperties": {
+              "^[A-Za-z0-9_-]{1,32}$": {
+                "description": "Bed capacity override for one ward (1–500)",
+                "maximum": 500.0,
+                "minimum": 1.0,
+                "type": "integer"
+              }
+            },
+            "propertyNames": {
+              "examples": [
+                "DSCC_Ward_07"
+              ],
+              "maxLength": 32
+            },
+            "title": "Capacity Overrides",
+            "type": "object"
+          },
+          "horizon": {
+            "default": 3,
+            "description": "Weeks ahead of the origin week (1–4)",
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Horizon",
+            "type": "integer"
+          },
+          "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "scope": {
+            "default": "all",
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj",
+              "all"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "service_level": {
+            "default": 0.9,
+            "description": "Forecast quantile service level (0.50–0.99)",
+            "maximum": 0.99,
+            "minimum": 0.5,
+            "title": "Service Level",
+            "type": "number"
+          }
+        },
+        "required": [
+          "origin_week"
+        ],
+        "title": "OverflowRequest",
+        "type": "object"
+      },
+      "OverflowResponse": {
+        "description": "POST /api/v1/overflow/route response (contracts §2.2).",
+        "properties": {
+          "capacity_method": {
+            "title": "Capacity Method",
+            "type": "string"
+          },
+          "cities": {
+            "items": {
+              "$ref": "#/components/schemas/CityBedSummary"
+            },
+            "title": "Cities",
+            "type": "array"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "request": {
+            "$ref": "#/components/schemas/OverflowRequest"
+          },
+          "solve_ms": {
+            "minimum": 0.0,
+            "title": "Solve Ms",
+            "type": "number"
+          },
+          "transfers": {
+            "items": {
+              "$ref": "#/components/schemas/Transfer"
+            },
+            "title": "Transfers",
+            "type": "array"
+          },
+          "wards": {
+            "items": {
+              "$ref": "#/components/schemas/WardBedStatus"
+            },
+            "title": "Wards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "request",
+          "capacity_method",
+          "wards",
+          "transfers",
+          "cities",
+          "solve_ms"
+        ],
+        "title": "OverflowResponse",
+        "type": "object"
+      },
+      "PlanComparison": {
+        "description": "GET /api/v1/plans/compare response (contracts §2.6 + RunMeta provenance envelope).",
+        "properties": {
+          "a": {
+            "$ref": "#/components/schemas/PlanSummary"
+          },
+          "b": {
+            "$ref": "#/components/schemas/PlanSummary"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "diffs": {
+            "items": {
+              "$ref": "#/components/schemas/PlanMetricDiff"
+            },
+            "title": "Diffs",
+            "type": "array"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "a",
+          "b",
+          "diffs"
+        ],
+        "title": "PlanComparison",
+        "type": "object"
+      },
+      "PlanHeadline": {
+        "description": "Comparable headline KPIs extracted per plan kind (nullable when not applicable).",
+        "properties": {
+          "cases_prevented": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cases Prevented"
+          },
+          "crews": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crews"
+          },
+          "critical_wards": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Wards"
+          },
+          "deficit_wards": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deficit Wards"
+          },
+          "mean_fulfilment_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Fulfilment Pct"
+          },
+          "notices": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notices"
+          },
+          "stock_pct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stock Pct"
+          },
+          "unroutable_patients": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unroutable Patients"
+          }
+        },
+        "title": "PlanHeadline",
+        "type": "object"
+      },
+      "PlanList": {
+        "description": "GET /api/v1/plans response (contracts §2.6 + RunMeta provenance envelope).",
+        "properties": {
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanSummary"
+            },
+            "title": "Plans",
+            "type": "array"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "plans"
+        ],
+        "title": "PlanList",
+        "type": "object"
+      },
+      "PlanMetricDiff": {
+        "properties": {
+          "a": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "A"
+          },
+          "b": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "B"
+          },
+          "delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta"
+          },
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric"
+        ],
+        "title": "PlanMetricDiff",
+        "type": "object"
+      },
+      "PlanRecord": {
+        "description": "POST /api/v1/plans 201 response (contracts §2.6).",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "headline": {
+            "$ref": "#/components/schemas/PlanHeadline"
+          },
+          "id": {
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "inputs": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AllocationRequest"
+              },
+              {
+                "$ref": "#/components/schemas/OverflowRequest"
+              },
+              {
+                "$ref": "#/components/schemas/SimulatorRequest"
+              },
+              {
+                "$ref": "#/components/schemas/DispatchRequest"
+              }
+            ],
+            "title": "Inputs"
+          },
+          "kind": {
+            "enum": [
+              "allocation",
+              "overflow",
+              "simulation",
+              "dispatch"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "origin_week": {
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          },
+          "outputs": {
+            "additionalProperties": true,
+            "title": "Outputs",
+            "type": "object"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "id",
+          "kind",
+          "label",
+          "created_at",
+          "origin_week",
+          "inputs",
+          "outputs",
+          "headline"
+        ],
+        "title": "PlanRecord",
+        "type": "object"
+      },
+      "PlanSummary": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "headline": {
+            "$ref": "#/components/schemas/PlanHeadline"
+          },
+          "id": {
+            "examples": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "allocation",
+              "overflow",
+              "simulation",
+              "dispatch"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "origin_week": {
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "created_at",
+          "origin_week",
+          "model_version",
+          "git_sha",
+          "headline"
+        ],
+        "title": "PlanSummary",
         "type": "object"
       },
       "PredictionStats": {
@@ -1308,6 +2786,39 @@
         "title": "Problem",
         "type": "object"
       },
+      "ResourceLine": {
+        "properties": {
+          "allocated": {
+            "minimum": 0.0,
+            "title": "Allocated",
+            "type": "integer"
+          },
+          "deficit": {
+            "minimum": 0.0,
+            "title": "Deficit",
+            "type": "integer"
+          },
+          "fulfilment_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Fulfilment Pct",
+            "type": "number"
+          },
+          "required": {
+            "minimum": 0.0,
+            "title": "Required",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "required",
+          "allocated",
+          "deficit",
+          "fulfilment_pct"
+        ],
+        "title": "ResourceLine",
+        "type": "object"
+      },
       "ScenarioRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1406,6 +2917,310 @@
           "scenario"
         ],
         "title": "ScenarioResponse",
+        "type": "object"
+      },
+      "SimulationPlanCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "simulation",
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "description": "Human-readable label for the saved plan (1–80 chars)",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "request": {
+            "$ref": "#/components/schemas/SimulatorRequest"
+          }
+        },
+        "required": [
+          "label",
+          "kind",
+          "request"
+        ],
+        "title": "SimulationPlanCreate",
+        "type": "object"
+      },
+      "SimulatorRequest": {
+        "additionalProperties": false,
+        "description": "POST /api/v1/simulator/run request (contracts §2.3).",
+        "properties": {
+          "auto_crews": {
+            "anyOf": [
+              {
+                "description": "Total crews placed greedily by the engine (1–300)",
+                "maximum": 300.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Total crews placed greedily by the engine; mutually exclusive with deployments",
+            "title": "Auto Crews"
+          },
+          "deployments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Deployment"
+                },
+                "maxItems": 60,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Explicit ward deployments (unique wards); mutually exclusive with auto_crews",
+            "title": "Deployments"
+          },
+          "efficacy": {
+            "default": "base",
+            "enum": [
+              "low",
+              "base",
+              "high"
+            ],
+            "title": "Efficacy",
+            "type": "string"
+          },
+          "origin_week": {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
+            "examples": [
+              "2025-08-04"
+            ],
+            "format": "date",
+            "title": "Origin Week",
+            "type": "string"
+          }
+        },
+        "required": [
+          "origin_week"
+        ],
+        "title": "SimulatorRequest",
+        "type": "object"
+      },
+      "SimulatorResponse": {
+        "description": "POST /api/v1/simulator/run response (contracts §2.3).",
+        "properties": {
+          "data_as_of": {
+            "description": "Last observed week used (2025-12-29 for the onsite dataset)",
+            "examples": [
+              "2025-12-29"
+            ],
+            "format": "date",
+            "title": "Data As Of",
+            "type": "string"
+          },
+          "efficacy": {
+            "$ref": "#/components/schemas/EfficacyParams"
+          },
+          "generated_at": {
+            "description": "UTC timestamp when this response was generated",
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "git_sha": {
+            "description": "Commit of the running code: ABHAS_GIT_SHA, repo HEAD read once at startup, or 'unknown'",
+            "examples": [
+              "075e81b"
+            ],
+            "pattern": "^([0-9a-f]{7,40}|unknown)$",
+            "title": "Git Sha",
+            "type": "string"
+          },
+          "model_version": {
+            "description": "Forecast artefact version, e.g. abhas-lgbm-1.1.2",
+            "examples": [
+              "abhas-lgbm-1.1.2"
+            ],
+            "title": "Model Version",
+            "type": "string"
+          },
+          "offline": {
+            "description": "Kill switch set or network probe down (ADR-0015)",
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "request": {
+            "$ref": "#/components/schemas/SimulatorRequest"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/SimulatorTotals"
+          },
+          "wards": {
+            "items": {
+              "$ref": "#/components/schemas/WardImpact"
+            },
+            "title": "Wards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "model_version",
+          "git_sha",
+          "data_as_of",
+          "offline",
+          "generated_at",
+          "request",
+          "efficacy",
+          "wards",
+          "totals"
+        ],
+        "title": "SimulatorResponse",
+        "type": "object"
+      },
+      "SimulatorTotals": {
+        "properties": {
+          "beds_avoided": {
+            "minimum": 0.0,
+            "title": "Beds Avoided",
+            "type": "number"
+          },
+          "cases_prevented": {
+            "minimum": 0.0,
+            "title": "Cases Prevented",
+            "type": "number"
+          },
+          "cases_prevented_high": {
+            "minimum": 0.0,
+            "title": "Cases Prevented High",
+            "type": "number"
+          },
+          "cases_prevented_low": {
+            "minimum": 0.0,
+            "title": "Cases Prevented Low",
+            "type": "number"
+          },
+          "crews": {
+            "minimum": 0.0,
+            "title": "Crews",
+            "type": "integer"
+          },
+          "saline_avoided": {
+            "minimum": 0.0,
+            "title": "Saline Avoided",
+            "type": "number"
+          }
+        },
+        "required": [
+          "crews",
+          "cases_prevented",
+          "cases_prevented_low",
+          "cases_prevented_high",
+          "beds_avoided",
+          "saline_avoided"
+        ],
+        "title": "SimulatorTotals",
+        "type": "object"
+      },
+      "SmsMessage": {
+        "properties": {
+          "characters": {
+            "minimum": 0.0,
+            "title": "Characters",
+            "type": "integer"
+          },
+          "encoding": {
+            "enum": [
+              "GSM-7",
+              "UCS-2"
+            ],
+            "title": "Encoding",
+            "type": "string"
+          },
+          "segments": {
+            "minimum": 1.0,
+            "title": "Segments",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "encoding",
+          "characters",
+          "segments"
+        ],
+        "title": "SmsMessage",
+        "type": "object"
+      },
+      "SupplyPair": {
+        "properties": {
+          "allocated": {
+            "minimum": 0.0,
+            "title": "Allocated",
+            "type": "integer"
+          },
+          "required": {
+            "minimum": 0.0,
+            "title": "Required",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "required",
+          "allocated"
+        ],
+        "title": "SupplyPair",
+        "type": "object"
+      },
+      "Transfer": {
+        "properties": {
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "from_ward": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "From Ward",
+            "type": "string"
+          },
+          "patients": {
+            "minimum": 1.0,
+            "title": "Patients",
+            "type": "integer"
+          },
+          "to_ward": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "To Ward",
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "from_ward",
+          "to_ward",
+          "patients"
+        ],
+        "title": "Transfer",
         "type": "object"
       },
       "ValidationResponse": {
@@ -1515,6 +3330,204 @@
         "title": "Ward",
         "type": "object"
       },
+      "WardAllocation": {
+        "properties": {
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "crews": {
+            "minimum": 0.0,
+            "title": "Crews",
+            "type": "integer"
+          },
+          "deficit_level": {
+            "enum": [
+              "none",
+              "deficit",
+              "critical"
+            ],
+            "title": "Deficit Level",
+            "type": "string"
+          },
+          "deficit_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Deficit Reasons",
+            "type": "array"
+          },
+          "density_factor": {
+            "maximum": 2.0,
+            "minimum": 0.5,
+            "title": "Density Factor",
+            "type": "number"
+          },
+          "diagnostic_kits": {
+            "$ref": "#/components/schemas/ResourceLine"
+          },
+          "expected_cases": {
+            "description": "Sum of forecast means across the window",
+            "minimum": 0.0,
+            "title": "Expected Cases",
+            "type": "number"
+          },
+          "hospital_beds": {
+            "$ref": "#/components/schemas/ResourceLine"
+          },
+          "planned_cases": {
+            "description": "Window case quantile used for supply sizing",
+            "minimum": 0.0,
+            "title": "Planned Cases",
+            "type": "number"
+          },
+          "priority_weight": {
+            "exclusiveMinimum": 0.0,
+            "title": "Priority Weight",
+            "type": "number"
+          },
+          "saline_bags": {
+            "$ref": "#/components/schemas/ResourceLine"
+          },
+          "tier": {
+            "description": "Peak tier across the planning window",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "title": "Tier",
+            "type": "string"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "city",
+          "tier",
+          "expected_cases",
+          "planned_cases",
+          "density_factor",
+          "priority_weight",
+          "saline_bags",
+          "diagnostic_kits",
+          "hospital_beds",
+          "crews",
+          "deficit_level",
+          "deficit_reasons"
+        ],
+        "title": "WardAllocation",
+        "type": "object"
+      },
+      "WardBedStatus": {
+        "properties": {
+          "beds_required": {
+            "minimum": 0.0,
+            "title": "Beds Required",
+            "type": "integer"
+          },
+          "capacity": {
+            "minimum": 1.0,
+            "title": "Capacity",
+            "type": "integer"
+          },
+          "capacity_source": {
+            "enum": [
+              "derived",
+              "override"
+            ],
+            "title": "Capacity Source",
+            "type": "string"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "headroom_before": {
+            "minimum": 0.0,
+            "title": "Headroom Before",
+            "type": "integer"
+          },
+          "local_deficit": {
+            "minimum": 0.0,
+            "title": "Local Deficit",
+            "type": "integer"
+          },
+          "net_deficit": {
+            "minimum": 0.0,
+            "title": "Net Deficit",
+            "type": "integer"
+          },
+          "transferred_in": {
+            "minimum": 0.0,
+            "title": "Transferred In",
+            "type": "integer"
+          },
+          "transferred_out": {
+            "minimum": 0.0,
+            "title": "Transferred Out",
+            "type": "integer"
+          },
+          "utilisation_after": {
+            "minimum": 0.0,
+            "title": "Utilisation After",
+            "type": "number"
+          },
+          "utilisation_before": {
+            "minimum": 0.0,
+            "title": "Utilisation Before",
+            "type": "number"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ward_id",
+          "city",
+          "beds_required",
+          "capacity",
+          "capacity_source",
+          "local_deficit",
+          "headroom_before",
+          "transferred_out",
+          "transferred_in",
+          "net_deficit",
+          "utilisation_before",
+          "utilisation_after"
+        ],
+        "title": "WardBedStatus",
+        "type": "object"
+      },
       "WardForecast": {
         "properties": {
           "city": {
@@ -1584,6 +3597,99 @@
           "weeks"
         ],
         "title": "WardHistory",
+        "type": "object"
+      },
+      "WardImpact": {
+        "properties": {
+          "beds_avoided": {
+            "minimum": 0.0,
+            "title": "Beds Avoided",
+            "type": "number"
+          },
+          "cases_prevented": {
+            "minimum": 0.0,
+            "title": "Cases Prevented",
+            "type": "number"
+          },
+          "cases_prevented_high": {
+            "minimum": 0.0,
+            "title": "Cases Prevented High",
+            "type": "number"
+          },
+          "cases_prevented_low": {
+            "minimum": 0.0,
+            "title": "Cases Prevented Low",
+            "type": "number"
+          },
+          "city": {
+            "enum": [
+              "Dhaka North",
+              "Dhaka South",
+              "Chattogram",
+              "Gazipur",
+              "Narayanganj"
+            ],
+            "title": "City",
+            "type": "string"
+          },
+          "crews": {
+            "minimum": 1.0,
+            "title": "Crews",
+            "type": "integer"
+          },
+          "horizons": {
+            "items": {
+              "$ref": "#/components/schemas/HorizonImpact"
+            },
+            "title": "Horizons",
+            "type": "array"
+          },
+          "rank": {
+            "minimum": 1.0,
+            "title": "Rank",
+            "type": "integer"
+          },
+          "reduction_fraction": {
+            "exclusiveMaximum": 1.0,
+            "minimum": 0.0,
+            "title": "Reduction Fraction",
+            "type": "number"
+          },
+          "roi_cases_per_crew": {
+            "minimum": 0.0,
+            "title": "Roi Cases Per Crew",
+            "type": "number"
+          },
+          "saline_avoided": {
+            "minimum": 0.0,
+            "title": "Saline Avoided",
+            "type": "number"
+          },
+          "ward_id": {
+            "examples": [
+              "DSCC_Ward_07"
+            ],
+            "maxLength": 32,
+            "pattern": "^[A-Za-z0-9_-]{1,32}$",
+            "title": "Ward Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rank",
+          "ward_id",
+          "city",
+          "crews",
+          "reduction_fraction",
+          "horizons",
+          "cases_prevented",
+          "cases_prevented_low",
+          "cases_prevented_high",
+          "beds_avoided",
+          "saline_avoided",
+          "roi_cases_per_crew"
+        ],
+        "title": "WardImpact",
         "type": "object"
       },
       "WardList": {
@@ -1828,6 +3934,21 @@
             },
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
           "401": {
             "content": {
               "application/json": {
@@ -1940,6 +4061,172 @@
         ]
       }
     },
+    "/api/v1/allocation/plan": {
+      "post": {
+        "operationId": "plan_allocation_api_v1_allocation_plan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllocationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllocationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Solver reported infeasibility after equity floor scaling"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Constrained intra-city supply allocation and crew placement",
+        "tags": [
+          "allocation"
+        ]
+      }
+    },
     "/api/v1/chat": {
       "post": {
         "operationId": "chat_api_v1_chat_post",
@@ -1963,6 +4250,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
           },
           "401": {
             "content": {
@@ -2093,6 +4395,21 @@
           "200": {
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
           "401": {
             "content": {
               "application/json": {
@@ -2205,6 +4522,384 @@
         ]
       }
     },
+    "/api/v1/dispatch/brief/{ward_id}.html": {
+      "get": {
+        "operationId": "get_commissioner_brief_api_v1_dispatch_brief__ward_id__html_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ward_id",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "pattern": "^[A-Za-z0-9_-]{1,32}$",
+              "title": "Ward Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
+            "in": "query",
+            "name": "origin_week",
+            "required": true,
+            "schema": {
+              "description": "Monday of the last observed week; 2016-02-29 … 2025-12-29",
+              "examples": [
+                "2025-08-04"
+              ],
+              "format": "date",
+              "title": "Origin Week",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang",
+            "required": false,
+            "schema": {
+              "default": "en",
+              "enum": [
+                "en",
+                "bn"
+              ],
+              "title": "Lang",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "plan_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "examples": [
+                    "550e8400-e29b-41d4-a716-446655440000"
+                  ],
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Plan Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stock_pct",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 100,
+              "minimum": 30,
+              "title": "Stock Pct",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "total_crews",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 300,
+              "minimum": 0,
+              "title": "Total Crews",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Self-contained A4 portrait printable HTML brief"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Self-contained printable A4 commissioner brief (HTML)",
+        "tags": [
+          "dispatch"
+        ]
+      }
+    },
+    "/api/v1/dispatch/notices": {
+      "post": {
+        "operationId": "create_dispatch_notices_api_v1_dispatch_notices_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DispatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Generate deterministic SMS, WhatsApp, and brief URL dispatch notices",
+        "tags": [
+          "dispatch"
+        ]
+      }
+    },
     "/api/v1/forecast": {
       "post": {
         "operationId": "forecast_api_v1_forecast_post",
@@ -2228,6 +4923,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
           },
           "401": {
             "content": {
@@ -2400,6 +5110,21 @@
             },
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
           "401": {
             "content": {
               "application/json": {
@@ -2544,6 +5269,21 @@
             },
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
           "401": {
             "content": {
               "application/json": {
@@ -2656,6 +5396,694 @@
         ]
       }
     },
+    "/api/v1/overflow/route": {
+      "post": {
+        "operationId": "route_overflow_api_v1_overflow_route_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverflowResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Routing programme reported infeasibility"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Intra-city hospital bed overflow routing",
+        "tags": [
+          "overflow"
+        ]
+      }
+    },
+    "/api/v1/plans": {
+      "get": {
+        "operationId": "list_plans_api_v1_plans_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "allocation",
+                    "overflow",
+                    "simulation",
+                    "dispatch"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "List saved operational plans newest first",
+        "tags": [
+          "plans"
+        ]
+      },
+      "post": {
+        "operationId": "create_plan_api_v1_plans_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "discriminator": {
+                  "mapping": {
+                    "allocation": "#/components/schemas/AllocationPlanCreate",
+                    "dispatch": "#/components/schemas/DispatchPlanCreate",
+                    "overflow": "#/components/schemas/OverflowPlanCreate",
+                    "simulation": "#/components/schemas/SimulationPlanCreate"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AllocationPlanCreate"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OverflowPlanCreate"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SimulationPlanCreate"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DispatchPlanCreate"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Execute and append-only persist an operational planning run",
+        "tags": [
+          "plans"
+        ]
+      }
+    },
+    "/api/v1/plans/compare": {
+      "get": {
+        "operationId": "compare_plans_api_v1_plans_compare_get",
+        "parameters": [
+          {
+            "description": "UUID of baseline plan A",
+            "in": "query",
+            "name": "a",
+            "required": true,
+            "schema": {
+              "description": "UUID of baseline plan A",
+              "examples": [
+                "550e8400-e29b-41d4-a716-446655440000"
+              ],
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+              "title": "A",
+              "type": "string"
+            }
+          },
+          {
+            "description": "UUID of candidate plan B",
+            "in": "query",
+            "name": "b",
+            "required": true,
+            "schema": {
+              "description": "UUID of candidate plan B",
+              "examples": [
+                "550e8400-e29b-41d4-a716-446655440000"
+              ],
+              "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+              "title": "B",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanComparison"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Compare headline KPIs between two saved plans (delta = b - a)",
+        "tags": [
+          "plans"
+        ]
+      }
+    },
     "/api/v1/scenario": {
       "post": {
         "operationId": "scenario_api_v1_scenario_post",
@@ -2679,6 +6107,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
           },
           "401": {
             "content": {
@@ -2792,6 +6235,157 @@
         ]
       }
     },
+    "/api/v1/simulator/run": {
+      "post": {
+        "operationId": "run_simulator_api_v1_simulator_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimulatorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulatorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Missing or invalid X-Ops-Token"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unknown ward, city or resource"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request body exceeds the 64 KB size limit"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Request failed validation; `errors` names each field"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Rate limit exceeded; retry after the Retry-After header"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Model or data not ready (run npm run setup)"
+          }
+        },
+        "summary": "Model-driven vector-control counterfactual simulation and ROI ranking",
+        "tags": [
+          "simulator"
+        ]
+      }
+    },
     "/api/v1/validation": {
       "get": {
         "operationId": "validation_api_v1_validation_get",
@@ -2805,6 +6399,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
           },
           "401": {
             "content": {
@@ -2956,6 +6565,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
           },
           "401": {
             "content": {
@@ -3129,6 +6753,21 @@
             },
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
           "401": {
             "content": {
               "application/json": {
@@ -3279,6 +6918,21 @@
             },
             "description": "Successful Response"
           },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
+          },
           "401": {
             "content": {
               "application/json": {
@@ -3404,6 +7058,21 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Malformed request body or syntax error"
           },
           "401": {
             "content": {

@@ -2,7 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Protocol
 
 
@@ -64,4 +64,39 @@ class CallLog(Protocol):
 
     def today(self, kind: str) -> tuple[int, float]:
         """(calls, spend_usd) since 00:00 Asia/Dhaka."""
+        ...
+
+
+@dataclass(frozen=True)
+class StoredPlan:
+    """Append-only persisted planning run spanning plans + plan_runs tables (contracts §5, §6; ADR-0016)."""
+
+    id: str
+    kind: str
+    label: str
+    origin_week: date
+    model_version: str
+    git_sha: str
+    data_as_of: date
+    offline: bool
+    created_at: datetime
+    inputs_json: str
+    outputs_json: str
+    headline_json: str
+    solve_ms: float
+
+
+class PlanStore(Protocol):
+    """Append-only storage for operational plans (SQLAlchemy adapter over Alembic 0002 tables)."""
+
+    def save(self, record: StoredPlan) -> StoredPlan:
+        """Persist a new plan record and return the stored copy."""
+        ...
+
+    def get(self, plan_id: str) -> StoredPlan | None:
+        """Fetch one plan by UUID string, or None if not found."""
+        ...
+
+    def list(self, kind: str | None = None, limit: int = 20) -> Sequence[StoredPlan]:
+        """Return plans newest-first, optionally filtered by kind."""
         ...

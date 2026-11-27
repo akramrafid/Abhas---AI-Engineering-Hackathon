@@ -1,4 +1,4 @@
-"""SQLAlchemy 2.0 ORM models matching Alembic revision 0001_initial."""
+"""SQLAlchemy 2.0 ORM models matching Alembic revisions 0001_initial and 0002_phase2_plans."""
 
 from __future__ import annotations
 
@@ -174,6 +174,68 @@ class LlmTraceRow(Base):
     numbers_validated: Mapped[bool] = mapped_column(Boolean, server_default=sa.text("1"), nullable=False)
     ok: Mapped[bool] = mapped_column(Boolean, server_default=sa.text("1"), nullable=False)
     error_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=sa.text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
+
+class PlanRow(Base):
+    __tablename__ = "plans"
+    __table_args__ = (
+        CheckConstraint(
+            "kind in ('allocation','overflow','simulation','dispatch')",
+            name="kind_valid",
+        ),
+        Index("ix_plans_kind_created", "kind", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    label: Mapped[str] = mapped_column(String(80), nullable=False)
+    origin_week: Mapped[date] = mapped_column(Date, nullable=False)
+    model_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    git_sha: Mapped[str] = mapped_column(String(40), nullable=False)
+    data_as_of: Mapped[date] = mapped_column(Date, nullable=False)
+    offline: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=sa.text("CURRENT_TIMESTAMP"),
+        nullable=False,
+    )
+
+
+class PlanRunRow(Base):
+    __tablename__ = "plan_runs"
+
+    plan_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("plans.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    inputs_json: Mapped[str] = mapped_column(Text, nullable=False)
+    outputs_json: Mapped[str] = mapped_column(Text, nullable=False)
+    headline_json: Mapped[str] = mapped_column(Text, nullable=False)
+    solve_ms: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class DispatchLogRow(Base):
+    __tablename__ = "dispatch_log"
+    __table_args__ = (Index("ix_dispatch_log_ward_created", "ward_id", "created_at"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    plan_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("plans.id"),
+        nullable=True,
+    )
+    ward_id: Mapped[str] = mapped_column(String(16), nullable=False)
+    channel: Mapped[str] = mapped_column(String(16), nullable=False)
+    lang: Mapped[str] = mapped_column(String(2), nullable=False)
+    encoding: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    segments: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    characters: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=sa.text("CURRENT_TIMESTAMP"),
