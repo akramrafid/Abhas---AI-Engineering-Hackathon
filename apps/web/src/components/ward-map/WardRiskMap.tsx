@@ -8,7 +8,14 @@ import type { RiskTier } from "@/components/brand/RiskTierBadge";
 import type { Lang } from "@/lib/i18n";
 import { createHexagonPolygon, type HealthFacility } from "./facilities";
 import { CITY_CENTROIDS, MAP_VIEWS, cityDisplayName, wardLabel, type LonLat, type MapView } from "./geo";
-import { buildMapStyle, mixColor, readMapPalette, type MapPalette, type MapTheme } from "./map-style";
+import {
+  buildMapStyle,
+  isOfflineMapEnv,
+  mixColor,
+  readMapPalette,
+  type MapPalette,
+  type MapTheme,
+} from "./map-style";
 import type { RouteResult } from "./routing";
 import { WardMapFallback } from "./WardMapFallback";
 import { WardMapTooltip } from "./WardMapTooltip";
@@ -207,9 +214,12 @@ export function WardRiskMap({
   const hoverFacilityIdRef = useRef<string | null>(null);
   const appliedThemeRef = useRef<MapTheme>(theme);
   const lastFlyNonceRef = useRef<number>(0);
+  const initialOfflineEnv = isOfflineMapEnv();
+  const offlineModeRef = useRef<boolean>(initialOfflineEnv);
 
   const [shouldLoad, setShouldLoad] = useState(interactive);
   const [isReady, setIsReady] = useState(false);
+  const [isOfflineMap, setIsOfflineMap] = useState<boolean>(initialOfflineEnv);
   const [styleVersion, setStyleVersion] = useState(0);
   const [hasFailed, setHasFailed] = useState(false);
   const [hover, setHover] = useState<ProjectedAnchor | null>(null);
@@ -344,6 +354,7 @@ export function WardRiskMap({
     if (!shouldLoad) return;
     let cancelled = false;
     let map: MapLibreMap | null = null;
+    let cleanupOfflineListener: (() => void) | null = null;
     void import("maplibre-gl")
       .then((maplibregl) => {
         if (cancelled || !containerRef.current) return;
@@ -352,9 +363,14 @@ export function WardRiskMap({
         paletteRef.current = palette;
         appliedThemeRef.current = theme;
 
+        const startOffline =
+          offlineModeRef.current || (typeof navigator !== "undefined" && navigator.onLine === false);
+        offlineModeRef.current = startOffline;
+        setIsOfflineMap(startOffline);
+
         const created = new maplibregl.Map({
           container: containerRef.current,
-          style: buildMapStyle(palette, theme),
+          style: buildMapStyle(palette, theme, { offline: startOffline }),
           bounds: MAP_VIEWS[view] as unknown as [number, number, number, number],
           fitBoundsOptions: {
             padding: cameraPadding(containerRef.current, reserveForCopy),
@@ -369,6 +385,25 @@ export function WardRiskMap({
           maxPitch: 75,
         });
         map = created;
+
+        const switchToOfflineSchematic = () => {
+          if (cancelled || offlineModeRef.current) return;
+          offlineModeRef.current = true;
+          setIsOfflineMap(true);
+          shownRef.current.clear();
+          created.setStyle(buildMapStyle(palette, appliedThemeRef.current, { offline: true }));
+        };
+
+        // Intercept tile/network errors cleanly so MapLibre never logs unhandled console errors
+        // and immediately falls back to the bundled GeoJSON schematic basemap (ADR-0015).
+        created.on("error", () => {
+          switchToOfflineSchematic();
+        });
+
+        const handleBrowserOffline = () => {
+          switchToOfflineSchematic();
+        };
+        window.addEventListener("offline", handleBrowserOffline);
 
         if (interactive) {
           created.addControl(
@@ -462,10 +497,14 @@ export function WardRiskMap({
         });
 
         mapRef.current = created;
+        cleanupOfflineListener = () => {
+          window.removeEventListener("offline", handleBrowserOffline);
+        };
       })
       .catch(() => !cancelled && setHasFailed(true));
     return () => {
       cancelled = true;
+      cleanupOfflineListener?.();
       map?.remove();
       mapRef.current = null;
     };
@@ -480,7 +519,7 @@ export function WardRiskMap({
     if (!map || !isReady || !palette || appliedThemeRef.current === theme) return;
     appliedThemeRef.current = theme;
     shownRef.current.clear();
-    map.setStyle(buildMapStyle(palette, theme));
+    map.setStyle(buildMapStyle(palette, theme, { offline: offlineModeRef.current }));
   }, [theme, isReady]);
 
   // Toggle layer visibility on demand without tearing down data sources.
@@ -770,11 +809,23 @@ export function WardRiskMap({
       data-map-mode={mode}
       data-map-3d={enable3D ? "true" : "false"}
       data-map-ready={isReady ? "true" : "false"}
+      data-map-offline={isOfflineMap ? "true" : "false"}
     >
       <div ref={containerRef} className="h-full w-full" />
       <p className="sr-only" aria-live="polite">
         {label}
       </p>
+      {isOfflineMap ? (
+        <div
+          data-testid={`${testId}-offline-badge`}
+          className={clsx(
+            "pointer-events-none absolute bottom-2 left-2 z-10 rounded-full bg-ink/85 px-2.5 py-0.5 text-[10px] font-medium text-mist ring-1 ring-white/15 backdrop-blur-sm",
+            lang === "bn" && "font-bangla",
+          )}
+        >
+          {lang === "bn" ? "অফলাইন স্কিম্যাটিক মানচিত্র" : "Offline schematic map"}
+        </div>
+      ) : null}
 
       {/* Geographically anchored city data & optional live weather badges */}
       {showPinnedData || weatherBadges.length > 0

@@ -9,6 +9,16 @@ const TABLE_TIMEOUT_MS = 5500;
 const ROAD_TORTUOSITY_FACTOR = 1.34;
 const FREE_FLOW_URBAN_KMH = 24;
 
+function isRoutingOffline(): boolean {
+  if (
+    process.env.NEXT_PUBLIC_ABHAS_OFFLINE === "1" ||
+    process.env.NEXT_PUBLIC_ABHAS_OFFLINE === "true"
+  ) {
+    return true;
+  }
+  return typeof navigator !== "undefined" && navigator.onLine === false;
+}
+
 export interface RouteVariant {
   id: "fastest" | "shortest";
   coordinates: [number, number][];
@@ -100,6 +110,19 @@ export async function fetchRoadRoute(
   externalSignal?: AbortSignal,
 ): Promise<RouteResult> {
   const startedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (isRoutingOffline()) {
+    const computeMs = Math.round(
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startedAt,
+    );
+    return {
+      origin,
+      destination,
+      fastest: buildFallbackVariant(origin, destination.position),
+      shortest: null,
+      engine: "offline-fallback",
+      computeMs,
+    };
+  }
   const { signal, cleanup } = composeSignal(externalSignal, ROUTE_TIMEOUT_MS);
 
   try {
@@ -174,7 +197,25 @@ export async function fetchNearestHospitalsByRoad(
   const candidates = rankFacilitiesByAirDistance(origin, facilities, filter).slice(0, 12);
 
   if (candidates.length === 0) {
-    return { items: [], engine: "osrm", computeMs: 0 };
+    return { items: [], engine: isRoutingOffline() ? "offline-fallback" : "osrm", computeMs: 0 };
+  }
+
+  if (isRoutingOffline()) {
+    const items: NearestHospitalResult[] = candidates
+      .map((facility) => {
+        const roadKm = Math.max(0.2, Number((facility.airKm * ROAD_TORTUOSITY_FACTOR).toFixed(2)));
+        return {
+          facility,
+          distanceKm: roadKm,
+          durationMin: Math.max(1, Math.round((roadKm / FREE_FLOW_URBAN_KMH) * 60)),
+          engine: "offline-fallback" as const,
+        };
+      })
+      .slice(0, limit);
+    const computeMs = Math.round(
+      (typeof performance !== "undefined" ? performance.now() : Date.now()) - startedAt,
+    );
+    return { items, engine: "offline-fallback", computeMs };
   }
 
   const { signal, cleanup } = composeSignal(externalSignal, TABLE_TIMEOUT_MS);

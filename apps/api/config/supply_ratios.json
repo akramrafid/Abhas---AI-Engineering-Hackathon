@@ -1,0 +1,28 @@
+{
+  "method": "supply = round_half_up(c × dengue_cases); constants reproduce 31,320/31,320 rows",
+  "dataset_sha256": "24fac5430af369142fcb3b1f0bd1fb99ca4583c618f83336d5dee58a5ebef9b0",
+  "ratios": {
+    "saline_bags": 2.385,
+    "diagnostic_kits": 1.164,
+    "hospital_beds": 0.298
+  },
+  "valid_interval": {
+    "saline_bags": [
+      2.383333,
+      2.386364
+    ],
+    "diagnostic_kits": [
+      1.161765,
+      1.166667
+    ],
+    "hospital_beds": [
+      0.296875,
+      0.3
+    ]
+  },
+  "row_match": {
+    "saline_bags": 1.0,
+    "diagnostic_kits": 1.0,
+    "hospital_beds": 1.0
+  }
+}
