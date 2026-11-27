@@ -78,7 +78,7 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
   ];
 
   return (
-    <dl
+    <div
       data-testid="stat-tiles"
       className="grid grid-cols-2 gap-3 lg:grid-cols-4"
       aria-busy={signals.isPending}
@@ -92,18 +92,18 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
             className="group flex flex-col justify-between rounded-[16px] bg-white p-4 ring-1 ring-mist/90 transition-colors duration-200 hover:ring-royal/35 sm:p-4.5"
           >
             <div className="flex items-start justify-between gap-2.5">
-              <dt
+              <p
                 lang={lang}
                 className={clsx("text-xs font-semibold leading-snug text-slate", bn && "font-bangla")}
               >
                 {tile.label}
-              </dt>
+              </p>
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-royal/[0.07] text-royal ring-1 ring-royal/12 transition-colors duration-200 group-hover:bg-royal group-hover:text-white group-hover:ring-royal">
                 <Icon aria-hidden="true" className="h-4 w-4" />
               </span>
             </div>
 
-            <dd className="mt-3">
+            <div className="mt-3">
               <span className="block font-sans text-[1.9rem] font-extrabold leading-none tracking-[-0.03em] text-navy tnum">
                 {tile.value === null ? "…" : <NumberTicker value={tile.value} decimalPlaces={tile.decimals} />}
               </span>
@@ -127,10 +127,10 @@ export function StatTiles({ signals, city, lang }: StatTilesProps) {
               >
                 {tile.note}
               </span>
-            </dd>
+            </div>
           </div>
         );
       })}
-    </dl>
+    </div>
   );
 }

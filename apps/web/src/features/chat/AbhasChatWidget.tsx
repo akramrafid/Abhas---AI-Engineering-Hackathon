@@ -613,7 +613,7 @@ function ChatWidgetInner() {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        aria-label={open ? "Close Abhas AI Assistant" : "Open Abhas AI Assistant"}
+        aria-label={open ? "Close Abhas AI Assistant" : "Ask Abhas AI — open assistant"}
         data-testid="abhas-chat-launcher"
         className={clsx(
           "group relative inline-flex h-12 cursor-pointer items-center gap-2.5 overflow-hidden rounded-full border border-white/25 px-4 text-sm font-semibold text-white transition-all duration-300 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2",

@@ -94,7 +94,7 @@ export function CostSection() {
           </dl>
         </div>
 
-        <dl className="space-y-2.5 rounded-[22px] bg-paper/70 p-2.5 ring-1 ring-mist/90">
+        <div className="space-y-2.5 rounded-[22px] bg-paper/70 p-2.5 ring-1 ring-mist/90">
           {COSTS.map((cost) => {
             const Icon = cost.icon;
             return (
@@ -108,27 +108,27 @@ export function CostSection() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <dt className={clsx("text-xs font-bold uppercase tracking-[0.08em] text-slate", bn && "font-bangla tracking-normal")}>
+                      <p className={clsx("text-xs font-bold uppercase tracking-[0.08em] text-slate", bn && "font-bangla tracking-normal")}>
                         {bn ? cost.termBn : cost.termEn}
-                      </dt>
+                      </p>
                       <span className={clsx("rounded-full bg-paper px-2.5 py-0.5 text-[11px] font-semibold text-navy ring-1 ring-mist tnum", bn && "font-bangla")}>
                         {bn ? cost.tagBn : cost.tagEn}
                       </span>
                     </div>
-                    <dd>
+                    <div>
                       <p className={clsx("mt-1.5 text-xl font-extrabold tracking-tight text-navy tnum", bn && "font-bangla")}>
                         {bn ? cost.valueBn : cost.valueEn}
                       </p>
                       <p className={clsx("mt-1 text-sm leading-6 text-slate", bn && "font-bangla")}>
                         {bn ? cost.noteBn : cost.noteEn}
                       </p>
-                    </dd>
+                    </div>
                   </div>
                 </div>
               </div>
             );
           })}
-        </dl>
+        </div>
       </div>
     </section>
   );

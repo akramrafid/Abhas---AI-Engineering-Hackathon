@@ -244,7 +244,7 @@ export function IntegrationsAndTrust() {
                             "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
                             bn && "font-bangla",
                             item.live
-                              ? "bg-royal/10 text-royal ring-1 ring-royal/15"
+                              ? "bg-royal/10 text-navy ring-1 ring-royal/15"
                               : "bg-paper text-slate ring-1 ring-mist",
                           )}
                         >
@@ -330,7 +330,7 @@ export function IntegrationsAndTrust() {
             </Link>
           </div>
 
-          <dl className="relative mt-8 grid gap-4 border-t border-white/12 pt-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative mt-8 grid gap-4 border-t border-white/12 pt-8 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST_PILLARS.map((pillar) => {
               const Icon = pillar.icon;
               return (
@@ -346,16 +346,16 @@ export function IntegrationsAndTrust() {
                       {pillar.metric}
                     </span>
                   </div>
-                  <dt className={clsx("mt-4 text-[15px] font-bold leading-snug text-white", bn && "font-bangla")}>
+                  <p className={clsx("mt-4 text-[15px] font-bold leading-snug text-white", bn && "font-bangla")}>
                     {bn ? pillar.titleBn : pillar.titleEn}
-                  </dt>
-                  <dd className={clsx("mt-1.5 text-sm leading-6 text-mist/85", bn && "font-bangla")}>
+                  </p>
+                  <p className={clsx("mt-1.5 text-sm leading-6 text-mist/85", bn && "font-bangla")}>
                     {bn ? pillar.detailBn : pillar.detailEn}
-                  </dd>
+                  </p>
                 </div>
               );
             })}
-          </dl>
+          </div>
 
           <div className={clsx("relative mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5 text-xs text-mist/80", bn && "font-bangla")}>
             <p>

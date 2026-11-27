@@ -72,8 +72,8 @@ export function AdvisoryCard({
                   : copy.advisoryTemplateBadge}
               </span>
               {data.numbers_validated ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-royal/[0.08] px-3 py-1 text-xs font-semibold text-royal ring-1 ring-royal/15">
-                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="inline-flex items-center gap-1 rounded-full bg-royal/[0.08] px-3 py-1 text-xs font-semibold text-navy ring-1 ring-royal/15">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-royal" aria-hidden="true" />
                   <span className={lang === "bn" ? "font-bangla" : undefined}>
                     {copy.advisoryValidated}
                   </span>

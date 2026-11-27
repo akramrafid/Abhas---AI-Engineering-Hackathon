@@ -444,7 +444,7 @@ export function HowItWorks() {
                 type="button"
                 data-testid="how-play-toggle"
                 aria-pressed={isPlaying}
-                aria-label={isPlaying ? (bn ? "অ্যানিমেশন বিরতি" : "Pause walkthrough") : (bn ? "অ্যানিমেশন চালু" : "Play walkthrough")}
+                aria-label={isPlaying ? (bn ? "বিরতি — অ্যানিমেশন থামান" : "Pause walkthrough") : (bn ? "চালান — অ্যানিমেশন শুরু করুন" : "Play walkthrough")}
                 onClick={() => {
                   setIsPlaying((p) => !p);
                   setCycleKey((k) => k + 1);
@@ -463,7 +463,7 @@ export function HowItWorks() {
               <button
                 type="button"
                 data-testid="how-replay-btn"
-                aria-label={bn ? "শুরু থেকে দেখুন" : "Replay from step 1"}
+                aria-label={bn ? "আবার দেখুন — ধাপ ১ থেকে" : "Replay from step 1"}
                 onClick={handleReplay}
                 className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-mist ring-1 ring-white/10 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal"
               >
@@ -562,7 +562,6 @@ export function HowItWorks() {
                 role="button"
                 tabIndex={0}
                 aria-pressed={activeStage === 0}
-                aria-label={bn ? "ধাপ ১: বৃষ্টি ও ওয়ার্ড তথ্য দেখুন" : "Step 1: Collect rain and ward data"}
                 onClick={() => selectStage(0)}
                 onKeyDown={(e) => handleNodeKeyDown(e, 0)}
                 className={clsx(
@@ -627,7 +626,6 @@ export function HowItWorks() {
                 role="button"
                 tabIndex={0}
                 aria-pressed={activeStage === 1}
-                aria-label={bn ? "ধাপ ২: তিন সপ্তাহের প্রজনন চক্র দেখুন" : "Step 2: Apply 3-week breeding clock"}
                 onClick={() => selectStage(1)}
                 onKeyDown={(e) => handleNodeKeyDown(e, 1)}
                 className={clsx(
@@ -707,7 +705,6 @@ export function HowItWorks() {
                 role="button"
                 tabIndex={0}
                 aria-pressed={activeStage === 2}
-                aria-label={bn ? "ধাপ ৩: LightGBM পূর্বাভাস ও কারণ দেখুন" : "Step 3: LightGBM forecast and SHAP reasons"}
                 onClick={() => selectStage(2)}
                 onKeyDown={(e) => handleNodeKeyDown(e, 2)}
                 className={clsx(
@@ -789,7 +786,6 @@ export function HowItWorks() {
                 role="button"
                 tabIndex={0}
                 aria-pressed={activeStage === 3}
-                aria-label={bn ? "ধাপ ৪: মাঠ পর্যায়ে সতর্কবার্তা দেখুন" : "Step 4: Dispatch field alerts"}
                 onClick={() => selectStage(3)}
                 onKeyDown={(e) => handleNodeKeyDown(e, 3)}
                 className={clsx(
