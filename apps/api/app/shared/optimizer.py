@@ -400,4 +400,38 @@ def greedy_crews(
     - Total crews assigned equals ``min(total_crews, len(wards) * cap)``.
     - Ties break by priority weight descending, then ``ward_id`` ascending.
     """
-    raise NotImplementedError("Implemented in WP3 (crew assignment)")
+    if isinstance(total_crews, bool) or not isinstance(total_crews, int) or total_crews < 0:
+        raise ValueError(f"total_crews must be a non-negative integer, got {total_crews!r}")
+    if isinstance(cap, bool) or not isinstance(cap, int) or cap < 1:
+        raise ValueError(f"cap must be a positive integer, got {cap!r}")
+
+    unique_wards = list(dict.fromkeys(str(w) for w in wards))
+    crews: dict[str, int] = {w: 0 for w in unique_wards}
+    steps = min(total_crews, len(unique_wards) * cap)
+    if steps == 0:
+        return CrewAssignmentResult(crews=crews, approximate=False)
+
+    weight_map = {str(k): float(v) for k, v in (weights or {}).items()}
+    next_marginal: dict[str, float] = {w: float(marginal_fn(w, 1)) for w in unique_wards}
+    prev_marginal: dict[str, float] = {}
+    approximate = False
+
+    for _ in range(steps):
+        eligible = [w for w in unique_wards if crews[w] < cap]
+        best_w = min(
+            eligible,
+            key=lambda w: (-round(next_marginal[w], 12), -weight_map.get(w, 0.0), w),
+        )
+        chosen_m = next_marginal[best_w]
+        if best_w in prev_marginal and chosen_m > prev_marginal[best_w] + 1e-9:
+            approximate = True
+        prev_marginal[best_w] = chosen_m
+        crews[best_w] += 1
+
+        if crews[best_w] < cap:
+            nxt_m = float(marginal_fn(best_w, crews[best_w] + 1))
+            if nxt_m > chosen_m + 1e-9:
+                approximate = True
+            next_marginal[best_w] = nxt_m
+
+    return CrewAssignmentResult(crews=crews, approximate=approximate)

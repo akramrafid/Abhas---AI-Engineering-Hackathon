@@ -24,7 +24,7 @@ import pandas as pd
 from app.core.errors import AppError
 from app.core.types import DATA_END, DATA_START, WeatherMode, WeatherSourceUsed
 from app.observability.metrics import OpsMetrics
-from app.ports.forecast_model import ForecastModel
+from app.ports.forecast_model import ForecastModel, PointForecast
 from app.ports.repositories import Observation, ObservationRepository, PredictionCache, WardRecord
 from app.ports.weather import WeatherSource
 from app.shared.drivers import DriverContribution, contributions_to_drivers
@@ -37,6 +37,7 @@ from app.shared.features import (
     fit_rain_normals,
     observations_to_dataframe,
 )
+from app.shared.intervention import apply_reduction
 from app.shared.tiers import peak_tier
 
 logger = logging.getLogger("abhas.forecast")
@@ -643,6 +644,144 @@ class ForecastEngine:
             baseline=tuple(baseline_map[(ward_id, h)] for h in sorted_horizons),
             scenario=tuple(scenario_map[(ward_id, h)] for h in sorted_horizons),
         )
+
+    # --- CounterfactualForecaster protocol methods (contracts §5; ADR-0013) ---
+
+    def nb_size(self, horizon: int) -> float:
+        """Return calibrated negative-binomial dispersion size parameter r_h for ``horizon``."""
+        cals = getattr(self._model, "calibrations", None)
+        if isinstance(cals, Mapping) and horizon in cals:
+            return float(cals[horizon].nb_r)
+        return 5.0
+
+    def _build_feature_rows_by_horizon(
+        self,
+        wards: Sequence[WardRecord],
+        origin_week: date,
+        horizons: Sequence[int],
+    ) -> dict[int, list[dict[str, float]]]:
+        """Build baseline serving feature rows aligned to ``wards`` without caching or mutating weather."""
+        ward_ids = [w.ward_id for w in wards]
+        obs_df, _, _ = self._load_window_dataframe(wards, origin_week, source="dataset")
+        normals = self._rain_normals(obs_df)
+        feat_cols = list(FEATURE_COLUMNS)
+        rows_by_h: dict[int, list[dict[str, float]]] = {}
+
+        for h in horizons:
+            feat_df = build_serving_features(
+                obs_df,
+                origin_week=origin_week,
+                horizon=h,
+                ward_ids=ward_ids,
+                rain_normals=normals,
+            )
+            if feat_df.empty:
+                raise AppError(
+                    status=422,
+                    slug="validation-error",
+                    title="Insufficient observations",
+                    detail=f"Missing feature row at origin_week {origin_week.isoformat()}.",
+                )
+            row_by_ward: dict[str, dict[str, float]] = {}
+            feat_values = feat_df[feat_cols].to_numpy(dtype=float)
+            for wid, vals in zip(feat_df["ward_id"].tolist(), feat_values, strict=True):
+                row_by_ward[str(wid)] = {col: float(v) for col, v in zip(feat_cols, vals, strict=True)}
+
+            missing = sorted(set(ward_ids) - set(row_by_ward.keys()))
+            if missing:
+                raise AppError(
+                    status=422,
+                    slug="validation-error",
+                    title="Insufficient observations",
+                    detail=f"Missing origin_week {origin_week.isoformat()} data for wards: {', '.join(missing[:3])}",
+                )
+            rows_by_h[h] = [row_by_ward[wid] for wid in ward_ids]
+
+        return rows_by_h
+
+    def _predict_feature_rows(
+        self,
+        feature_rows: Sequence[Mapping[str, float]],
+        ordered_wids: Sequence[str],
+        horizon: int,
+        origin_week: date,
+    ) -> list[PointForecast]:
+        target_week = origin_week + timedelta(weeks=horizon)
+        target_iso = canonical_iso_week(target_week)
+        if hasattr(self._model, "endemic_thresholds"):
+            return list(
+                cast(Any, self._model).predict(
+                    feature_rows,
+                    horizon,
+                    ward_ids=ordered_wids,
+                    target_iso_weeks=[target_iso] * len(ordered_wids),
+                )
+            )
+        return list(self._model.predict(feature_rows, horizon))
+
+    def counterfactual_grid(
+        self,
+        ward_ids: Sequence[str],
+        origin_week: date,
+        horizons: Sequence[int],
+        scenarios: Sequence[Mapping[str, float]],
+    ) -> list[dict[tuple[str, int], PointForecast]]:
+        """Evaluate multiple per-ward reduction-fraction scenarios in one LightGBM batch per horizon.
+
+        Never mutates raw weather and never writes counterfactuals to ``predictions_cache``.
+        """
+        validate_origin_week(origin_week, source="dataset")
+        sorted_horizons = sorted(int(h) for h in horizons)
+        if not ward_ids or not scenarios:
+            return [{} for _ in scenarios]
+
+        wards = self._resolve_wards(ward_ids)
+        ordered_wids = [w.ward_id for w in wards]
+        base_rows_by_h = self._build_feature_rows_by_horizon(wards, origin_week, sorted_horizons)
+        n_wards = len(ordered_wids)
+        n_scen = len(scenarios)
+        results: list[dict[tuple[str, int], PointForecast]] = [{} for _ in range(n_scen)]
+
+        for h in sorted_horizons:
+            base_rows = base_rows_by_h[h]
+            stacked_rows: list[Mapping[str, float]] = []
+            stacked_wids: list[str] = []
+            for scen in scenarios:
+                for wid, row in zip(ordered_wids, base_rows, strict=True):
+                    frac = float(scen.get(wid, 0.0))
+                    if frac > 0.0:
+                        rain_total = max(0.0, float(row.get("rainfall_lag_0", 0.0)))
+                        stacked_rows.append(apply_reduction(row, h, frac, rain_total))
+                    else:
+                        stacked_rows.append(row)
+                    stacked_wids.append(wid)
+
+            preds = self._predict_feature_rows(stacked_rows, stacked_wids, h, origin_week)
+            for s_idx in range(n_scen):
+                offset = s_idx * n_wards
+                for w_idx, wid in enumerate(ordered_wids):
+                    results[s_idx][(wid, h)] = preds[offset + w_idx]
+
+        return results
+
+    def window(
+        self,
+        ward_ids: Sequence[str],
+        origin_week: date,
+        horizons: Sequence[int],
+    ) -> Mapping[tuple[str, int], PointForecast]:
+        """Return baseline PointForecasts keyed by (ward_id, horizon) without mutating cache."""
+        return self.counterfactual_grid(ward_ids, origin_week, horizons, [{}])[0]
+
+    def counterfactual(
+        self,
+        ward_ids: Sequence[str],
+        origin_week: date,
+        horizons: Sequence[int],
+        fractions: Mapping[str, float],
+    ) -> Mapping[tuple[str, int], PointForecast]:
+        """Return counterfactual PointForecasts with per-ward reductions applied strictly at feature level."""
+        return self.counterfactual_grid(ward_ids, origin_week, horizons, [fractions])[0]
 
 
 def cast_weather_source(val: str) -> WeatherSourceUsed:
