@@ -5,7 +5,6 @@ export type Lang = "en" | "bn";
 export type DashboardTab =
   | "ward-risk"
   | "command"
-  | "nearest-bed"
   | "map"
   | "lags"
   | "scenario"
@@ -17,7 +16,6 @@ export type DashboardTab =
 export const VALID_TABS: readonly DashboardTab[] = [
   "ward-risk",
   "command",
-  "nearest-bed",
   "map",
   "lags",
   "scenario",
@@ -465,7 +463,6 @@ export const UI_COPY: Record<Lang, UiCopy> = {
     tabs: {
       "ward-risk": "Ward Forecast",
       command: "Command Center",
-      "nearest-bed": "Nearest Bed",
       map: "Risk Map",
       lags: "Lags",
       scenario: "Scenario",
@@ -920,7 +917,6 @@ export const UI_COPY: Record<Lang, UiCopy> = {
     tabs: {
       "ward-risk": "ওয়ার্ড পূর্বাভাস",
       command: "কমান্ড সেন্টার",
-      "nearest-bed": "নিকটতম শয্যা",
       map: "ঝুঁকি মানচিত্র",
       lags: "বৃষ্টি-ব্যবধান",
       scenario: "দৃশ্যপট",

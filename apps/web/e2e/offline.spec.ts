@@ -308,13 +308,6 @@ test.describe("WP6-2 Offline resilience (all non-localhost requests aborted)", (
     await expect(page.getByTestId("early-action-trigger-card")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId("trigger-rule-sentence")).toContainText("80 mm");
 
-    // WP8 Offline: Nearest Bed tab renders ranked local GeoJSON hospitals with zero external tiles
-    await page.getByTestId("tab-nearest-bed").click();
-    await expect(page.getByTestId("nearest-bed-view")).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId("hospital-card-1")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByTestId("call-999-primary")).toHaveAttribute("href", "tel:999");
-    await expect(page.getByTestId("facilities-demo-banner")).toContainText("Demo bed data");
-
     // Open printable A4 commissioner HTML brief in browser while offline + verify CSP, trigger rule & inline styling (L4 / ADR-0020)
     const briefResp = await page.goto(
       `${API_URL}/api/v1/dispatch/brief/DSCC_Ward_04.html?origin_week=2024-08-05&lang=en`,

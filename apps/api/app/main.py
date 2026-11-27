@@ -15,7 +15,7 @@ from app.adapters.config_planning import (
 )
 from app.adapters.config_supply import check_supply_ratios_ready
 from app.adapters.db.factory import ensure_database_ready, get_engine
-from app.adapters.db.models import HospitalRow, WardRow
+from app.adapters.db.models import WardRow
 from app.adapters.runtime import check_model_readiness
 from app.core.config import active_faults, get_settings
 from app.core.errors import (
@@ -36,7 +36,6 @@ from app.features.allocation.router import stub_allocation_runner
 from app.features.chat.router import router as chat_router
 from app.features.dispatch.router import router as dispatch_router
 from app.features.dispatch.router import stub_dispatch_runner
-from app.features.facilities.router import router as facilities_router
 from app.features.forecast.router import router as forecast_router
 from app.features.heatmap.router import router as heatmap_router
 from app.features.lags.deps import warm_lags_cache
@@ -73,17 +72,6 @@ def _model_is_ready() -> bool:
     return bool(info.get("ok", False))
 
 
-def _facilities_is_ready() -> bool:
-    if "db_down" in active_faults():
-        return False
-    engine = get_engine()
-    if not inspect(engine).has_table("hospitals"):
-        return False
-    with engine.connect() as conn:
-        count = int(conn.execute(select(func.count()).select_from(HospitalRow.__table__)).scalar_one())
-    return count > 0
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
     # Ensure DB is ready (dev/test auto-migrates/seeds; production requires pre-seeded DB).
@@ -109,7 +97,6 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
         "ward_capacity": check_ward_capacity_ready,
         "trigger_evaluation": check_trigger_evaluation_ready,
         "structural_planner": check_structural_planner_ready,
-        "facilities": _facilities_is_ready,
     }
     checks.update(get_readiness_checks())
     checks.update(getattr(app.state, "checks", {}))
@@ -161,13 +148,7 @@ def create_app() -> FastAPI:
         allow_origins=settings.cors_origin_list,
         allow_credentials=False,
         allow_methods=["GET", "POST"],
-        allow_headers=[
-            "Content-Type",
-            "X-Request-ID",
-            "X-Ops-Token",
-            "X-Facility-Role",
-            "X-Facility-Token",
-        ],
+        allow_headers=["Content-Type", "X-Request-ID", "X-Ops-Token"],
     )
 
     @app.get("/healthz", tags=["health"], summary="Liveness")
@@ -226,7 +207,6 @@ def create_app() -> FastAPI:
         dispatch_router,
         plans_router,
         planning_router,
-        facilities_router,
     ):
         app.include_router(r)
     return app

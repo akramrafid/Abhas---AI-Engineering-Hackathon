@@ -36,14 +36,6 @@ export const VIEW_META: Record<DashboardTab, ViewMeta> = {
       bn: "পাঁচ-ধাপের অপারেশনাল কমান্ড: পূর্বাভাস, সীমিত মজুতের বণ্টন, শয্যা স্থানান্তর, দল সিমুলেশন ও নির্দেশনা পাঠানো।",
     },
   },
-  "nearest-bed": {
-    icon: ShieldCheck,
-    showStats: false,
-    description: {
-      en: "Control-room hospital bed availability, client-side nearest ranking, verified phones & Call 999, ambulance request log, and manager bed board.",
-      bn: "কন্ট্রোল-রুম হাসপাতালের শয্যা, ক্লায়েন্ট-সাইড নিকটতম র‍্যাঙ্কিং, যাচাইকৃত ফোন ও কল ৯৯৯, অ্যাম্বুলেন্স লগ এবং ম্যানেজার বেড-বোর্ড।",
-    },
-  },
   map: {
     icon: MapIcon,
     showStats: true,

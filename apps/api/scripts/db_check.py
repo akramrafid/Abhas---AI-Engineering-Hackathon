@@ -29,9 +29,6 @@ EXPECTED_TABLES: frozenset[str] = frozenset(
         "plans",
         "plan_runs",
         "dispatch_log",
-        "hospitals",
-        "bed_updates",
-        "ambulance_requests",
     }
 )
 

@@ -15,8 +15,7 @@ from sqlalchemy import Engine, func, inspect, select
 from app.core.config import API_DIR, get_settings
 
 from .engine import create_db_engine, normalize_database_url
-from .facilities_repo import SqlFacilitiesStore, seed_hospitals_from_geojson
-from .models import HospitalRow, WardRow
+from .models import WardRow
 from .repositories import SqlCallLog, SqlObservationRepository, SqlPredictionCache, SqlWeatherCache
 
 logger = logging.getLogger("abhas.db")
@@ -28,7 +27,6 @@ _obs_repos: dict[str, SqlObservationRepository] = {}
 _pred_caches: dict[str, SqlPredictionCache] = {}
 _call_logs: dict[str, SqlCallLog] = {}
 _weather_caches: dict[str, SqlWeatherCache] = {}
-_facilities_stores: dict[str, SqlFacilitiesStore] = {}
 
 
 def _default_url() -> str:
@@ -56,10 +54,9 @@ def ensure_database_ready(url: str | None = None) -> Engine:
         if normalized in _bootstrapped_urls:
             return engine
         settings = get_settings()
-        insp = inspect(engine)
-        needs_migrate = (not insp.has_table("wards")) or (not insp.has_table("hospitals"))
+        needs_migrate = not inspect(engine).has_table("wards")
         if needs_migrate and settings.app_env != "production":
-            logger.info("Running Alembic upgrade head for database schema")
+            logger.info("Running Alembic upgrade head for uninitialized database")
             cfg = Config(str(API_DIR / "alembic.ini"))
             cfg.attributes["url"] = normalized
             command.upgrade(cfg, "head")
@@ -74,16 +71,6 @@ def ensure_database_ready(url: str | None = None) -> Engine:
                 from scripts.seed import seed_database
 
                 seed_database(engine=engine)
-
-        if inspect(engine).has_table("hospitals"):
-            with engine.connect() as conn:
-                hosp_count = int(
-                    conn.execute(select(func.count()).select_from(HospitalRow.__table__)).scalar_one()
-                )
-            if hosp_count == 0 and settings.app_env != "production":
-                seeded_h = seed_hospitals_from_geojson(engine)
-                if seeded_h > 0:
-                    logger.info("Seeded %d OSM hospitals with labelled DEMO bed data", seeded_h)
         _bootstrapped_urls.add(normalized)
         return engine
 
@@ -132,17 +119,6 @@ def get_weather_cache(url: str | None = None, *, auto_bootstrap: bool = True) ->
             wcache = SqlWeatherCache(engine)
             _weather_caches[normalized] = wcache
         return wcache
-
-
-def get_facilities_store(url: str | None = None, *, auto_bootstrap: bool = True) -> SqlFacilitiesStore:
-    normalized = normalize_database_url(url) if url else _default_url()
-    engine = ensure_database_ready(normalized) if auto_bootstrap else get_engine(normalized)
-    with _lock:
-        store = _facilities_stores.get(normalized)
-        if store is None:
-            store = SqlFacilitiesStore(engine)
-            _facilities_stores[normalized] = store
-        return store
 
 
 def reset_factory() -> None:

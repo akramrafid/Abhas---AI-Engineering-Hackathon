@@ -208,7 +208,6 @@ def test_cr_16_readyz_extensible_checks_hook() -> None:
                 "ward_capacity": True,
                 "trigger_evaluation": True,
                 "structural_planner": True,
-                "facilities": True,
             }
     finally:
         unregister_readiness_check("model")

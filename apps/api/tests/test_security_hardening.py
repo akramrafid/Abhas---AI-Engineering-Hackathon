@@ -371,7 +371,6 @@ def test_sec_7_and_sec_11_problem_json_404_405_500_headers_and_prod_docs(
                 "ward_capacity": True,
                 "trigger_evaluation": True,
                 "structural_planner": True,
-                "facilities": True,
             }
     finally:
         root_abhas.removeHandler(err_handler)

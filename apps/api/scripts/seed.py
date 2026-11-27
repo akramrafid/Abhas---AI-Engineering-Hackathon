@@ -21,7 +21,6 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.adapters.db.engine import create_db_engine, normalize_database_url
-from app.adapters.db.facilities_repo import seed_hospitals_from_geojson
 from app.adapters.db.models import ObservationRow, WardRow
 from app.core.config import get_settings
 
@@ -233,7 +232,6 @@ def seed_database(
                         raise ValueError(
                             f"Dataset SHA-256 mismatch: got {actual_sha}, expected {EXPECTED_SHA256}"
                         )
-                seed_hospitals_from_geojson(db_engine)
                 return existing_wards, existing_obs, True
 
         wards, observations = load_raw_dataset(target_xlsx, target_sheet, verify_sha256=verify_sha256)
@@ -266,7 +264,6 @@ def seed_database(
 
             final_wards = int(conn.execute(select(func.count()).select_from(ward_t)).scalar_one())
             final_obs = int(conn.execute(select(func.count()).select_from(obs_t)).scalar_one())
-        seed_hospitals_from_geojson(db_engine)
         return final_wards, final_obs, False
     finally:
         if owns_engine:
