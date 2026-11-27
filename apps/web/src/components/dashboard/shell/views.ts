@@ -1,4 +1,5 @@
 import {
+  CalendarClock,
   CloudRain,
   Grid3x3,
   Info,
@@ -25,6 +26,14 @@ export const VIEW_META: Record<DashboardTab, ViewMeta> = {
     description: {
       en: "One ward's next four weeks: tier, expected cases with their range, and what drives them.",
       bn: "একটি ওয়ার্ডের আগামী চার সপ্তাহ: ঝুঁকির স্তর, সম্ভাব্য রোগী ও তার কারণ।",
+    },
+  },
+  command: {
+    icon: CalendarClock,
+    showStats: false,
+    description: {
+      en: "Five-step operational command: forecast demand, allocate supplies under stock limits, route bed overflow, simulate crews, and dispatch notices.",
+      bn: "পাঁচ-ধাপের অপারেশনাল কমান্ড: পূর্বাভাস, সীমিত মজুতের বণ্টন, শয্যা স্থানান্তর, দল সিমুলেশন ও নির্দেশনা পাঠানো।",
     },
   },
   map: {
