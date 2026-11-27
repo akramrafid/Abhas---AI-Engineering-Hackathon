@@ -77,13 +77,14 @@ function LogoutDialogBody({
 }
 
 function ClerkLogoutConfirmDialog({ lang, onClose }: LogoutConfirmDialogProps) {
+  const router = useRouter();
   const { signOut } = useClerk();
   const [busy, setBusy] = useState(false);
 
   const handleConfirm = () => {
     setBusy(true);
     void signOut({ redirectUrl: "/" }).catch(() => {
-      window.location.assign("/");
+      router.push("/");
     });
   };
 

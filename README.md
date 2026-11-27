@@ -20,7 +20,7 @@
 
 ---
 
-**Abhas (আভাস)** is a production-grade dengue early-warning operations console engineered for the **AI Engineering Hackathon (Preliminary Round — Urban Dengue Outbreak Early Warning Challenge for Bangladesh)**. It models the 2-to-4-week *Aedes aegypti* vector breeding clock to translate weekly rainfall, temperature, humidity, and hyper-local ward vulnerability (`water_logging_risk_index`, `population_density_sqkm`, `sanitation_score`) into calibrated 1–4 week outbreak risk forecasts across **60 wards in five Bangladesh city corporations**: **Dhaka North (DNCC)**, **Dhaka South (DSCC)**, **Chattogram (CCC)**, **Gazipur (GCC)**, and **Narayanganj (NCC)**.
+**Abhas (আভাস)** is a production-grade dengue early-warning and municipal outbreak command console engineered for the **AI Engineering Hackathon (Preliminary & Phase 2 Onsite Rounds — Urban Dengue Outbreak Early Warning Challenge for Bangladesh)**. It models the 2-to-4-week *Aedes aegypti* vector breeding clock to translate weekly rainfall, temperature, humidity, and hyper-local ward vulnerability (`water_logging_risk_index`, `population_density_sqkm`, `sanitation_score`) into calibrated 1–4 week outbreak risk forecasts, resource allocations, hospital bed overflow routes, counterfactual intervention plans, and long-term structural-fix priorities across **60 wards in five Bangladesh city corporations**: **Dhaka North (DNCC)**, **Dhaka South (DSCC)**, **Chattogram (CCC)**, **Gazipur (GCC)**, and **Narayanganj (NCC)**.
 
 ---
 
@@ -38,16 +38,19 @@
 
 ---
 
-## Phase 2 — Operational Command System (`version-onsite-final`)
+## Phase 2 — Operational Command System (`main` / `version-onsite-final`)
 
-Building directly on the Phase 1 early-warning engine (kept intact below), **Phase 2** turns calibrated 1–4 week dengue forecasts into an end-to-end **Municipal Outbreak Command Center** across all 60 wards in 5 Bangladesh city corporations (ADR-0009 through ADR-0016). Profiling the onsite dataset (`apps/api/scripts/profile_onsite.py`, documented in [docs/data-profile-onsite.md](docs/data-profile-onsite.md)) confirmed the exact same 31,320 historical rows plus three deterministic per-case supply columns (`saline_bags_needed = round(2.385 × cases)`, `diagnostic_kits_needed = round(1.164 × cases)`, `hospital_beds_required = round(0.298 × cases)` — **31,320 / 31,320 exact matches**), so the locked Phase 1 LightGBM artifact (`abhas-lgbm-1.1.2`) was preserved without retraining.
+Building directly on the Phase 1 early-warning engine (kept intact below), **Phase 2** turns calibrated 1–4 week dengue forecasts into an end-to-end **Municipal Outbreak Command Center** across all 60 wards in 5 Bangladesh city corporations (`ADR-0009` through `ADR-0016`, `ADR-0020`, `ADR-0021`). Profiling the onsite dataset (`apps/api/scripts/profile_onsite.py`, documented in [docs/data-profile-onsite.md](docs/data-profile-onsite.md)) confirmed the exact same 31,320 historical rows plus three deterministic per-case supply columns (`saline_bags_needed = round(2.385 × cases)`, `diagnostic_kits_needed = round(1.164 × cases)`, `hospital_beds_required = round(0.298 × cases)` — **31,320 / 31,320 exact matches**), so the locked Phase 1 LightGBM artifact (`abhas-lgbm-1.1.2`) was preserved without retraining.
 
 ### What's New in Phase 2
-- **5 New Isolated API Slices (`apps/api/app/features/{allocation,overflow,simulator,dispatch,plans}/`):** Bringing the modular monolith to **14 API slices · 12 Web slices · 0 boundary violations** (`gates.mjs slices`).
-- **5-Step Operational Command Center (`/dashboard?demo=1&tab=command`):** Unified `Forecast → Allocate → Route → Simulate → Dispatch` workflow with live stock/crew/efficacy controls, deficit alerts, provenance strip (`model_version`, `git_sha`, `data_as_of`, live/offline badge), and side-by-side **Plan A vs. Plan B** comparison drawer.
+- **6 New Isolated API Slices (`apps/api/app/features/{allocation,overflow,simulator,dispatch,plans,planning}/`):** Bringing the modular monolith to **15 API slices · 12 Web slices · 0 boundary violations** (`gates.mjs slices`).
+- **5-Step Operational Command Center (`/dashboard?demo=1&tab=command`):** Unified `Forecast → Allocate → Route → Simulate → Dispatch` workflow with live stock/crew/efficacy controls, deficit alerts, provenance strip (`model_version`, `git_sha`, `data_as_of`, live/offline badge), **Build vs Send** drainage-vs-crew planning panel, and side-by-side **Plan A vs. Plan B** comparison drawer.
 - **Exact Optimization & Monotonic Simulation:** Weighted HiGHS LP with ceiling integer 20% ward equity floors (exact integer optimum; monotone D'Hondt apportionment when floor scaling triggers), peak-week P90 hospital bed sizing matching overflow routing, two-stage exact rational water-filling + HiGHS min-arcs intra-city bed overflow routing, and greedy submodular crew allocation powered by the LightGBM model's monotonic rainfall counterfactuals.
-- **Hard Offline-First Guarantee (ADR-0015):** Explicit `ABHAS_OFFLINE=1` kill switch, browser `navigator.onLine` + `online`/`offline` connectivity badge (`Offline (network)` / `Offline mode` / `Local API`), background connectivity probe, 2 s / 3-failure circuit breakers, zero browser-side Open-Meteo calls, zero remote fonts/icons/images, GeoJSON/SVG offline map fallback, and automated non-loopback socket-guard CI gate (`npm run offline:check`).
-- **Append-Only Decision Log (`Alembic 0002`):** Persists every operational plan (`plans` & `dispatch_log` tables) with full input/output provenance for auditability and scenario comparison.
+- **Zero-Model Early-Action Trigger (`ADR-0020`, `GET /api/v1/validation/trigger`, `npm run trigger`):** Auditable rule fitted strictly on 2016–2023 (*act when 2-week rain > 80 mm AND `water_logging_risk_index ≥ 0.30`* for High risk `≥ 8` cases 3 weeks later), scored on the locked 2024–2025 hold-out (**94.1% hit rate**, **63.4% FAR**, **0.733 Peirce skill score**, median lead **6 weeks** [IQR 3–8 w]) and benchmarked head-to-head against Abhas LightGBM (**92.0% hit rate**, **50.5% FAR**, **0.800 PSS**, avoiding **496 false alarms**). Shown in the Validation tab and printed directly on bilingual commissioner briefs.
+- **Structural-Fix Planner & "Build vs Send" (`ADR-0021`, `GET /api/v1/planning/structural`, `npm run structural`):** Poisson GLM + LightGBM partial-dependence cross-check with 500-resample bootstrap 95% CIs quantifying annual cases prevented per ward for `-0.1 / -0.2` water-logging and `+0.1 / +0.2` sanitation upgrades (`-0.1` water-logging → **8.48%** GLM / **6.54%** LightGBM PD; `+0.1` sanitation → **3.37%** GLM / **1.74%** PD; top wards `CCC_Ward_03` `34.2`, `DNCC_Ward_12` `33.7`, `DSCC_Ward_04` `32.9` cases/yr at `-0.2` water-logging), paired with crew ROI and explicitly labeled *"associations in simulated data, not causal real-world estimates"*.
+- **Refined Operations Console UX (`/dashboard`):** Streamlined around an Operate-mode desktop left sidebar, unified 4-column tabular-mono KPI strip, non-alarmist sticky ward priority rail, baseline-aligned Peak Tier card, and zero-nested-box chart/table/driver/advisory panels — verified WCAG 2.2 AA compliant with zero Lime in data views.
+- **Hard Offline-First Guarantee (`ADR-0015`):** Explicit `ABHAS_OFFLINE=1` kill switch, browser `navigator.onLine` + `online`/`offline` connectivity badge (`Offline (network)` / `Offline mode` / `Local API`), background connectivity probe, 2 s / 3-failure circuit breakers, zero browser-side Open-Meteo calls, zero remote fonts/icons/images, GeoJSON/SVG offline map fallback, and automated non-loopback socket-guard CI gate (`npm run offline:check`).
+- **Append-Only Decision Log (`Alembic 0002`):** Persists every operational plan across `plans`, `plan_runs`, and `dispatch_log` tables with full input/output provenance for auditability and scenario comparison.
 
 ### Run Phase 2 in ≤ 3 Minutes (Zero API Keys)
 
@@ -77,12 +80,13 @@ Open **`http://localhost:3000/dashboard?demo=1&tab=command&lang=en`** to step th
 | **2. Allocate** | `POST /api/v1/allocation/plan` (`allocation`) | P80 window quantile for saline (`2.385`/case) & kits (`1.164`/case) and **peak-week P90** for hospital beds (`0.298`/case) + integral HiGHS LP with ceiling integer `≥ 20%` ward equity floors (monotone D'Hondt apportionment under floor scaling), exact half-up stock conservation (`Σ alloc == available`), and explicit deficit tiers (`none / deficit / critical`). | **139.3 ms** *(all 60 wards)* |
 | **3. Route** | `POST /api/v1/overflow/route` (`overflow`) | Strict intra-city two-stage solver: Stage 1 exact rational (`Fraction`) min-max peak-utilisation water-filling + Stage 2 HiGHS MILP minimizing transfer arcs (2 s time limit). Zero cross-city transfers; reports `unroutable_patients` honestly alongside `Beds filled after` and `Demand / capacity` (`284` derived beds). | **18.4 ms** *(all 60 wards, 5 cities)* |
 | **4. Simulate** | `POST /api/v1/simulator/run` (`simulator`) | Model-driven LightGBM counterfactual. In each treated ward, the rain features that the model is monotone in are scaled by `(1 − E(c))`: `h = 2`: `rainfall_lag_0/1/2`; `h = 3`: lags 0–1; `h = 4`: lag 0; every horizon: `rain_sum_0_3`, and `rain_anomaly`, which is reduced by `E(c) ×` that week's rain. The model is then re-run for `h = 2–4`. Efficacy is `E(c) = E_max·(1 − e^(−k·c))`, with assumed presets `(E_max, k)`: low `(0.25, 0.35)`, base `(0.40, 0.50)`, high `(0.55, 0.70)`. Crews are placed greedily by marginal cases prevented, at most 5 per ward. With 10 crews at `2024-08-05`: `90.56` cases prevented, band `48.61–112.55`. | **45.6 ms** *(10 wards × 4 scenarios)* · **224.6 ms** *(60-ward auto-10)* |
-| **5. Dispatch & Plans** | `POST /api/v1/dispatch/notices`, `GET /api/v1/dispatch/brief/{ward_id}.html`, `/api/v1/plans` (`dispatch`, `plans`) | Bilingual EN/বাংলা generator: GSM-7 1-segment EN SMS (`≤ 160` chars, `111` chars for `DSCC_Ward_04`), UCS-2 `≤ 3`-segment Bangla SMS (`126` chars = `2` segs), WhatsApp notices, CSP-hardened zero-URL HTML-escaped self-contained A4 briefs, strict numeric faithfulness validator (409 `ward-not-in-plan` & 422 `origin-mismatch` — never invents fallback rows), and append-only SQLite/Postgres plan comparison. | **73.2 ms** *(20-ward Dhaka South batch)* |
+| **5. Dispatch & Plans** | `POST /api/v1/dispatch/notices`, `GET /api/v1/dispatch/brief/{ward_id}.html`, `/api/v1/plans` (`dispatch`, `plans`) | Bilingual EN/বাংলা generator: GSM-7 1-segment EN SMS (`≤ 160` chars, `111` chars for `DSCC_Ward_04`), UCS-2 `≤ 3`-segment Bangla SMS (`126` chars = `2` segs), WhatsApp notices, CSP-hardened zero-URL HTML-escaped self-contained A4 briefs (with printed ADR-0020 trigger rule), strict numeric faithfulness validator (409 `ward-not-in-plan` & 422 `origin-mismatch`), and append-only SQLite/Postgres plan comparison. | **73.2 ms** *(20-ward Dhaka South batch)* |
+| **6. Trigger & Structural Planning** | `GET /api/v1/validation/trigger`, `GET /api/v1/planning/structural` (`validation`, `planning`) | Offline-served precomputed artefacts (`evals/results/trigger.json`, `structural.json`): zero-model Peirce-optimal 3-week trigger rule (`rain_2w > 80 mm & water_logging ≥ 0.30`) vs. LightGBM hold-out comparison, plus Poisson GLM + LightGBM PD bootstrap 95% CI drainage/sanitation effects and **Build vs Send** ward table. | **< 5 ms** *(cached JSON, offline)* |
 
 ### Offline Drill & Verification
 Abhas Phase 2 is verified end-to-end with zero external network traffic via **`npm run offline:check`** (`node .orca-team/tools/gates.mjs offline`):
-- **API Socket Guard:** `10 / 10` `-m offline` tests and `223 / 223` full pytest tests pass with `socket.socket.connect` blocked for all non-loopback hosts (`0` external calls).
-- **Web Offline Suite:** `3 / 3` Playwright `--project=offline` flows (Landing, Risk Map GeoJSON fallback + Weather layer ON, and all 5 Command Center steps unconditionally + Plans + CSP-hardened Printable A4 Brief) pass with all non-localhost requests aborted (`0` external requests, `0` console/page errors).
+- **API Socket Guard:** `13 / 13` `-m offline` tests and `240 / 240` full pytest tests pass with `socket.socket.connect` blocked for all non-loopback hosts (`0` external calls).
+- **Web Offline Suite:** `3 / 3` Playwright `--project=offline` flows (Landing, Risk Map GeoJSON fallback + Weather layer ON, and all 5 Command Center steps + Plans + Early-Action Trigger + Build vs Send + CSP-hardened Printable A4 Brief) pass with all non-localhost requests aborted (`0` external requests, `0` console/page errors).
 - Full walkthrough and physical Wi-Fi disconnect stage checklist: [docs/offline-drill.md](docs/offline-drill.md).
 
 ### Deterministic Sample Exports (`/exports`)
@@ -104,11 +108,11 @@ curl -fsS https://abhas-api.onrender.com/readyz
 ```
 
 ### Phase 2 Documentation Index
-- **Architecture & Measured Numbers:** [ARCHITECTURE.md](ARCHITECTURE.md) · [docs/architecture.md](docs/architecture.md) (`ADR-0009..0016`)
+- **Architecture & Measured Numbers:** [ARCHITECTURE.md](ARCHITECTURE.md) · [docs/architecture.md](docs/architecture.md) (`ADR-0001..0016`, `ADR-0020`, `ADR-0021`)
 - **Contracts & Algorithms:** [docs/contracts-phase2.md](docs/contracts-phase2.md) · [docs/algorithms-phase2.md](docs/algorithms-phase2.md)
 - **Onsite Data Profile:** [docs/data-profile-onsite.md](docs/data-profile-onsite.md)
 - **Offline Drill:** [docs/offline-drill.md](docs/offline-drill.md)
-- **Judge Q&A Prep (25 Questions):** [docs/qa-prep.md](docs/qa-prep.md)
+- **Judge Q&A Prep (29 Questions):** [docs/qa-prep.md](docs/qa-prep.md)
 - **7-Minute Uncut Demo Script:** [docs/demo-7min.md](docs/demo-7min.md)
 
 ---
@@ -134,14 +138,14 @@ curl -fsS https://abhas-api.onrender.com/readyz
 | **Frontend Console** | Next.js `16` (App Router, Turbopack, Cache Components), React `19`, Tailwind CSS `v4`, TanStack React Query, Recharts, MapLibre GL JS, GSAP |
 | **Database & Caching** | SQLite WAL (zero-key local Stage 1) / PostgreSQL-ready via Alembic (`0001_initial`, `0002_phase2_plans`), single-flight lock + L1 LRU + L2 SQLite `predictions_cache` & `weather_cache` + append-only `plans` decision log |
 | **External Services (All Optional)** | Open-Meteo Forecast & ERA5 Archive API (CC BY 4.0, no key), OpenStreetMap raster tiles / OpenFreeMap vector tiles / OSRM road routing (all auto-fall back to bundled GeoJSON/SVG schematic & corridor estimates), Google Gemini 2.5 Flash API (optional AI chat), Anthropic Claude Haiku API (optional officer advisory), Clerk (`@clerk/nextjs` optional auth) |
-| **Quality, Security & Testing** | `pytest` (223 tests + Hypothesis property suites + offline socket guard), `ruff`, `pyright`, `eslint`, `tsc`, Schemathesis (`22/22` ops, 409/413 documented), Playwright (`default` + `offline` projects, `NEXT_DIST_DIR=.next-e2e` + isolated `data/abhas-test.db`) + `axe-core` (WCAG 2.2 AA), `k6` (Phase 1+2 weighted 20 VUs: `151.9 ms` overall p95, `122.1 ms` P1 GET p95), custom 30-attack AI/API red-team suite |
+| **Quality, Security & Testing** | `pytest` (240 tests + Hypothesis property suites + offline socket guard), `ruff`, `pyright` (0 warnings), `eslint` (0 warnings), `tsc`, Schemathesis (`24/24` ops, `2,327/2,327` cases, 409/413 documented), Playwright (`default` + `offline` projects, `NEXT_DIST_DIR=.next-e2e` + isolated `data/abhas-test.db`) + `axe-core` (WCAG 2.2 AA), `k6` (Phase 1+2 weighted 20 VUs: `151.9 ms` overall p95, `122.1 ms` P1 GET p95), custom 30-attack AI/API red-team suite |
 
 ---
 
 ## Table of Contents
 
 - [Demo & Video Links](#demo--video-links)
-- [Phase 2 — Operational Command System (`version-onsite-final`)](#phase-2--operational-command-system-version-onsite-final)
+- [Phase 2 — Operational Command System (`main` / `version-onsite-final`)](#phase-2--operational-command-system-main--version-onsite-final)
 - [Team](#team)
 - [Tech Stack](#tech-stack)
 - [Why Abhas](#why-abhas)
@@ -263,11 +267,11 @@ flowchart LR
     end
 
     subgraph Serving ["4. FastAPI Modular Monolith"]
-        API["Single-Flight Lock · L1 LRU · SQLite WAL<br/>9 Vertical Slices · Gemini/Haiku $1 Cap"]
+        API["Single-Flight Lock · L1 LRU · SQLite WAL<br/>15 Vertical Slices · HiGHS LP/MILP · Gemini/Haiku $1 Cap"]
     end
 
     subgraph Outputs ["5. Municipal Operations Console"]
-        UI["Next.js 16 Console (EN / বাংলা)<br/>Risk Map · A4 Brief · ≤160 SMS · CSV · AI Chat"]
+        UI["Next.js 16 Console (EN / বাংলা)<br/>Command Center · Risk Map · A4 Brief · ≤160 SMS · CSV · AI Chat"]
     end
 
     DS --> FE
@@ -283,7 +287,7 @@ flowchart LR
 
 ## Animated System Design Diagram
 
-Abhas follows a **Modular Monolith with Vertical-Slice Boundaries (ADR-0001)** and **Hexagonal Ports & Adapters** — enforced automatically by `node .orca-team/tools/gates.mjs slices` (`9 API slices · 11 Web slices · 0 violations`).
+Abhas follows a **Modular Monolith with Vertical-Slice Boundaries (ADR-0001)** and **Hexagonal Ports & Adapters** — enforced automatically by `node .orca-team/tools/gates.mjs slices` (`15 API slices · 12 Web slices · 0 violations`).
 
 <p align="center">
   <img src="docs/diagrams/system-design.svg" alt="Abhas Animated Production System Design Diagram" width="100%" />
@@ -296,7 +300,7 @@ Abhas follows a **Modular Monolith with Vertical-Slice Boundaries (ADR-0001)** a
 flowchart TB
     subgraph Client ["Client Layer — Next.js 16 (App Router · Tailwind v4 · EN/বাংলা)"]
         LAND["Landing & Public Pages<br/>/, /docs, /security, /status, /contact"]
-        DASH["Operations Console (/dashboard)<br/>8 Views · MapLibre · Recharts · A4 Print"]
+        DASH["Operations Console (/dashboard)<br/>9 Views · Command Center · MapLibre · Recharts · A4 Print"]
         CHATUI["Abhas AI Chat Widget<br/>SSE Streaming · Ward Context"]
         PROXY["Next.js Server Route (/api/ops)<br/>Server-Only OPS_TOKEN Proxy"]
     end
@@ -305,16 +309,16 @@ flowchart TB
         MW["CORS Allowlist → Security Headers → Request-ID → Rate Limiter (120/m · 20/m LLM) → 64 KiB Body Cap → RFC 9457"]
     end
 
-    subgraph Slices ["9 Isolated API Vertical Slices (apps/api/app/features/*)"]
-        S1["wards · lags"]
-        S2["forecast · heatmap"]
-        S3["validation · weather"]
+    subgraph Slices ["15 Isolated API Vertical Slices (apps/api/app/features/*)"]
+        S1["wards · lags · heatmap"]
+        S2["forecast · validation · weather"]
+        S3["allocation · overflow · simulator · dispatch · plans · planning"]
         S4["advisory · chat · ops"]
     end
 
     subgraph Adapters ["Hexagonal Ports & Adapters (apps/api/app/adapters/*)"]
-        DB[("SQLite WAL / PostgreSQL<br/>Alembic 0001_initial")]
-        ML["LightGBM CPU Engine<br/>current.joblib (0.59 ms/ward)"]
+        DB[("SQLite WAL / PostgreSQL<br/>Alembic 0001 + 0002 (9 tables)")]
+        ML["LightGBM CPU Engine + HiGHS<br/>current.joblib (0.59 ms/ward)"]
         WX["Open-Meteo Adapter<br/>6h Cache · Retries · Circuit Breaker"]
         LLM["Gemini 2.5 Flash & Claude Haiku<br/>$1/day Ledger · Offline Fallback"]
     end
@@ -325,8 +329,8 @@ flowchart TB
     PROXY --> MW
     MW --> S1 & S2 & S3 & S4
     S1 & S2 & S3 --> DB
-    S2 --> ML
-    S2 & S3 --> WX
+    S2 & S3 --> ML
+    S2 --> WX
     S4 --> LLM
     S4 --> DB
 ```
@@ -340,20 +344,20 @@ Every architectural decision in Abhas was made for **Bangladesh municipal health
 
 | Architectural Choice | Why We Chose It | Alternative Rejected & Trade-off |
 |---|---|---|
-| **Modular Monolith with Vertical Slices + Hexagonal Ports & Adapters (ADR-0001)** | Isolates all `9` API slices and `11` Web slices behind typed interfaces (enforced automatically by `gates.mjs slices`) so ML, backend, and frontend work cleanly in parallel while deploying as one lightweight process with zero inter-service network hops. | **Microservices:** Adds Docker/broker orchestration, higher latency, and operational overhead that municipal IT teams cannot maintain. |
+| **Modular Monolith with Vertical Slices + Hexagonal Ports & Adapters (ADR-0001)** | Isolates all `15` API slices and `12` Web slices behind typed interfaces (enforced automatically by `gates.mjs slices`) so ML, backend, and frontend work cleanly in parallel while deploying as one lightweight process with zero inter-service network hops. | **Microservices:** Adds Docker/broker orchestration, higher latency, and operational overhead that municipal IT teams cannot maintain. |
 | **CPU-Only LightGBM Poisson + 80% Conformal Calibration + Exact TreeSHAP** | Ideal for 31,320 structured tabular ward-week rows: supports strict monotonic rainfall constraints (more rain never lowers risk), produces exact per-ward SHAP attributions, beats climatology by ~20% (`1.01` vs `1.26` MAE), and ships as a `954 KiB` artifact running in `0.591 ms/ward` on standard office laptop CPUs. | **Deep Learning (LSTM / TFT / Chronos) & GPU XGBoost:** Overfit on ~30k rows, require >2 GB GPU runtimes, lack fast exact attribution, or offered `<0.2%` CV delta for far heavier infrastructure. |
 | **SQLite WAL (Stage 1) + SQLAlchemy 2.0 / Alembic PostgreSQL Port (Stage 2)** | Lets any judge or city health office boot the complete system offline with **zero API keys and zero external databases** in ≤ 3 minutes (`129 s` fresh-clone verified), while keeping a zero-rewrite migration path to managed PostgreSQL / Neon. | **Mandatory Cloud DB / Docker-Only Setup:** Breaks offline/air-gapped municipal laptop usage and adds credential friction during evaluation. |
 | **Single-Flight Cold Lock + Two-Tier Caching (`L1 LRU` + `L2 SQLite`) + Batched Open-Meteo** | Coalesces concurrent cold forecast requests, serves hot ward views in `< 2 ms`, and fetches all 5 city centroids in **1 batched Open-Meteo call every 6 hours (`≤ 4 calls/day`)** with ERA5 bias correction, circuit breaker, and climatology fallback. | **Per-Ward Live Weather Polling / Uncached Inference:** Multiplies external API calls 60×, risks rate-limit failures during storm surges, and degrades latency under load. |
 | **Deterministic ML Core + Optional Budget-Capped LLMs (`Gemini 2.5 Flash` & `Claude Haiku`)** | Guarantees reproducible, mathematically audited risk scores and P10–P90 bands even with zero internet; optional LLMs strictly narrate verified forecast numbers under hard token/budget caps (`thinkingBudget: 0`, `$1/day` SQLite cap, dual-key `429` failover) and fall back seamlessly to free bilingual templates. | **LLM-Only / RAG Forecasting:** Non-deterministic, hallucinates numeric case counts, incurs per-request API cost, and fails completely offline. |
 | **Split Production Hosting (`Next.js 16` on Vercel + `FastAPI/LightGBM` Docker on Render)** | Delivers edge-cached SSR/PPR pages, code-split dashboard tabs, and viewport-gated MapLibre on Vercel for fast mobile loads across Bangladesh, paired with a containerized Linux OpenMP (`libgomp1`) backend on Render at `$0–$5/month`. | **Serverless Python Functions:** Cold-start timeouts and native OpenMP/LightGBM binary size limits make container hosting cleaner and faster for ML inference. |
 
-For full ADRs (`ADR-0001`–`ADR-0008`), chronological split details, and resilience controls, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For full ADRs (`ADR-0001`–`ADR-0016`, `ADR-0020`, `ADR-0021`), chronological split details, and resilience controls, see [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/architecture.md](docs/architecture.md).
 
 ---
 
 ## Animated Entity Relationship Diagram (ERD)
 
-All six tables are managed via Alembic (`0001_initial`) in [apps/api/app/adapters/db/models.py](apps/api/app/adapters/db/models.py) and run identically on **SQLite WAL** (Stage 1 local/zero-key) or **PostgreSQL / Neon** (Stage 2 cloud). **Zero patient PII** exists anywhere in the schema.
+All **9 tables** are managed via Alembic (`0001_initial`: `wards`, `observations`, `weather_cache`, `predictions_cache`, `api_calls`, `llm_traces`; `0002_phase2_plans`: `plans`, `plan_runs`, `dispatch_log`) in [apps/api/app/adapters/db/models.py](apps/api/app/adapters/db/models.py) and run identically on **SQLite WAL** (Stage 1 local/zero-key) or **PostgreSQL / Neon** (Stage 2 cloud). **Zero patient PII** exists anywhere in the schema.
 
 <p align="center">
   <img src="docs/diagrams/erd.svg" alt="Abhas Animated Entity Relationship Diagram" width="100%" />
@@ -444,18 +448,19 @@ erDiagram
 
 ## Core Capabilities & API Reference
 
-Contract specification exported at [contracts/openapi.json](contracts/openapi.json) (`14` routes across `9` domain slices + health probes):
+Contract specification exported at [contracts/openapi.json](contracts/openapi.json) (`23` paths / `24` operations across `15` domain slices + health probes):
 
 | Method & Route | Slice | Purpose |
 |---|---|---|
-| `GET /healthz`, `GET /readyz` | Core | Liveness and deep readiness (DB seeded + LightGBM loaded) |
+| `GET /healthz`, `GET /readyz` | Core | Liveness and deep readiness (DB seeded, LightGBM loaded, supply ratios, ward capacities, trigger & structural artefacts) |
 | `GET /api/v1/wards` | `wards` | 60 wards across 5 cities with vulnerability metrics + dataset date bounds |
 | `GET /api/v1/wards/{ward_id}/history` | `wards` | Weekly historical rainfall, temperature, humidity, and recorded cases |
-| `GET /api/v1/lags/{ward_id}` | `lags` | Multi-week rainfall lag correlations (`0–8w`) proving the 3-week peak |
+| `GET /api/v1/wards/{ward_id}/lags` | `lags` | Multi-week rainfall lag correlations (`0–8w`) proving the 3-week peak |
 | `POST /api/v1/forecast` | `forecast` | Multi-ward, multi-horizon (`1–4w`) LightGBM predictions, `P10–P90`, tiers, TreeSHAP drivers (`dataset` or `live` Open-Meteo) |
 | `POST /api/v1/scenario` | `forecast` | Counterfactual what-if weather simulator (e.g., +150 mm storm delta without polluting persistent cache) |
 | `GET /api/v1/heatmap` | `heatmap` | City-wide ward × horizon risk matrix for map and priority triage |
 | `GET /api/v1/validation` | `validation` | Locked 2024–2025 chronological hold-out MAE/RMSE, 80% coverage, and tier confusion matrix |
+| `GET /api/v1/validation/trigger` | `validation` | Precomputed zero-model early-action trigger rule (`ADR-0020`) vs. LightGBM hold-out metrics & lead-time quartiles |
 | `GET /api/v1/weather/status` | `weather` | Open-Meteo 5-city centroid coordinates, cache age, bias-check flag, and daily call count |
 | `POST /api/v1/advisory` | `advisory` | Bilingual EN/বাংলা structured officer briefing (`$1/day` capped LLM + offline template fallback) |
 | `POST /api/v1/chat`, `POST /api/v1/chat/stream` | `chat` | Grounded Abhas AI assistant (Gemini 2.5 Flash SSE streaming + dual-key failover + offline fallback) |
@@ -465,6 +470,7 @@ Contract specification exported at [contracts/openapi.json](contracts/openapi.js
 | `POST /api/v1/simulator/run` | `simulator` | Monotonic rainfall counterfactual intervention simulator + crew ROI & low/base/high sensitivity band |
 | `POST /api/v1/dispatch/notices`, `GET /api/v1/dispatch/brief/{ward_id}.html` | `dispatch` | Bilingual EN/বাংলা GSM-7/UCS-2 SMS, WhatsApp, and printable A4 self-contained HTML briefs |
 | `POST /api/v1/plans`, `GET /api/v1/plans`, `GET /api/v1/plans/compare` | `plans` | Append-only SQLite/Postgres decision log with run provenance (`model_version`, `git_sha`, `offline`) and KPI diff comparison |
+| `GET /api/v1/planning/structural` | `planning` | Precomputed Poisson GLM + LightGBM PD drainage/sanitation effects with bootstrap 95% CIs & **Build vs Send** ward table (`ADR-0021`) |
 
 ---
 
@@ -494,23 +500,27 @@ Read the complete model card in [docs/model-card.md](docs/model-card.md) and arc
 ├── ARCHITECTURE.md               # Concise 1–2 page architecture, split, model & cost rationale
 ├── apps/
 │   ├── api/                      # FastAPI + LightGBM backend (see apps/api/README.md)
-│   │   ├── app/features/         # 9 isolated vertical slices (router, service, schemas, deps)
-│   │   ├── app/ports/            # Hexagonal interfaces (DB, ML, Weather, LLM)
+│   │   ├── app/features/         # 15 isolated vertical slices (router, service, schemas, deps)
+│   │   ├── app/ports/            # Hexagonal interfaces (DB, ML, Weather, LLM, Planning)
 │   │   ├── app/adapters/         # Concrete SQLAlchemy, LightGBM, Open-Meteo, Gemini/Claude
-│   │   ├── config/               # Versioned 5-city centroids & ERA5 bias check
-│   │   └── ml/                   # Training, backtesting, verification & current.joblib (954 KiB)
+│   │   ├── config/               # Versioned 5-city centroids, supply ratios & ward capacities
+│   │   └── ml/                   # Training, backtesting, trigger/structural analysis & current.joblib (954 KiB)
 │   └── web/                      # Next.js 16 bilingual console (see apps/web/README.md)
-│       └── src/features/         # 11 isolated frontend slices (landing, ward-risk, chat, etc.)
+│       └── src/features/         # 12 isolated frontend slices (landing, ward-risk, command, validation, chat, etc.)
 ├── contracts/openapi.json        # Locked OpenAPI 3.1 contract synced to TypeScript types
 ├── docs/
 │   ├── diagrams/                 # Animated SVG architecture diagrams (data-flow, system-design, erd)
-│   ├── adr/                      # Architecture Decision Records (ADR-0001..0008)
+│   ├── adr/                      # Architecture Decision Records (ADR-0001..0016)
 │   ├── brand/                    # Brand guidelines & generated design tokens
 │   ├── PRD.md                    # Product Requirements & Given/When/Then ACs
-│   ├── architecture.md           # Detailed C4 architecture & sequence flows
+│   ├── architecture.md           # Detailed C4 architecture, sequence flows & ADR-0020..0021
+│   ├── contracts-phase2.md       # Phase 2 API contracts & error schemas
+│   ├── algorithms-phase2.md      # Phase 2 LP/MILP, simulation, trigger & structural-fix maths
+│   ├── qa-prep.md                # 29 judge Q&A answers with measured numbers
 │   ├── model-card.md             # Full model card & simulated-data disclosures
 │   └── threat-model.md           # STRIDE threat model & security controls
-└── scripts/                      # One-command setup, seed, smoke test & Python launcher
+├── exports/                      # Deterministic bilingual SMS, WhatsApp & A4 brief packs
+└── scripts/                      # One-command setup, seed, smoke, export & Python launcher
 ```
 
 ### Component Documentation
@@ -519,9 +529,9 @@ Read the complete model card in [docs/model-card.md](docs/model-card.md) and arc
 - **Architecture & Cost Controls:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ### Branch Topology
-- **`main`** — Release-ready submission branch mirrored from verified `lead` (default clone target for judges & deployment).
-- **`lead`** — Active integration branch where vertical-slice merges, CI gates, and security reviews land before promotion to `main`.
-- **`akramrafid/*`** — Historical vertical-slice & review branches preserved for full auditability of iterative development.
+- **`main`** — Release-ready submission branch (default clone target for judges & deployment), synced cleanly with verified Phase 2 onsite work.
+- **`version-onsite-final`** — Phase 2 onsite integration branch where Command Center, WP10 trigger/structural planner, QA fixes, and dashboard UX polish landed before promotion to `main`.
+- **`lead`** & **`akramrafid/*`** — Phase 1 integration and historical vertical-slice branches preserved for full auditability.
 
 ---
 
@@ -530,11 +540,13 @@ Read the complete model card in [docs/model-card.md](docs/model-card.md) and arc
 > **Running E2E alongside `npm run dev`:** Playwright uses an isolated SQLite database (`data/abhas-test.db`, auto-seeded via `scripts/prepare_test_db.mjs` when `APP_ENV=test`) and a separate Next.js build folder (`NEXT_DIST_DIR=.next-e2e`) on distinct ports (`:3011` / `:8011`), so `npm run e2e` runs cleanly alongside an active dev server without writing test plans into `data/abhas.db`. Similarly, `npm run eval` writes artefacts to gitignored `apps/api/evals/results/runs/<timestamp>/` unless `--record` is passed, keeping the working tree clean.
 
 ```bash
-npm run ci              # Ruff lint/format + Pyright + ESLint + tsc + 223 pytest + local smoke
-npm run e2e             # Playwright end-to-end suite (34 default + 3 offline) + axe WCAG 2.2 AA audit
-npm run test:contract   # Schemathesis OpenAPI 3.1 contract & stateful fuzzing (22/22 routes)
+npm run ci              # Ruff lint/format + Pyright + ESLint + tsc + 240 pytest + local smoke
+npm run e2e             # Playwright end-to-end suite (33 default + 3 offline) + axe WCAG 2.2 AA audit
+npm run test:contract   # Schemathesis OpenAPI 3.1 contract & stateful fuzzing (24/24 ops, 2,327 cases)
 npm run eval            # Locked 2024–2025 hold-out evaluation (11/11 AC-5 quality floors; clean tree)
 npm run eval:retrieval  # Hotspot ranking Recall@15 & MRR check
+npm run trigger         # Recompute ADR-0020 early-action trigger rule & locked 2024–2025 hold-out comparison
+npm run structural      # Recompute ADR-0021 Poisson GLM + LightGBM PD bootstrap CIs & Build vs Send table
 npm run redteam         # 30 automated API & AI prompt-injection security attack vectors
 npm run check:traces    # SQLite llm_traces persistence & $1/day budget enforcement
 npm run offline:check   # Pytest non-loopback socket guard (API) + Playwright non-localhost abort (Web)
@@ -542,18 +554,19 @@ npm run exports         # Regenerate deterministic Phase 2 /exports SMS, WhatsAp
 npm run gates           # Runs the complete release-gate matrix
 ```
 
-| Gate | Scope & Threshold | Verified Result | Status |
+| Gate | Scope & Threshold | Verified Result (`main`) | Status |
 |---|---|---|---|
-| `ci` | Zero lint/type errors, 100% unit/property/integration tests + smoke | 223/223 pytest (+ Hypothesis), 6/6 smoke, 0 ruff/pyright/eslint/tsc errors | **PASS** |
-| `slices` | Zero cross-slice boundary violations (ADR-0001) | 14 API slices · 12 Web slices · 0 violations | **PASS** |
-| `migrations` | Alembic `0001`+`0002` `upgrade → check → downgrade → upgrade` | 9 tables, constraints, indexes, SQLite WAL clean | **PASS** |
-| `contract` | Schemathesis OpenAPI 3.1 fuzzing & stateful testing vs `contracts/openapi.json` | 22/22 operations · 22/22 coverage · 32/32 stateful · 409/413 documented · 0 failures | **PASS** |
-| `e2e` | Playwright `default` + `offline` suites + axe WCAG 2.2 AA (EN & বাংলা) | 34 default + 3 offline passed, 0 WCAG violations, 0 Lime in data views | **PASS** |
-| `offline` | API non-loopback socket guard + Playwright non-localhost abort (`ABHAS_OFFLINE=1`) | 10/10 `-m offline`, 223/223 full pytest, 3/3 web offline (incl. Weather layer), 0 external calls | **PASS** |
+| `ci` | Zero lint/type errors, 100% unit/property/integration tests + smoke | 240/240 pytest (+ Hypothesis), 6/6 smoke, 0 ruff/pyright/eslint/tsc errors or warnings | **PASS** |
+| `build` | Next.js 16 production build (Turbopack + static/PPR routes) | 22/22 routes built cleanly | **PASS** |
+| `slices` | Zero cross-slice boundary violations (ADR-0001) | 15 API slices · 12 Web slices · 0 violations | **PASS** |
+| `migrations` | Alembic `0001`+`0002` `upgrade → check → downgrade → upgrade` | 9 tables (`plans`, `plan_runs`, `dispatch_log` + 6 core), SQLite WAL clean | **PASS** |
+| `contract` | Schemathesis OpenAPI 3.1 fuzzing & stateful testing vs `contracts/openapi.json` | 24/24 operations · 35/35 stateful · 2,327/2,327 test cases · 0 failures | **PASS** |
+| `e2e` | Playwright `default` + `offline` suites + axe WCAG 2.2 AA (EN & বাংলা) | 36 passed (33 default + 3 offline), 0 WCAG violations, 0 Lime in data views | **PASS** |
+| `offline` | API non-loopback socket guard + Playwright non-localhost abort (`ABHAS_OFFLINE=1`) | 13/13 `-m offline`, 240/240 full pytest, 3/3 web offline (incl. Weather layer), 0 external calls | **PASS** |
 | `load` | k6 weighted load (`20 VUs × 30 s`: 16 P1 + 4 P2, P1 GET p95 < 300 ms, errors < 1%) | 3,303 requests, 6,602/6,602 checks (100%), overall `p(95) = 151.9 ms`, P1 GET `122.1 ms`, 0.00% errors | **PASS** |
 | `eval` | Hold-out pass rate ≥ 80%, all 11 quality floors (no Phase 1 regression) | 40/48 (83.33%), h2 MAE `0.991`, h3 MAE `1.010`, cov80 `84.5%`, 11/11 floors | **PASS** |
-| `retrieval` | Top-15 hotspot Recall@15 ≥ 0.55 | Recall@15 = 0.6111 · MRR = 0.8875 | **PASS** |
-| `redteam` | Prompt injection, SSRF, payload cap, rate limit | 30/30 attacks blocked (100%) | **PASS** |
+| `retrieval` | Top-15 hotspot Recall@15 ≥ 0.55 | Recall@15 = 0.6111 · MRR = 0.8875 (`n = 36`) | **PASS** |
+| `redteam` | Prompt injection, SSRF, payload cap, rate limit (`npm run redteam`) | 30/30 attacks blocked (100%, 0 high failures) | **PASS** |
 | `traces` | SQLite trace & daily spend cap verification | 5/5 tracing tests passed | **PASS** |
 
 ---
@@ -565,11 +578,11 @@ In full compliance with hackathon transparency rules, every AI assistant, model,
 ### AI Coding Assistants Used During Development
 | Assistant | Model(s) | Role & What It Was Used For |
 |---|---|---|
-| **Claude Code** | **Anthropic Claude Opus 5.5** (`opus`, max effort) | Architecture, ADRs (`ADR-0001..0016`), PRD, Phase 2 contracts (`docs/contracts-phase2.md`), mathematical specifications (`docs/algorithms-phase2.md`), work-package specs (`.orca-team/specs/p2-wp0..wp6.md`), and independent cross-family code & security review. |
-| **Antigravity IDE** | **Google Gemini 4 Neon xHigh** *(+ Gemini 4 Hydrogen in Phase 1)* | Full implementation of all code (`WP0`, `WP0b`, `WP1`–`WP6`, onsite data profiling, LightGBM + HiGHS LP/MILP optimization, bilingual Next.js 16 Command Center UI, offline hardening, performance tuning, test/property/E2E suites, integration, and documentation). |
+| **Claude Code** | **Anthropic Claude Opus 5.5** (`opus`, max effort) | Architecture, ADRs (`ADR-0001..0016`, `ADR-0020..0021`), PRD, Phase 2 contracts (`docs/contracts-phase2.md`), mathematical specifications (`docs/algorithms-phase2.md`), work-package specs (`.orca-team/specs/p2-wp0..wp6.md`, `p2-wp10-trigger-structural.md`), and independent cross-family code & security review. |
+| **Antigravity IDE** | **Google Gemini 4 Neon xHigh** *(+ Gemini 4 Hydrogen in Phase 1)* | Full implementation of all code (`WP0`, `WP0b`, `WP1`–`WP6`, `WP10`, onsite data profiling, LightGBM + HiGHS LP/MILP optimization, bilingual Next.js 16 Command Center & Operate-mode Dashboard UX, offline hardening, performance tuning, test/property/E2E suites, integration, and documentation). |
 
 ### Agent Skills & MCPs Used During Development
-- **Project Skills (`.agents/skills/`):** `swarm-lead`, `product-requirements`, `solution-architecture`, `system-design`, `ai-engineering`, `backend-engineering`, `data-engineering`, `database-engineering`, `frontend-engineering`, `frontend-design`, `ux-flow-design`, `production-standards`, `production-hardening`, `property-based-testing`, `sqa-testing`, `webapp-testing`, `eval-engineering`, `security-review`, `ai-red-team`, `vercel-react-best-practices`, `web-design-guidelines`, `verification-before-completion`, `tech-lead-integration`.
+- **Project Skills (`.agents/skills/` & UI/UX skills):** `swarm-lead`, `product-requirements`, `solution-architecture`, `system-design`, `ai-engineering`, `backend-engineering`, `data-engineering`, `database-engineering`, `frontend-engineering`, `frontend-design`, `ux-flow-design`, `impeccable`, `ui-ux-pro-max`, `production-standards`, `production-hardening`, `property-based-testing`, `sqa-testing`, `webapp-testing`, `eval-engineering`, `security-review`, `ai-red-team`, `vercel-react-best-practices`, `web-design-guidelines`, `verification-before-completion`, `tech-lead-integration`.
 - **MCP Servers:** Workspace development environment included design-reference MCP tooling (`stitch`, `motion-brew`); **zero MCP servers** are invoked or required at application runtime.
 
 ### Runtime AI Model Endpoints & External Services (All Optional)
