@@ -65,3 +65,22 @@ Sequence diagrams, the resilience register, latency budget and rate limits are i
 `docs/adr/`: 0001 vertical slices · 0002 SQLite + Alembic, local run · 0003 LightGBM Poisson direct multi-horizon ·
 0004 chronological validation and uncertainty · 0005 weather source and caching · 0006 advisory LLM ·
 0007 dashboard stack and data fetching · 0008 request/response, no auth.
+
+## Phase 2 — operational command system (version-onsite-final)
+Architecture style is unchanged (ADR-0001: modular monolith, vertical slices, ports & adapters).
+- **New API slices** (`apps/api/app/features/`): `allocation` · `overflow` · `simulator` · `dispatch` · `plans`.
+- **New shared modules** (`apps/api/app/shared/`): `supply.py` (cases → supplies at a service level),
+  `optimizer.py` (weighted LP allocation, rounding, deficit flags, greedy crews), `routing.py` (intra-city
+  min-max transportation LP + arc-minimising MILP, capacity derivation), `intervention.py` (efficacy curve,
+  monotone feature reduction, counterfactual bookkeeping).
+- **New ports**: `ports/supply.py` (supply ratio source), `ports/capacity.py` (bed capacity source),
+  `ports/intervention.py` (counterfactual forecaster, implemented by the forecast engine).
+- **New web slice**: `apps/web/src/features/command/` — the 5-step Command Center
+  (Forecast → Allocate → Route → Simulate → Dispatch).
+- **Rules**: all Phase 2 maths is pure, deterministic, offline Python (NumPy/SciPy). No network on any core path.
+  Features never import each other; cross-slice logic lives in `shared/`. Every Phase 2 response carries
+  `model_version`, `git_sha`, `data_as_of` and `offline`.
+
+Phase 2 decisions: 0009 supply conversion · 0010 constrained allocation · 0011 crew assignment ·
+0012 overflow routing · 0013 counterfactual simulator · 0014 dispatch templates · 0015 offline resilience ·
+0016 plans and decision log.
