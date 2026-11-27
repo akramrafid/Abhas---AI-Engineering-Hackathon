@@ -138,9 +138,10 @@ export function StatTiles({ signals, city, windowKey = "2-4w", lang }: StatTiles
 
             <span
               data-testid={`${tile.testId}-note`}
+              title={tile.note}
               lang={lang}
               className={clsx(
-                "mt-1.5 block truncate text-[11px] font-medium text-slate",
+                "mt-1.5 block text-[11px] font-medium leading-snug text-slate",
                 bn && "font-bangla",
               )}
             >

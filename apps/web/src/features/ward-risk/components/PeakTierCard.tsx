@@ -113,18 +113,18 @@ export function PeakTierCard({
             {/* 1. Peak risk score with 0–100 gauge bar */}
             <div className="flex flex-col justify-between p-4">
               <div>
-                <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                <p className={clsx("truncate text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
                   {copy.peakRiskScore}
                 </p>
                 <p
                   data-testid="peak-risk-score"
-                  className="mt-1.5 font-mono text-2xl font-bold tracking-tight text-navy tnum"
+                  className="mt-1.5 whitespace-nowrap font-mono text-[22px] font-bold leading-none tracking-tight text-navy tnum"
                 >
                   <NumberTicker value={peakHorizon.risk_score} decimalPlaces={0} />
-                  <span className="text-sm font-medium text-slate"> / 100</span>
+                  <span className="text-xs font-medium text-slate"> / 100</span>
                 </p>
               </div>
-              <div className="mt-2.5">
+              <div className="mt-3">
                 <div
                   aria-hidden="true"
                   className="h-1.5 w-full overflow-hidden rounded-full bg-paper ring-1 ring-mist/80"
@@ -143,17 +143,20 @@ export function PeakTierCard({
             {/* 2. Peak expected cases with P10–P90 conformal whisker */}
             <div className="flex flex-col justify-between border-mist/80 p-4 sm:border-l xl:border-l-0">
               <div>
-                <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
-                  {copy.peakExpectedCases} (+{peakHorizon.horizon}w)
+                <p className={clsx("truncate text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                  {copy.peakExpectedCases}
                 </p>
                 <p
                   data-testid="peak-expected-cases"
-                  className="mt-1.5 font-mono text-2xl font-bold tracking-tight text-navy tnum"
+                  className="mt-1.5 whitespace-nowrap font-mono text-[22px] font-bold leading-none tracking-tight text-navy tnum"
                 >
                   <NumberTicker value={peakHorizon.expected_cases} decimalPlaces={1} />
+                  <span className="ml-1 font-sans text-xs font-medium text-slate">
+                    (+{peakHorizon.horizon}w)
+                  </span>
                 </p>
               </div>
-              <div className="mt-2.5">
+              <div className="mt-3">
                 <div
                   aria-hidden="true"
                   className="relative h-1.5 w-full rounded-full bg-royal/15"
@@ -171,35 +174,39 @@ export function PeakTierCard({
 
             {/* 3. Act-by operational deadline callout (primary focal anchor) */}
             <div className="flex flex-col justify-between border-mist/80 bg-royal/[0.045] p-4 sm:border-t xl:border-t-0">
-              <p
-                className={clsx(
-                  "flex items-center gap-1.5 text-xs font-bold text-royal",
-                  lang === "bn" && "font-bangla",
-                )}
-              >
-                <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                <span>{copy.actByLabel}</span>
-              </p>
-              <p
-                data-testid="peak-act-by"
-                className="mt-1.5 font-mono text-xl font-bold tracking-tight text-navy tnum"
-              >
-                {actBy.displayDate}
-              </p>
-              <p className={clsx("mt-2 text-[11px] leading-snug text-slate", lang === "bn" && "font-bangla")}>
+              <div>
+                <p
+                  className={clsx(
+                    "flex items-center gap-1.5 truncate text-xs font-bold text-royal",
+                    lang === "bn" && "font-bangla",
+                  )}
+                >
+                  <CalendarClock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>{copy.actByLabel}</span>
+                </p>
+                <p
+                  data-testid="peak-act-by"
+                  className="mt-1.5 whitespace-nowrap font-mono text-[20px] font-bold leading-none tracking-tight text-navy tnum"
+                >
+                  {actBy.displayDate}
+                </p>
+              </div>
+              <p className={clsx("mt-3 text-[11px] leading-snug text-slate", lang === "bn" && "font-bangla")}>
                 {actBy.urgent ? copy.actImmediately : copy.actByHint}
               </p>
             </div>
 
             {/* 4. Peak target week */}
             <div className="flex flex-col justify-between border-mist/80 p-4 sm:border-l sm:border-t xl:border-l-0 xl:border-t-0">
-              <p className={clsx("text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
-                {copy.peakTargetWeek}
-              </p>
-              <p className="mt-1.5 font-mono text-xl font-bold tracking-tight text-navy tnum">
-                {peakHorizon.target_week}
-              </p>
-              <p className="mt-2 font-mono text-[11px] font-semibold text-slate tnum">
+              <div>
+                <p className={clsx("truncate text-xs font-semibold text-slate", lang === "bn" && "font-bangla")}>
+                  {copy.peakTargetWeek}
+                </p>
+                <p className="mt-1.5 whitespace-nowrap font-mono text-[20px] font-bold leading-none tracking-tight text-navy tnum">
+                  {peakHorizon.target_week}
+                </p>
+              </div>
+              <p className="mt-3 font-mono text-[11px] font-semibold text-slate tnum">
                 +{peakHorizon.horizon} week{peakHorizon.horizon === 1 ? "" : "s"} after origin
               </p>
             </div>

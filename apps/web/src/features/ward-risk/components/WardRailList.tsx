@@ -56,11 +56,11 @@ export function WardRailList({
           </span>
         </div>
 
-        {/* Compact tier filter bar — hides empty zero-count tiers cleanly except via All */}
+        {/* Actionable tier filter bar — shows only tiers present in this city */}
         <div
           role="group"
           aria-label="Filter wards by risk tier"
-          className="mt-2 flex flex-wrap gap-1 text-[11px] tnum"
+          className="mt-2 flex flex-wrap gap-1.5 text-[11px] tnum"
         >
           <button
             type="button"
@@ -76,30 +76,36 @@ export function WardRailList({
           >
             {lang === "bn" ? `সব (${sortedForecasts.length})` : `All (${sortedForecasts.length})`}
           </button>
-          {([...TIER_ORDER].reverse() as RiskTier[]).map((t) => {
-            const count = tierCounts[t];
-            const active = tierFilter === t;
-            return (
-              <button
-                key={t}
-                type="button"
-                disabled={count === 0}
-                aria-pressed={active}
-                onClick={() => setTierFilter(active ? "all" : t)}
-                className={clsx(
-                  "rounded-lg px-2 py-1 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
-                  lang === "bn" && "font-bangla",
-                  count === 0
-                    ? "cursor-default bg-transparent text-slate/50"
-                    : active
-                      ? "cursor-pointer bg-royal text-white"
-                      : "cursor-pointer bg-white text-navy ring-1 ring-mist hover:border-royal hover:text-royal",
-                )}
-              >
-                {lang === "bn" ? TIER_META[t].labelBn : t} {count}
-              </button>
-            );
-          })}
+          {([...TIER_ORDER].reverse() as RiskTier[])
+            .filter((t) => tierCounts[t] > 0)
+            .map((t) => {
+              const count = tierCounts[t];
+              const active = tierFilter === t;
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setTierFilter(active ? "all" : t)}
+                  className={clsx(
+                    "inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal",
+                    lang === "bn" && "font-bangla",
+                    active
+                      ? "bg-royal text-white"
+                      : "bg-white text-navy ring-1 ring-mist hover:text-royal",
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: active ? "#FFFFFF" : TIER_META[t].bgVar }}
+                  />
+                  <span>
+                    {lang === "bn" ? TIER_META[t].labelBn : t} {count}
+                  </span>
+                </button>
+              );
+            })}
         </div>
       </CardHeader>
 
@@ -150,7 +156,7 @@ export function WardRailList({
                     <span className="shrink-0 whitespace-nowrap font-mono text-xs font-bold text-navy tnum">
                       {wfPeak.expected_cases.toFixed(1)}{" "}
                       <span className="font-sans text-[11px] font-normal text-slate">
-                        +{wfPeak.horizon}w
+                        {copy.casesUnit} · +{wfPeak.horizon}w
                       </span>
                     </span>
                   ) : null}

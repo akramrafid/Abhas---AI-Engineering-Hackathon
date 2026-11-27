@@ -233,12 +233,12 @@ export function WardForecastView({
                   {copy.trajectoryDesc}
                 </CardDescription>
               </div>
-              <div className={clsx("flex items-center gap-3 text-xs font-medium text-slate", lang === "bn" && "font-bangla")}>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
+              <div className={clsx("flex shrink-0 items-center gap-2 text-xs font-medium text-slate", lang === "bn" && "font-bangla")}>
+                <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
                   <span className="h-0.5 w-3.5 rounded-full bg-royal" aria-hidden="true" />
                   {lang === "bn" ? "প্রত্যাশিত রোগী" : "Expected cases"}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
+                <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-2.5 py-1 ring-1 ring-mist/80">
                   <span
                     className="h-2.5 w-3.5 rounded-xs border border-royal/30 bg-forecast-band"
                     aria-hidden="true"

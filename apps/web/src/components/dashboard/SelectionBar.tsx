@@ -125,7 +125,7 @@ export function SelectionBar({
           onRetry={onRetryWards}
         />
       ) : (
-        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-[minmax(145px,0.9fr)_minmax(225px,1.3fr)_minmax(240px,1.35fr)_auto] lg:items-end">
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-[minmax(132px,0.75fr)_minmax(188px,1.05fr)_minmax(272px,1.55fr)_auto] lg:items-end">
           <SelectField
             id="city-select"
             label={copy.city}
